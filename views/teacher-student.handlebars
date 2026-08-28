@@ -1,0 +1,22 @@
+<main class="account-page"><section class="profile-card"><a
+      class="back-link"
+      href="/teacher/dashboard"
+    >← All students</a><p class="eyebrow">Student statistics</p><h1
+    >{{student.username}}</h1><div class="goal-box"><span>Learning goal</span><strong
+      >{{#if student.goal}}{{student.goal}}{{else}}No goal set{{/if}}</strong></div><h2
+    >Activity performance</h2><div class="student-stats">{{#each
+        activityStats
+      }}<article><strong>{{activity_type}}</strong><b>{{points}}
+            /
+            {{possible_points}}</b><span>Average
+            {{average_score}}% · Levels:
+            {{#if levels}}{{levels}}{{else}}-{{/if}}</span></article>{{else}}<p
+          class="empty-state"
+        >No completed activities yet.</p>{{/each}}</div><h2>Recent results</h2><div
+      class="progress-list"
+    >{{#each progress}}<article class="progress-row"><strong
+          >{{activity_type}}</strong><span>{{points}}
+            /
+            {{total_points}}
+            points</span><b>{{percentage}}%</b><small
+          >{{completed_at}}</small></article>{{/each}}</div></section></main>

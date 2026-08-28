@@ -1,0 +1,19 @@
+<main class="account-page">
+  <section class="profile-card teacher-card">
+    <div class="profile-heading"><div><p class="eyebrow">Teacher dashboard</p><h1
+        >Student progress</h1></div><a
+        class="practice-button"
+        href="/logout"
+      >Log out</a></div>
+    <div class="student-table"><div class="student-table-head"><span
+        >Student</span><span>Goal</span><span>Points</span><span
+        >Levels</span></div>{{#each students}}<a
+          class="student-row student-link"
+          href="/teacher/student/{{username}}"
+        ><strong>{{username}}</strong><span>{{#if goal}}{{goal}}{{else}}No goal
+              set{{/if}}</span><b>{{points}} / {{possible_points}}</b><span
+          >{{#if levels}}{{levels}}{{else}}No activity{{/if}}</span></a>{{else}}<p
+          class="empty-state"
+        >No student accounts yet.</p>{{/each}}</div>
+  </section>
+</main>

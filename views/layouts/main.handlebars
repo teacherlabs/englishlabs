@@ -1,48 +1,58 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kirby Club</title>
+    <title>English Labs</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      href="https://fonts.googleapis.com/css2?family=Caesar+Dressing&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Major+Mono+Display&family=Water+Brush&display=swap"
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     />
-
   </head>
   <body>
     <header>
       <nav>
-        <img
-          class="kirby-logo"
-          src="/img/Kirby_Nintendo.png"
-          alt="kirbyphoto"
-        />
+        <a href="/" class="logo-text" aria-label="English Labs home">
+          <img src="/img/logo.png" alt="English Labs" class="site-logo" />
+        </a>
         <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/members">Members</a></li>
-          <li><a href="/contact">Contact</a></li>
+          <li><a href="/">Grammar</a></li>
+          <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>
+          {{#if session.isLoggedIn}}<li><a href="/lobby">Enter Lobby</a></li>{{/if}}
         </ul>
-
         {{#if session.isLoggedIn}}
-          <li id="menulogin">Hi,
-            {{session.name}}
-            -
-            <a href="/logout" class="login-btn">Log out</a></li>
+          <div id="menulogin" class="user-profile-menu">
+            <span>Hi, {{session.name}}</span>
+
+            <!-- Profile Picture Link Placeholder -->
+            <a href="{{#if session.isAdmin}}/teacher/dashboard{{else}}/profile{{/if}}" class="profile-pic-link" title="{{#if session.isAdmin}}Teacher dashboard{{else}}View Profile{{/if}}">
+              {{#if session.avatar}}
+                <img src="/uploads/profiles/{{session.avatar}}" alt="Profile Picture" class="nav-avatar" />
+              {{else}}
+                <span class="nav-avatar nav-avatar-placeholder" aria-label="Profile picture placeholder">{{session.avatar_initial}}</span>
+              {{/if}}
+            </a>
+
+            <a href="/logout" class="login-btn">Log out</a>
+          </div>
         {{else}}
           <div class="auth-button">
             <a href="/login" class="login-btn">Log in</a>
             <a href="/signup" class="signup-btn">Sign up</a>
           </div>
         {{/if}}
-
       </nav>
     </header>
     {{{body}}}

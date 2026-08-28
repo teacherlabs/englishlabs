@@ -1,0 +1,324 @@
+<main class="practice-page">
+  <a class="back-link" href="/">← Back to grammar areas</a>
+  <div class="practice-heading">
+    <p class="eyebrow">English Labs / Practice</p>
+    <h1>{{pageTitle}}</h1>
+    <p>{{pageIntro}}</p>
+  </div>
+
+  {{#if chapters}}
+    <div class="chapter-picker" aria-label="Choose a chapter">
+      {{#each chapters}}
+        <a class="chapter-mini-card{{#if selected}} selected{{/if}}" href="/practice/questions?chapter={{id}}">
+          <span>Chapter {{chapter_number}}</span>
+          <strong>{{title}}</strong>
+        </a>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#if questions}}
+    <form class="question-list" data-quiz-form data-activity="{{mode}}" data-chapter-id="{{chapterId}}" data-difficulty-level="{{selectedLevel}}">
+      {{#each questions}}
+        <fieldset class="question-card" data-question-index="{{@index}}" data-explanation="{{explanation}}"{{#unless @first}} hidden{{/unless}}>
+          <div class="question-progress">Question {{question_number}} of {{../questions.length}}</div>
+          <legend><span>{{chapter_title}}</span>{{question_text}}</legend>
+          <div class="answer-options">
+            <label><input type="radio" name="question-{{id}}" value="a" /> <span><b>A.</b> {{option_a}}</span></label>
+            <label><input type="radio" name="question-{{id}}" value="b" /> <span><b>B.</b> {{option_b}}</span></label>
+            {{#if option_c}}<label><input type="radio" name="question-{{id}}" value="c" /> <span><b>C.</b> {{option_c}}</span></label>{{/if}}
+            {{#if option_d}}<label><input type="radio" name="question-{{id}}" value="d" /> <span><b>D.</b> {{option_d}}</span></label>{{/if}}
+          </div>
+          <input type="hidden" data-answer value="{{correct_option}}" />
+          <div class="answer-feedback" data-feedback hidden></div>
+        </fieldset>
+      {{/each}}
+      <div class="quiz-footer">
+        <strong class="score-result" data-score-result>Points: 0 / {{questions.length}}</strong>
+        <button class="practice-button" type="button" data-next-question disabled>Choose an answer</button>
+      </div>
+      <section class="activity-complete is-hidden" data-activity-complete aria-live="polite">
+        <p class="eyebrow">Exercise complete</p>
+        <h2>Nice work!</h2>
+        <p data-complete-result></p>
+        <button class="practice-button restart-button" type="button" data-activity-restart><span aria-hidden="true">&#8635;</span> Restart</button>
+      </section>
+    </form>
+  {{else if mode}}
+    {{#if fixerQuestions}}
+      <section class="fixer-panel" data-fixer data-fixer-total="{{fixerQuestions.length}}">
+        {{#each fixerQuestions}}
+          <div class="fixer-question" data-fixer-question{{#unless @first}} hidden{{/unless}}>
+            <p class="eyebrow">Sentence {{number}} of {{../fixerQuestions.length}}</p>
+            <h2>Incorrect sentence</h2>
+            <p class="incorrect-sentence">{{text}}</p>
+            <span data-correct-answer hidden>{{answer}}</span>
+            <label for="sentence-input-{{number}}">Write the correct sentence</label>
+            <textarea id="sentence-input-{{number}}" rows="4" data-fixer-input placeholder="Write the corrected sentence here..."></textarea>
+            <button class="practice-button" type="button" data-fix-button>Check my sentence</button>
+            <p class="feedback" data-fix-feedback>Rewrite the sentence, then check your answer.</p>
+          </div>
+        {{/each}}
+        <div class="quiz-footer">
+          <strong data-fixer-score>Points: 0 / {{fixerQuestions.length}}</strong>
+          <button class="practice-button" type="button" data-next-fixer disabled>Check your answer</button>
+        </div>
+        <section class="activity-complete is-hidden" data-activity-complete aria-live="polite">
+          <p class="eyebrow">Exercise complete</p>
+          <h2>Nice work!</h2>
+          <p data-complete-result></p>
+          <button class="practice-button restart-button" type="button" data-fixer-restart><span aria-hidden="true">&#8635;</span> Restart</button>
+        </section>
+      </section>
+    {{else if isErrorActivity}}
+      <section class="error-panel" data-error-activity data-sentence-total="{{errorSentences.length}}">
+        {{#each errorSentences}}
+          <div class="error-question" data-error-question data-wrong-word="{{wrongWord}}" data-correct-word="{{correctWord}}"{{#unless @first}} hidden{{/unless}}>
+            <p class="eyebrow">Sentence {{number}} of {{../errorSentences.length}}</p>
+            <h2>{{text}}</h2>
+            <p>Choose the word that needs correcting.</p>
+            <div class="word-buttons">
+              {{#each words}}<button type="button" data-word="{{this}}">{{this}}</button>{{/each}}
+            </div>
+            <div class="correction-options" data-correction-options hidden>
+              <span>Choose the correct replacement:</span>
+              {{#each corrections}}<button type="button" data-correction="{{this}}">{{this}}</button>{{/each}}
+            </div>
+            <p class="feedback" data-error-feedback>Click a word to inspect it.</p>
+          </div>
+        {{/each}}
+        <div class="error-footer">
+          <strong data-error-score>Points: 0 / {{errorSentences.length}}</strong>
+          <button class="practice-button" type="button" data-next-error disabled>Find the error first</button>
+        </div>
+        <section class="activity-complete is-hidden" data-activity-complete aria-live="polite">
+          <p class="eyebrow">Exercise complete</p>
+          <h2>Nice work!</h2>
+          <p data-complete-result></p>
+          <button class="practice-button restart-button" type="button" data-activity-restart><span aria-hidden="true">&#8635;</span> Restart</button>
+        </section>
+      </section>
+    {{/if}}
+  {{/if}}
+</main>
+
+<script>
+  const quizForm = document.querySelector("[data-quiz-form]");
+  if (quizForm) {
+    const questions = [...quizForm.querySelectorAll(".question-card")];
+    const nextButton = quizForm.querySelector("[data-next-question]");
+    const resultKey = `grammar-result-${quizForm.dataset.activity}-${quizForm.dataset.chapterId || "all"}`;
+    const completePanel = quizForm.querySelector("[data-activity-complete]");
+    const completeResult = quizForm.querySelector("[data-complete-result]");
+    const previousResult = JSON.parse(localStorage.getItem(resultKey) || "null");
+    let currentIndex = 0;
+    let points = 0;
+
+    const playCorrectSound = () => {
+      if (localStorage.getItem("practice-sound-enabled") === "false") return;
+      const audioContext = new AudioContext();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.frequency.value = 660;
+      gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.25);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.25);
+      oscillator.addEventListener("ended", () => audioContext.close());
+    };
+
+    const showCompletion = (result) => {
+      completeResult.textContent = `${result.points} / ${result.total} correct (${result.percentage}%)`;
+      completePanel.classList.remove("is-hidden");
+      questions.forEach((question) => question.hidden = true);
+      quizForm.querySelector(".quiz-footer").classList.add("is-hidden");
+      quizForm.querySelector("[data-score-result]").textContent = `Final score: ${result.points} / ${result.total}`;
+    };
+    if (previousResult) showCompletion(previousResult);
+    quizForm.querySelector("[data-activity-restart]").addEventListener("click", () => {
+      localStorage.removeItem(resultKey);
+      location.reload();
+    });
+
+    questions.forEach((question, index) => {
+      question.querySelectorAll("input[type=radio]").forEach((option) => {
+        option.addEventListener("change", () => {
+          const selected = question.querySelector("input[type=radio]:checked");
+          const isCorrect = selected.value === question.querySelector("[data-answer]").value;
+          const feedback = question.querySelector("[data-feedback]");
+          if (isCorrect) points += 1;
+          if (isCorrect) playCorrectSound();
+          question.querySelectorAll("input[type=radio]").forEach((input) => input.disabled = true);
+          feedback.hidden = false;
+          if (isCorrect) question.classList.add("celebrate-correct");
+          feedback.className = `answer-feedback ${isCorrect ? "correct" : "incorrect"}`;
+          feedback.innerHTML = `<strong>${isCorrect ? "Correct! +1 point" : "Not quite."}</strong><p>${isCorrect ? "Well done." : "The correct answer is option " + question.querySelector("[data-answer]").value.toUpperCase() + "."}</p><p>${question.dataset.explanation}</p>`;
+          quizForm.querySelector("[data-score-result]").textContent = `Points: ${points} / ${questions.length}`;
+          nextButton.disabled = false;
+          nextButton.textContent = index === questions.length - 1 ? "Finish quiz" : "Next question";
+        });
+      });
+    });
+
+    nextButton.addEventListener("click", () => {
+      questions[currentIndex].hidden = true;
+      currentIndex += 1;
+      if (currentIndex >= questions.length) {
+        const percentage = Math.round((points / questions.length) * 100);
+        const result = { points, total: questions.length, percentage };
+        localStorage.setItem(resultKey, JSON.stringify(result));
+        quizForm.querySelector("[data-score-result]").textContent = `Final score: ${points} / ${questions.length} · ${percentage}%`;
+        nextButton.hidden = true;
+        showCompletion(result);
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            activityType: quizForm.dataset.activity,
+            chapterId: quizForm.dataset.chapterId || null,
+            difficultyLevel: quizForm.dataset.difficultyLevel || "",
+            points,
+            totalPoints: questions.length,
+          }),
+        }).then((response) => {
+          if (response.status === 401 || response.redirected) {
+            quizForm.querySelector("[data-score-result]").textContent += " · Log in to save this result";
+          }
+        });
+        return;
+      }
+      questions[currentIndex].hidden = false;
+      nextButton.disabled = true;
+      nextButton.textContent = "Choose an answer";
+    });
+  }
+
+  const fixer = document.querySelector("[data-fixer]");
+  if (fixer) {
+    const fixerQuestions = [...fixer.querySelectorAll("[data-fixer-question]")];
+    const nextFixer = fixer.querySelector("[data-next-fixer]");
+    const score = fixer.querySelector("[data-fixer-score]");
+    let fixerIndex = 0;
+    let points = 0;
+
+    const normalizeAnswer = (answer) => answer.trim().replace(/\s+/g, " ");
+
+    fixerQuestions.forEach((question, index) => {
+      const input = question.querySelector("[data-fixer-input]");
+      const checkButton = question.querySelector("[data-fix-button]");
+      const feedback = question.querySelector("[data-fix-feedback]");
+
+      checkButton.addEventListener("click", () => {
+        const expectedAnswer = normalizeAnswer(question.querySelector("[data-correct-answer]").textContent);
+        const isCorrect = normalizeAnswer(input.value) === expectedAnswer;
+        feedback.className = `feedback ${isCorrect ? "correct" : "incorrect"}`;
+        if (!isCorrect) {
+          feedback.textContent = "Not quite. Check the capitalization, grammar, and punctuation, then try again.";
+          return;
+        }
+
+        if (question.dataset.completed) return;
+        points += 1;
+        question.dataset.completed = "true";
+        input.disabled = true;
+        checkButton.disabled = true;
+        feedback.textContent = "Correct! You can continue to the next sentence.";
+        score.textContent = `Points: ${points} / ${fixerQuestions.length}`;
+        question.classList.add("celebrate-correct");
+        nextFixer.disabled = false;
+        nextFixer.textContent = index === fixerQuestions.length - 1 ? "Finish activity" : "Next sentence";
+      });
+    });
+
+    nextFixer.addEventListener("click", () => {
+      fixerQuestions[fixerIndex].hidden = true;
+      fixerIndex += 1;
+      if (fixerIndex >= fixerQuestions.length) {
+        const percentage = Math.round((points / fixerQuestions.length) * 100);
+        fixer.querySelector("[data-complete-result]").textContent = `${points} / ${fixerQuestions.length} correct (${percentage}%)`;
+        fixer.querySelector("[data-activity-complete]").classList.remove("is-hidden");
+        fixer.querySelector(".quiz-footer").classList.add("is-hidden");
+        return;
+      }
+      fixerQuestions[fixerIndex].hidden = false;
+      nextFixer.disabled = true;
+      nextFixer.textContent = "Check your answer";
+    });
+
+    fixer.querySelector("[data-fixer-restart]").addEventListener("click", () => location.reload());
+  }
+
+  const errorActivity = document.querySelector("[data-error-activity]");
+  if (errorActivity) {
+    const errorQuestions = [...errorActivity.querySelectorAll("[data-error-question]")];
+    const nextError = errorActivity.querySelector("[data-next-error]");
+    const score = errorActivity.querySelector("[data-error-score]");
+    const resultKey = `grammar-result-errors-${errorActivity.dataset.sentenceTotal}`;
+    const completePanel = errorActivity.querySelector("[data-activity-complete]");
+    const completeResult = errorActivity.querySelector("[data-complete-result]");
+    const previousResult = JSON.parse(localStorage.getItem(resultKey) || "null");
+    let errorIndex = 0;
+    let points = 0;
+
+    const showCompletion = (result) => {
+      completeResult.textContent = `${result.points} / ${result.total} correct (${result.percentage}%)`;
+      completePanel.classList.remove("is-hidden");
+      errorQuestions.forEach((question) => question.hidden = true);
+      errorActivity.querySelector(".error-footer").classList.add("is-hidden");
+      score.textContent = `Final score: ${result.points} / ${result.total}`;
+    };
+    if (previousResult) showCompletion(previousResult);
+    errorActivity.querySelector("[data-activity-restart]").addEventListener("click", () => {
+      localStorage.removeItem(resultKey);
+      location.reload();
+    });
+
+    errorQuestions.forEach((question) => {
+      question.querySelectorAll("[data-word]").forEach((button) => button.addEventListener("click", () => {
+        const isWrongWord = button.dataset.word === question.dataset.wrongWord;
+        question.querySelectorAll("[data-word]").forEach((wordButton) => wordButton.classList.remove("found-error"));
+        if (isWrongWord) {
+          button.classList.add("found-error");
+          question.querySelector("[data-correction-options]").hidden = false;
+          question.querySelector("[data-error-feedback]").textContent = "Good catch. Now choose the correct replacement.";
+        } else {
+          question.querySelector("[data-correction-options]").hidden = true;
+          question.querySelector("[data-error-feedback]").textContent = "This word is correct. Keep looking.";
+        }
+      }));
+      question.querySelectorAll("[data-correction]").forEach((button) => button.addEventListener("click", () => {
+        const isCorrect = button.dataset.correction === question.dataset.correctWord;
+        if (isCorrect) {
+          if (!question.dataset.completed) points += 1;
+          question.dataset.completed = "true";
+          question.classList.add("celebrate-correct");
+          score.textContent = `Points: ${points} / ${errorQuestions.length}`;
+          question.querySelector("[data-error-feedback]").textContent = "Correct! You can continue to the next sentence.";
+          nextError.disabled = false;
+          nextError.textContent = errorIndex === errorQuestions.length - 1 ? "Finish activity" : "Next sentence";
+        } else {
+          question.querySelector("[data-error-feedback]").textContent = "Not quite. Check the grammar rule and try again.";
+        }
+      }));
+    });
+
+    nextError.addEventListener("click", () => {
+      errorQuestions[errorIndex].hidden = true;
+      errorIndex += 1;
+      if (errorIndex >= errorQuestions.length) {
+        nextError.hidden = true;
+        const percentage = Math.round((points / errorQuestions.length) * 100);
+        const result = { points, total: errorQuestions.length, percentage };
+        localStorage.setItem(resultKey, JSON.stringify(result));
+        score.textContent = `Final score: ${points} / ${errorQuestions.length} · ${percentage}%`;
+        showCompletion(result);
+        return;
+      }
+      errorQuestions[errorIndex].hidden = false;
+      nextError.disabled = true;
+      nextError.textContent = "Find the error first";
+    });
+  }
+</script>

@@ -1,0 +1,451 @@
+<main class="practice-page vocabulary-exercise-page">
+  <div class="vocabulary-workspace exercise-workspace{{#if isFlip}} has-insights{{/if}}{{#if isSpelling}} has-spelling-insights{{/if}}">
+    <aside class="practice-nav vocabulary-nav">
+      <p class="exercise-overview-title">Exercise overview</p>
+      <nav aria-label="Vocabulary exercises">
+        <a class="{{#if isFlip}}active-exercise{{/if}}" href="/vocabulary/flip-cards"><strong>Flip cards</strong></a>
+        <a class="{{#if isTranslation}}active-exercise{{/if}}" href="/vocabulary/translation"><strong>Translation</strong></a>
+        <a class="{{#if isSpelling}}active-exercise{{/if}}" href="/vocabulary/spelling"><strong>Write the word</strong></a>
+      </nav>
+    </aside>
+
+    <div class="vocabulary-exercise-content">
+      <div class="practice-heading">
+        <p class="eyebrow">English Labs / Vocabulary</p>
+        <h1>{{pageTitle}}</h1>
+        <p>{{pageIntro}}</p>
+      </div>
+
+      {{#if vocabularyLevels}}
+        <div class="vocabulary-levels" aria-label="Choose vocabulary level">
+          {{#each vocabularyLevels}}
+            <a class="vocabulary-level{{#if selected}} selected{{/if}}" data-level-link="{{key}}" href="{{../vocabularyBasePath}}?level={{key}}"><strong>{{label}}</strong></a>
+          {{/each}}
+        </div>
+      {{/if}}
+
+  {{#if words}}
+    <div class="vocabulary-exercise" data-vocabulary-exercise data-mode="{{mode}}" data-level="{{selectedLevel}}" data-total="{{words.length}}">
+      <div class="vocabulary-counter" data-vocabulary-counter>Word 1 of {{words.length}}</div>
+      <div class="vocabulary-items">
+        {{#each words}}
+          <article class="vocabulary-item{{#unless @first}} is-hidden{{/unless}}{{#if ../isFlip}} flip-card{{/if}}{{#if ../isSpelling}} spelling-item{{/if}}{{#if ../isTranslation}} translation-item{{/if}}" data-vocabulary-item data-index="{{@index}}" data-word-id="{{id}}" data-swedish="{{swedish_translation}}" data-english="{{english_word}}"{{#if ../isFlip}} role="button" tabindex="0" aria-label="Flip card for {{english_word}}"{{/if}}>
+            {{#if ../isFlip}}
+              <div class="vocabulary-card-inner">
+                <div class="vocabulary-card-face vocabulary-card-front">
+                  {{#if part_of_speech}}<span class="word-type">{{part_of_speech}}</span>{{/if}}
+                  <h2>{{english_word}}</h2>
+                  {{#if definition}}<p class="word-definition">{{definition}}</p>{{/if}}
+                  <small class="flip-hint">Click to flip</small>
+                </div>
+                <div class="vocabulary-card-face vocabulary-card-back">
+                  <span class="word-type">Swedish</span>
+                  <h2>{{swedish_translation}}</h2>
+                  {{#if example_sentence}}<p><span>Example sentence:</span> {{example_sentence}}</p>{{/if}}
+                </div>
+              </div>
+            {{else}}
+              {{#if part_of_speech}}<span class="word-type">{{part_of_speech}}</span>{{/if}}
+              {{#if ../isSpelling}}
+                <h2>{{swedish_translation}}</h2>
+              {{else}}
+                {{#if english_word}}<h2>{{english_word}}</h2>{{/if}}
+              {{/if}}
+              {{#if definition}}<p class="word-definition">{{#if ../isSpelling}}<strong>Definition:</strong> {{/if}}{{definition}}</p>{{/if}}
+              {{#if options}}<div class="translation-options">{{#each options}}<button type="button" data-translation-option="{{this}}">{{this}}</button>{{/each}}</div>{{/if}}
+              {{#if ../isSpelling}}<label class="spelling-label" for="spelling-{{id}}">Type the English word</label><input class="spelling-input" id="spelling-{{id}}" type="text" autocomplete="off" data-spelling-input /><div class="spelling-actions"><button class="notes-button spelling-check" type="button" data-spelling-check>Check spelling</button><button class="hint-button" type="button" data-spelling-hint>Hint</button><button class="hint-button spelling-skip" type="button" data-spelling-skip>Skip word</button><button class="practice-button spelling-card-next" type="button" data-spelling-next hidden>Next word</button></div><p class="spelling-hint" data-spelling-hint-text aria-live="polite"></p>{{/if}}
+              {{#if ../isSentence}}<textarea class="sentence-input" rows="3" placeholder="Write a sentence with {{english_word}}..."></textarea><button class="notes-button sentence-check" type="button" data-sentence-check>Check sentence</button>{{/if}}
+              <div class="vocabulary-feedback" data-vocabulary-feedback></div>
+              {{#if ../isTranslation}}<button class="practice-button translation-card-next" type="button" data-vocabulary-next hidden>Next word</button>{{/if}}
+            {{/if}}
+          </article>
+        {{/each}}
+      </div>
+      <strong class="vocabulary-score" data-vocabulary-score>Points: 0 / {{words.length}}</strong>
+      <div class="vocabulary-controls">
+        {{#if isFlip}}<button class="swipe-button" type="button" data-swipe-known>I know it</button>{{/if}}
+        {{#unless isTranslation}}<button class="practice-button{{#if isSpelling}} spelling-next{{/if}}" type="button" data-vocabulary-next>{{#if isFlip}}Skip word{{else}}Next word{{/if}}</button>{{/unless}}
+      </div>
+      <section class="vocabulary-complete is-hidden" data-vocabulary-complete aria-live="polite">
+        <p class="eyebrow">Exercise complete</p>
+        <h2 data-complete-title>Nice work!</h2>
+        <p data-complete-result></p>
+        <button class="practice-button restart-button" type="button" data-vocabulary-restart><span aria-hidden="true">&#8635;</span> Restart</button>
+      </section>
+    </div>
+  {{/if}}
+    </div>
+    {{#if isFlip}}
+      <aside class="vocabulary-insights">
+        <p class="eyebrow">Your vocabulary</p>
+        <h3>Words to revisit</h3>
+        <p class="insight-copy">These are the words you skip most often.</p>
+        <ol class="hardest-words" data-hardest-words><li>No skipped words yet</li></ol>
+      </aside>
+    {{/if}}
+    {{#if isSpelling}}
+      <aside class="vocabulary-insights spelling-insights is-hidden">
+        <p class="eyebrow">Your progress</p>
+        <h3>Most difficult words</h3>
+        <p class="insight-copy">The three words you had the most trouble with.</p>
+        <ol class="hardest-words" data-spelling-wrong-words></ol>
+      </aside>
+    {{/if}}
+  </div>
+</main>
+
+<script>
+  const vocabularyExercise = document.querySelector("[data-vocabulary-exercise]");
+  if (vocabularyExercise) {
+    const mode = vocabularyExercise.dataset.mode;
+    const selectedLevel = vocabularyExercise.dataset.level;
+    const items = [...vocabularyExercise.querySelectorAll("[data-vocabulary-item]")];
+    const counter = vocabularyExercise.querySelector("[data-vocabulary-counter]");
+    const scoreDisplay = vocabularyExercise.querySelector("[data-vocabulary-score]");
+    const nextButton = vocabularyExercise.querySelector("[data-vocabulary-next]");
+    const swipeButton = vocabularyExercise.querySelector("[data-swipe-known]");
+    const completePanel = vocabularyExercise.querySelector("[data-vocabulary-complete]");
+    const completeResult = vocabularyExercise.querySelector("[data-complete-result]");
+    const restartButton = vocabularyExercise.querySelector("[data-vocabulary-restart]");
+    const resultKey = `vocabulary-result-${mode}-${selectedLevel}`;
+    let currentIndex = 0;
+    let points = 0;
+    let totalFlipPoints = 0;
+    let completed = new Set();
+    let failed = [];
+
+    const readResult = () => JSON.parse(localStorage.getItem(resultKey) || "null");
+    const showCompletion = (result) => {
+      completeResult.textContent = `${result.points} / ${result.total} correct (${result.percentage}%)`;
+      completePanel.classList.remove("is-hidden");
+      vocabularyExercise.querySelector(".vocabulary-items").classList.add("is-hidden");
+      vocabularyExercise.querySelector(".vocabulary-controls").classList.add("is-hidden");
+      counter.textContent = "Completed previously";
+      scoreDisplay.textContent = `Final score: ${result.points} / ${result.total}`;
+    };
+    const saveCompletion = () => {
+      const result = { points, total: items.length, percentage: Math.round((points / items.length) * 100) };
+      localStorage.setItem(resultKey, JSON.stringify(result));
+      showCompletion(result);
+    };
+
+    const previousResult = readResult() || (mode === "flip" ? JSON.parse(localStorage.getItem(`vocabulary-last-flip-${selectedLevel}`) || "null") : null);
+    if (previousResult) showCompletion(previousResult);
+    restartButton.addEventListener("click", () => {
+      localStorage.removeItem(resultKey);
+      if (mode === "flip") localStorage.removeItem(`vocabulary-last-flip-${selectedLevel}`);
+      localStorage.removeItem(`vocabulary-known-${selectedLevel}`);
+      localStorage.removeItem(`vocabulary-level-${selectedLevel}-complete`);
+      location.reload();
+    });
+
+    const levelLinks = [...document.querySelectorAll("[data-level-link]")];
+    const completedLevels = {
+      easy: localStorage.getItem("vocabulary-level-easy-complete") === "true",
+      medium: localStorage.getItem("vocabulary-level-medium-complete") === "true",
+    };
+    levelLinks.forEach((link) => {
+      const locked = link.dataset.level === "medium" && !completedLevels.easy;
+      if (locked && link.dataset.level !== selectedLevel) {
+        link.classList.add("locked");
+        link.setAttribute("aria-disabled", "true");
+        link.addEventListener("click", (event) => event.preventDefault());
+      }
+    });
+
+    const showItem = (index) => {
+      items.forEach((item, itemIndex) => {
+        item.classList.toggle("is-hidden", itemIndex !== index);
+          item.hidden = itemIndex !== index;
+        if (itemIndex === index) item.classList.remove("is-flipped");
+      });
+      counter.textContent = `Word ${index + 1} of ${items.length}`;
+      nextButton.disabled = false;
+    };
+
+    if (mode === "flip") {
+      const knownKey = `vocabulary-known-${selectedLevel}`;
+      const knownWords = new Set(JSON.parse(localStorage.getItem(knownKey) || "[]"));
+      const originalItems = [...items];
+        const totalFlipWords = originalItems.length;
+      originalItems.forEach((item) => {
+        item.classList.add("is-hidden");
+        item.hidden = true;
+      });
+      const activeItems = items.filter((item) => !knownWords.has(item.dataset.wordId));
+      items.splice(0, items.length, ...activeItems);
+      const hardestList = document.querySelector("[data-hardest-words]");
+      const currentWords = new Set(originalItems.map((item) => item.dataset.english));
+      const skippedKey = `vocabulary-skipped-${selectedLevel}`;
+      const skipped = JSON.parse(localStorage.getItem(skippedKey) || "[]")
+        .filter((word) => currentWords.has(word));
+      localStorage.setItem(skippedKey, JSON.stringify(skipped));
+      if (hardestList && skipped.length) hardestList.innerHTML = skipped.slice(0, 3).map((word) => `<li>${word}</li>`).join("");
+      if (!items.length) {
+        document.querySelector("[data-vocabulary-counter]").textContent = "Level complete · choose the next level";
+        document.querySelector("[data-vocabulary-next]").hidden = true;
+        document.querySelector("[data-swipe-known]").hidden = true;
+      } else {
+        showItem(0);
+      }
+      let touchStartX = 0;
+      const markKnown = () => {
+        const currentItem = items[currentIndex];
+        currentItem.classList.add("celebrate-correct");
+        completed.add(currentIndex);
+        knownWords.add(currentItem.dataset.wordId);
+        localStorage.setItem(knownKey, JSON.stringify([...knownWords]));
+        points += 1;
+        totalFlipPoints += 1;
+        scoreDisplay.textContent = `Points: ${totalFlipPoints} / ${totalFlipWords}`;
+        if (completed.size === items.length) {
+          finishRound();
+        }
+        if (completed.size < items.length) {
+          do { currentIndex = (currentIndex + 1) % items.length; } while (completed.has(currentIndex));
+          showItem(currentIndex);
+        }
+      };
+      const moveNext = () => {
+        const skippedWords = JSON.parse(localStorage.getItem(`vocabulary-skipped-${selectedLevel}`) || "[]");
+        const currentItem = items[currentIndex];
+        const word = currentItem.dataset.english;
+        if (!skippedWords.includes(word)) skippedWords.push(word);
+        localStorage.setItem(`vocabulary-skipped-${selectedLevel}`, JSON.stringify(skippedWords.slice(-20)));
+        completed.add(currentIndex);
+        if (completed.size === items.length) {
+          finishRound();
+          return;
+        }
+        do { currentIndex = (currentIndex + 1) % items.length; } while (completed.has(currentIndex));
+        showItem(currentIndex);
+      };
+      function finishRound() {
+        const skippedItems = items.filter((item, index) => !knownWords.has(item.dataset.wordId));
+        if (skippedItems.length) {
+          originalItems.forEach((item) => {
+            item.classList.add("is-hidden");
+            item.hidden = true;
+          });
+          items.splice(0, items.length, ...skippedItems);
+          completed = new Set();
+          currentIndex = 0;
+          points = 0;
+          scoreDisplay.textContent = `Points: ${totalFlipPoints} / ${totalFlipWords}`;
+          counter.textContent = `Next round · ${items.length} words to revisit`;
+          showItem(0);
+          return;
+        }
+        counter.textContent = `Complete · ${items.length} words learned`;
+        localStorage.setItem(`vocabulary-level-${selectedLevel}-complete`, "true");
+        const result = { points: totalFlipPoints, total: totalFlipWords, percentage: 100 };
+        localStorage.setItem(`vocabulary-last-flip-${selectedLevel}`, JSON.stringify(result));
+        showCompletion(result);
+        fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ activityType: "flip-cards", difficultyLevel: selectedLevel, points: totalFlipPoints, totalPoints: totalFlipWords }) });
+        nextButton.hidden = true;
+        if (swipeButton) swipeButton.hidden = true;
+      }
+      items.forEach((item) => {
+        const flip = () => item.classList.toggle("is-flipped");
+        item.addEventListener("click", (event) => {
+          if (!event.target.closest("button")) flip();
+        });
+        item.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            flip();
+          }
+        });
+        item.addEventListener("touchstart", (event) => { touchStartX = event.changedTouches[0].screenX; }, { passive: true });
+        item.addEventListener("touchend", (event) => {
+          const distance = event.changedTouches[0].screenX - touchStartX;
+          if (Math.abs(distance) > 70) distance > 0 ? markKnown() : moveNext();
+        }, { passive: true });
+      });
+      swipeButton.addEventListener("click", markKnown);
+      nextButton.addEventListener("click", moveNext);
+    } else if (mode === "translation") {
+      let translationQueue = items.map((item, itemIndex) => itemIndex);
+      let failedTranslationItems = [];
+      const resetTranslationItem = (item) => {
+        item.classList.remove("celebrate-correct");
+        item.querySelector("[data-vocabulary-next]").hidden = true;
+        item.querySelectorAll("[data-translation-option]").forEach((option) => {
+          option.disabled = false;
+          option.classList.remove("is-correct", "is-wrong");
+        });
+        item.querySelector("[data-vocabulary-feedback]").textContent = "";
+      };
+      const moveNextTranslation = () => {
+        translationQueue.shift();
+        if (!translationQueue.length && failedTranslationItems.length) {
+          translationQueue = failedTranslationItems;
+          failedTranslationItems = [];
+        }
+        if (!translationQueue.length) {
+          counter.textContent = `Complete · ${points} / ${items.length} correct`;
+          saveCompletion();
+          return;
+        }
+        currentIndex = translationQueue[0];
+        resetTranslationItem(items[currentIndex]);
+        showItem(currentIndex);
+      };
+      items.forEach((item, itemIndex) => {
+        const itemNextButton = item.querySelector("[data-vocabulary-next]");
+        itemNextButton.addEventListener("click", moveNextTranslation);
+        item.querySelectorAll("[data-translation-option]").forEach((button) => button.addEventListener("click", () => {
+        const correct = button.dataset.translationOption === item.dataset.swedish;
+        item.querySelectorAll("[data-translation-option]").forEach((option) => {
+          option.disabled = true;
+          if (option.dataset.translationOption === item.dataset.swedish) option.classList.add("is-correct");
+        });
+        item.querySelector("[data-vocabulary-feedback]").textContent = correct ? "Correct!" : `Not quite. The answer is ${item.dataset.swedish}.`;
+        if (!correct) {
+          button.classList.add("is-wrong");
+          failedTranslationItems.push(itemIndex);
+          itemNextButton.hidden = false;
+          itemNextButton.textContent = "Next word";
+          return;
+        }
+        item.classList.add("celebrate-correct");
+        points += 1;
+        scoreDisplay.textContent = `Points: ${points} / ${items.length}`;
+        window.setTimeout(moveNextTranslation, 1500);
+        }));
+      });
+    } else if (mode === "spelling") {
+      nextButton.hidden = true;
+      let spellingQueue = [...items];
+      let skippedItems = [];
+      let spellingRound = 1;
+      let spellingPosition = 1;
+      const spellingTotal = items.length;
+      let spellingRoundTotal = spellingTotal;
+      const wrongWords = new Map();
+      const wrongWordsList = document.querySelector("[data-spelling-wrong-words]");
+      const recordWrongWord = (word) => {
+        wrongWords.set(word, (wrongWords.get(word) || 0) + 1);
+      };
+      const showWrongWords = () => {
+        if (!wrongWordsList) return;
+        wrongWordsList.replaceChildren();
+        [...wrongWords.entries()]
+          .sort((first, second) => second[1] - first[1])
+          .slice(0, 3)
+          .forEach(([word]) => {
+          const wordItem = document.createElement("li");
+          wordItem.textContent = word;
+          wrongWordsList.append(wordItem);
+          });
+        document.querySelector(".spelling-insights").classList.remove("is-hidden");
+      };
+      const showSpellingItem = (item) => {
+        items.forEach((candidate) => {
+          candidate.classList.toggle("is-hidden", candidate !== item);
+          candidate.hidden = candidate !== item;
+        });
+        counter.textContent = spellingRound > 1
+          ? `Words to revisit · ${spellingPosition} of ${spellingRoundTotal}`
+          : `Word ${spellingPosition} of ${spellingTotal}`;
+        item.querySelector("[data-spelling-next]").hidden = true;
+        item.querySelector("[data-spelling-skip]").hidden = false;
+      };
+      const moveToNextSpelling = () => {
+        if (spellingQueue.length) showSpellingItem(spellingQueue[0]);
+        else if (skippedItems.length) {
+          spellingQueue = skippedItems;
+          skippedItems = [];
+          spellingRound += 1;
+          spellingPosition = 1;
+          spellingRoundTotal = spellingQueue.length;
+          showSpellingItem(spellingQueue[0]);
+        } else {
+          showWrongWords();
+          saveCompletion();
+        }
+      };
+      items.forEach((item) => {
+        const input = item.querySelector("[data-spelling-input]");
+        const checkButton = item.querySelector("[data-spelling-check]");
+        const cardNextButton = item.querySelector("[data-spelling-next]");
+        const hintButton = item.querySelector("[data-spelling-hint]");
+        const hintText = item.querySelector("[data-spelling-hint-text]");
+        const skipButton = item.querySelector("[data-spelling-skip]");
+        hintButton.addEventListener("click", () => {
+          hintText.textContent = `Hint: the word starts with “${item.dataset.english.trim().charAt(0).toUpperCase()}”.`;
+          input.focus();
+        });
+        checkButton.addEventListener("click", () => {
+          const correct = input.value.trim().toLowerCase() === item.dataset.english.trim().toLowerCase();
+          const feedback = item.querySelector("[data-vocabulary-feedback]");
+          if (!correct) {
+            recordWrongWord(item.dataset.english);
+            item.dataset.attempts = Number(item.dataset.attempts || 0) + 1;
+            feedback.textContent = "Not quite. Check the spelling and try again.";
+            if (Number(item.dataset.attempts) >= 2) {
+              hintText.textContent = `Hint: the word is “${item.dataset.english.trim()}”.`;
+              cardNextButton.hidden = false;
+              cardNextButton.textContent = spellingQueue.length === 1 && !skippedItems.length ? "Finish exercise" : "Next word";
+            }
+            input.focus();
+            return;
+          }
+          if (!item.dataset.completed) points += 1;
+          item.dataset.completed = "true";
+          input.disabled = true;
+          checkButton.disabled = true;
+          item.classList.add("celebrate-correct");
+          feedback.textContent = "Correct! You can continue to the next word.";
+          scoreDisplay.textContent = `Points: ${points} / ${items.length}`;
+          skipButton.hidden = true;
+          cardNextButton.hidden = false;
+          cardNextButton.textContent = spellingQueue.length === 1 && !skippedItems.length ? "Finish exercise" : "Next word";
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") checkButton.click();
+        });
+        cardNextButton.addEventListener("click", () => {
+          item.classList.remove("celebrate-correct");
+          if (!item.dataset.completed && !skippedItems.includes(item)) skippedItems.push(item);
+          spellingQueue.shift();
+          spellingPosition += 1;
+          moveToNextSpelling();
+        });
+        skipButton.addEventListener("click", () => {
+          item.classList.remove("celebrate-correct");
+          recordWrongWord(item.dataset.english);
+          if (!skippedItems.includes(item)) skippedItems.push(item);
+          spellingQueue.shift();
+          spellingPosition += 1;
+          moveToNextSpelling();
+        });
+      });
+      showSpellingItem(spellingQueue[0]);
+    } else if (mode === "sentence") {
+      nextButton.textContent = "Next word";
+      nextButton.addEventListener("click", () => {
+        const item = items[currentIndex];
+        const feedback = item.querySelector("[data-vocabulary-feedback]");
+        feedback.textContent = "Write your sentence in your notebook, then continue to the next word.";
+        completed.add(currentIndex);
+        if (completed.size === items.length) {
+          counter.textContent = `Complete · ${items.length} words practised`;
+          saveCompletion();
+          return;
+        }
+        currentIndex = (currentIndex + 1) % items.length;
+        showItem(currentIndex);
+      });
+      items.forEach((item) => item.querySelector("[data-sentence-check]").addEventListener("click", () => {
+        const input = item.querySelector(".sentence-input");
+        const hasSentence = input.value.trim().length >= 5;
+        if (hasSentence) item.classList.add("celebrate-correct");
+        if (hasSentence && !item.dataset.scored) points += 1;
+        if (hasSentence) item.dataset.scored = "true";
+        scoreDisplay.textContent = `Points: ${points} / ${items.length}`;
+        item.querySelector("[data-vocabulary-feedback]").textContent = hasSentence ? "Good sentence attempt. Check that it uses the word correctly." : "Write a little more so you can practise using the word in context.";
+      }));
+    }
+  }
+</script>

@@ -1,8 +1,85 @@
-<div id="header">
-  <h1>Kirby Club</h1>
-  <p>Welcome to the Kirby Club where you can find new friends and plan events
-    for our beloved Kirby god. We also have Kirby Merch with our new colors for
-    the summer!!
-  </p>
-  <button class="become-btn"> Become a Member</button>
-</div>
+<main class="grammar-page">
+  <div class="grammar-workspace">
+    <aside class="practice-nav">
+      <p class="exercise-overview-title">Exercise overview</p>
+      <nav aria-label="Practice pages">
+        <a href="/practice/questions"><strong>Practise Questions</strong></a>
+        <a href="/practice/sentence-fixer"><strong>Sentence Fixer</strong></a>
+        <a href="/practice/find-errors"><strong>Find Errors</strong></a>
+        <a href="/practice/final-test"><strong>Final Test</strong></a>
+      </nav>
+    </aside>
+
+    <div class="grammar-content">
+      <div class="grammar-intro">
+        <p class="eyebrow">English Labs / Grammar</p>
+        <h1>Build stronger sentences.</h1>
+        <p>Choose a grammar area, review the notes, then practise what you know.</p>
+      </div>
+
+      <div class="grammar-grid">
+        {{#each chapters}}
+          <article class="grammar-card">
+            <div class="card-topline">
+              <span>Chapter {{chapter_number}}</span>
+            </div>
+            <div class="card-content">
+              <h2>{{title}}</h2>
+              <p>{{description}}</p>
+            </div>
+            <div class="card-actions">
+              <a
+                class="practice-button"
+                href="/grammar/chapter/{{id}}"
+              >Practise</a>
+              <button
+                class="notes-button"
+                type="button"
+                data-dialog-target="notes-{{id}}"
+              >Study notes</button>
+            </div>
+          </article>
+
+          <dialog class="notes-dialog" id="notes-{{id}}">
+            <div class="dialog-heading">
+              <div>
+                <p class="eyebrow">Chapter {{chapter_number}}</p>
+                <h2>{{title}}</h2>
+              </div>
+              <button
+                class="close-dialog"
+                type="button"
+                data-dialog-close
+                aria-label="Close study notes"
+              >&times;</button>
+            </div>
+            <p class="dialog-description">{{description}}</p>
+            <div class="topic-list">
+              {{#each topics}}
+                <section class="topic-note">
+                  <div class="topic-label">{{topic_code}}</div>
+                  <h3>{{title}}</h3>
+                  <p>{{explanation}}</p>
+                  {{#if example_sentence}}<p class="example"><strong
+                      >Example:</strong>
+                      {{example_sentence}}</p>{{/if}}
+                </section>
+              {{/each}}
+            </div>
+          </dialog>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.querySelectorAll("[data-dialog-target]").forEach((button) => {
+  button.addEventListener("click", () =>
+  document.getElementById(button.dataset.dialogTarget).showModal()); });
+  document.querySelectorAll("[data-dialog-close]").forEach((button) => {
+  button.addEventListener("click", () => button.closest("dialog").close()); });
+  document.querySelectorAll("dialog").forEach((dialog) => {
+  dialog.addEventListener("click", (event) => { if (event.target === dialog)
+  dialog.close(); }); });
+</script>
