@@ -1,0 +1,77 @@
+<main class="vocabulary-page useful-chunks-page">
+  <div class="vocabulary-workspace">
+    <aside class="practice-nav vocabulary-nav">
+      <p class="exercise-overview-title">Exercise overview</p>
+      <nav aria-label="Vocabulary exercises">
+        <a href="/vocabulary/flip-cards"><strong>Flip cards</strong></a>
+        <a href="/vocabulary/translation"><strong>Translation</strong></a>
+        <a href="/vocabulary/spelling"><strong>Write the word</strong></a>
+        <a class="active-exercise" href="/vocabulary/useful-chunks"><strong>Useful Chunks</strong></a>
+      </nav>
+    </aside>
+
+    <section class="vocabulary-content">
+      <div class="grammar-intro">
+        <p class="eyebrow">English Labs / Vocabulary</p>
+        <h1>Useful Chunks</h1>
+        <p>Choose a list, then write your own sentence using one of its useful chunks.</p>
+      </div>
+
+      <details class="chunk-list-picker">
+        <summary><span class="menu-icon" aria-hidden="true">&#9776;</span><strong>Choose a list</strong><span class="selected-list-label">List {{selectedList.number}} · {{selectedList.title}}</span></summary>
+        <nav class="chunk-list-menu" aria-label="Useful Chunk lists">
+          {{#each lists}}
+            <a class="chunk-list-link{{#if selected}} selected{{/if}}" href="/vocabulary/useful-chunks?list={{number}}">
+              <span>List {{number}}</span>
+              <strong>{{title}}</strong>
+            </a>
+          {{/each}}
+        </nav>
+      </details>
+
+      <section class="chunk-practice-panel">
+        <div class="chunk-panel-heading">
+          <div>
+            <p class="eyebrow">List {{selectedList.number}}</p>
+            <h2>{{selectedList.title}}</h2>
+          </div>
+          <div class="chunk-panel-actions"><span>{{selectedList.chunks.length}} chunks</span><a class="guide-practice-link" href="/vocabulary/useful-chunks/guide?list={{selectedList.number}}">How to use them</a></div>
+        </div>
+        <div class="chunk-grid">
+          {{#each selectedList.chunks}}
+            <button class="chunk-option{{#if @first}} selected{{/if}}" type="button" data-chunk-option="{{this}}">{{this}}</button>
+          {{/each}}
+        </div>
+
+        {{#if saved}}<p class="save-notice" role="status">Your sentence was saved for your teacher to read.</p>{{/if}}
+        <form class="chunk-sentence-form" method="post" action="/vocabulary/useful-chunks">
+          <input type="hidden" name="listNumber" value="{{selectedList.number}}" />
+          <input type="hidden" name="chunk" value="{{selectedList.chunks.[0]}}" data-selected-chunk />
+          <label for="sentence">Write a sentence with <strong data-selected-chunk-label>{{selectedList.chunks.[0]}}</strong></label>
+          <textarea id="sentence" name="sentence" rows="4" maxlength="500" required placeholder="Write your own sentence here..."></textarea>
+          <button class="practice-button" type="submit">Save sentence</button>
+        </form>
+      </section>
+
+      {{#if submissions}}
+        <section class="chunk-history">
+          <div class="chunk-panel-heading"><h2>Your saved sentences</h2><span>{{submissions.length}}</span></div>
+          {{#each submissions}}
+            <article class="chunk-history-row"><strong>{{chunk}}</strong><p>{{sentence}}</p><small>{{submitted_at}}</small></article>
+          {{/each}}
+        </section>
+      {{/if}}
+    </section>
+  </div>
+</main>
+
+<script>
+  document.querySelectorAll("[data-chunk-option]").forEach((option) => {
+    option.addEventListener("click", () => {
+      document.querySelectorAll("[data-chunk-option]").forEach((item) => item.classList.remove("selected"));
+      option.classList.add("selected");
+      document.querySelector("[data-selected-chunk]").value = option.dataset.chunkOption;
+      document.querySelector("[data-selected-chunk-label]").textContent = option.dataset.chunkOption;
+    });
+  });
+</script>

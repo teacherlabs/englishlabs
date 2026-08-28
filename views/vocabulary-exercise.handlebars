@@ -6,6 +6,7 @@
         <a class="{{#if isFlip}}active-exercise{{/if}}" href="/vocabulary/flip-cards"><strong>Flip cards</strong></a>
         <a class="{{#if isTranslation}}active-exercise{{/if}}" href="/vocabulary/translation"><strong>Translation</strong></a>
         <a class="{{#if isSpelling}}active-exercise{{/if}}" href="/vocabulary/spelling"><strong>Write the word</strong></a>
+        <a href="/vocabulary/useful-chunks"><strong>Useful Chunks</strong></a>
       </nav>
     </aside>
 
@@ -177,10 +178,32 @@
       const hardestList = document.querySelector("[data-hardest-words]");
       const currentWords = new Set(originalItems.map((item) => item.dataset.english));
       const skippedKey = `vocabulary-skipped-${selectedLevel}`;
+      const skipCountsKey = `vocabulary-skip-counts-${selectedLevel}`;
       const skipped = JSON.parse(localStorage.getItem(skippedKey) || "[]")
         .filter((word) => currentWords.has(word));
       localStorage.setItem(skippedKey, JSON.stringify(skipped));
-      if (hardestList && skipped.length) hardestList.innerHTML = skipped.slice(0, 3).map((word) => `<li>${word}</li>`).join("");
+      const renderHardestWords = () => {
+        if (!hardestList) return;
+        const skipCounts = JSON.parse(localStorage.getItem(skipCountsKey) || "{}");
+        const hardestWords = Object.entries(skipCounts)
+          .sort((first, second) => second[1] - first[1])
+          .slice(0, 3);
+        hardestList.innerHTML = hardestWords.length
+          ? hardestWords.map(([word]) => `<li>${word}</li>`).join("")
+          : "<li>No skipped words yet</li>";
+      };
+      renderHardestWords();
+      const saveDifficultWords = (words) => fetch("/api/vocabulary/difficult-words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ difficultyLevel: selectedLevel, words }),
+      });
+      const recordSkippedWord = (word) => {
+        const skipCounts = JSON.parse(localStorage.getItem(skipCountsKey) || "{}");
+        skipCounts[word] = (skipCounts[word] || 0) + 1;
+        localStorage.setItem(skipCountsKey, JSON.stringify(skipCounts));
+        renderHardestWords();
+      };
       if (!items.length) {
         document.querySelector("[data-vocabulary-counter]").textContent = "Level complete · choose the next level";
         document.querySelector("[data-vocabulary-next]").hidden = true;
@@ -212,6 +235,8 @@
         const word = currentItem.dataset.english;
         if (!skippedWords.includes(word)) skippedWords.push(word);
         localStorage.setItem(`vocabulary-skipped-${selectedLevel}`, JSON.stringify(skippedWords.slice(-20)));
+        recordSkippedWord(word);
+        saveDifficultWords([word]);
         completed.add(currentIndex);
         if (completed.size === items.length) {
           finishRound();
@@ -221,6 +246,7 @@
         showItem(currentIndex);
       };
       function finishRound() {
+        renderHardestWords();
         const skippedItems = items.filter((item, index) => !knownWords.has(item.dataset.wordId));
         if (skippedItems.length) {
           originalItems.forEach((item) => {

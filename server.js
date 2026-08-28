@@ -1,7 +1,7 @@
 //---------------------
 // GLOBAL DEFINITIONS
 //---------------------
-const adminname = "Melina";
+const adminname = "Melisa";
 const adminPassword =
   "$2b$12$n0Uw5LlR/4OaSeTKsBFb0OIJZ5QaGoQyo6koa6MJMYYsueqS.8duu";
 
@@ -13,10 +13,12 @@ const { engine } = require("express-handlebars");
 const sqlite3 = require("sqlite3");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const multer = require("multer");
 const session = require("express-session");
 const connectSqlite3 = require("connect-sqlite3");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 //----------
 // PORT
 //----------
@@ -73,6 +75,183 @@ function vocabularyLevelChoices(selectedLevel) {
   ];
 }
 
+function usefulChunkExample(chunk) {
+  const examples = {
+    "as strong as": "Who in your life is as strong as a superhero, and why?",
+    "be able to": "Who is able to do something impressive, and what is it?",
+    "be a bit": "When might someone say, ‘Aren’t you a bit too old for that?’",
+    "be a pain": "Studying for exams can sometimes be a pain. What might make it easier?",
+    "these days": "Do people still repair things these days? Why or why not?",
+    "be ready for": "What is something you are ready for, and why?",
+    "would you get": "Would you get excited, scared, or curious if you saw an alien? Why?",
+    "flesh and blood": "Would you replace any of your flesh and blood body parts with bionic ones? Why?",
+    "like the idea of": "Do you like the idea of replacing human teachers with AI robots? Why or why not?",
+    "a lack of": "What happens when there is a lack of skilled players in a sport?",
+    "on one's own": "Describe a time when you handled a difficult task on your own.",
+    "twice as": "How would you feel if your trip took twice as long as expected?",
+    "ahead of one's time": "In what way was Greta Thunberg ahead of her time?",
+    "later in life": "What do people appreciate more later in life, and why?",
+    "come up with": "Who came up with an idea or invention you admire?",
+    "as simple as": "How can learning a new skill be made as simple as possible?",
+    "as a means of": "How can mobile phones be used as a means of learning outside class?",
+    "carry out": "What project or task would you like to carry out in the future?",
+    "set up": "How would you set up a new club at school?",
+    "break down": "Have you had a bike or gadget break down at the worst time?",
+    "be successful": "What does being successful mean to you?",
+    "feel at ease": "What can teachers do to help a new student feel at ease?",
+    "spill the beans": "If you know a secret, do you sometimes spill the beans? Why?",
+    "take up": "What new hobby or sport would you like to take up, and why?",
+    "go both ways": "Where does trust need to go both ways for a relationship to work?",
+    "go along with": "When is it better to go along with someone’s idea?",
+    "give in": "Is it ever a good idea to give in during an argument?",
+    "bring up": "What topics are hardest to bring up with your parents or teachers?",
+    "hang out": "Where do you usually hang out with your closest friends?",
+    "make fun of": "How do you feel when someone makes fun of you?",
+    "reach out to": "Who have you reached out to for support?",
+    "take a deep breath": "When has taking a deep breath helped you stay calm?",
+    "be targeted": "Student Prompt: Write your own discussion question using this phrase.",
+    "live on": "Student Prompt: Write your own discussion question using this phrase.",
+    "pet an animal": "Student Prompt: Write your own discussion question using this phrase.",
+    "kick in": "Student Prompt: Write your own discussion question using this phrase.",
+    "turn to": "Student Prompt: Write your own discussion question using this phrase.",
+    "take matters into one's hands": "Student Prompt: Write your own discussion question using this phrase.",
+    "a few exceptions": "Student Prompt: Write your own discussion question using this phrase.",
+    "a smooth ride": "Student Prompt: Write your own discussion question using this phrase.",
+    "if only": "Student Prompt: Write your own discussion question using this phrase.",
+    "leave someone be": "Student Prompt: Write your own discussion question using this phrase.",
+    "the next generation": "Student Prompt: Write your own discussion question using this phrase.",
+    "be brave enough to": "Student Prompt: Write your own discussion question using this phrase.",
+  };
+  return examples[chunk] || `What personal experience could you describe using “${chunk}”?`;
+}
+
+const usefulChunkLists = [
+  [
+    "Tech yes? Tech no?",
+    "as strong as|be able to|be a bit|be a pain|these days|be ready for|would you get|flesh and blood|like the idea of",
+  ],
+  [
+    "Language work",
+    "in the early days|a lack of|on one's own|health issues|twice as|ahead of one's time|an early version of|later in life|predict the weather|be successful",
+  ],
+  [
+    "Language work",
+    "may have been|come up with|as simple as|as a means of|carry out|set up|in X years' time|break down|became more reliable|offer huge potential",
+  ],
+  [
+    "Relationships & dialogue",
+    "be on a date|spill the beans|feel at ease|take up|not mind|go both ways|it's hard to win|go along with|bring up|give in",
+  ],
+  [
+    "Of love and...",
+    "get together|keep one's nerves in check|hang out|make fun of|call someone out on|there's nothing to say|chew one's fingernails|drop into|reach out to|take a deep breath",
+  ],
+  [
+    "Language work",
+    "constantly evolve|bring with it|pave the way for|turn up at|go in one direction|a strong influence on|slow things down|grow up with|have a chance|put together",
+  ],
+  [
+    "Choices & lifestyle",
+    "make a decision|go back to|make up one's mind|ready and willing|be keen|have one's fair share of|take ages|crime rate|to holiday",
+  ],
+  [
+    "Human relations",
+    "fall in love|declare war on|good relations with|get on well with|be madly in love|start an affair|be held up as|play by ear|mark the beginning|a world of difference",
+  ],
+  [
+    "Of love and... (Romeo & Juliet)",
+    "catch the eye of|be allowed to|coin a term|get hold of|cheer someone up|burst into tears|fall in love with|keep something a secret|lose one's life|draw one's final breath",
+  ],
+  [
+    "Society & current affairs",
+    "once the dust has settled|difficult conditions|sign a peace treaty|with complete disregard for|take control of|growing economy|toughen one's stance|no one knows what the future will hold|bring benefits|a hot topic",
+  ],
+  [
+    "Survival & heritage",
+    "Indigenous Peoples|hard to come by|from generation to generation|turn around|be deceived|catch someone's eye|in great danger|lose consciousness|stay afloat|turn into",
+  ],
+  [
+    "Culture & perspective",
+    "melting pot|in one's daily life|in the neighborhood|the first step|significantly larger|over time|be challenging|mixed feelings",
+  ],
+  [
+    "Travel & experiences",
+    "go on a trip|take a stroll|burst out laughing|surprised to hear|give away|drag someone to|check out|wet oneself|change one's mind|adrenaline junkie",
+  ],
+  [
+    "History & identity",
+    "declare independence|traced back to|to attract|home to|fight for one's rights|be reflected in|by far|the perfect spot",
+  ],
+  [
+    "Places & leisure",
+    "be popular with|a must-see|be looking to|chill out|home to|be lucky enough|one final thing|thanks to|so much more than|a paradise for",
+  ],
+  [
+    "News & media",
+    "by word of mouth|spread fear|be hit by|come across|make conversation|make one's way|get rid of|feed on",
+  ],
+  [
+    "Daily language",
+    "be the answer|feel a bit tired|an energy boost|you'd be surprised|bend the truth|have no idea|go on TV|tons of|sounds awesome",
+  ],
+  [
+    "Civil rights & justice",
+    "campaign for|achieve equality|a major victory|give up|call for|discriminate against|demand justice|spark outrage",
+  ],
+  [
+    "Adventures & everyday life",
+    "head out|go exploring|take notes|stay safe|make sense|put something on|stay warm|begin to wonder|be worth it|a brilliant experience",
+  ],
+  [
+    "History & accomplishments",
+    "lay the foundation|do deeds|be shipped off|right-hand man|make it one's mission|bring to stage/screen|keep a secret",
+  ],
+  [
+    "The road less traveled",
+    "be fascinated by|be determined to|cut corners|set off from|the world's first|give the green light|on one's way|work feverishly",
+  ],
+  [
+    "Media & critical thinking",
+    "the whole picture|fully understand|take control of|play a role in|be eager to|keep up|raise questions|be responsible",
+  ],
+  [
+    "Inspiration & resilience",
+    "inspired by|against the wishes of|be struck by a storm|wash ashore|keep track of time|keep someone company|catch up|fall to the ground|make someone proud|pass away",
+  ],
+  [
+    "Exploration & journey",
+    "set out|keep in mind|be left out|make a journey|step ashore|more accessible|find a shortcut|contribute to|greet someone",
+  ],
+  [
+    "Work & society",
+    "at a young age|be common|unskilled manual work|fair wage|deliver a speech|on behalf of|a media outcry|fall on deaf ears|be targeted|live on",
+  ],
+  [
+    "Feelings & psychology",
+    "butterflies in one's stomach|come down to|chemical substances|cloud the senses|get someone off one's mind|being infatuated|share someone's feelings|spend time with|have a crush|pet an animal|kick in",
+  ],
+  [
+    "Tech & action",
+    "sort out|put an end to|take action|carry on|round up|benefit someone|carry out|a fraction of a second|turn to|take matters into one's hands",
+  ],
+  [
+    "Technology & society",
+    "a greater impact|in some respects|in one's heyday|what better way|cut down on|be in use|a few exceptions|a smooth ride",
+  ],
+  [
+    "Human nature & choices",
+    "by nature|feel lost|give up|find one's way|agree to|turn someone away|advise someone to|make sacrifices|if only|leave someone be",
+  ],
+  [
+    "Unity, peace & poetry",
+    "send a strong message|strive to|put differences aside|lay down arms|stand between|in every nook|the next generation|be brave enough to",
+  ],
+].map(([title, chunks], index) => ({
+  number: index + 1,
+  title,
+  chunks: chunks.split("|"),
+}));
+
 //----------
 // SESSIONS
 //----------
@@ -101,24 +280,36 @@ app.use(function (req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
-app.use("/uploads/profiles", express.static(path.join(dataDir, "uploads", "profiles")));
+app.use(
+  "/uploads/profiles",
+  express.static(path.join(dataDir, "uploads", "profiles")),
+);
 
 db.serialize(() => {
   db.run("ALTER TABLE members ADD COLUMN password_hash TEXT", () => {});
+  db.run("ALTER TABLE members ADD COLUMN fname TEXT DEFAULT ''", () => {});
+  db.run("ALTER TABLE members ADD COLUMN lname TEXT DEFAULT ''", () => {});
+  db.run("ALTER TABLE members ADD COLUMN email TEXT DEFAULT ''", () => {});
   db.run(
     "ALTER TABLE members ADD COLUMN role TEXT NOT NULL DEFAULT 'student'",
     () => {},
   );
   db.run("ALTER TABLE members ADD COLUMN goal TEXT DEFAULT ''", () => {});
   db.run("ALTER TABLE members ADD COLUMN avatar TEXT DEFAULT ''", () => {});
-  db.run(`CREATE TABLE IF NOT EXISTS user_character (
+  db.run(
+    `CREATE TABLE IF NOT EXISTS user_character (
     user_id TEXT PRIMARY KEY,
     character_hash TEXT NOT NULL,
     character_layers TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES members(username)
-  )`, () => {});
-  db.run("ALTER TABLE user_character ADD COLUMN character_layers TEXT NOT NULL DEFAULT '[]'", () => {});
+  )`,
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE user_character ADD COLUMN character_layers TEXT NOT NULL DEFAULT '[]'",
+    () => {},
+  );
   db.run(
     "ALTER TABLE members ADD COLUMN avatar_hair TEXT DEFAULT '#3b2416'",
     () => {},
@@ -166,6 +357,63 @@ db.serialize(() => {
     "ALTER TABLE progress ADD COLUMN difficulty_level TEXT DEFAULT ''",
     () => {},
   );
+  db.run(`CREATE TABLE IF NOT EXISTS useful_chunk_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    list_number INTEGER NOT NULL,
+    chunk TEXT NOT NULL,
+    sentence TEXT NOT NULL,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES members(username)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at INTEGER NOT NULL,
+    FOREIGN KEY (username) REFERENCES members(username)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS vocabulary_difficult_words (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    difficulty_level TEXT NOT NULL,
+    word TEXT NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 1,
+    last_seen TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (username, difficulty_level, word),
+    FOREIGN KEY (username) REFERENCES members(username)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_rooms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'waiting',
+    current_question INTEGER NOT NULL DEFAULT 0,
+    question_started_at INTEGER,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id INTEGER NOT NULL,
+    question_order INTEGER NOT NULL,
+    question_text TEXT NOT NULL,
+    answer_a TEXT NOT NULL,
+    answer_b TEXT NOT NULL,
+    answer_c TEXT NOT NULL,
+    answer_d TEXT NOT NULL,
+    correct_answer TEXT NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_participants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    answer TEXT,
+    score INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (room_id, username),
+    FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
+  )`);
+  db.run("ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER", () => {});
 });
 
 //------------
@@ -228,7 +476,7 @@ app.get("/", (req, res) => {
   );
 });
 
-app.get("/vocabulary", (req, res) => {
+app.get("/vocabulary", requireAuthenticated, (req, res) => {
   grammarDb.get(
     "SELECT COUNT(*) AS word_count FROM vocabulary",
     (error, result) => {
@@ -238,7 +486,72 @@ app.get("/vocabulary", (req, res) => {
   );
 });
 
-app.get("/vocabulary/flip-cards", (req, res) => {
+app.get("/vocabulary/useful-chunks", requireLogin, (req, res) => {
+  const selectedNumber = Math.min(
+    usefulChunkLists.length,
+    Math.max(1, Number(req.query.list) || 1),
+  );
+  const selectedList = usefulChunkLists[selectedNumber - 1];
+  db.all(
+    "SELECT chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? AND list_number = ? ORDER BY submitted_at DESC",
+    [req.session.name, selectedNumber],
+    (error, submissions) => {
+      if (error) return res.status(500).send("Unable to load useful chunks.");
+      res.render("useful-chunks.handlebars", {
+        lists: usefulChunkLists.map((list) => ({
+          ...list,
+          selected: list.number === selectedNumber,
+        })),
+        selectedList,
+        submissions,
+        saved: req.query.saved === "1",
+      });
+    },
+  );
+});
+
+app.get("/vocabulary/useful-chunks/guide", requireLogin, (req, res) => {
+  const selectedNumber = Math.min(
+    usefulChunkLists.length,
+    Math.max(1, Number(req.query.list) || 1),
+  );
+  const guideLists = usefulChunkLists.map((list) => ({
+      ...list,
+      selected: list.number === selectedNumber,
+      chunks: list.chunks.map((chunk) => ({ phrase: chunk, example: usefulChunkExample(chunk) })),
+    }));
+  res.render("useful-chunks-guide.handlebars", {
+    lists: guideLists,
+    selectedList: guideLists[selectedNumber - 1],
+  });
+});
+
+app.post("/vocabulary/useful-chunks", requireLogin, (req, res) => {
+  const listNumber = Number(req.body.listNumber);
+  const chunk = String(req.body.chunk || "").trim();
+  const sentence = String(req.body.sentence || "").trim();
+  const list = usefulChunkLists[listNumber - 1];
+  if (
+    !list ||
+    !list.chunks.includes(chunk) ||
+    sentence.length < 3 ||
+    sentence.length > 500
+  ) {
+    return res
+      .status(400)
+      .redirect(`/vocabulary/useful-chunks?list=${listNumber}`);
+  }
+  db.run(
+    "INSERT INTO useful_chunk_submissions (username, list_number, chunk, sentence) VALUES (?, ?, ?, ?)",
+    [req.session.name, listNumber, chunk, sentence],
+    (error) =>
+      error
+        ? res.status(500).send("Unable to save your sentence.")
+        : res.redirect(`/vocabulary/useful-chunks?list=${listNumber}&saved=1`),
+  );
+});
+
+app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
   grammarDb.all(
     "SELECT id, english_word, swedish_translation, part_of_speech, definition, example_sentence, cefr_level FROM vocabulary ORDER BY id",
     (error, words) => {
@@ -267,7 +580,7 @@ app.get("/vocabulary/flip-cards", (req, res) => {
   );
 });
 
-app.get("/vocabulary/translation", (req, res) => {
+app.get("/vocabulary/translation", requireAuthenticated, (req, res) => {
   grammarDb.all(
     "SELECT id, english_word, swedish_translation, part_of_speech, cefr_level FROM vocabulary ORDER BY id",
     (error, words) => {
@@ -306,7 +619,7 @@ app.get("/vocabulary/translation", (req, res) => {
   );
 });
 
-app.get("/vocabulary/spelling", (req, res) => {
+app.get("/vocabulary/spelling", requireAuthenticated, (req, res) => {
   grammarDb.all(
     "SELECT id, english_word, swedish_translation, part_of_speech, definition, cefr_level FROM vocabulary ORDER BY id",
     (error, words) => {
@@ -331,17 +644,17 @@ app.get("/vocabulary/spelling", (req, res) => {
   );
 });
 
-app.get("/grammar/chapter/:id", (req, res) => {
+app.get("/grammar/chapter/:id", requireAuthenticated, (req, res) => {
   res.redirect(
     `/practice/questions?chapter=${encodeURIComponent(req.params.id)}`,
   );
 });
 
-app.get("/practice/questions", (req, res) => {
+app.get("/practice/questions", requireAuthenticated, (req, res) => {
   const chapterFilter = req.query.chapter ? "WHERE chapters.id = ?" : "";
   const params = req.query.chapter ? [req.query.chapter] : [];
   grammarDb.all(
-    "SELECT id, chapter_number, title, cefr_level FROM chapters ORDER BY chapter_number",
+    "SELECT id, chapter_number, title, description, cefr_level FROM chapters ORDER BY chapter_number",
     (chaptersError, chapters) => {
       if (chaptersError)
         return res.status(500).send("Unable to load chapters.");
@@ -514,22 +827,7 @@ app.get("/practice/questions", (req, res) => {
                 "'Affect' is usually a verb meaning to influence; 'effect' is usually a noun meaning a result.",
             },
           };
-          const fallbackQuestions = chaptersWithoutQuestions.map((chapter) => ({
-            id: `chapter-${chapter.id}-intro`,
-            chapter_id: chapter.id,
-            chapter_title: chapter.title,
-            ...(grammarFallbacks[chapter.chapter_number] ||
-              grammarFallbacks[1]),
-            cefr_level: chapter.cefr_level,
-          }));
-          const availableQuestions = requestedChapter
-            ? [
-                ...questions,
-                ...fallbackQuestions.filter(
-                  (question) => question.chapter_id === requestedChapter,
-                ),
-              ]
-            : [...questions, ...fallbackQuestions];
+          const availableQuestions = questions;
           res.render("practice.handlebars", {
             mode: "questions",
             pageTitle: "Practise Questions",
@@ -550,7 +848,7 @@ app.get("/practice/questions", (req, res) => {
   );
 });
 
-app.get("/practice/sentence-fixer", (req, res) => {
+app.get("/practice/sentence-fixer", requireAuthenticated, (req, res) => {
   res.render("practice.handlebars", {
     mode: "fixer",
     pageTitle: "Sentence Fixer",
@@ -570,7 +868,7 @@ app.get("/practice/sentence-fixer", (req, res) => {
   });
 });
 
-app.get("/practice/find-errors", (req, res) => {
+app.get("/practice/find-errors", requireAuthenticated, (req, res) => {
   res.render("practice.handlebars", {
     mode: "errors",
     isErrorActivity: true,
@@ -621,7 +919,7 @@ app.get("/practice/find-errors", (req, res) => {
   });
 });
 
-app.get("/practice/final-test", (req, res) => {
+app.get("/practice/final-test", requireAuthenticated, (req, res) => {
   grammarDb.all(
     `SELECT quiz_questions.*, chapters.title AS chapter_title
      FROM quiz_questions
@@ -688,6 +986,81 @@ app.get("/login", (req, res) => {
 
 app.get("/signup", (req, res) => {
   res.render("signup.handlebars");
+});
+
+app.get("/forgot-password", (req, res) => {
+  res.render("forgot-password.handlebars");
+});
+
+app.post("/forgot-password", (req, res) => {
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const genericMessage = "If an account uses that email, a reset link has been sent.";
+  if (!email) return res.status(400).render("forgot-password.handlebars", { error: "Enter your email address." });
+
+  db.get("SELECT username FROM members WHERE LOWER(email) = ?", [email], (lookupError, member) => {
+    if (lookupError || !member) return res.render("forgot-password.handlebars", { message: genericMessage });
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const expiresAt = Date.now() + 60 * 60 * 1000;
+    db.run("DELETE FROM password_resets WHERE username = ?", [member.username], () => {
+      db.run("INSERT INTO password_resets (username, token_hash, expires_at) VALUES (?, ?, ?)", [member.username, tokenHash, expiresAt], (insertError) => {
+        if (insertError) return res.status(500).render("forgot-password.handlebars", { error: "Unable to create a reset link." });
+        const baseUrl = process.env.APP_URL || `http://localhost:${port}`;
+        const resetUrl = `${baseUrl}/reset-password/${token}`;
+        const hasMailConfig = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+        if (!hasMailConfig) {
+          if (process.env.NODE_ENV !== "production") {
+            console.log(`Password reset link for ${member.username}: ${resetUrl}`);
+            return res.render("forgot-password.handlebars", { message: "A development reset link was printed in the server terminal." });
+          }
+          return res.status(500).render("forgot-password.handlebars", { error: "Password reset email is not configured yet." });
+        }
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_SECURE === "true",
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: email,
+          subject: "Reset your English Labs password",
+          text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
+        }, (mailError) => {
+          if (mailError) return res.status(500).render("forgot-password.handlebars", { error: "Unable to send the reset email." });
+          res.render("forgot-password.handlebars", { message: genericMessage });
+        });
+      });
+    });
+  });
+});
+
+app.get("/reset-password/:token", (req, res) => {
+  const tokenHash = crypto.createHash("sha256").update(req.params.token).digest("hex");
+  db.get("SELECT id FROM password_resets WHERE token_hash = ? AND expires_at > ?", [tokenHash, Date.now()], (error, reset) => {
+    if (error || !reset) return res.status(400).render("reset-password.handlebars", { error: "This reset link is invalid or has expired." });
+    res.render("reset-password.handlebars", { token: req.params.token });
+  });
+});
+
+app.post("/reset-password/:token", (req, res) => {
+  const password = String(req.body.password || "");
+  const confirmPassword = String(req.body.confirmPassword || "");
+  if (password.length < 8 || password !== confirmPassword) {
+    return res.status(400).render("reset-password.handlebars", { token: req.params.token, error: "Use matching passwords with at least 8 characters." });
+  }
+  const tokenHash = crypto.createHash("sha256").update(req.params.token).digest("hex");
+  db.get("SELECT id, username FROM password_resets WHERE token_hash = ? AND expires_at > ?", [tokenHash, Date.now()], (lookupError, reset) => {
+    if (lookupError || !reset) return res.status(400).render("reset-password.handlebars", { error: "This reset link is invalid or has expired." });
+    bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
+      if (hashError) return res.status(500).render("reset-password.handlebars", { error: "Unable to reset your password." });
+      db.run("UPDATE members SET password_hash = ? WHERE username = ?", [passwordHash, reset.username], (updateError) => {
+        if (updateError) return res.status(500).render("reset-password.handlebars", { error: "Unable to reset your password." });
+        db.run("DELETE FROM password_resets WHERE id = ?", [reset.id]);
+        res.render("login.handlebars", { message: "Your password has been reset. You can now log in." });
+      });
+    });
+  });
 });
 
 app.post("/login", (req, res) => {
@@ -770,15 +1143,23 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/signup", (req, res) => {
-  const { username, password, confirmPassword, goal } = req.body;
+  const { fname, lname, username, email, password, confirmPassword, goal } = req.body;
+  const firstName = String(fname || "").trim();
+  const lastName = String(lname || "").trim();
+  const requestedUsername = String(username || "").trim();
+  const requestedEmail = String(email || "").trim().toLowerCase();
   if (
-    !username ||
+    !firstName ||
+    !lastName ||
+    !requestedUsername ||
+    !requestedEmail ||
+    !/^\S+@\S+\.\S+$/.test(requestedEmail) ||
     !password ||
     password !== confirmPassword ||
-    username === adminname
+    requestedUsername === adminname
   ) {
     return res.status(400).render("signup.handlebars", {
-      error: "Enter a unique username and matching passwords.",
+      error: "Enter your name, a valid email, a unique username, and matching passwords.",
     });
   }
   bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
@@ -787,8 +1168,8 @@ app.post("/signup", (req, res) => {
         .status(500)
         .render("signup.handlebars", { error: "Unable to create account." });
     db.run(
-      "INSERT INTO members (username, password_hash, role, goal) VALUES (?, ?, 'student', ?)",
-      [username, passwordHash, goal || ""],
+      "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
+      [requestedUsername, firstName, lastName, requestedEmail, passwordHash, goal || ""],
       function (insertError) {
         if (insertError)
           return res.status(400).render("signup.handlebars", {
@@ -796,9 +1177,9 @@ app.post("/signup", (req, res) => {
           });
         req.session.isLoggedIn = true;
         req.session.isAdmin = false;
-        req.session.name = username;
+        req.session.name = requestedUsername;
         req.session.avatar = "";
-        req.session.avatar_initial = username.charAt(0).toUpperCase();
+        req.session.avatar_initial = requestedUsername.charAt(0).toUpperCase();
         res.redirect("/profile");
       },
     );
@@ -808,6 +1189,11 @@ app.post("/signup", (req, res) => {
 function requireLogin(req, res, next) {
   if (!req.session.isLoggedIn || req.session.isAdmin)
     return res.redirect("/login");
+  next();
+}
+
+function requireAuthenticated(req, res, next) {
+  if (!req.session.isLoggedIn) return res.redirect("/login");
   next();
 }
 
@@ -894,8 +1280,136 @@ app.get("/profile", requireLogin, (req, res) => {
   );
 });
 
-app.get("/lobby", requireLogin, (req, res) => {
-  res.render("lobby.handlebars", { student: { username: req.session.name } });
+app.get("/lobby", requireAuthenticated, (req, res) => {
+  db.get(
+    "SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1",
+    (roomError, room) => {
+      if (roomError) return res.status(500).send("Unable to load lobby.");
+      const renderLobby = (questions = [], participant = null) =>
+        res.render("lobby.handlebars", {
+          student: { username: req.session.name },
+          isAdmin: Boolean(req.session.isAdmin),
+          room,
+          questions,
+          participant,
+          leaderboard: [],
+          currentQuestion: room ? questions.find((question) => question.question_order === room.current_question) : null,
+          isWaiting: room?.status === "waiting",
+          isRunning: room?.status === "running",
+        });
+      if (!room) return renderLobby();
+      db.all(
+        "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order",
+        [room.id],
+        (questionError, questions) => {
+          if (questionError) return res.status(500).send("Unable to load lobby questions.");
+          db.get(
+            "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
+            [room.id, req.session.name],
+            (participantError, participant) => participantError
+              ? res.status(500).send("Unable to load lobby participant.")
+              : renderLobby(questions, participant),
+          );
+        },
+      );
+    },
+  );
+});
+
+app.post("/lobby/rooms", requireAdmin, (req, res) => {
+  const title = String(req.body.title || "English Labs quiz").trim().slice(0, 100);
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  db.run("INSERT INTO lobby_rooms (code, title) VALUES (?, ?)", [code, title], (error) =>
+    error ? res.status(500).send("Unable to create room.") : res.redirect("/lobby"),
+  );
+});
+
+app.post("/lobby/quit", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  db.run("DELETE FROM lobby_participants WHERE room_id = ?", [roomId], (participantsError) => {
+    if (participantsError) return res.status(500).send("Unable to close room.");
+    db.run("DELETE FROM lobby_questions WHERE room_id = ?", [roomId], (questionsError) => {
+      if (questionsError) return res.status(500).send("Unable to close room.");
+      db.run("DELETE FROM lobby_rooms WHERE id = ?", [roomId], (roomError) =>
+        roomError ? res.status(500).send("Unable to close room.") : res.redirect("/lobby"),
+      );
+    });
+  });
+});
+
+app.post("/lobby/questions", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const answers = ["a", "b", "c", "d"].map((key) => String(req.body[`answer_${key}`] || "").trim());
+  const correctAnswer = String(req.body.correctAnswer || "").toLowerCase();
+  const questionText = String(req.body.questionText || "").trim();
+  if (!roomId || !questionText || answers.some((answer) => !answer) || !["a", "b", "c", "d"].includes(correctAnswer)) {
+    return res.status(400).redirect("/lobby");
+  }
+  db.get("SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_questions WHERE room_id = ?", [roomId], (orderError, result) => {
+    if (orderError) return res.status(500).send("Unable to add question.");
+    db.run(
+      "INSERT INTO lobby_questions (room_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [roomId, result.next_order, questionText, ...answers, correctAnswer],
+      (error) => error ? res.status(500).send("Unable to add question.") : res.redirect("/lobby"),
+    );
+  });
+});
+
+app.post("/lobby/join", requireLogin, (req, res) => {
+  const code = String(req.body.code || "").trim();
+  db.get("SELECT * FROM lobby_rooms WHERE code = ? AND status != 'finished'", [code], (error, room) => {
+    if (error || !room) return res.status(400).redirect("/lobby?error=code");
+    db.run("INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)", [room.id, req.session.name], () => res.redirect("/lobby"));
+  });
+});
+
+app.post("/lobby/start", requireAdmin, (req, res) => {
+  db.run("UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)", [Date.now(), Number(req.body.roomId), Number(req.body.roomId)], () => res.redirect("/lobby"));
+});
+
+app.post("/lobby/answer", requireLogin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const answer = String(req.body.answer || "").toLowerCase();
+  db.get("SELECT current_question FROM lobby_rooms WHERE id = ? AND status = 'running'", [roomId], (roomError, room) => {
+    if (roomError || !room) return res.status(400).json({ error: "Room is not running." });
+    db.get("SELECT correct_answer FROM lobby_questions WHERE room_id = ? AND question_order = ?", [roomId, room.current_question], (questionError, question) => {
+      if (questionError || !question || !["a", "b", "c", "d"].includes(answer)) return res.status(400).json({ error: "Invalid answer." });
+      const speedBonus = answer === question.correct_answer
+        ? Math.max(0, 50 - Math.floor((Date.now() - (room.question_started_at || Date.now())) / 1000) * 5)
+        : 0;
+      const points = answer === question.correct_answer ? 100 + speedBonus : 0;
+      db.run("UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL", [answer, points, roomId, req.session.name], function (updateError) {
+        if (updateError) return res.status(500).json({ error: "Unable to save answer." });
+        res.json({ correct: this.changes === 1 && points === 1, answered: this.changes === 1 });
+      });
+    });
+  });
+});
+
+app.post("/lobby/next", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  db.get("SELECT current_question FROM lobby_rooms WHERE id = ?", [roomId], (error, room) => {
+    if (error || !room) return res.redirect("/lobby");
+    db.get("SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?", [roomId], (countError, count) => {
+      const next = room.current_question + 1;
+      db.run("UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ? WHERE id = ?", [next, next > count.total ? "finished" : "running", next > count.total ? null : Date.now(), roomId], () => {
+        db.run("UPDATE lobby_participants SET answer = NULL WHERE room_id = ?", [roomId], () => res.redirect("/lobby"));
+      });
+    });
+  });
+});
+
+app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
+  db.get("SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1", (error, room) => {
+    if (error || !room) return res.json({ room: null });
+    db.get("SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?", [room.id, room.current_question], (questionError, question) => {
+      db.get("SELECT score, answer FROM lobby_participants WHERE room_id = ? AND username = ?", [room.id, req.session.name], (participantError, participant) => {
+        db.all("SELECT username, score FROM lobby_participants WHERE room_id = ? ORDER BY score DESC, username ASC", [room.id], (leaderboardError, leaderboard) => {
+          res.json({ room, question: questionError ? null : question, participant: participantError ? null : participant, leaderboard: leaderboardError ? [] : leaderboard });
+        });
+      });
+    });
+  });
 });
 
 app.post("/profile/goal", requireLogin, (req, res) => {
@@ -914,48 +1428,62 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
   let characterHash = submittedValue;
 
   try {
-    if (submittedValue.startsWith("http://") || submittedValue.startsWith("https://")) {
+    if (
+      submittedValue.startsWith("http://") ||
+      submittedValue.startsWith("https://")
+    ) {
       characterHash = new URL(submittedValue).hash.slice(1);
     }
   } catch (error) {
-    characterHash = "";
+    return res.status(400).json({ error: "invalid characterHash format" });
   }
 
-  if (characterHash.startsWith("#")) characterHash = characterHash.slice(1);
-
-  if (
-    !characterHash ||
-    characterHash.length > 2047 ||
-    !/^[\w=&%|.-]+$/.test(characterHash)
-  ) {
+  if (characterHash.length > 2047 || !/^[\w=&%|.-]+$/.test(characterHash)) {
     return res.status(400).json({ error: "invalid characterHash format" });
   }
 
   let characterLayers = [];
   if (Array.isArray(req.body.layers)) {
-    characterLayers = req.body.layers.filter(
-      (layer) =>
-        layer &&
-        typeof layer.spritePath === "string" &&
-        layer.spritePath.startsWith("spritesheets/") &&
-        Number.isFinite(Number(layer.zPos)) &&
-        Number.isFinite(Number(layer.yPos)),
-    ).map((layer) => ({
-      spritePath: layer.spritePath,
-      zPos: Number(layer.zPos),
-      yPos: Number(layer.yPos),
-      recolors: layer.recolors && typeof layer.recolors === "object"
-        ? Object.fromEntries(Object.entries(layer.recolors).filter(([, mapping]) =>
-            mapping && Array.isArray(mapping.source) && Array.isArray(mapping.target)
-            && mapping.source.length === mapping.target.length
-            && mapping.source.every((color) => typeof color === "string")
-            && mapping.target.every((color) => typeof color === "string"),
-          ).map(([type, mapping]) => [type, {
-            source: mapping.source,
-            target: mapping.target,
-          }]))
-        : {},
-    }));
+    characterLayers = req.body.layers
+      .filter(
+        (layer) =>
+          layer &&
+          typeof layer.spritePath === "string" &&
+          layer.spritePath.startsWith("spritesheets/") &&
+          Number.isFinite(Number(layer.zPos)) &&
+          Number.isFinite(Number(layer.yPos)),
+      )
+      .map((layer) => ({
+        spritePath: layer.spritePath,
+        zPos: Number(layer.zPos),
+        yPos: Number(layer.yPos),
+        recolors:
+          layer.recolors && typeof layer.recolors === "object"
+            ? Object.fromEntries(
+                Object.entries(layer.recolors)
+                  .filter(
+                    ([, mapping]) =>
+                      mapping &&
+                      Array.isArray(mapping.source) &&
+                      Array.isArray(mapping.target) &&
+                      mapping.source.length === mapping.target.length &&
+                      mapping.source.every(
+                        (color) => typeof color === "string",
+                      ) &&
+                      mapping.target.every(
+                        (color) => typeof color === "string",
+                      ),
+                  )
+                  .map(([type, mapping]) => [
+                    type,
+                    {
+                      source: mapping.source,
+                      target: mapping.target,
+                    },
+                  ]),
+              )
+            : {},
+      }));
   }
 
   db.run(
@@ -967,14 +1495,15 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
        updated_at = CURRENT_TIMESTAMP`,
     [req.session.name, characterHash, JSON.stringify(characterLayers)],
     (error) => {
-      if (error) return res.status(500).json({ error: "Unable to save character" });
+      if (error)
+        return res.status(500).json({ error: "Unable to save character" });
       res.json({ ok: true });
     },
   );
 });
 
-app.get("/api/profile/:userId/character", requireLogin, (req, res) => {
-  if (req.params.userId !== req.session.name) {
+app.get("/api/profile/:userId/character", requireAuthenticated, (req, res) => {
+  if (req.params.userId !== req.session.name && !req.session.isAdmin) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
@@ -982,10 +1511,16 @@ app.get("/api/profile/:userId/character", requireLogin, (req, res) => {
     "SELECT character_hash, character_layers FROM user_character WHERE user_id = ?",
     [req.params.userId],
     (error, character) => {
-      if (error) return res.status(500).json({ error: "Unable to load character" });
-      if (!character) return res.status(404).json({ error: "no character saved" });
+      if (error)
+        return res.status(500).json({ error: "Unable to load character" });
+      if (!character)
+        return res.status(404).json({ error: "no character saved" });
       let layers = [];
-      try { layers = JSON.parse(character.character_layers || "[]"); } catch (error) { layers = []; }
+      try {
+        layers = JSON.parse(character.character_layers || "[]");
+      } catch (error) {
+        layers = [];
+      }
       res.json({ characterHash: character.character_hash, layers });
     },
   );
@@ -1063,27 +1598,60 @@ app.post("/api/progress", requireLogin, (req, res) => {
   );
 });
 
+app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
+  const difficultyLevel = ["easy", "medium"].includes(req.body.difficultyLevel)
+    ? req.body.difficultyLevel
+    : null;
+  const words = Array.isArray(req.body.words)
+    ? req.body.words.map((word) => String(word).trim()).filter(Boolean).slice(0, 20)
+    : [];
+  if (!difficultyLevel || !words.length) return res.status(400).json({ error: "Invalid words." });
+
+  const statement = db.prepare(`
+    INSERT INTO vocabulary_difficult_words (username, difficulty_level, word)
+    VALUES (?, ?, ?)
+    ON CONFLICT(username, difficulty_level, word)
+    DO UPDATE SET attempts = attempts + 1, last_seen = CURRENT_TIMESTAMP
+  `);
+  words.forEach((word) => statement.run(req.session.name, difficultyLevel, word));
+  statement.finalize((error) =>
+    error
+      ? res.status(500).json({ error: "Unable to save difficult words." })
+      : res.json({ saved: words.length }),
+  );
+});
+
 app.get("/teacher/dashboard", requireAdmin, (req, res) => {
   db.all(
-    `SELECT members.username, members.goal,
+    `SELECT members.username, members.fname, members.lname, members.goal,
     COALESCE(SUM(progress.points), 0) AS points,
     COALESCE(SUM(progress.total_points), 0) AS possible_points,
     COUNT(progress.id) AS activities,
-    COALESCE(GROUP_CONCAT(DISTINCT progress.difficulty_level), '') AS levels
+    COALESCE(GROUP_CONCAT(DISTINCT progress.difficulty_level), '') AS levels,
+    COALESCE(SUM(CASE WHEN progress.difficulty_level = 'easy' THEN 1 ELSE 0 END), 0) AS easy_activities,
+    COALESCE(SUM(CASE WHEN progress.difficulty_level = 'medium' THEN 1 ELSE 0 END), 0) AS medium_activities
     FROM members LEFT JOIN progress ON progress.username = members.username
     WHERE members.role = 'student'
     GROUP BY members.username ORDER BY members.username`,
     (error, students) => {
       if (error)
         return res.status(500).send("Unable to load student progress.");
-      res.render("teacher.handlebars", { students });
+      res.render("teacher.handlebars", {
+        students: students.map((student) => ({
+          ...student,
+          levelBadges: [
+            { label: "Easy", stronger: student.easy_activities >= student.medium_activities },
+            { label: "Medium", stronger: student.medium_activities > student.easy_activities },
+          ],
+        })),
+      });
     },
   );
 });
 
 app.get("/teacher/student/:username", requireAdmin, (req, res) => {
   db.get(
-    "SELECT username, goal FROM members WHERE username = ? AND role = 'student'",
+    "SELECT username, fname, lname, goal FROM members WHERE username = ? AND role = 'student'",
     [req.params.username],
     (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
@@ -1108,13 +1676,42 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
               const rankedStats = [...preparedStats].sort(
                 (a, b) => b.average_score - a.average_score,
               );
-              res.render("teacher-student.handlebars", {
-                student,
-                progress,
-                activityStats: preparedStats,
-                bestActivity: rankedStats[0],
-                needsFocus: rankedStats[rankedStats.length - 1],
-              });
+              db.all(
+                "SELECT list_number, chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                [student.username],
+                (submissionsError, usefulChunkSubmissions) => {
+                  if (submissionsError)
+                    return res
+                      .status(500)
+                      .send("Unable to load useful chunk submissions.");
+                  db.all(
+                    "SELECT DISTINCT difficulty_level FROM progress WHERE username = ? AND activity_type = 'flip-cards' AND difficulty_level IN ('easy', 'medium') ORDER BY difficulty_level",
+                    [student.username],
+                    (levelsError, flipCompletions) => {
+                      if (levelsError)
+                        return res.status(500).send("Unable to load flip-card completions.");
+                      db.all(
+                        "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 6",
+                        [student.username],
+                        (wordsError, hardestWords) => {
+                          if (wordsError)
+                            return res.status(500).send("Unable to load difficult words.");
+                          res.render("teacher-student.handlebars", {
+                            student,
+                            progress,
+                            activityStats: preparedStats,
+                            bestActivity: rankedStats[0],
+                            needsFocus: rankedStats[rankedStats.length - 1],
+                            usefulChunkSubmissions,
+                            flipCompletions,
+                            hardestWords,
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+              );
             },
           );
         },

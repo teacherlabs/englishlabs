@@ -91,28 +91,6 @@
     });
   }
 
-  function drawWorld() {
-    const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#b8e1dc");
-    gradient.addColorStop(1, "#e7d8b1");
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#d5b981";
-    context.fillRect(0, 360, canvas.width, 180);
-    context.fillStyle = "#8cbd91";
-    [[90, 105, 170, 180], [710, 80, 180, 190], [350, 35, 230, 130]].forEach(([x, y, width, height]) => {
-      context.fillRect(x, y, width, height);
-    });
-    context.fillStyle = "#fff8df";
-    context.font = "bold 22px monospace";
-    context.fillText("ENGLISH LABS", 370, 95);
-    context.fillStyle = "#c48762";
-    context.fillRect(70, 265, 180, 10);
-    context.fillRect(710, 270, 180, 10);
-    context.fillStyle = "#f8e8bd";
-    context.fillRect(400, 360, 160, 180);
-  }
-
   function drawPlayer() {
     const frame = Math.floor(player.frame);
     const row = directionRows[player.direction];
@@ -138,17 +116,19 @@
     const delta = Math.min(50, now - lastTime);
     lastTime = now;
     update(delta);
-    drawWorld();
+    context.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayer();
     requestAnimationFrame(loop);
   }
 
   window.addEventListener("keydown", (event) => {
+    if (event.target.matches("input, textarea, select")) return;
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (movementKeys.has(key)) event.preventDefault();
     keys.add(key);
   });
   window.addEventListener("keyup", (event) => {
+    if (event.target.matches("input, textarea, select")) return;
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (movementKeys.has(key)) event.preventDefault();
     keys.delete(key);

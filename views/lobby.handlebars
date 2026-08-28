@@ -1,10 +1,63 @@
 <main class="lobby-page">
+  <section class="lobby-quiz-panel">
+    {{#if isAdmin}}
+      <div class="lobby-admin-tools">
+        <p class="eyebrow">Teacher control</p>
+        {{#unless room}}
+          <h1>Create a quiz room</h1>
+          <form class="lobby-form" action="/lobby/rooms" method="post"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><button class="practice-button" type="submit">Create room</button></form>
+        {{/unless}}
+        {{#if room}}
+          <h1>{{room.title}}</h1>
+          <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
+          <form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit room</button></form>
+          <h2>Questions</h2>
+          <ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{else}}<li>No questions yet.</li>{{/each}}</ol>
+          {{#if isWaiting}}
+            <form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>
+            {{#if questions}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/if}}
+          {{else}}
+            <p class="admin-live-note">The live question will appear in the lobby below.</p>
+          {{/if}}
+        {{/if}}
+      </div>
+    {{else}}
+      {{#unless participant}}<h1>Join a quiz</h1><form class="lobby-form" action="/lobby/join" method="post"><label for="room-code">Enter the 4-digit code</label><input id="room-code" name="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" /><button class="practice-button" type="submit">Join room</button></form>{{/unless}}
+      {{#if participant}}<p class="lobby-joined-note">You joined {{room.title}}. The quiz appears in the lobby below.</p>{{/if}}
+    {{/if}}
+  </section>
   <section class="lobby-shell">
-    <div class="lobby-stage-wrap">
+    {{#if isAdmin}}{{#if isRunning}}<div class="lobby-stage-wrap">{{/if}}{{else}}<div class="lobby-stage-wrap">{{/if}}
+      {{#if isAdmin}}{{#if isRunning}}<section class="admin-live-quiz"><p class="eyebrow">Live quiz</p><h2>Question {{room.current_question}}</h2>{{#if currentQuestion}}<p class="admin-live-question">{{currentQuestion.question_text}}</p><div class="admin-live-answers"><span><b>A</b>{{currentQuestion.answer_a}}</span><span><b>B</b>{{currentQuestion.answer_b}}</span><span><b>C</b>{{currentQuestion.answer_c}}</span><span><b>D</b>{{currentQuestion.answer_d}}</span></div>{{/if}}<form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="notes-button" type="submit">Next question</button></form></section>{{/if}}{{else}}{{#if participant}}<div class="student-live-layout"><section data-live-quiz data-room-id="{{room.id}}"><p class="eyebrow">{{room.title}}</p><h1 data-quiz-status>Waiting for the teacher...</h1><div class="live-question" data-live-question hidden><h2 data-question-text></h2><div class="live-answer-grid"><button type="button" data-answer="a"></button><button type="button" data-answer="b"></button><button type="button" data-answer="c"></button><button type="button" data-answer="d"></button></div><p data-answer-feedback></p></div><p>Your score: <strong data-live-score>{{participant.score}}</strong></p></section><aside class="lobby-leaderboard"><p class="eyebrow">Leaderboard</p><h2>Fastest players</h2><ol data-leaderboard><li>Waiting for answers...</li></ol></aside></div>{{/if}}{{/if}}
       <canvas id="lobby-canvas" data-user="{{student.username}}" width="960" height="540" aria-label="Playable English Labs practice plaza"></canvas>
       <div id="lobby-loading" class="lobby-loading">Loading your character...</div>
       <div class="lobby-hud"><span class="lobby-key">WASD</span><span>Move around the plaza</span><span id="lobby-position">Ready</span></div>
-    </div>
+    {{#if isAdmin}}{{#if isRunning}}</div>{{/if}}{{else}}</div>{{/if}}
   </section>
 </main>
 <script src="/js/lobby.js"></script>
+{{#unless isAdmin}}<script>
+  const liveQuiz = document.querySelector("[data-live-quiz]");
+  if (liveQuiz) {
+    const roomId = liveQuiz.dataset.roomId;
+    const status = liveQuiz.querySelector("[data-quiz-status]");
+    const questionBox = liveQuiz.querySelector("[data-live-question]");
+    const questionText = liveQuiz.querySelector("[data-question-text]");
+    const feedback = liveQuiz.querySelector("[data-answer-feedback]");
+    const score = liveQuiz.querySelector("[data-live-score]");
+    const leaderboard = liveQuiz.parentElement.querySelector("[data-leaderboard]");
+    let currentQuestion = 0;
+    const refresh = () => fetch("/api/lobby/state").then((response) => response.json()).then((state) => {
+      if (!state.room || state.room.id !== Number(roomId)) return;
+      score.textContent = state.participant?.score || 0;
+      leaderboard.innerHTML = state.leaderboard?.length
+        ? state.leaderboard.map((player, index) => `<li><span>${index + 1}. ${player.username}</span><strong>${player.score}</strong></li>`).join("")
+        : "<li>Waiting for answers...</li>";
+      if (state.room.status !== "running" || !state.question) { status.textContent = "Waiting for the teacher..."; questionBox.hidden = true; return; }
+      if (currentQuestion !== state.room.current_question) { currentQuestion = state.room.current_question; questionText.textContent = state.question.question_text; [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => { const button = questionBox.querySelector(`[data-answer="${key}"]`); button.textContent = state.question[field]; button.disabled = false; }); feedback.textContent = ""; }
+      status.textContent = `Question ${state.room.current_question}`; questionBox.hidden = false;
+    });
+    liveQuiz.querySelectorAll("[data-answer]").forEach((button) => button.addEventListener("click", () => { liveQuiz.querySelectorAll("[data-answer]").forEach((item) => item.disabled = true); fetch("/lobby/answer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, answer: button.dataset.answer }) }).then((response) => response.json()).then((result) => { feedback.textContent = result.correct ? "Correct!" : "Not quite."; refresh(); }); }));
+    refresh(); setInterval(refresh, 1500);
+  }
+</script>{{/unless}}

@@ -1,0 +1,45 @@
+<main class="vocabulary-page useful-chunks-guide-page">
+  <div class="vocabulary-workspace">
+    <aside class="practice-nav vocabulary-nav">
+      <p class="exercise-overview-title">Exercise overview</p>
+      <nav aria-label="Vocabulary exercises">
+        <a href="/vocabulary/flip-cards"><strong>Flip cards</strong></a>
+        <a href="/vocabulary/translation"><strong>Translation</strong></a>
+        <a href="/vocabulary/spelling"><strong>Write the word</strong></a>
+        <a href="/vocabulary/useful-chunks"><strong>Useful Chunks</strong></a>
+        <a class="active-exercise" href="/vocabulary/useful-chunks/guide"><strong>How to use them</strong></a>
+      </nav>
+    </aside>
+
+    <section class="vocabulary-content">
+      <div class="grammar-intro">
+        <p class="eyebrow">English Labs / Vocabulary</p>
+        <h1>How to use Useful Chunks</h1>
+        <p>See each phrase used in a discussion prompt, as in the compendium.</p>
+      </div>
+      <details class="chunk-list-picker">
+        <summary><span class="menu-icon" aria-hidden="true">&#9776;</span><strong>Choose a list</strong><span class="selected-list-label">List {{selectedList.number}} · {{selectedList.title}}</span></summary>
+        <nav class="chunk-list-menu" aria-label="Useful Chunk lists">
+          {{#each lists}}
+            <a class="chunk-list-link{{#if selected}} selected{{/if}}" href="/vocabulary/useful-chunks/guide?list={{number}}"><span>List {{number}}</span><strong>{{title}}</strong></a>
+          {{/each}}
+        </nav>
+      </details>
+      <div class="chunk-guide-list">
+        <section class="chunk-guide-card">
+            {{#with selectedList}}
+            <div class="chunk-panel-heading">
+              <div><p class="eyebrow">List {{number}}</p><h2>{{title}}</h2></div>
+              <a class="guide-practice-link" href="/vocabulary/useful-chunks?list={{number}}">Practise list</a>
+            </div>
+            <div class="chunk-example-grid">
+              {{#each chunks}}
+                <article class="chunk-example"><strong>{{phrase}}</strong><p>{{example}}</p></article>
+              {{/each}}
+            </div>
+            {{/with}}
+        </section>
+      </div>
+    </section>
+  </div>
+</main>

@@ -7,6 +7,7 @@
     "node": "20.x"
   },
   "scripts": {
+    "dev": "node --watch server.js",
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,6 +28,7 @@
     "express-sessions": "^1.0.6",
     "handlebars": "^4.7.8",
     "multer": "^2.2.0",
+    "nodemailer": "^9.0.6",
     "sqlite-express": "^4.0.0",
     "sqlite3": "^5.1.7"
   }
