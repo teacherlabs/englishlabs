@@ -2,7 +2,7 @@ services:
   - type: web
     name: englishlabs
     runtime: node
-    buildCommand: npm ci
+    buildCommand: rm -rf node_modules && npm ci
     startCommand: npm start
     envVars:
       - key: NODE_ENV
