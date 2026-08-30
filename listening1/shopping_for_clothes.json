@@ -1,0 +1,106 @@
+{
+  "topic": {
+    "id": "shopping-for-clothes",
+    "title": "Shopping for clothes",
+    "level": "A2 Pre-intermediate",
+    "category": "Shopping",
+    "description": "Listen to the conversation between a customer and a shop assistant and do the exercises to improve your listening skills."
+  },
+  "content": {
+    "contextPassage": {
+      "title": "In the clothes shop",
+      "summary": "A customer is trying on a T-shirt and asks about sizes, colours, and how to pay."
+    },
+    "vocabulary": [
+      "cash",
+      "checkout",
+      "credit card",
+      "changing rooms",
+      "receipt",
+      "T-shirt"
+    ],
+    "audio": {
+      "src": "",
+      "placeholderText": "Insert your audio file URL here"
+    }
+  },
+  "exercises": [
+    {
+      "type": "sports_grouping",
+      "activity": {
+        "id": "shop-assistant-or-customer",
+        "title": "Check your understanding: shop assistant or customer",
+        "instruction": "Drag each statement to the correct person (Shop assistant or Customer)."
+      },
+      "categories": [
+        {
+          "id": "shop_assistant",
+          "title": "Shop assistant",
+          "items": [
+            "Is it OK?",
+            "And in purple?",
+            "Would you like to pay with credit card or with cash?",
+            "Can I help you?",
+            "What size do you want?"
+          ]
+        },
+        {
+          "id": "customer",
+          "title": "Customer",
+          "items": [
+            "Yes, have you got this T-shirt in other colours?",
+            "Can I try it on?"
+          ]
+        }
+      ],
+      "allItems": [
+        "Is it OK?",
+        "And in purple?",
+        "Would you like to pay with credit card or with cash?",
+        "Can I help you?",
+        "Yes, have you got this T-shirt in other colours?",
+        "Can I try it on?",
+        "What size do you want?"
+      ]
+    },
+    {
+      "type": "gap_fill",
+      "instruction": "Answer the questions based on the conversation.",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "What size T-shirt does the customer want?",
+          "answer": "Medium"
+        },
+        {
+          "id": 2,
+          "sentence": "Does the shop have a medium size purple T-shirt?",
+          "answer": "No"
+        },
+        {
+          "id": 3,
+          "sentence": "What colour T-shirt does the customer try on?",
+          "answer": "Red"
+        },
+        {
+          "id": 4,
+          "sentence": "Does the customer buy the red T-shirt?",
+          "answer": "Yes"
+        },
+        {
+          "id": 5,
+          "sentence": "How much does it cost?",
+          "answer": "£10.95"
+        },
+        {
+          "id": 6,
+          "sentence": "Does the customer pay by credit card or with cash?",
+          "answer": "Credit card"
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "What was the last item of clothing you bought? Where and when did you buy it? Are you happy with it?"
+  }
+}

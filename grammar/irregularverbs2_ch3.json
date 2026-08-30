@@ -1,0 +1,156 @@
+{
+  "quizTitle": "Irregular Verbs Exercise Part 2 (Past Simple)",
+  "instructions": "Fill in the correct past simple form of the irregular verb in parentheses.",
+  "questions": [
+    {
+      "id": 1,
+      "sentence": "I _______ (come) to England in 1993.",
+      "baseVerb": "come",
+      "correctAnswer": "came"
+    },
+    {
+      "id": 2,
+      "sentence": "She _______ (stand) under a tree to shelter from the rain.",
+      "baseVerb": "stand",
+      "correctAnswer": "stood"
+    },
+    {
+      "id": 3,
+      "sentence": "They _______ (do) their homework yesterday.",
+      "baseVerb": "do",
+      "correctAnswer": "did"
+    },
+    {
+      "id": 4,
+      "sentence": "We _______ (sing) too much last night - I have a sore throat!",
+      "baseVerb": "sing",
+      "correctAnswer": "sang"
+    },
+    {
+      "id": 5,
+      "sentence": "He already _______ (eat) all the cake.",
+      "baseVerb": "eat",
+      "correctAnswer": "ate"
+    },
+    {
+      "id": 6,
+      "sentence": "The child _______ (fall) off his bicycle.",
+      "baseVerb": "fall",
+      "correctAnswer": "fell"
+    },
+    {
+      "id": 7,
+      "sentence": "It _______ (take) three hours to drive to Paris.",
+      "baseVerb": "take",
+      "correctAnswer": "took"
+    },
+    {
+      "id": 8,
+      "sentence": "I _______ (find) your keys under the table.",
+      "baseVerb": "find",
+      "correctAnswer": "found"
+    },
+    {
+      "id": 9,
+      "sentence": "She _______ (get) a new bike for her birthday.",
+      "baseVerb": "get",
+      "correctAnswer": "got"
+    },
+    {
+      "id": 10,
+      "sentence": "She _______ (sell) her house last year.",
+      "baseVerb": "sell",
+      "correctAnswer": "sold"
+    },
+    {
+      "id": 11,
+      "sentence": "We _______ (go) to New York in January.",
+      "baseVerb": "go",
+      "correctAnswer": "went"
+    },
+    {
+      "id": 12,
+      "sentence": "Finally my mother _______ (let) me go to a party.",
+      "baseVerb": "let",
+      "correctAnswer": "let"
+    },
+    {
+      "id": 13,
+      "sentence": "It _______ (be) cold last night.",
+      "baseVerb": "be",
+      "correctAnswer": "was"
+    },
+    {
+      "id": 14,
+      "sentence": "I _______ (meet) John at the weekend.",
+      "baseVerb": "meet",
+      "correctAnswer": "met"
+    },
+    {
+      "id": 15,
+      "sentence": "Lucy _______ (pay) the bill before leaving the restaurant.",
+      "baseVerb": "pay",
+      "correctAnswer": "paid"
+    },
+    {
+      "id": 16,
+      "sentence": "We _______ (see) the new film yesterday.",
+      "baseVerb": "see",
+      "correctAnswer": "saw"
+    },
+    {
+      "id": 17,
+      "sentence": "She _______ (wear) her new coat to the party.",
+      "baseVerb": "wear",
+      "correctAnswer": "wore"
+    },
+    {
+      "id": 18,
+      "sentence": "I _______ (think) my football team would win.",
+      "baseVerb": "think",
+      "correctAnswer": "thought"
+    },
+    {
+      "id": 19,
+      "sentence": "They _______ (put) their bags in the bedroom.",
+      "baseVerb": "put",
+      "correctAnswer": "put"
+    },
+    {
+      "id": 20,
+      "sentence": "Billy _______ (run) after the bus.",
+      "baseVerb": "run",
+      "correctAnswer": "ran"
+    },
+    {
+      "id": 21,
+      "sentence": "She _______ (say) that she would come later.",
+      "baseVerb": "say",
+      "correctAnswer": "said"
+    },
+    {
+      "id": 22,
+      "sentence": "I _______ (buy) some books this morning.",
+      "baseVerb": "buy",
+      "correctAnswer": "bought"
+    },
+    {
+      "id": 23,
+      "sentence": "We _______ (make) a cake - it was delicious.",
+      "baseVerb": "make",
+      "correctAnswer": "made"
+    },
+    {
+      "id": 24,
+      "sentence": "He _______ (sit) on the old chair and it broke.",
+      "baseVerb": "sit",
+      "correctAnswer": "sat"
+    },
+    {
+      "id": 25,
+      "sentence": "They _______ (write) a letter to their parents.",
+      "baseVerb": "write",
+      "correctAnswer": "wrote"
+    }
+  ]
+}

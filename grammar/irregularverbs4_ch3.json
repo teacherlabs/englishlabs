@@ -1,0 +1,156 @@
+{
+  "quizTitle": "Irregular Verbs Exercise Part 4 (Past Participles)",
+  "instructions": "Fill in the correct past participle form of the irregular verb in parentheses.",
+  "questions": [
+    {
+      "id": 1,
+      "sentence": "She has never _______ (let) her daughter have a boyfriend.",
+      "baseVerb": "let",
+      "correctAnswer": "let"
+    },
+    {
+      "id": 2,
+      "sentence": "Have you already _______ (read) today's newspaper?",
+      "baseVerb": "read",
+      "correctAnswer": "read"
+    },
+    {
+      "id": 3,
+      "sentence": "The house has been _______ (sell).",
+      "baseVerb": "sell",
+      "correctAnswer": "sold"
+    },
+    {
+      "id": 4,
+      "sentence": "He has _______ (lose) his wallet again.",
+      "baseVerb": "lose",
+      "correctAnswer": "lost"
+    },
+    {
+      "id": 5,
+      "sentence": "I have _______ (write) three essays this week.",
+      "baseVerb": "write",
+      "correctAnswer": "written"
+    },
+    {
+      "id": 6,
+      "sentence": "That clock was _______ (make) in Switzerland.",
+      "baseVerb": "make",
+      "correctAnswer": "made"
+    },
+    {
+      "id": 7,
+      "sentence": "He had _______ (run) 6 miles when he hurt his ankle.",
+      "baseVerb": "run",
+      "correctAnswer": "run"
+    },
+    {
+      "id": 8,
+      "sentence": "I have never _______ (see) such a beautiful view.",
+      "baseVerb": "see",
+      "correctAnswer": "seen"
+    },
+    {
+      "id": 9,
+      "sentence": "He has _______ (teach) hundreds of students during his career.",
+      "baseVerb": "teach",
+      "correctAnswer": "taught"
+    },
+    {
+      "id": 10,
+      "sentence": "Have you ever _______ (meet) a famous person?",
+      "baseVerb": "meet",
+      "correctAnswer": "met"
+    },
+    {
+      "id": 11,
+      "sentence": "Because she hadn't _______ (pay) the bill, the electricity went off.",
+      "baseVerb": "pay",
+      "correctAnswer": "paid"
+    },
+    {
+      "id": 12,
+      "sentence": "They have _______ (send) Christmas cards to all their friends.",
+      "baseVerb": "send",
+      "correctAnswer": "sent"
+    },
+    {
+      "id": 13,
+      "sentence": "Where have we _______ (put) the car keys?",
+      "baseVerb": "put",
+      "correctAnswer": "put"
+    },
+    {
+      "id": 14,
+      "sentence": "We have never _______ (sing) in public before.",
+      "baseVerb": "sing",
+      "correctAnswer": "sung"
+    },
+    {
+      "id": 15,
+      "sentence": "She had _______ (wear) her blue dress many times.",
+      "baseVerb": "wear",
+      "correctAnswer": "worn"
+    },
+    {
+      "id": 16,
+      "sentence": "John had never _______ (speak) English before he came to London.",
+      "baseVerb": "speak",
+      "correctAnswer": "spoken"
+    },
+    {
+      "id": 17,
+      "sentence": "Why have you _______ (stand) up - are we leaving?",
+      "baseVerb": "stand",
+      "correctAnswer": "stood"
+    },
+    {
+      "id": 18,
+      "sentence": "Have you ever _______ (swim) in the Atlantic Ocean?",
+      "baseVerb": "swim",
+      "correctAnswer": "swum"
+    },
+    {
+      "id": 19,
+      "sentence": "It had _______ (take) three hours to reach the station, so they had missed the train.",
+      "baseVerb": "take",
+      "correctAnswer": "taken"
+    },
+    {
+      "id": 20,
+      "sentence": "I have never _______ (say) that I didn't love you.",
+      "baseVerb": "say",
+      "correctAnswer": "said"
+    },
+    {
+      "id": 21,
+      "sentence": "David jumped into the air. He had _______ (sit) on a drawing pin.",
+      "baseVerb": "sit",
+      "correctAnswer": "sat"
+    },
+    {
+      "id": 22,
+      "sentence": "The weatherman had _______ (tell) us it would be sunny, but it rained all day.",
+      "baseVerb": "tell",
+      "correctAnswer": "told"
+    },
+    {
+      "id": 23,
+      "sentence": "I'm sorry I'm so tired. I haven't _______ (sleep).",
+      "baseVerb": "sleep",
+      "correctAnswer": "slept"
+    },
+    {
+      "id": 24,
+      "sentence": "Have you _______ (think) about changing jobs?",
+      "baseVerb": "think",
+      "correctAnswer": "thought"
+    },
+    {
+      "id": 25,
+      "sentence": "He'd thought he had _______ (understand) but now he realised he'd made a mistake.",
+      "baseVerb": "understand",
+      "correctAnswer": "understood"
+    }
+  ]
+}

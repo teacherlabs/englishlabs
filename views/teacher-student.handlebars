@@ -9,8 +9,9 @@
       <aside class="student-profile-nav" aria-label="Student profile sections">
         <p class="exercise-overview-title">Profile sections</p>
         <button class="student-section-link active" type="button" data-student-section="activity-section">Activity performance</button>
+        <button class="student-section-link" type="button" data-student-section="listening-section">Listening comprehension <span class="section-count">{{listeningCompletions.length}}</span></button>
         <button class="student-section-link" type="button" data-student-section="flip-section">Flip-card progress</button>
-        <button class="student-section-link" type="button" data-student-section="chunks-section">Useful Chunk sentences</button>
+        <button class="student-section-link" type="button" data-student-section="chunks-section">Useful Chunk sentences <span class="section-count">{{usefulChunkSubmissionCount}}</span></button>
       </aside>
 
       <div class="student-profile-sections">
@@ -28,6 +29,17 @@
           </div>
         </section>
 
+        <section class="student-profile-section" id="listening-section" data-student-panel hidden>
+          <h2>Listening comprehension</h2>
+          <div class="student-stats">
+            {{#each listeningCompletions}}
+              <article><strong>{{title}} - Exercise {{exerciseNumber}}</strong><b>{{points}} / {{total_points}}</b><span>{{percentage}}% · Completed {{completed_at}}</span></article>
+            {{else}}
+              <p class="empty-state">No completed listening exercises yet.</p>
+            {{/each}}
+          </div>
+        </section>
+
         <section class="student-profile-section" id="flip-section" data-student-panel hidden>
           <h2>Flip-card progress</h2>
           <div class="flip-levels"><span class="{{#if flipCompletions.[0]}}completed{{/if}}">Easy{{#if flipCompletions.[0]}} completed{{else}} not completed{{/if}}</span><span class="{{#if flipCompletions.[1]}}completed{{/if}}">Medium{{#if flipCompletions.[1]}} completed{{else}} not completed{{/if}}</span></div>
@@ -41,11 +53,19 @@
 
         <section class="student-profile-section" id="chunks-section" data-student-panel hidden>
           <h2>Useful Chunk sentences</h2>
-          {{#if usefulChunkSubmissions}}
-            <div class="useful-submissions">{{#each usefulChunkSubmissions}}<article class="useful-submission"><div><strong>List {{list_number}}</strong><span>{{chunk}}</span></div><p>{{sentence}}</p><small>{{submitted_at}}</small></article>{{/each}}</div>
-          {{else}}
-            <p class="empty-state">This student has not submitted any sentences yet.</p>
-          {{/if}}
+          <p class="student-section-summary">{{usefulChunkSubmissionCount}} saved sentence submissions</p>
+          <div class="admin-chunk-lists">
+            {{#each usefulChunkListsForAdmin}}
+              <details class="admin-chunk-list">
+                <summary><strong>List {{number}}</strong><span>{{submittedCount}} / {{totalCount}} completed</span></summary>
+                <div class="admin-chunk-statuses">
+                  {{#each chunks}}
+                    <article class="admin-chunk-status{{#if submitted}} submitted{{/if}}"><div><strong>{{chunk}}</strong><span>{{#if submitted}}Submitted{{else}}Not submitted{{/if}}</span></div>{{#if submitted}}<p>{{sentence}}</p><small>{{submitted_at}}</small>{{/if}}</article>
+                  {{/each}}
+                </div>
+              </details>
+            {{/each}}
+          </div>
         </section>
       </div>
     </div>

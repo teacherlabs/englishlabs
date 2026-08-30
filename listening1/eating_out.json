@@ -1,0 +1,140 @@
+{
+  "topic": {
+    "id": "eating-out",
+    "title": "Eating out",
+    "level": "A2 Pre-intermediate",
+    "category": "Food & Life Skills",
+    "description": "Read the menu for The Boat Restaurant to answer reading comprehension questions about opening hours, prices, and food categories."
+  },
+  "content": {
+    "restaurantInfo": {
+      "name": "The Boat Restaurant",
+      "rating": 4.0,
+      "totalReviews": 489,
+      "hours": {
+        "lunch": "12:30 – 2:30 p.m.",
+        "dinner": "6:00 – 9:00 p.m."
+      }
+    },
+    "readingPassage": {
+      "title": "Menu",
+      "sections": [
+        {
+          "category": "Starters",
+          "note": "All starters are served with bread and butter",
+          "items": [
+            { "name": "Tomato soup", "price": "£2.00" },
+            { "name": "French onion soup", "price": "£2.50" },
+            { "name": "Tomato salad", "price": "£2.90" },
+            { "name": "Chicken Salad", "price": "£3.30" }
+          ]
+        },
+        {
+          "category": "Snacks (lunchtime only)",
+          "note": "All snacks are served with salad and chips",
+          "items": [
+            { "name": "Cheese omelette", "price": "£3.50" },
+            { "name": "Vegetable omelette", "price": "£3.25" },
+            { "name": "Cheese & tomato sandwich", "price": "£3.25" },
+            { "name": "Burger", "price": "£2.90" },
+            { "name": "Cheese burger", "price": "£3.20" },
+            { "name": "Chicken sandwich", "price": "£3.50" }
+          ]
+        },
+        {
+          "category": "Main courses",
+          "items": [
+            { "name": "German sausage and chips", "price": "£6.50" },
+            { "name": "Grilled fish and potatoes", "price": "£6.25" },
+            { "name": "Italian cheese & tomato pizza", "price": "£4.85" },
+            { "name": "Thai chicken and rice", "price": "£5.95" },
+            { "name": "Vegetable pasta", "price": "£4.85" },
+            { "name": "Roast chicken and potatoes", "price": "£5.95" }
+          ]
+        },
+        {
+          "category": "Desserts",
+          "items": [
+            { "name": "Fruit salad and cream", "price": "£2.25" },
+            { "name": "Ice cream (chocolate, coffee or lemon)", "price": "£2.00" },
+            { "name": "Lemon cake", "price": "£2.25" },
+            { "name": "Chocolate cake", "price": "£2.25" },
+            { "name": "Cheese and biscuits", "price": "£2.50" }
+          ]
+        },
+        {
+          "category": "Drinks",
+          "items": [
+            { "name": "Mineral water", "price": "£1.00" },
+            { "name": "Fresh orange juice", "price": "£1.25" },
+            { "name": "Soft drinks", "price": "£1.30" },
+            { "name": "English tea", "price": "£0.90" },
+            { "name": "Irish cream coffee", "price": "£0.90" }
+          ]
+        }
+      ]
+    }
+  },
+  "exercises": [
+    {
+      "type": "true_or_false",
+      "instruction": "Read the menu and decide if the statements are True or False.",
+      "questions": [
+        {
+          "id": 1,
+          "statement": "Lunch is served until 3:00 p.m.",
+          "correctAnswer": false
+        },
+        {
+          "id": 2,
+          "statement": "All starters come with bread and butter.",
+          "correctAnswer": true
+        },
+        {
+          "id": 3,
+          "statement": "You can order snacks during dinner hours.",
+          "correctAnswer": false
+        },
+        {
+          "id": 4,
+          "statement": "German sausage and chips is the most expensive main course.",
+          "correctAnswer": true
+        },
+        {
+          "id": 5,
+          "statement": "English tea costs £1.25.",
+          "correctAnswer": false
+        }
+      ]
+    },
+    {
+      "type": "gap_fill",
+      "instruction": "Fill in the missing details using the menu.",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "Dinner starts being served at ________ p.m.",
+          "answer": "6:00"
+        },
+        {
+          "id": 2,
+          "sentence": "All lunchtime snacks are served with salad and ________.",
+          "answer": "chips"
+        },
+        {
+          "id": 3,
+          "sentence": "The price of tomato soup is £________.",
+          "answer": "2.00"
+        },
+        {
+          "id": 4,
+          "sentence": "You can choose from chocolate, coffee, or ________ ice cream.",
+          "answer": "lemon"
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "What food and drink from this menu would you order?"
+  }
+}

@@ -23,6 +23,415 @@ const nodemailer = require("nodemailer");
 // PORT
 //----------
 const port = Number(process.env.PORT || 8090);
+const practiceQuestionChapters = [
+  {
+    id: "1",
+    chapterNumber: 1,
+    ...JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "grammar", "Indefinite_articles_ch1.json"),
+        "utf8",
+      ),
+    ),
+  },
+  {
+    id: "2",
+    chapterNumber: 2,
+    unit: "Articles: A, An & The",
+    exercises: [
+      (() => {
+        const articleQuiz = JSON.parse(
+          fs.readFileSync(
+            path.join(__dirname, "grammar", "articles_ch2.json"),
+            "utf8",
+          ),
+        );
+        return {
+          id: "ex1",
+          title: articleQuiz.quizTitle,
+          type: "multiple-choice",
+          questions: articleQuiz.questions
+            .filter((question) => question.correctAnswer !== "-")
+            .map((question) => ({
+              id: question.id,
+              sentence: question.question,
+              options: question.options.filter((option) => option !== "-"),
+              answer: question.correctAnswer,
+              explanation: "Choose the correct article to fill the gap.",
+            })),
+        };
+      })(),
+    ],
+  },
+  {
+    id: "3",
+    chapterNumber: 3,
+    unit: "Irregular Verbs",
+    exercises: [
+      (() => {
+        const irregularVerbQuiz = JSON.parse(
+          fs.readFileSync(
+            path.join(__dirname, "grammar", "irregular_verbs_ch3.json"),
+            "utf8",
+          ),
+        );
+        return {
+          id: "ex1",
+          title: irregularVerbQuiz.quizTitle,
+          type: "write-answer",
+          instructions: irregularVerbQuiz.instructions,
+          questions: irregularVerbQuiz.questions.map((question) => ({
+            id: question.id,
+            sentence: question.sentence,
+            answer: question.correctAnswer,
+            explanation: `The past simple form of “${question.baseVerb}” is “${question.correctAnswer}”.`,
+          })),
+        };
+      })(),
+      (() => {
+        const irregularVerbQuiz = JSON.parse(
+          fs.readFileSync(
+            path.join(__dirname, "grammar", "irregularverbs2_ch3.json"),
+            "utf8",
+          ),
+        );
+        return {
+          id: "ex2",
+          title: irregularVerbQuiz.quizTitle,
+          type: "write-answer",
+          instructions: irregularVerbQuiz.instructions,
+          questions: irregularVerbQuiz.questions.map((question) => ({
+            id: question.id,
+            sentence: question.sentence,
+            answer: question.correctAnswer,
+            explanation: `The past simple form of “${question.baseVerb}” is “${question.correctAnswer}”.`,
+          })),
+        };
+      })(),
+      (() => {
+        const irregularVerbQuiz = JSON.parse(
+          fs.readFileSync(
+            path.join(__dirname, "grammar", "irregularverbs3_ch3.json"),
+            "utf8",
+          ),
+        );
+        return {
+          id: "ex3",
+          title: irregularVerbQuiz.quizTitle,
+          type: "write-answer",
+          instructions: irregularVerbQuiz.instructions,
+          questions: irregularVerbQuiz.questions.map((question) => ({
+            id: question.id,
+            sentence: question.sentence,
+            answer: question.correctAnswer,
+            explanation: `The correct past participle of “${question.baseVerb}” is “${question.correctAnswer}”.`,
+          })),
+        };
+      })(),
+      (() => {
+        const irregularVerbQuiz = JSON.parse(
+          fs.readFileSync(
+            path.join(__dirname, "grammar", "irregularverbs4_ch3.json"),
+            "utf8",
+          ),
+        );
+        return {
+          id: "ex4",
+          title: irregularVerbQuiz.quizTitle,
+          type: "write-answer",
+          instructions: irregularVerbQuiz.instructions,
+          questions: irregularVerbQuiz.questions.map((question) => ({
+            id: question.id,
+            sentence: question.sentence,
+            answer: question.correctAnswer,
+            explanation: `The correct past participle of “${question.baseVerb}” is “${question.correctAnswer}”.`,
+          })),
+        };
+      })(),
+    ],
+  },
+];
+const readingTopics = [
+  (() => {
+    const reading = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "listening1", "eating_out.json"),
+        "utf8",
+      ),
+    );
+    return {
+      ...reading,
+      listeningLevel: "1",
+      audioUrl: "/audio/eating-out",
+      exercises: reading.exercises.map((exercise, index) => ({
+        ...exercise,
+        id: `exercise-${index + 1}`,
+        number: index + 1,
+        isTrueOrFalse: exercise.type === "true_or_false",
+        questions: exercise.questions.map((question, questionIndex) => ({
+          ...question,
+          number: questionIndex + 1,
+          answer: String(question.correctAnswer ?? question.answer),
+        })),
+      })),
+    };
+  })(),
+  (() => {
+    const listening = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "listening1", "Free_time.json"),
+        "utf8",
+      ),
+    );
+    return {
+      ...listening,
+      listeningLevel: "1",
+      audioUrl: "/audio/free-time",
+      exercises: listening.exercises.map((exercise, index) => ({
+        ...exercise,
+        id: `exercise-${index + 1}`,
+        number: index + 1,
+        isSportsGrouping: exercise.type === "sports_grouping",
+        isTrueOrFalse: exercise.type === "true_or_false",
+        questions: (exercise.questions || []).map(
+          (question, questionIndex) => ({
+            ...question,
+            number: questionIndex + 1,
+            answer: String(question.correctAnswer ?? question.answer),
+          }),
+        ),
+      })),
+    };
+  })(),
+  (() => {
+    const listening = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "listening1", "giving_directions.json"),
+        "utf8",
+      ),
+    );
+    return {
+      ...listening,
+      listeningLevel: "1",
+      audioUrl: "/audio/giving-directions",
+      exercises: listening.exercises.map((exercise, index) => ({
+        ...exercise,
+        id: `exercise-${index + 1}`,
+        number: index + 1,
+        isTrueOrFalse: exercise.type === "true_or_false",
+        questions: exercise.questions.map((question, questionIndex) => ({
+          ...question,
+          number: questionIndex + 1,
+          sentence: question.sentence || question.question,
+          answer: String(question.correctAnswer ?? question.answer),
+        })),
+      })),
+    };
+  })(),
+  (() => {
+    const listening = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "listening1", "going_tothecinema.json"),
+        "utf8",
+      ),
+    );
+    return {
+      ...listening,
+      listeningLevel: "1",
+      audioUrl: "/audio/going-cinema",
+      exercises: listening.exercises.map((exercise, index) => ({
+        ...exercise,
+        id: `exercise-${index + 1}`,
+        number: index + 1,
+        isTrueOrFalse: exercise.type === "true_or_false",
+        questions: exercise.questions.map((question, questionIndex) => ({
+          ...question,
+          number: questionIndex + 1,
+          sentence: question.sentence || question.question,
+          answer: String(question.correctAnswer ?? question.answer),
+        })),
+      })),
+    };
+  })(),
+  (() => {
+    const listening = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "listening1", "shopping_for_clothes.json"),
+        "utf8",
+      ),
+    );
+    return {
+      ...listening,
+      listeningLevel: "1",
+      audioUrl: "/audio/shopping-clothes",
+      exercises: listening.exercises.map((exercise, index) => ({
+        ...exercise,
+        id: `exercise-${index + 1}`,
+        number: index + 1,
+        isSportsGrouping: exercise.type === "sports_grouping",
+        isTrueOrFalse: exercise.type === "true_or_false",
+        questions: (exercise.questions || []).map(
+          (question, questionIndex) => ({
+            ...question,
+            number: questionIndex + 1,
+            answer: String(question.correctAnswer ?? question.answer),
+          }),
+        ),
+      })),
+    };
+  })(),
+];
+
+const shuffleArray = (items) => {
+  const array = [...items];
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
+const audioUrlByTopicId = {
+  "advice-exams": "/audio/advice-exams",
+  "amazing-facts": "/audio/amazing-facts",
+  celebrations: "/audio/celebrations",
+  "difficult-situations": "/audio/difficult-situations",
+  "favourite-things": "/audio/favourite-things",
+  "important-people": "/audio/important-people",
+  llamas: "/audio/llamas",
+  "my-favourite-film": "/audio/my-favourite-film",
+  "organising-your-time": "/audio/organising-your-time",
+  "sports-centres": "/audio/sports-centres",
+  "the-weekend": "/audio/the-weekend",
+  "theme-parks": "/audio/theme-parks",
+  "stop-wasting-time": "/audio/stop-wasting-time",
+  "taking-notes": "/audio/taking-notes",
+  "tour-of-london": "/audio/tour-of-london",
+  "trains-and-travel": "/audio/trains-and-travel",
+  "travelling-abroad": "/audio/travelling-abroad",
+  "using-colours-to-do-homework": "/audio/using-colours-to-do-homework",
+  "weather-forecast": "/audio/weather-forecast",
+  work: "/audio/work",
+};
+
+const matchingPairTypes = ["matching_definitions", "phrase_matching", "matching_synonyms"];
+
+const buildTopicExercise = (exercise, index) => {
+  const base = { ...exercise, id: `exercise-${index + 1}`, number: index + 1 };
+  if (matchingPairTypes.includes(exercise.type)) {
+    const categories = exercise.pairs.map((pair, pairIndex) => ({
+      id: `match-${pairIndex + 1}`,
+      title: pair.word ?? pair.start ?? pair.verb ?? pair.phrase,
+      items: [pair.definition ?? pair.end ?? pair.noun ?? pair.meaning],
+    }));
+    return {
+      ...base,
+      isSportsGrouping: true,
+      activity: { title: exercise.title, instruction: exercise.instruction },
+      categories,
+      allItems: shuffleArray(categories.map((category) => category.items[0])),
+    };
+  }
+  if (exercise.type === "drag_and_drop") {
+    return {
+      ...base,
+      isSportsGrouping: true,
+      activity: { title: exercise.title, instruction: exercise.instruction },
+      categories: exercise.categories,
+      allItems: exercise.allItems,
+    };
+  }
+  if (exercise.type === "ordering_stages") {
+    const categories = exercise.stages.map((stage) => ({
+      id: `step-${stage.order}`,
+      title: `Step ${stage.order}`,
+      items: [stage.text],
+    }));
+    return {
+      ...base,
+      isSportsGrouping: true,
+      activity: { title: exercise.title, instruction: exercise.instruction },
+      categories,
+      allItems: shuffleArray(categories.map((category) => category.items[0])),
+    };
+  }
+  if (exercise.type === "unscramble_sentences") {
+    return {
+      ...base,
+      questions: exercise.sentences.map((sentence, sentenceIndex) => ({
+        id: sentence.id,
+        number: sentenceIndex + 1,
+        sentence: shuffleArray(sentence.targetSentence.split(" ")).join(" / "),
+        answer: sentence.targetSentence,
+      })),
+    };
+  }
+  if (exercise.type === "multiple_choice") {
+    return {
+      ...base,
+      isMultipleChoice: true,
+      questions: exercise.questions.map((question, questionIndex) => ({
+        ...question,
+        number: questionIndex + 1,
+        answer: String(question.correctAnswer ?? question.answer),
+      })),
+    };
+  }
+  if (exercise.type === "speaker_matching") {
+    return {
+      ...base,
+      questions: exercise.questions.map((question, questionIndex) => ({
+        ...question,
+        number: questionIndex + 1,
+        sentence: question.speaker,
+        answer: String(question.correctAnswer ?? question.answer),
+      })),
+    };
+  }
+  return {
+    ...base,
+    isTrueOrFalse: exercise.type === "true_or_false",
+    questions: (exercise.questions || []).map((question, questionIndex) => ({
+      ...question,
+      number: questionIndex + 1,
+      answer: String(question.correctAnswer ?? question.answer),
+    })),
+  };
+};
+
+const level2Topics = [
+  ...JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "listening2", "listeningtopics.json"),
+      "utf8",
+    ),
+  ),
+  ...JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "listening2", "listeningtopics2.json"),
+      "utf8",
+    ),
+  ),
+].map((entry) => ({
+  ...entry,
+  listeningLevel: "2",
+  audioUrl: audioUrlByTopicId[entry.topic.id] || "",
+  exercises: entry.exercises.map(buildTopicExercise),
+}));
+readingTopics.push(...level2Topics);
+
+const level1ExtraTopics = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "listening1", "listeningtopicslevel1.json"),
+    "utf8",
+  ),
+).map((entry) => ({
+  ...entry,
+  listeningLevel: "1",
+  audioUrl: audioUrlByTopicId[entry.topic.id] || "",
+  exercises: entry.exercises.map(buildTopicExercise),
+}));
+readingTopics.push(...level1ExtraTopics);
 
 //----------
 // APPLICATION
@@ -80,49 +489,77 @@ function usefulChunkExample(chunk) {
     "as strong as": "Who in your life is as strong as a superhero, and why?",
     "be able to": "Who is able to do something impressive, and what is it?",
     "be a bit": "When might someone say, ‘Aren’t you a bit too old for that?’",
-    "be a pain": "Studying for exams can sometimes be a pain. What might make it easier?",
+    "be a pain":
+      "Studying for exams can sometimes be a pain. What might make it easier?",
     "these days": "Do people still repair things these days? Why or why not?",
     "be ready for": "What is something you are ready for, and why?",
-    "would you get": "Would you get excited, scared, or curious if you saw an alien? Why?",
-    "flesh and blood": "Would you replace any of your flesh and blood body parts with bionic ones? Why?",
-    "like the idea of": "Do you like the idea of replacing human teachers with AI robots? Why or why not?",
-    "a lack of": "What happens when there is a lack of skilled players in a sport?",
-    "on one's own": "Describe a time when you handled a difficult task on your own.",
-    "twice as": "How would you feel if your trip took twice as long as expected?",
+    "would you get":
+      "Would you get excited, scared, or curious if you saw an alien? Why?",
+    "flesh and blood":
+      "Would you replace any of your flesh and blood body parts with bionic ones? Why?",
+    "like the idea of":
+      "Do you like the idea of replacing human teachers with AI robots? Why or why not?",
+    "a lack of":
+      "What happens when there is a lack of skilled players in a sport?",
+    "on one's own":
+      "Describe a time when you handled a difficult task on your own.",
+    "twice as":
+      "How would you feel if your trip took twice as long as expected?",
     "ahead of one's time": "In what way was Greta Thunberg ahead of her time?",
     "later in life": "What do people appreciate more later in life, and why?",
     "come up with": "Who came up with an idea or invention you admire?",
-    "as simple as": "How can learning a new skill be made as simple as possible?",
-    "as a means of": "How can mobile phones be used as a means of learning outside class?",
-    "carry out": "What project or task would you like to carry out in the future?",
+    "as simple as":
+      "How can learning a new skill be made as simple as possible?",
+    "as a means of":
+      "How can mobile phones be used as a means of learning outside class?",
+    "carry out":
+      "What project or task would you like to carry out in the future?",
     "set up": "How would you set up a new club at school?",
     "break down": "Have you had a bike or gadget break down at the worst time?",
     "be successful": "What does being successful mean to you?",
     "feel at ease": "What can teachers do to help a new student feel at ease?",
-    "spill the beans": "If you know a secret, do you sometimes spill the beans? Why?",
+    "spill the beans":
+      "If you know a secret, do you sometimes spill the beans? Why?",
     "take up": "What new hobby or sport would you like to take up, and why?",
-    "go both ways": "Where does trust need to go both ways for a relationship to work?",
+    "go both ways":
+      "Where does trust need to go both ways for a relationship to work?",
     "go along with": "When is it better to go along with someone’s idea?",
     "give in": "Is it ever a good idea to give in during an argument?",
-    "bring up": "What topics are hardest to bring up with your parents or teachers?",
+    "bring up":
+      "What topics are hardest to bring up with your parents or teachers?",
     "hang out": "Where do you usually hang out with your closest friends?",
     "make fun of": "How do you feel when someone makes fun of you?",
     "reach out to": "Who have you reached out to for support?",
     "take a deep breath": "When has taking a deep breath helped you stay calm?",
-    "be targeted": "Student Prompt: Write your own discussion question using this phrase.",
-    "live on": "Student Prompt: Write your own discussion question using this phrase.",
-    "pet an animal": "Student Prompt: Write your own discussion question using this phrase.",
-    "kick in": "Student Prompt: Write your own discussion question using this phrase.",
-    "turn to": "Student Prompt: Write your own discussion question using this phrase.",
-    "take matters into one's hands": "Student Prompt: Write your own discussion question using this phrase.",
-    "a few exceptions": "Student Prompt: Write your own discussion question using this phrase.",
-    "a smooth ride": "Student Prompt: Write your own discussion question using this phrase.",
-    "if only": "Student Prompt: Write your own discussion question using this phrase.",
-    "leave someone be": "Student Prompt: Write your own discussion question using this phrase.",
-    "the next generation": "Student Prompt: Write your own discussion question using this phrase.",
-    "be brave enough to": "Student Prompt: Write your own discussion question using this phrase.",
+    "be targeted":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "live on":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "pet an animal":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "kick in":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "turn to":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "take matters into one's hands":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "a few exceptions":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "a smooth ride":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "if only":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "leave someone be":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "the next generation":
+      "Student Prompt: Write your own discussion question using this phrase.",
+    "be brave enough to":
+      "Student Prompt: Write your own discussion question using this phrase.",
   };
-  return examples[chunk] || `What personal experience could you describe using “${chunk}”?`;
+  return (
+    examples[chunk] ||
+    `What personal experience could you describe using “${chunk}”?`
+  );
 }
 
 const usefulChunkLists = [
@@ -284,6 +721,84 @@ app.use(
   "/uploads/profiles",
   express.static(path.join(dataDir, "uploads", "profiles")),
 );
+app.get("/audio/eating-out", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_eating_out.mp3"));
+});
+app.get("/audio/free-time", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_free_time.mp3"));
+});
+app.get("/audio/giving-directions", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_giving_directions.mp3"));
+});
+app.get("/audio/going-cinema", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_going_to-the_cinema.mp3"));
+});
+app.get("/audio/shopping-clothes", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_shopping_for_clothes.mp3"));
+});
+app.get("/audio/advice-exams", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_Advice_for_exams.mp3"));
+});
+app.get("/audio/amazing-facts", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_amazing_facts.mp3"));
+});
+app.get("/audio/celebrations", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_celebrations.mp3"));
+});
+app.get("/audio/difficult-situations", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_difficult_situations.mp3"));
+});
+app.get("/audio/favourite-things", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_favourite_things.mp3"));
+});
+app.get("/audio/important-people", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_important_people.mp3"));
+});
+app.get("/audio/llamas", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_llamas.mp3"));
+});
+app.get("/audio/my-favourite-film", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_my_favourite_film.mp3"));
+});
+app.get("/audio/organising-your-time", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_Organising_your_time.mp3"));
+});
+app.get("/audio/sports-centres", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1-sports_centres.mp3"));
+});
+app.get("/audio/the-weekend", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_the_weekend.mp3"));
+});
+app.get("/audio/theme-parks", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio2", "B1_theme_parks.mp3"));
+});
+app.get("/audio/stop-wasting-time", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_Stop_wasting_time.mp3"));
+});
+app.get("/audio/taking-notes", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_Taking_notes.mp3"));
+});
+app.get("/audio/tour-of-london", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_tour_of_london.mp3"));
+});
+app.get("/audio/trains-and-travel", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_trains_and_travel.mp3"));
+});
+app.get("/audio/travelling-abroad", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_travelling_abroad.mp3"));
+});
+app.get("/audio/using-colours-to-do-homework", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "audio1", "A2_Using_colours_to_do_homework.mp3"),
+  );
+});
+app.get("/audio/weather-forecast", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_weather_forecast.mp3"));
+});
+app.get("/audio/work", (req, res) => {
+  res.sendFile(path.join(__dirname, "audio1", "A2_work.mp3"));
+});
+
 
 db.serialize(() => {
   db.run("ALTER TABLE members ADD COLUMN password_hash TEXT", () => {});
@@ -413,7 +928,10 @@ db.serialize(() => {
     UNIQUE (room_id, username),
     FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
   )`);
-  db.run("ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER", () => {});
+  db.run(
+    "ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER",
+    () => {},
+  );
 });
 
 //------------
@@ -430,50 +948,7 @@ app.get("/", (req, res) => {
   if (!req.session.isLoggedIn) {
     return res.render("auth.handlebars");
   }
-
-  grammarDb.all(
-    `SELECT chapters.*, COUNT(grammar_topics.id) AS topic_count
-     FROM chapters
-     LEFT JOIN grammar_topics ON grammar_topics.chapter_id = chapters.id
-     GROUP BY chapters.id
-     ORDER BY chapters.chapter_number`,
-    (error, chapters) => {
-      if (error) {
-        console.log("ERROR loading grammar chapters: ", error);
-        return res.status(500).send("Unable to load grammar content.");
-      }
-
-      grammarDb.all(
-        `SELECT chapter_id, topic_code, title, explanation, example_sentence, cefr_level
-         FROM grammar_topics
-         ORDER BY chapter_id, topic_code`,
-        (topicsError, topics) => {
-          if (topicsError) {
-            console.log("ERROR loading grammar topics: ", topicsError);
-            return res.status(500).send("Unable to load grammar content.");
-          }
-
-          const topicsByChapter = topics.reduce((groups, topic) => {
-            if (!groups[topic.chapter_id]) groups[topic.chapter_id] = [];
-            groups[topic.chapter_id].push(topic);
-            return groups;
-          }, {});
-
-          const model = {
-            isLoggedIn: req.session.isLoggedIn,
-            name: req.session.name,
-            isAdmin: req.session.isAdmin,
-            chapters: chapters.map((chapter) => ({
-              ...chapter,
-              topics: topicsByChapter[chapter.id] || [],
-            })),
-          };
-
-          res.render("home.handlebars", model);
-        },
-      );
-    },
-  );
+  res.redirect("/practice/questions?chapter=1");
 });
 
 app.get("/vocabulary", requireAuthenticated, (req, res) => {
@@ -486,7 +961,34 @@ app.get("/vocabulary", requireAuthenticated, (req, res) => {
   );
 });
 
-app.get("/vocabulary/useful-chunks", requireLogin, (req, res) => {
+app.get("/listening", requireAuthenticated, (req, res) => {
+  const selectedLevel = req.query.level === "2" ? "2" : "1";
+  const selectedTopic =
+    readingTopics.find(
+      (topic) =>
+        topic.topic.id === req.query.topic &&
+        topic.listeningLevel === selectedLevel,
+    ) || readingTopics.find((topic) => topic.listeningLevel === selectedLevel);
+  res.render("listening.handlebars", {
+    listeningLevels: ["1", "2"].map((level) => ({
+      number: level,
+      selected: level === selectedLevel,
+      topics: readingTopics
+        .filter((topic) => topic.listeningLevel === level)
+        .map((topic) => ({
+          ...topic.topic,
+          selected: topic.topic.id === selectedTopic?.topic.id,
+        })),
+    })),
+    topic: selectedTopic?.topic,
+    content: selectedTopic?.content,
+    audioUrl: selectedTopic?.audioUrl,
+    exercises: selectedTopic?.exercises,
+    discussion: selectedTopic?.discussion,
+  });
+});
+
+app.get("/vocabulary/useful-chunks", requireAuthenticated, (req, res) => {
   const selectedNumber = Math.min(
     usefulChunkLists.length,
     Math.max(1, Number(req.query.list) || 1),
@@ -510,16 +1012,19 @@ app.get("/vocabulary/useful-chunks", requireLogin, (req, res) => {
   );
 });
 
-app.get("/vocabulary/useful-chunks/guide", requireLogin, (req, res) => {
+app.get("/vocabulary/useful-chunks/guide", requireAuthenticated, (req, res) => {
   const selectedNumber = Math.min(
     usefulChunkLists.length,
     Math.max(1, Number(req.query.list) || 1),
   );
   const guideLists = usefulChunkLists.map((list) => ({
-      ...list,
-      selected: list.number === selectedNumber,
-      chunks: list.chunks.map((chunk) => ({ phrase: chunk, example: usefulChunkExample(chunk) })),
-    }));
+    ...list,
+    selected: list.number === selectedNumber,
+    chunks: list.chunks.map((chunk) => ({
+      phrase: chunk,
+      example: usefulChunkExample(chunk),
+    })),
+  }));
   res.render("useful-chunks-guide.handlebars", {
     lists: guideLists,
     selectedList: guideLists[selectedNumber - 1],
@@ -651,201 +1156,55 @@ app.get("/grammar/chapter/:id", requireAuthenticated, (req, res) => {
 });
 
 app.get("/practice/questions", requireAuthenticated, (req, res) => {
-  const chapterFilter = req.query.chapter ? "WHERE chapters.id = ?" : "";
-  const params = req.query.chapter ? [req.query.chapter] : [];
-  grammarDb.all(
-    "SELECT id, chapter_number, title, description, cefr_level FROM chapters ORDER BY chapter_number",
-    (chaptersError, chapters) => {
-      if (chaptersError)
-        return res.status(500).send("Unable to load chapters.");
-
-      if (!req.query.chapter) {
-        return res.render("practice.handlebars", {
-          mode: "questions",
-          pageTitle: "Practise Questions",
-          pageIntro: "Choose a chapter to begin practising.",
-          chapterId: "",
-          chapters: chapters.map((chapter) => ({
-            ...chapter,
-            selected: false,
-          })),
-        });
-      }
-
-      grammarDb.all(
-        `SELECT quiz_questions.*, chapters.id AS chapter_id, chapters.title AS chapter_title
-         FROM quiz_questions
-         JOIN grammar_topics ON quiz_questions.topic_id = grammar_topics.id
-         JOIN chapters ON grammar_topics.chapter_id = chapters.id
-         ${chapterFilter}
-         ORDER BY chapters.chapter_number, quiz_questions.id`,
-        params,
-        (error, questions) => {
-          if (error)
-            return res.status(500).send("Unable to load practice questions.");
-          const questionsByChapter = questions.reduce((groups, question) => {
-            if (!groups[question.chapter_id]) groups[question.chapter_id] = [];
-            groups[question.chapter_id].push(question);
-            return groups;
-          }, {});
-          const requestedChapter = req.query.chapter
-            ? Number(req.query.chapter)
-            : null;
-          const chaptersWithoutQuestions = chapters.filter(
-            (chapter) => !questionsByChapter[chapter.id],
-          );
-          const grammarFallbacks = {
-            1: {
-              question_text:
-                "Which word is an adjective in this sentence: 'The bright student smiled.'",
-              option_a: "bright",
-              option_b: "student",
-              option_c: "smiled",
-              option_d: "the",
-              correct_option: "a",
-              explanation:
-                "'Bright' describes the noun 'student', so it is an adjective.",
-            },
-            2: {
-              question_text:
-                "Which part is the subject in 'The young teacher explained the lesson'?",
-              option_a: "explained",
-              option_b: "the lesson",
-              option_c: "The young teacher",
-              option_d: "young",
-              correct_option: "c",
-              explanation:
-                "The subject is who performs the action. 'The young teacher' performs the action 'explained'.",
-            },
-            3: {
-              question_text: "Which sentence contains an infinitive phrase?",
-              option_a: "She runs quickly.",
-              option_b: "To learn English takes practice.",
-              option_c: "The blue book is here.",
-              option_d: "We arrived yesterday.",
-              correct_option: "b",
-              explanation:
-                "'To learn English' is an infinitive phrase because it begins with 'to' plus the verb 'learn'.",
-            },
-            4: {
-              question_text:
-                "Which word correctly completes the adjective clause: 'The book ____ I borrowed is excellent.'?",
-              option_a: "where",
-              option_b: "that",
-              option_c: "when",
-              option_d: "why",
-              correct_option: "b",
-              explanation:
-                "'That' introduces an adjective clause modifying the noun 'book'.",
-            },
-            5: {
-              question_text:
-                "Which of the following sentences is a compound sentence?",
-              option_a:
-                "The sun set behind the mountains, and the temperature dropped rapidly.",
-              option_b: "The wind howled loudly through the dark night.",
-              option_c:
-                "Although she was tired, she finished her homework before bedtime.",
-              option_d:
-                "Walking down the quiet street, he listened to the rustling leaves.",
-              correct_option: "a",
-              explanation:
-                "A compound sentence contains two independent clauses joined by a coordinating conjunction such as 'and'.",
-            },
-            6: {
-              question_text:
-                "Which pronoun correctly completes the sentence: 'Sarah gave the note to Mark and ____.'?",
-              option_a: "I",
-              option_b: "me",
-              option_c: "myself",
-              option_d: "mine",
-              correct_option: "b",
-              explanation:
-                "'Me' is correct because it is the object of the preposition 'to'.",
-            },
-            7: {
-              question_text: "Which sentence uses the past perfect correctly?",
-              option_a: "She had left before I arrived.",
-              option_b: "She has left yesterday.",
-              option_c: "She leave before I arrived.",
-              option_d: "She leaving before I arrived.",
-              correct_option: "a",
-              explanation:
-                "Past perfect uses 'had' plus a past participle for an earlier past action: 'had left'.",
-            },
-            8: {
-              question_text:
-                "Which sentence uses commas correctly in a series?",
-              option_a: "We bought apples bananas and milk.",
-              option_b: "We bought apples, bananas, and milk.",
-              option_c: "We bought, apples bananas, and milk.",
-              option_d: "We bought apples bananas, and milk.",
-              correct_option: "b",
-              explanation:
-                "Commas separate each item in a series: apples, bananas, and milk.",
-            },
-            9: {
-              question_text: "Which sentence uses a semicolon correctly?",
-              option_a: "I was tired; I went to bed.",
-              option_b: "I was; tired I went to bed.",
-              option_c: "I was tired I; went to bed.",
-              option_d: "I; was tired, I went to bed.",
-              correct_option: "a",
-              explanation:
-                "A semicolon can join two closely related independent clauses.",
-            },
-            10: {
-              question_text: "Which sentence uses capitalization correctly?",
-              option_a: "My friend lives in sweden.",
-              option_b: "My friend lives in Sweden.",
-              option_c: "my friend lives in Sweden.",
-              option_d: "My Friend lives in Sweden.",
-              correct_option: "b",
-              explanation:
-                "'Sweden' is a proper noun and must begin with a capital letter.",
-            },
-            11: {
-              question_text:
-                "Which sentence has correct subject-verb agreement?",
-              option_a: "The list of names are long.",
-              option_b: "The list of names is long.",
-              option_c: "The list of names be long.",
-              option_d: "The list of names were long.",
-              correct_option: "b",
-              explanation:
-                "The subject is singular 'list', so it takes the singular verb 'is'.",
-            },
-            12: {
-              question_text:
-                "Which word correctly completes the sentence: 'The new rule will ____ how students study.'?",
-              option_a: "effect",
-              option_b: "affect",
-              option_c: "except",
-              option_d: "advice",
-              correct_option: "b",
-              explanation:
-                "'Affect' is usually a verb meaning to influence; 'effect' is usually a noun meaning a result.",
-            },
-          };
-          const availableQuestions = questions;
-          res.render("practice.handlebars", {
-            mode: "questions",
-            pageTitle: "Practise Questions",
-            pageIntro: "Test one grammar area at a time and build your score.",
-            chapterId: req.query.chapter || "",
-            questions: availableQuestions.map((question, index) => ({
-              ...question,
-              question_number: index + 1,
-            })),
-            chapters: chapters.map((chapter) => ({
-              ...chapter,
-              selected: String(chapter.id) === String(req.query.chapter),
-            })),
-          });
-        },
-      );
-    },
+  const selectedChapter = practiceQuestionChapters.find(
+    (chapter) => chapter.id === String(req.query.chapter || ""),
   );
+  const requestedExercise = selectedChapter?.exercises.find(
+    (exercise) => exercise.id === req.query.exercise,
+  );
+  const selectedExercise = requestedExercise && {
+    ...requestedExercise,
+    isFillInBlanks: requestedExercise.type === "fill-in-the-blanks",
+    isWrittenAnswer: requestedExercise.type === "write-answer",
+    totalQuestions:
+      requestedExercise.items?.length ||
+      requestedExercise.questions?.length ||
+      0,
+    items: requestedExercise.items?.map((item, index) => ({
+      ...item,
+      questionNumber: index + 1,
+    })),
+    questions: requestedExercise.questions?.map((question, index) => ({
+      ...question,
+      questionNumber: index + 1,
+    })),
+    paragraphs: requestedExercise.paragraphs?.map((paragraph) => ({
+      ...paragraph,
+      parts: paragraph.text
+        .split(/(\{\{blank\d+\}\})/)
+        .filter(Boolean)
+        .map((part) => {
+          const blankId = part.match(/^\{\{(blank\d+)\}\}$/)?.[1];
+          return blankId
+            ? { isBlank: true, ...paragraph.blanks[blankId] }
+            : { text: part };
+        }),
+    })),
+  };
+
+  res.render("practice-questions.handlebars", {
+    pageTitle: "Chapters",
+    chapters: practiceQuestionChapters.map((chapter) => ({
+      ...chapter,
+      selected: chapter.id === selectedChapter?.id,
+      exercises: chapter.exercises.map((exercise) => ({
+        ...exercise,
+        selected: exercise.id === selectedExercise?.id,
+      })),
+    })),
+    selectedChapter,
+    selectedExercise,
+  });
 });
 
 app.get("/practice/sentence-fixer", requireAuthenticated, (req, res) => {
@@ -993,74 +1352,156 @@ app.get("/forgot-password", (req, res) => {
 });
 
 app.post("/forgot-password", (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase();
-  const genericMessage = "If an account uses that email, a reset link has been sent.";
-  if (!email) return res.status(400).render("forgot-password.handlebars", { error: "Enter your email address." });
-
-  db.get("SELECT username FROM members WHERE LOWER(email) = ?", [email], (lookupError, member) => {
-    if (lookupError || !member) return res.render("forgot-password.handlebars", { message: genericMessage });
-    const token = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    const expiresAt = Date.now() + 60 * 60 * 1000;
-    db.run("DELETE FROM password_resets WHERE username = ?", [member.username], () => {
-      db.run("INSERT INTO password_resets (username, token_hash, expires_at) VALUES (?, ?, ?)", [member.username, tokenHash, expiresAt], (insertError) => {
-        if (insertError) return res.status(500).render("forgot-password.handlebars", { error: "Unable to create a reset link." });
-        const baseUrl = process.env.APP_URL || `http://localhost:${port}`;
-        const resetUrl = `${baseUrl}/reset-password/${token}`;
-        const hasMailConfig = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
-        if (!hasMailConfig) {
-          if (process.env.NODE_ENV !== "production") {
-            console.log(`Password reset link for ${member.username}: ${resetUrl}`);
-            return res.render("forgot-password.handlebars", { message: "A development reset link was printed in the server terminal." });
-          }
-          return res.status(500).render("forgot-password.handlebars", { error: "Password reset email is not configured yet." });
-        }
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT || 587),
-          secure: process.env.SMTP_SECURE === "true",
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        transporter.sendMail({
-          from: process.env.SMTP_FROM || process.env.SMTP_USER,
-          to: email,
-          subject: "Reset your English Labs password",
-          text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
-        }, (mailError) => {
-          if (mailError) return res.status(500).render("forgot-password.handlebars", { error: "Unable to send the reset email." });
-          res.render("forgot-password.handlebars", { message: genericMessage });
-        });
-      });
+  const email = String(req.body.email || "")
+    .trim()
+    .toLowerCase();
+  const genericMessage =
+    "If an account uses that email, a reset link has been sent.";
+  if (!email)
+    return res.status(400).render("forgot-password.handlebars", {
+      error: "Enter your email address.",
     });
-  });
+
+  db.get(
+    "SELECT username FROM members WHERE LOWER(email) = ?",
+    [email],
+    (lookupError, member) => {
+      if (lookupError || !member)
+        return res.render("forgot-password.handlebars", {
+          message: genericMessage,
+        });
+      const token = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const expiresAt = Date.now() + 60 * 60 * 1000;
+      db.run(
+        "DELETE FROM password_resets WHERE username = ?",
+        [member.username],
+        () => {
+          db.run(
+            "INSERT INTO password_resets (username, token_hash, expires_at) VALUES (?, ?, ?)",
+            [member.username, tokenHash, expiresAt],
+            (insertError) => {
+              if (insertError)
+                return res.status(500).render("forgot-password.handlebars", {
+                  error: "Unable to create a reset link.",
+                });
+              const baseUrl = process.env.APP_URL || `http://localhost:${port}`;
+              const resetUrl = `${baseUrl}/reset-password/${token}`;
+              const hasMailConfig =
+                process.env.SMTP_HOST &&
+                process.env.SMTP_USER &&
+                process.env.SMTP_PASS;
+              if (!hasMailConfig) {
+                if (process.env.NODE_ENV !== "production") {
+                  console.log(
+                    `Password reset link for ${member.username}: ${resetUrl}`,
+                  );
+                  return res.render("forgot-password.handlebars", {
+                    message:
+                      "A development reset link was printed in the server terminal.",
+                  });
+                }
+                return res.status(500).render("forgot-password.handlebars", {
+                  error: "Password reset email is not configured yet.",
+                });
+              }
+              const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT || 587),
+                secure: process.env.SMTP_SECURE === "true",
+                auth: {
+                  user: process.env.SMTP_USER,
+                  pass: process.env.SMTP_PASS,
+                },
+              });
+              transporter.sendMail(
+                {
+                  from: process.env.SMTP_FROM || process.env.SMTP_USER,
+                  to: email,
+                  subject: "Reset your English Labs password",
+                  text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
+                },
+                (mailError) => {
+                  if (mailError)
+                    return res
+                      .status(500)
+                      .render("forgot-password.handlebars", {
+                        error: "Unable to send the reset email.",
+                      });
+                  res.render("forgot-password.handlebars", {
+                    message: genericMessage,
+                  });
+                },
+              );
+            },
+          );
+        },
+      );
+    },
+  );
 });
 
 app.get("/reset-password/:token", (req, res) => {
-  const tokenHash = crypto.createHash("sha256").update(req.params.token).digest("hex");
-  db.get("SELECT id FROM password_resets WHERE token_hash = ? AND expires_at > ?", [tokenHash, Date.now()], (error, reset) => {
-    if (error || !reset) return res.status(400).render("reset-password.handlebars", { error: "This reset link is invalid or has expired." });
-    res.render("reset-password.handlebars", { token: req.params.token });
-  });
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  db.get(
+    "SELECT id FROM password_resets WHERE token_hash = ? AND expires_at > ?",
+    [tokenHash, Date.now()],
+    (error, reset) => {
+      if (error || !reset)
+        return res.status(400).render("reset-password.handlebars", {
+          error: "This reset link is invalid or has expired.",
+        });
+      res.render("reset-password.handlebars", { token: req.params.token });
+    },
+  );
 });
 
 app.post("/reset-password/:token", (req, res) => {
   const password = String(req.body.password || "");
   const confirmPassword = String(req.body.confirmPassword || "");
   if (password.length < 8 || password !== confirmPassword) {
-    return res.status(400).render("reset-password.handlebars", { token: req.params.token, error: "Use matching passwords with at least 8 characters." });
-  }
-  const tokenHash = crypto.createHash("sha256").update(req.params.token).digest("hex");
-  db.get("SELECT id, username FROM password_resets WHERE token_hash = ? AND expires_at > ?", [tokenHash, Date.now()], (lookupError, reset) => {
-    if (lookupError || !reset) return res.status(400).render("reset-password.handlebars", { error: "This reset link is invalid or has expired." });
-    bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
-      if (hashError) return res.status(500).render("reset-password.handlebars", { error: "Unable to reset your password." });
-      db.run("UPDATE members SET password_hash = ? WHERE username = ?", [passwordHash, reset.username], (updateError) => {
-        if (updateError) return res.status(500).render("reset-password.handlebars", { error: "Unable to reset your password." });
-        db.run("DELETE FROM password_resets WHERE id = ?", [reset.id]);
-        res.render("login.handlebars", { message: "Your password has been reset. You can now log in." });
-      });
+    return res.status(400).render("reset-password.handlebars", {
+      token: req.params.token,
+      error: "Use matching passwords with at least 8 characters.",
     });
-  });
+  }
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  db.get(
+    "SELECT id, username FROM password_resets WHERE token_hash = ? AND expires_at > ?",
+    [tokenHash, Date.now()],
+    (lookupError, reset) => {
+      if (lookupError || !reset)
+        return res.status(400).render("reset-password.handlebars", {
+          error: "This reset link is invalid or has expired.",
+        });
+      bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
+        if (hashError)
+          return res.status(500).render("reset-password.handlebars", {
+            error: "Unable to reset your password.",
+          });
+        db.run(
+          "UPDATE members SET password_hash = ? WHERE username = ?",
+          [passwordHash, reset.username],
+          (updateError) => {
+            if (updateError)
+              return res.status(500).render("reset-password.handlebars", {
+                error: "Unable to reset your password.",
+              });
+            db.run("DELETE FROM password_resets WHERE id = ?", [reset.id]);
+            res.render("login.handlebars", {
+              message: "Your password has been reset. You can now log in.",
+            });
+          },
+        );
+      });
+    },
+  );
 });
 
 app.post("/login", (req, res) => {
@@ -1143,11 +1584,14 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/signup", (req, res) => {
-  const { fname, lname, username, email, password, confirmPassword, goal } = req.body;
+  const { fname, lname, username, email, password, confirmPassword, goal } =
+    req.body;
   const firstName = String(fname || "").trim();
   const lastName = String(lname || "").trim();
   const requestedUsername = String(username || "").trim();
-  const requestedEmail = String(email || "").trim().toLowerCase();
+  const requestedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
   if (
     !firstName ||
     !lastName ||
@@ -1159,7 +1603,8 @@ app.post("/signup", (req, res) => {
     requestedUsername === adminname
   ) {
     return res.status(400).render("signup.handlebars", {
-      error: "Enter your name, a valid email, a unique username, and matching passwords.",
+      error:
+        "Enter your name, a valid email, a unique username, and matching passwords.",
     });
   }
   bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
@@ -1169,7 +1614,14 @@ app.post("/signup", (req, res) => {
         .render("signup.handlebars", { error: "Unable to create account." });
     db.run(
       "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
-      [requestedUsername, firstName, lastName, requestedEmail, passwordHash, goal || ""],
+      [
+        requestedUsername,
+        firstName,
+        lastName,
+        requestedEmail,
+        passwordHash,
+        goal || "",
+      ],
       function (insertError) {
         if (insertError)
           return res.status(400).render("signup.handlebars", {
@@ -1293,7 +1745,11 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           questions,
           participant,
           leaderboard: [],
-          currentQuestion: room ? questions.find((question) => question.question_order === room.current_question) : null,
+          currentQuestion: room
+            ? questions.find(
+                (question) => question.question_order === room.current_question,
+              )
+            : null,
           isWaiting: room?.status === "waiting",
           isRunning: room?.status === "running",
         });
@@ -1302,13 +1758,15 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order",
         [room.id],
         (questionError, questions) => {
-          if (questionError) return res.status(500).send("Unable to load lobby questions.");
+          if (questionError)
+            return res.status(500).send("Unable to load lobby questions.");
           db.get(
             "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
             [room.id, req.session.name],
-            (participantError, participant) => participantError
-              ? res.status(500).send("Unable to load lobby participant.")
-              : renderLobby(questions, participant),
+            (participantError, participant) =>
+              participantError
+                ? res.status(500).send("Unable to load lobby participant.")
+                : renderLobby(questions, participant),
           );
         },
       );
@@ -1317,99 +1775,222 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
 });
 
 app.post("/lobby/rooms", requireAdmin, (req, res) => {
-  const title = String(req.body.title || "English Labs quiz").trim().slice(0, 100);
+  const title = String(req.body.title || "English Labs quiz")
+    .trim()
+    .slice(0, 100);
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  db.run("INSERT INTO lobby_rooms (code, title) VALUES (?, ?)", [code, title], (error) =>
-    error ? res.status(500).send("Unable to create room.") : res.redirect("/lobby"),
+  db.run(
+    "INSERT INTO lobby_rooms (code, title) VALUES (?, ?)",
+    [code, title],
+    (error) =>
+      error
+        ? res.status(500).send("Unable to create room.")
+        : res.redirect("/lobby"),
   );
 });
 
 app.post("/lobby/quit", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
-  db.run("DELETE FROM lobby_participants WHERE room_id = ?", [roomId], (participantsError) => {
-    if (participantsError) return res.status(500).send("Unable to close room.");
-    db.run("DELETE FROM lobby_questions WHERE room_id = ?", [roomId], (questionsError) => {
-      if (questionsError) return res.status(500).send("Unable to close room.");
-      db.run("DELETE FROM lobby_rooms WHERE id = ?", [roomId], (roomError) =>
-        roomError ? res.status(500).send("Unable to close room.") : res.redirect("/lobby"),
+  db.run(
+    "DELETE FROM lobby_participants WHERE room_id = ?",
+    [roomId],
+    (participantsError) => {
+      if (participantsError)
+        return res.status(500).send("Unable to close room.");
+      db.run(
+        "DELETE FROM lobby_questions WHERE room_id = ?",
+        [roomId],
+        (questionsError) => {
+          if (questionsError)
+            return res.status(500).send("Unable to close room.");
+          db.run(
+            "DELETE FROM lobby_rooms WHERE id = ?",
+            [roomId],
+            (roomError) =>
+              roomError
+                ? res.status(500).send("Unable to close room.")
+                : res.redirect("/lobby"),
+          );
+        },
       );
-    });
-  });
+    },
+  );
 });
 
 app.post("/lobby/questions", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
-  const answers = ["a", "b", "c", "d"].map((key) => String(req.body[`answer_${key}`] || "").trim());
+  const answers = ["a", "b", "c", "d"].map((key) =>
+    String(req.body[`answer_${key}`] || "").trim(),
+  );
   const correctAnswer = String(req.body.correctAnswer || "").toLowerCase();
   const questionText = String(req.body.questionText || "").trim();
-  if (!roomId || !questionText || answers.some((answer) => !answer) || !["a", "b", "c", "d"].includes(correctAnswer)) {
+  if (
+    !roomId ||
+    !questionText ||
+    answers.some((answer) => !answer) ||
+    !["a", "b", "c", "d"].includes(correctAnswer)
+  ) {
     return res.status(400).redirect("/lobby");
   }
-  db.get("SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_questions WHERE room_id = ?", [roomId], (orderError, result) => {
-    if (orderError) return res.status(500).send("Unable to add question.");
-    db.run(
-      "INSERT INTO lobby_questions (room_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [roomId, result.next_order, questionText, ...answers, correctAnswer],
-      (error) => error ? res.status(500).send("Unable to add question.") : res.redirect("/lobby"),
-    );
-  });
+  db.get(
+    "SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_questions WHERE room_id = ?",
+    [roomId],
+    (orderError, result) => {
+      if (orderError) return res.status(500).send("Unable to add question.");
+      db.run(
+        "INSERT INTO lobby_questions (room_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [roomId, result.next_order, questionText, ...answers, correctAnswer],
+        (error) =>
+          error
+            ? res.status(500).send("Unable to add question.")
+            : res.redirect("/lobby"),
+      );
+    },
+  );
 });
 
 app.post("/lobby/join", requireLogin, (req, res) => {
   const code = String(req.body.code || "").trim();
-  db.get("SELECT * FROM lobby_rooms WHERE code = ? AND status != 'finished'", [code], (error, room) => {
-    if (error || !room) return res.status(400).redirect("/lobby?error=code");
-    db.run("INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)", [room.id, req.session.name], () => res.redirect("/lobby"));
-  });
+  db.get(
+    "SELECT * FROM lobby_rooms WHERE code = ? AND status != 'finished'",
+    [code],
+    (error, room) => {
+      if (error || !room) return res.status(400).redirect("/lobby?error=code");
+      db.run(
+        "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
+        [room.id, req.session.name],
+        () => res.redirect("/lobby"),
+      );
+    },
+  );
 });
 
 app.post("/lobby/start", requireAdmin, (req, res) => {
-  db.run("UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)", [Date.now(), Number(req.body.roomId), Number(req.body.roomId)], () => res.redirect("/lobby"));
+  db.run(
+    "UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)",
+    [Date.now(), Number(req.body.roomId), Number(req.body.roomId)],
+    () => res.redirect("/lobby"),
+  );
 });
 
 app.post("/lobby/answer", requireLogin, (req, res) => {
   const roomId = Number(req.body.roomId);
   const answer = String(req.body.answer || "").toLowerCase();
-  db.get("SELECT current_question FROM lobby_rooms WHERE id = ? AND status = 'running'", [roomId], (roomError, room) => {
-    if (roomError || !room) return res.status(400).json({ error: "Room is not running." });
-    db.get("SELECT correct_answer FROM lobby_questions WHERE room_id = ? AND question_order = ?", [roomId, room.current_question], (questionError, question) => {
-      if (questionError || !question || !["a", "b", "c", "d"].includes(answer)) return res.status(400).json({ error: "Invalid answer." });
-      const speedBonus = answer === question.correct_answer
-        ? Math.max(0, 50 - Math.floor((Date.now() - (room.question_started_at || Date.now())) / 1000) * 5)
-        : 0;
-      const points = answer === question.correct_answer ? 100 + speedBonus : 0;
-      db.run("UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL", [answer, points, roomId, req.session.name], function (updateError) {
-        if (updateError) return res.status(500).json({ error: "Unable to save answer." });
-        res.json({ correct: this.changes === 1 && points === 1, answered: this.changes === 1 });
-      });
-    });
-  });
+  db.get(
+    "SELECT current_question FROM lobby_rooms WHERE id = ? AND status = 'running'",
+    [roomId],
+    (roomError, room) => {
+      if (roomError || !room)
+        return res.status(400).json({ error: "Room is not running." });
+      db.get(
+        "SELECT correct_answer FROM lobby_questions WHERE room_id = ? AND question_order = ?",
+        [roomId, room.current_question],
+        (questionError, question) => {
+          if (
+            questionError ||
+            !question ||
+            !["a", "b", "c", "d"].includes(answer)
+          )
+            return res.status(400).json({ error: "Invalid answer." });
+          const speedBonus =
+            answer === question.correct_answer
+              ? Math.max(
+                  0,
+                  50 -
+                    Math.floor(
+                      (Date.now() - (room.question_started_at || Date.now())) /
+                        1000,
+                    ) *
+                      5,
+                )
+              : 0;
+          const points =
+            answer === question.correct_answer ? 100 + speedBonus : 0;
+          db.run(
+            "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
+            [answer, points, roomId, req.session.name],
+            function (updateError) {
+              if (updateError)
+                return res
+                  .status(500)
+                  .json({ error: "Unable to save answer." });
+              res.json({
+                correct: this.changes === 1 && points === 1,
+                answered: this.changes === 1,
+              });
+            },
+          );
+        },
+      );
+    },
+  );
 });
 
 app.post("/lobby/next", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
-  db.get("SELECT current_question FROM lobby_rooms WHERE id = ?", [roomId], (error, room) => {
-    if (error || !room) return res.redirect("/lobby");
-    db.get("SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?", [roomId], (countError, count) => {
-      const next = room.current_question + 1;
-      db.run("UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ? WHERE id = ?", [next, next > count.total ? "finished" : "running", next > count.total ? null : Date.now(), roomId], () => {
-        db.run("UPDATE lobby_participants SET answer = NULL WHERE room_id = ?", [roomId], () => res.redirect("/lobby"));
-      });
-    });
-  });
+  db.get(
+    "SELECT current_question FROM lobby_rooms WHERE id = ?",
+    [roomId],
+    (error, room) => {
+      if (error || !room) return res.redirect("/lobby");
+      db.get(
+        "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?",
+        [roomId],
+        (countError, count) => {
+          const next = room.current_question + 1;
+          db.run(
+            "UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ? WHERE id = ?",
+            [
+              next,
+              next > count.total ? "finished" : "running",
+              next > count.total ? null : Date.now(),
+              roomId,
+            ],
+            () => {
+              db.run(
+                "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
+                [roomId],
+                () => res.redirect("/lobby"),
+              );
+            },
+          );
+        },
+      );
+    },
+  );
 });
 
 app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
-  db.get("SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1", (error, room) => {
-    if (error || !room) return res.json({ room: null });
-    db.get("SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?", [room.id, room.current_question], (questionError, question) => {
-      db.get("SELECT score, answer FROM lobby_participants WHERE room_id = ? AND username = ?", [room.id, req.session.name], (participantError, participant) => {
-        db.all("SELECT username, score FROM lobby_participants WHERE room_id = ? ORDER BY score DESC, username ASC", [room.id], (leaderboardError, leaderboard) => {
-          res.json({ room, question: questionError ? null : question, participant: participantError ? null : participant, leaderboard: leaderboardError ? [] : leaderboard });
-        });
-      });
-    });
-  });
+  db.get(
+    "SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1",
+    (error, room) => {
+      if (error || !room) return res.json({ room: null });
+      db.get(
+        "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?",
+        [room.id, room.current_question],
+        (questionError, question) => {
+          db.get(
+            "SELECT score, answer FROM lobby_participants WHERE room_id = ? AND username = ?",
+            [room.id, req.session.name],
+            (participantError, participant) => {
+              db.all(
+                "SELECT username, score FROM lobby_participants WHERE room_id = ? ORDER BY score DESC, username ASC",
+                [room.id],
+                (leaderboardError, leaderboard) => {
+                  res.json({
+                    room,
+                    question: questionError ? null : question,
+                    participant: participantError ? null : participant,
+                    leaderboard: leaderboardError ? [] : leaderboard,
+                  });
+                },
+              );
+            },
+          );
+        },
+      );
+    },
+  );
 });
 
 app.post("/profile/goal", requireLogin, (req, res) => {
@@ -1603,9 +2184,13 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
     ? req.body.difficultyLevel
     : null;
   const words = Array.isArray(req.body.words)
-    ? req.body.words.map((word) => String(word).trim()).filter(Boolean).slice(0, 20)
+    ? req.body.words
+        .map((word) => String(word).trim())
+        .filter(Boolean)
+        .slice(0, 20)
     : [];
-  if (!difficultyLevel || !words.length) return res.status(400).json({ error: "Invalid words." });
+  if (!difficultyLevel || !words.length)
+    return res.status(400).json({ error: "Invalid words." });
 
   const statement = db.prepare(`
     INSERT INTO vocabulary_difficult_words (username, difficulty_level, word)
@@ -1613,7 +2198,9 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
     ON CONFLICT(username, difficulty_level, word)
     DO UPDATE SET attempts = attempts + 1, last_seen = CURRENT_TIMESTAMP
   `);
-  words.forEach((word) => statement.run(req.session.name, difficultyLevel, word));
+  words.forEach((word) =>
+    statement.run(req.session.name, difficultyLevel, word),
+  );
   statement.finalize((error) =>
     error
       ? res.status(500).json({ error: "Unable to save difficult words." })
@@ -1640,8 +2227,14 @@ app.get("/teacher/dashboard", requireAdmin, (req, res) => {
         students: students.map((student) => ({
           ...student,
           levelBadges: [
-            { label: "Easy", stronger: student.easy_activities >= student.medium_activities },
-            { label: "Medium", stronger: student.medium_activities > student.easy_activities },
+            {
+              label: "Easy",
+              stronger: student.easy_activities >= student.medium_activities,
+            },
+            {
+              label: "Medium",
+              stronger: student.medium_activities > student.easy_activities,
+            },
           ],
         })),
       });
@@ -1656,7 +2249,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
       db.all(
-        "SELECT activity_type, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
+        "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
         [student.username],
         (progressError, progress) => {
           if (progressError)
@@ -1689,13 +2282,64 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                     [student.username],
                     (levelsError, flipCompletions) => {
                       if (levelsError)
-                        return res.status(500).send("Unable to load flip-card completions.");
+                        return res
+                          .status(500)
+                          .send("Unable to load flip-card completions.");
                       db.all(
                         "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 6",
                         [student.username],
                         (wordsError, hardestWords) => {
                           if (wordsError)
-                            return res.status(500).send("Unable to load difficult words.");
+                            return res
+                              .status(500)
+                              .send("Unable to load difficult words.");
+                          const latestSubmissionByChunk = new Map();
+                          usefulChunkSubmissions.forEach((submission) => {
+                            const key = `${submission.list_number}:${submission.chunk}`;
+                            if (!latestSubmissionByChunk.has(key))
+                              latestSubmissionByChunk.set(key, submission);
+                          });
+                          const usefulChunkListsForAdmin = usefulChunkLists.map(
+                            (list) => {
+                              const chunks = list.chunks.map((chunk) => {
+                                const submission = latestSubmissionByChunk.get(
+                                  `${list.number}:${chunk}`,
+                                );
+                                return {
+                                  chunk,
+                                  submitted: Boolean(submission),
+                                  sentence: submission?.sentence,
+                                  submitted_at: submission?.submitted_at,
+                                };
+                              });
+                              return {
+                                number: list.number,
+                                chunks,
+                                submittedCount: chunks.filter(
+                                  (chunk) => chunk.submitted,
+                                ).length,
+                                totalCount: chunks.length,
+                              };
+                            },
+                          );
+                          const listeningCompletions = progress
+                            .filter(
+                              (item) =>
+                                item.activity_type === "listening" &&
+                                item.difficulty_level.startsWith("listening:"),
+                            )
+                            .map((item) => {
+                              const [, topicId, exerciseNumber] =
+                                item.difficulty_level.split(":");
+                              const topic = readingTopics.find(
+                                (entry) => entry.topic.id === topicId,
+                              );
+                              return {
+                                ...item,
+                                title: topic?.topic.title || "Listening topic",
+                                exerciseNumber,
+                              };
+                            });
                           res.render("teacher-student.handlebars", {
                             student,
                             progress,
@@ -1703,8 +2347,12 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                             bestActivity: rankedStats[0],
                             needsFocus: rankedStats[rankedStats.length - 1],
                             usefulChunkSubmissions,
+                            usefulChunkSubmissionCount:
+                              usefulChunkSubmissions.length,
+                            usefulChunkListsForAdmin,
                             flipCompletions,
                             hardestWords,
+                            listeningCompletions,
                           });
                         },
                       );

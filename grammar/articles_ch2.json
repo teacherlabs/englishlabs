@@ -1,0 +1,306 @@
+{
+  "quizTitle": "Articles Quiz",
+  "instructions": "Choose the correct article to fill the gap. The dash (-) means no article is needed.",
+  "questions": [
+    {
+      "id": 1,
+      "question": "Please close _______ window. It's cold in here.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 2,
+      "question": "He's always by himself. Does he have _______ friends?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 3,
+      "question": "Have you ever ridden _______ camel?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 4,
+      "question": "It was a beautiful day. There wasn't a cloud in _______ sky.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 5,
+      "question": "Look! There's a cat on _______ roof.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 6,
+      "question": "There are a lot of deer in _______ forest behind the school.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 7,
+      "question": "A very good way to improve your English is to read _______ books.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 8,
+      "question": "Do you like _______ new science teacher? - Yeah, she's cool!",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 9,
+      "question": "Where are _______ scissors? - Sorry, I haven't seen them.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 10,
+      "question": "We're going to buy _______ new car next week.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 11,
+      "question": "Someone's knocking on _______ door. Can you hear them?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 12,
+      "question": "Take your feet off _______ table, please!",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 13,
+      "question": "There were no more chairs so we had to sit on _______ floor.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 14,
+      "question": "Don't forget to buy _______ flowers on the way home.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 15,
+      "question": "My father had _______ accident on the way to work.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    },
+    {
+      "id": 16,
+      "question": "Look out! There's _______ spider on your back.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 17,
+      "question": "To build a doll's house you will need nails, wood and _______ hammer.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 18,
+      "question": "We went to _______ airport this morning to pick up my grandmother.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 19,
+      "question": "Don't play in my classroom. Go to _______ sports hall.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 20,
+      "question": "There was _______ strange man in the library at lunch today.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 21,
+      "question": "I have _______ problem. Can you help me?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 22,
+      "question": "It was a beautiful day. There wasn't a cloud in _______ sky.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 23,
+      "question": "I need _______ new calculator. This one is broken.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 24,
+      "question": "Have you ever seen _______ ghost?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 25,
+      "question": "I hate _______ dogs that live in the next house. They bark all night.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 26,
+      "question": "I prefer _______ apples to pears.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 27,
+      "question": "I'd like _______ MP3 player for my birthday.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    },
+    {
+      "id": 28,
+      "question": "I know _______ girl who won the snowboarding competition. She's in my grade 9 math class.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 29,
+      "question": "May I borrow _______ pencil? - Yes, have this one.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 30,
+      "question": "I need to go to the library to return _______ books I borrowed.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 31,
+      "question": "At our school there are _______ students from more than 50 countries.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 32,
+      "question": "Do you have _______ sister?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 33,
+      "question": "Would you like _______ apple? - No, thanks. I'm not hungry.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    },
+    {
+      "id": 34,
+      "question": "Did you find _______ pen you were looking for?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 35,
+      "question": "Wait for me by _______ school gate at 4 o'clock.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 36,
+      "question": "I don't like _______ dogs!",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 37,
+      "question": "Don't eat in the classroom. Go to _______ cafeteria.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 38,
+      "question": "Can you tell me how to get to _______ library?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 39,
+      "question": "In other things _______ boys are better than girls.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 40,
+      "question": "I live in _______ old house near the centre of town.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    },
+    {
+      "id": 41,
+      "question": "You have now reached _______ last question in this quiz.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 42,
+      "question": "If you do that again, I'll send you to _______ principal.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 43,
+      "question": "Do you believe in _______ ghosts?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 44,
+      "question": "We heard strange noises in the night so we called _______ police.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 45,
+      "question": "They have forecast a lot of rain for the next few weeks. I need to buy _______ umbrella.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    },
+    {
+      "id": 46,
+      "question": "What time is it? - Sorry, I don't have _______ watch.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "a"
+    },
+    {
+      "id": 47,
+      "question": "Are spiders _______ insects? - No, they're not.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "-"
+    },
+    {
+      "id": 48,
+      "question": "Can you please return _______ pencil I gave you yesterday?",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 49,
+      "question": "Waiter! There's a fly in _______ soup.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "the"
+    },
+    {
+      "id": 50,
+      "question": "I eat _______ egg for breakfast every day.",
+      "options": ["a", "an", "the", "-"],
+      "correctAnswer": "an"
+    }
+  ]
+}

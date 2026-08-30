@@ -26,6 +26,8 @@
       <nav>
         <ul>
           {{#if session.isLoggedIn}}<li><a href="/">Grammar</a></li>
+          <li><a href="/reading">Reading</a></li>
+          <li><a href="/listening">Listening</a></li>
           <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
           {{#if session.isLoggedIn}}<li><a href="/lobby">Enter Lobby</a></li>{{/if}}
         </ul>

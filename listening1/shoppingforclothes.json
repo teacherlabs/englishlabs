@@ -1,0 +1,105 @@
+{
+  "topic": {
+    "id": "shopping-for-clothes",
+    "title": "Shopping for clothes",
+    "level": "A2 Pre-intermediate",
+    "category": "Shopping",
+    "description": "Listen to the conversation between a customer and a shop assistant and do the exercises to improve your listening skills."
+  },
+  "content": {
+    "audio": {
+      "src": "",
+      "placeholderText": "Insert your audio file URL here"
+    }
+  },
+  "preparation": {
+    "instruction": "Do this exercise before you listen. Write the correct word under the picture.",
+    "words": [
+      "cash",
+      "checkout",
+      "credit card",
+      "changing rooms",
+      "receipt",
+      "T-shirt"
+    ]
+  },
+  "exercises": [
+    {
+      "type": "drag_and_drop",
+      "id": "shop-assistant-or-customer",
+      "title": "Check your understanding: shop assistant or customer",
+      "instruction": "Drag each statement to the correct person (Shop assistant or Customer).",
+      "categories": [
+        {
+          "id": "shop_assistant",
+          "title": "Shop assistant",
+          "items": [
+            "Is it OK?"[cite: 1],
+            "And in purple?"[cite: 1],
+            "Would you like to pay with credit card or with cash?"[cite: 1],
+            "Can I help you?"[cite: 1],
+            "What size do you want?"[cite: 1]
+          ]
+        },
+        {
+          "id": "customer",
+          "title": "Customer",
+          "items": [
+            "Yes, have you got this T-shirt in other colours?"[cite: 1],
+            "Can I try it on?"[cite: 1]
+          ]
+        }
+      ],
+      "allItems": [
+        "Is it OK?"[cite: 1],
+        "And in purple?"[cite: 1],
+        "Would you like to pay with credit card or with cash?"[cite: 1],
+        "Can I help you?"[cite: 1],
+        "Yes, have you got this T-shirt in other colours?"[cite: 1],
+        "Can I try it on?"[cite: 1],
+        "What size do you want?"[cite: 1]
+      ]
+    },
+    {
+      "type": "short_answer",
+      "id": "gap-fill-questions",
+      "title": "Check your understanding: gap fill",
+      "instruction": "Answer the questions based on the conversation.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "What size T-shirt does the customer want?",
+          "answer": "Medium"
+        },
+        {
+          "id": 2,
+          "question": "Does the shop have a medium size purple T-shirt?",
+          "answer": "No"
+        },
+        {
+          "id": 3,
+          "question": "What colour T-shirt does the customer try on?",
+          "answer": "Red"
+        },
+        {
+          "id": 4,
+          "question": "Does the customer buy the red T-shirt?",
+          "answer": "Yes"
+        },
+        {
+          "id": 5,
+          "question": "How much does it cost?",
+          "answer": "£10.95"
+        },
+        {
+          "id": 6,
+          "question": "Does the customer pay by credit card or with cash?",
+          "answer": "Credit card"
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "What was the last item of clothing you bought? Where and when did you buy it? Are you happy with it?"[cite: 1]
+  }
+}

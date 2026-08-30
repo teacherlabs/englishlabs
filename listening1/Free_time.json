@@ -1,0 +1,126 @@
+{
+  "topic": {
+    "id": "free-time",
+    "title": "Free time",
+    "level": "A2 Pre-intermediate",
+    "category": "Sports & Leisure",
+    "description": "Information about joining the Brownton swimming pool water polo club, age groups, training schedules, and registration requirements."
+  },
+  "content": {
+    "contextPassage": {
+      "title": "Brownton Swimming Pool - Water Polo Club Info",
+      "summary": "Brownton Swimming Pool offers water polo clubs for under 14s, under 16s, under 18s, and adults. Members must complete a registration form and submit a photograph to join."
+    },
+    "audio": {
+      "src": "",
+      "placeholderText": "Insert your audio file URL here"
+    }
+  },
+  "exercises": [
+    {
+      "type": "sports_grouping",
+      "activity": {
+        "id": "sports-grouping",
+        "title": "Put the sports in the correct groups",
+        "instruction": "Categorize the sports into their appropriate environment group."
+      },
+      "categories": [
+        {
+          "id": "water_sports",
+          "title": "Water sports",
+          "items": ["sailing", "diving"]
+        },
+        {
+          "id": "indoor_sports",
+          "title": "Indoor sports",
+          "items": ["basketball", "badminton", "table tennis"]
+        },
+        {
+          "id": "outdoor_sports",
+          "title": "Outdoor sports",
+          "items": ["football", "golf", "rugby"]
+        }
+      ],
+      "allItems": [
+        "football",
+        "sailing",
+        "golf",
+        "basketball",
+        "diving",
+        "badminton",
+        "table tennis",
+        "rugby"
+      ]
+    },
+    {
+      "type": "gap_fill",
+      "instruction": "Fill in the missing information based on the club details.",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "Tyrone wants to join the under ________s club.",
+          "answer": "16"
+        },
+        {
+          "id": 2,
+          "sentence": "There are ________ places available in the under 16s club.",
+          "answer": "two"
+        },
+        {
+          "id": 3,
+          "sentence": "The under 16s train on Tuesdays and ________.",
+          "answer": "Thursdays"
+        },
+        {
+          "id": 4,
+          "sentence": "Training takes place from 6:30 to ________ pm.",
+          "answer": "8:00"
+        },
+        {
+          "id": 5,
+          "sentence": "Matches are played on ________ mornings.",
+          "answer": "Saturday"
+        },
+        {
+          "id": 6,
+          "sentence": "Training starts on September ________.",
+          "answer": "2nd"
+        }
+      ]
+    },
+    {
+      "type": "true_or_false",
+      "instruction": "Decide whether the following statements are True or False.",
+      "questions": [
+        {
+          "id": 1,
+          "statement": "Tyrone is 15 years old.",
+          "correctAnswer": true
+        },
+        {
+          "id": 2,
+          "statement": "The under 16s team trains three evenings a week.",
+          "correctAnswer": false
+        },
+        {
+          "id": 3,
+          "statement": "Classes are free for members under 18 years old.",
+          "correctAnswer": true
+        },
+        {
+          "id": 4,
+          "statement": "Tyrone needs to bring a photograph when he completes the form.",
+          "correctAnswer": true
+        },
+        {
+          "id": 5,
+          "statement": "Tyrone can register completely online without visiting the pool.",
+          "correctAnswer": false
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "Are you a member of any sports clubs? Which sports do you enjoy practicing in your free time?"
+  }
+}

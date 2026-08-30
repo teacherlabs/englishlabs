@@ -18,12 +18,11 @@
       </div>
 
       <details class="chunk-list-picker">
-        <summary><span class="menu-icon" aria-hidden="true">&#9776;</span><strong>Choose a list</strong><span class="selected-list-label">List {{selectedList.number}} · {{selectedList.title}}</span></summary>
+        <summary><span class="menu-icon" aria-hidden="true">&#9776;</span><strong>Choose a list</strong><span class="selected-list-label">List {{selectedList.number}}</span></summary>
         <nav class="chunk-list-menu" aria-label="Useful Chunk lists">
           {{#each lists}}
             <a class="chunk-list-link{{#if selected}} selected{{/if}}" href="/vocabulary/useful-chunks?list={{number}}">
               <span>List {{number}}</span>
-              <strong>{{title}}</strong>
             </a>
           {{/each}}
         </nav>
@@ -33,9 +32,8 @@
         <div class="chunk-panel-heading">
           <div>
             <p class="eyebrow">List {{selectedList.number}}</p>
-            <h2>{{selectedList.title}}</h2>
           </div>
-          <div class="chunk-panel-actions"><span>{{selectedList.chunks.length}} chunks</span><a class="guide-practice-link" href="/vocabulary/useful-chunks/guide?list={{selectedList.number}}">How to use them</a></div>
+          <div class="chunk-panel-actions"><span>{{selectedList.chunks.length}} chunks</span><a class="guide-practice-link" href="/vocabulary/useful-chunks/guide?list={{selectedList.number}}">Cheat sheet</a></div>
         </div>
         <div class="chunk-grid">
           {{#each selectedList.chunks}}

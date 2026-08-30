@@ -6,11 +6,13 @@
         href="/logout"
       >Log out</a></div>
     <div class="student-table"><div class="student-table-head"><span
-          >Student</span><span>Goal</span></div>{{#each students}}<a
+        >Student</span><span>Goal</span></div>{{#each students}}<a
           class="student-row student-link"
           href="/teacher/student/{{username}}"
-          ><strong>{{#if fname}}{{fname}} {{lname}}{{else}}{{username}}{{/if}}</strong><span>{{#if goal}}{{goal}}{{else}}No goal
-            set{{/if}}</span></a>{{else}}<p
+        ><strong>{{#if fname}}{{fname}}
+              {{lname}}{{else}}{{username}}{{/if}}</strong><span>{{#if
+              goal
+            }}{{goal}}{{else}}No goal set{{/if}}</span></a>{{else}}<p
           class="empty-state"
         >No student accounts yet.</p>{{/each}}</div>
   </section>

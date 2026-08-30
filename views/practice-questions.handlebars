@@ -1,0 +1,185 @@
+<main class="practice-page practice-questions-page">
+  <div class="grammar-workspace">
+    <aside class="practice-nav">
+      <p class="exercise-overview-title">Grammar overview</p>
+      <nav aria-label="Practice pages">
+        <a href="/practice/questions"><strong>Chapters</strong></a>
+        <a href="/practice/sentence-fixer"><strong>Sentence Fixer</strong></a>
+        <a href="/practice/find-errors"><strong>Find Errors</strong></a>
+        <a href="/practice/final-test"><strong>Final Test</strong></a>
+      </nav>
+    </aside>
+
+    <div class="grammar-content">
+      <a class="back-link" href="/">← Back to grammar areas</a>
+  <div class="practice-heading">
+    <p class="eyebrow">English Labs / Practice</p>
+    <h1>{{pageTitle}}</h1>
+  </div>
+
+  <section class="chapter-picker" aria-label="Choose a practice chapter">
+    {{#each chapters}}
+      <a class="chapter-mini-card{{#if selected}} selected{{/if}}" href="/practice/questions?chapter={{id}}">
+        <span>Chapter {{chapterNumber}}</span>
+        <strong>{{unit}}</strong>
+      </a>
+    {{/each}}
+  </section>
+
+  {{#if selectedChapter}}
+    <section class="exercise-picker" aria-label="Choose an exercise">
+      {{#each selectedChapter.exercises}}
+        <a class="exercise-card{{#if selected}} selected{{/if}}" href="/practice/questions?chapter={{../selectedChapter.id}}&exercise={{id}}">
+          <span>{{type}}</span>
+          <strong>{{title}}</strong>
+        </a>
+      {{/each}}
+    </section>
+  {{/if}}
+
+  {{#if selectedExercise}}
+    <section class="json-exercise" data-json-exercise data-exercise-type="{{selectedExercise.type}}">
+      <div class="exercise-heading">
+        <p class="eyebrow">{{selectedChapter.unit}}</p>
+        <h2>{{selectedExercise.title}}</h2>
+      </div>
+
+      {{#if selectedExercise.isFillInBlanks}}
+        {{#each selectedExercise.paragraphs}}
+          <article class="paragraph-exercise">
+            <h3>{{heading}}</h3>
+            <p class="paragraph-with-blanks">{{#each parts}}{{#if isBlank}}<input type="text" data-answer="{{answer}}" aria-label="Article before {{hint}}" maxlength="5" autocomplete="off" />{{else}}{{text}}{{/if}}{{/each}}</p>
+          </article>
+        {{/each}}
+        <button class="practice-button" type="button" data-check-blanks>Check answers</button>
+      {{else if selectedExercise.isWrittenAnswer}}
+        <p class="exercise-instructions">{{selectedExercise.instructions}}</p>
+        <div class="json-question-list">
+          {{#each selectedExercise.questions}}
+            <article class="json-question" data-answer="{{answer}}" data-explanation="{{explanation}}"{{#unless @first}} hidden{{/unless}}>
+              <p class="question-progress">Question {{questionNumber}} of {{@root.selectedExercise.totalQuestions}}</p>
+              <p>{{sentence}}</p>
+              <input class="written-answer" type="text" autocomplete="off" aria-label="Your answer" placeholder="Write the past simple form" />
+              <button class="practice-button" type="button" data-check-written>Check answer</button>
+              <p class="answer-feedback" hidden></p>
+            </article>
+          {{/each}}
+        </div>
+        <div class="quiz-footer">
+          <strong class="score-result" data-json-points>Points: 0</strong>
+          <button class="practice-button" type="button" data-next-json-question disabled>Check your answer</button>
+        </div>
+      {{else}}
+        <div class="json-question-list">
+          {{#if selectedExercise.items}}
+            {{#each selectedExercise.items}}
+              <article class="json-question" data-answer="{{answer}}" data-explanation="{{explanation}}"{{#unless @first}} hidden{{/unless}}>
+                <p class="question-progress">Question {{questionNumber}} of {{@root.selectedExercise.totalQuestions}}</p>
+                <p>Choose the correct article before <strong>{{word}}</strong>.</p>
+                <div class="answer-options">
+                  {{#each @root.selectedExercise.options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}
+                </div>
+                <p class="answer-feedback" hidden></p>
+              </article>
+            {{/each}}
+          {{else}}
+            {{#each selectedExercise.questions}}
+              <article class="json-question" data-answer="{{answer}}" data-explanation="{{explanation}}"{{#unless @first}} hidden{{/unless}}>
+                <p class="question-progress">Question {{questionNumber}} of {{@root.selectedExercise.totalQuestions}}</p>
+                <p>{{sentence}}</p>
+                <div class="answer-options">
+                  {{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}
+                </div>
+                <p class="answer-feedback" hidden></p>
+              </article>
+            {{/each}}
+          {{/if}}
+        </div>
+        <div class="quiz-footer">
+          <strong class="score-result" data-json-points>Points: 0</strong>
+          <button class="practice-button" type="button" data-next-json-question disabled>Choose an answer</button>
+        </div>
+      {{/if}}
+      <p class="json-score" data-json-score aria-live="polite"></p>
+    </section>
+  {{/if}}
+    </div>
+  </div>
+</main>
+
+<script>
+  const exercise = document.querySelector("[data-json-exercise]");
+  if (exercise) {
+    const score = exercise.querySelector("[data-json-score]");
+    const questions = [...exercise.querySelectorAll(".json-question")];
+    const pointsDisplay = exercise.querySelector("[data-json-points]");
+    const nextQuestion = exercise.querySelector("[data-next-json-question]");
+    let currentQuestion = 0;
+    let points = 0;
+
+    questions.forEach((question, index) => {
+      question.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
+        if (!button.matches(".answer-options button")) return;
+        if (question.dataset.answered) return;
+        const correct = button.value === question.dataset.answer;
+        question.dataset.answered = "true";
+        question.dataset.correct = correct;
+        if (correct) points += 1;
+        question.querySelectorAll("button").forEach((choice) => choice.disabled = true);
+        const feedback = question.querySelector(".answer-feedback");
+        feedback.hidden = false;
+        feedback.classList.add(correct ? "correct" : "incorrect");
+        feedback.textContent = `${correct ? "Correct! +1 point." : `The answer is “${question.dataset.answer}”.`} ${question.dataset.explanation}`;
+        pointsDisplay.textContent = `Points: ${points} / ${questions.length}`;
+        nextQuestion.disabled = false;
+        nextQuestion.textContent = index === questions.length - 1 ? "Finish exercise" : "Next question";
+      }));
+    });
+
+    exercise.querySelectorAll("[data-check-written]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const question = button.closest(".json-question");
+        if (question.dataset.answered) return;
+        const input = question.querySelector(".written-answer");
+        const correct = input.value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
+        question.dataset.answered = "true";
+        question.dataset.correct = correct;
+        if (correct) points += 1;
+        input.disabled = true;
+        button.disabled = true;
+        const feedback = question.querySelector(".answer-feedback");
+        feedback.hidden = false;
+        feedback.classList.add(correct ? "correct" : "incorrect");
+        feedback.textContent = `${correct ? "Correct! +1 point." : `The answer is “${question.dataset.answer}”.`} ${question.dataset.explanation}`;
+        pointsDisplay.textContent = `Points: ${points} / ${questions.length}`;
+        nextQuestion.disabled = false;
+        nextQuestion.textContent = question === questions.at(-1) ? "Finish exercise" : "Next question";
+      });
+    });
+
+    nextQuestion?.addEventListener("click", () => {
+      questions[currentQuestion].hidden = true;
+      currentQuestion += 1;
+      if (currentQuestion >= questions.length) {
+        score.textContent = `Final score: ${points} / ${questions.length}`;
+        nextQuestion.hidden = true;
+        return;
+      }
+      questions[currentQuestion].hidden = false;
+      nextQuestion.disabled = true;
+      nextQuestion.textContent = "Choose an answer";
+    });
+
+    exercise.querySelector("[data-check-blanks]")?.addEventListener("click", (event) => {
+      const inputs = [...exercise.querySelectorAll("input[data-answer]")];
+      const correct = inputs.filter((input) => input.value.trim().toLowerCase() === input.dataset.answer).length;
+      inputs.forEach((input) => {
+        const isCorrect = input.value.trim().toLowerCase() === input.dataset.answer;
+        input.classList.toggle("correct-blank", isCorrect);
+        input.classList.toggle("incorrect-blank", !isCorrect);
+      });
+      score.textContent = `Score: ${correct} / ${inputs.length}`;
+      event.currentTarget.textContent = "Check answers again";
+    });
+  }
+</script>

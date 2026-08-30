@@ -3,7 +3,7 @@ services:
     name: englishlabs
     runtime: node
     buildCommand: rm -rf node_modules && npm ci
-    startCommand: npm start
+    startCommand: npm run reset-grammar && npm start
     envVars:
       - key: NODE_ENV
         value: production

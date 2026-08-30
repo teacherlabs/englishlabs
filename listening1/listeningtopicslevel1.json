@@ -1,0 +1,539 @@
+[
+  {
+    "topic": {
+      "id": "stop-wasting-time",
+      "title": "Stop wasting time",
+      "level": "A2 Pre-intermediate",
+      "category": "Study Skills & Habits",
+      "description": "Listen to advice on how to stay focused, stop wasting time, and study effectively."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "preparation-gap-fill",
+        "title": "Preparation: Gap Fill",
+        "instruction": "Complete the sentences with the correct words.",
+        "questions": [
+          {
+            "id": 1,
+            "sentence": "When you need to study, you don't want to ________ time.",
+            "answer": "waste"
+          },
+          {
+            "id": 2,
+            "sentence": "It's easy to ________ working well but ________ doing something else.",
+            "answer": "start off",
+            "secondAnswer": "end up"
+          },
+          {
+            "id": 3,
+            "sentence": "It's a good idea to ________ your music.",
+            "answer": "turn off"
+          },
+          {
+            "id": 4,
+            "sentence": "You can use the internet to ________ information.",
+            "answer": "look up"
+          },
+          {
+            "id": 5,
+            "sentence": "Make sure you have everything you ________ before you start.",
+            "answer": "need"
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "study-tips-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct option according to the advice.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What should you do with your phone when studying?",
+            "options": [
+              "Turn it off or leave it in another room",
+              "Keep it next to you on silent",
+              "Use it to listen to music"
+            ],
+            "answer": "Turn it off or leave it in another room"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your biggest distraction when trying to study or do homework?"
+    }
+  },
+  {
+    "topic": {
+      "id": "taking-notes",
+      "title": "Taking notes",
+      "level": "A2 Pre-intermediate",
+      "category": "Study Skills & School",
+      "description": "Listen to two students talking about how to take effective notes during class."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "unscramble_sentences",
+        "id": "scramble-word-sentences",
+        "title": "Preparation: Unscramble the Sentences",
+        "instruction": "Put the words in the correct order to form complete sentences.",
+        "sentences": [
+          {
+            "id": 1,
+            "targetSentence": "You are brilliant at history."
+          },
+          {
+            "id": 2,
+            "targetSentence": "These are my notes from today."
+          },
+          {
+            "id": 3,
+            "targetSentence": "You don't have to copy everything."
+          },
+          {
+            "id": 4,
+            "targetSentence": "You have to write the important words."
+          },
+          {
+            "id": 5,
+            "targetSentence": "You can draw little pictures too."
+          },
+          {
+            "id": 6,
+            "targetSentence": "Let's test your memory."
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "note-taking-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the note-taking tips are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "You should try to write down every single word the teacher says.",
+            "correctAnswer": false
+          },
+          {
+            "id": 2,
+            "statement": "Drawing small pictures or symbols can help you remember ideas.",
+            "correctAnswer": true
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you prefer writing notes by hand or typing them on a device?"
+    }
+  },
+  {
+    "topic": {
+      "id": "tour-of-london",
+      "title": "Tour of London",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Sightseeing",
+      "description": "Listen to a tour guide on a double-decker bus introducing famous London landmarks."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "london-landmarks-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct landmark described by the guide.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where does the tour bus stop first?",
+            "options": [
+              "Madame Tussauds",
+              "The Big Ben clock tower",
+              "The Tower of London"
+            ],
+            "answer": "Madame Tussauds"
+          },
+          {
+            "id": 2,
+            "question": "What can tourists see on the left near the river?",
+            "options": [
+              "The London Eye",
+              "Buckingham Palace",
+              "Hyde Park"
+            ],
+            "answer": "The London Eye"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "london-tour-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "Oxford Street is famous for its museums.",
+            "correctAnswer": false
+          },
+          {
+            "id": 2,
+            "statement": "You can see Big Ben next to the Houses of Parliament.",
+            "correctAnswer": true
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which attraction in London would you be most excited to see?"
+    }
+  },
+  {
+    "topic": {
+      "id": "trains-and-travel",
+      "title": "Trains and travel",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Transport",
+      "description": "Listen to station announcements and ticket counter conversations for train travel."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "train-vocabulary-matching",
+        "title": "Preparation: Matching",
+        "instruction": "Match the travel terms with their definitions.",
+        "pairs": [
+          {
+            "word": "ticket",
+            "definition": "A small piece of paper to allow you to use a train or bus."
+          },
+          {
+            "word": "platform",
+            "definition": "The place in a train station where people get on and get off trains."
+          },
+          {
+            "word": "single (ticket)",
+            "definition": "A ticket to travel to a place, but not to travel back."
+          },
+          {
+            "word": "return (ticket)",
+            "definition": "A ticket to travel to a place and back again."
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "train-announcement-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing ticket details and platform numbers.",
+        "questions": [
+          {
+            "id": 1,
+            "sentence": "The train to Oxford will depart from platform ________.",
+            "answer": "4"
+          },
+          {
+            "id": 2,
+            "sentence": "A ________ ticket allows you to travel there and back on the same day.",
+            "answer": "return"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you like traveling by train? Why or why not?"
+    }
+  },
+  {
+    "topic": {
+      "id": "travelling-abroad",
+      "title": "Travelling abroad",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Airport Routine",
+      "description": "Listen to an explanation of the step-by-step procedure when flying abroad."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "ordering_stages",
+        "id": "airport-sequence-ordering",
+        "title": "Preparation: Sequencing",
+        "instruction": "Put the stages of travelling by plane in the correct order.",
+        "stages": [
+          {
+            "order": 1,
+            "text": "Arrive at the airport."
+          },
+          {
+            "order": 2,
+            "text": "Go to the check-in desk."
+          },
+          {
+            "order": 3,
+            "text": "Go through immigration."
+          },
+          {
+            "order": 4,
+            "text": "Wait at the boarding gate."
+          },
+          {
+            "order": 5,
+            "text": "Board the plane."
+          },
+          {
+            "order": 6,
+            "text": "The plane takes off."
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "airport-comprehension-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct answer about airport announcements.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where must passengers show their passport and boarding pass?",
+            "options": [
+              "At the boarding gate",
+              "In the airport cafeteria",
+              "At the baggage claim"
+            ],
+            "answer": "At the boarding gate"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Have you ever traveled abroad by plane? Where did you go?"
+    }
+  },
+  {
+    "topic": {
+      "id": "using-colours-to-do-homework",
+      "title": "Using colours to do homework",
+      "level": "A2 Pre-intermediate",
+      "category": "Study Skills & Stationery",
+      "description": "Listen to tips on how color-coding notes and using stationery helps study organization."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "phrase_matching",
+        "id": "stationery-phrase-matching",
+        "title": "Preparation: Matching",
+        "instruction": "Match the clause on the left to its completion on the right.",
+        "pairs": [
+          {
+            "start": "You can use colour",
+            "end": "coding to organise homework."
+          },
+          {
+            "start": "A stationery shop",
+            "end": "sells pens and paper."
+          },
+          {
+            "start": "You can write on sticky notes",
+            "end": "to remember important things."
+          },
+          {
+            "start": "We borrow books",
+            "end": "from a library."
+          },
+          {
+            "start": "A page marker",
+            "end": "helps you find the right page in a book."
+          },
+          {
+            "start": "A calendar shows the",
+            "end": "days, weeks, and months of a year."
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "color-coding-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "Using highlighters helps key details stand out on a page.",
+            "correctAnswer": true
+          },
+          {
+            "id": 2,
+            "statement": "It is best to use only one black pen for all subject notes.",
+            "correctAnswer": false
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you use highlighters, sticky notes, or color coding for your schoolwork?"
+    }
+  },
+  {
+    "topic": {
+      "id": "weather-forecast",
+      "title": "Weather forecast",
+      "level": "A2 Pre-intermediate",
+      "category": "Daily Life & Nature",
+      "description": "Listen to a radio weather forecast describing conditions across different regions."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "weather-regional-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the predicted weather for each region.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What is the weather like in the north?",
+            "options": [
+              "Rainy and windy",
+              "Sunny and warm",
+              "Snowing"
+            ],
+            "answer": "Rainy and windy"
+          },
+          {
+            "id": 2,
+            "question": "When is the weather expected to clear up in the south?",
+            "options": [
+              "By afternoon",
+              "By late evening",
+              "Tomorrow morning"
+            ],
+            "answer": "By afternoon"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "weather-temp-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the predicted temperature values.",
+        "questions": [
+          {
+            "id": 1,
+            "sentence": "The maximum temperature in the south will reach ________ degrees.",
+            "answer": "22"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What kind of weather do you enjoy the most?"
+    }
+  },
+  {
+    "topic": {
+      "id": "work",
+      "title": "Work",
+      "level": "A2 Pre-intermediate",
+      "category": "Jobs & Careers",
+      "description": "Listen to people describing their daily job routines, work environments, and duties."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "speaker_matching",
+        "id": "job-speaker-matching",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each speaker with their occupation.",
+        "questions": [
+          {
+            "id": "speaker_1",
+            "speaker": "Speaker 1",
+            "answer": "Chef / Restaurant worker"
+          },
+          {
+            "id": "speaker_2",
+            "speaker": "Speaker 2",
+            "answer": "Shop assistant"
+          },
+          {
+            "id": "speaker_3",
+            "speaker": "Speaker 3",
+            "answer": "Office manager"
+          },
+          {
+            "id": "speaker_4",
+            "speaker": "Speaker 4",
+            "answer": "Tour guide"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "work-routine-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "Speaker 1 starts work very early in the morning.",
+            "correctAnswer": true
+          },
+          {
+            "id": 2,
+            "statement": "Speaker 2 works outdoors all day.",
+            "correctAnswer": false
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What job would you like to have in the future?"
+    }
+  }
+]

@@ -1,0 +1,234 @@
+<main class="practice-page reading-page">
+  <div class="grammar-workspace">
+    <aside class="practice-nav">
+      <p class="exercise-overview-title">Listening topics</p>
+      <nav aria-label="Listening topics">
+        {{#each listeningLevels}}
+          <div class="listening-level{{#if selected}} is-open{{/if}}">
+            <button class="listening-level-toggle" type="button" data-listening-level-toggle aria-expanded="{{#if selected}}true{{else}}false{{/if}}">
+              <strong>Level {{number}}</strong><span aria-hidden="true">+</span>
+            </button>
+            <div class="listening-level-topics"><div>
+              {{#if topics}}
+                {{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}" href="/listening?level={{../number}}&topic={{id}}">{{title}}</a>{{/each}}
+              {{else}}
+                <p>No topics yet.</p>
+              {{/if}}
+            </div></div>
+          </div>
+        {{/each}}
+      </nav>
+    </aside>
+
+    <div class="grammar-content">
+      {{#if topic}}
+      <div class="practice-heading">
+        <p class="eyebrow">Listening / {{topic.category}}</p>
+        <h1>{{topic.title}}</h1>
+        <p>{{topic.description}}</p>
+      </div>
+
+      {{#if content.restaurantInfo}}
+      <section class="restaurant-details" aria-label="Restaurant details">
+        <div><span>Restaurant</span><strong>{{content.restaurantInfo.name}}</strong></div>
+        <div><span>Rating</span><strong>{{content.restaurantInfo.rating}} / 5 ({{content.restaurantInfo.totalReviews}} reviews)</strong></div>
+        <div><span>Lunch</span><strong>{{content.restaurantInfo.hours.lunch}}</strong></div>
+        <div><span>Dinner</span><strong>{{content.restaurantInfo.hours.dinner}}</strong></div>
+      </section>
+      {{else}}
+      <section class="listening-context">
+        <p class="eyebrow">Listen for</p>
+        <h2>{{content.contextPassage.title}}</h2>
+        <p>{{content.contextPassage.summary}}</p>
+        {{#if content.vocabulary}}
+          <div class="listening-vocabulary">
+            {{#each content.vocabulary}}<span>{{this}}</span>{{/each}}
+          </div>
+        {{/if}}
+        {{#if content.filmTypes}}
+          <div class="listening-vocabulary">
+            {{#each content.filmTypes}}<span>{{this}}</span>{{/each}}
+          </div>
+        {{/if}}
+      </section>
+      {{/if}}
+
+      <section class="listening-player-panel">
+        <div class="reading-section-heading"><p class="eyebrow">Listen</p><h2>{{topic.title}}</h2></div>
+        <audio class="listening-player" controls preload="metadata">
+          <source src="{{audioUrl}}" type="audio/mpeg" />
+          Your browser does not support audio playback.
+        </audio>
+      </section>
+
+      {{#if content.readingPassage}}
+      <section class="reading-content">
+        <div class="reading-section-heading"><p class="eyebrow">Restaurant menu</p><h2>{{content.readingPassage.title}}</h2></div>
+        <div class="menu-grid">
+          {{#each content.readingPassage.sections}}
+            <article class="menu-section">
+              <h3>{{category}}</h3>
+              {{#if note}}<p>{{note}}</p>{{/if}}
+              <ul>{{#each items}}<li><span>{{name}}</span><strong>{{price}}</strong></li>{{/each}}</ul>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+      {{/if}}
+
+      <section class="reading-exercises" data-reading-exercises>
+        <div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
+        {{#each exercises}}
+          <article class="reading-exercise{{#if isSportsGrouping}} sports-grouping-exercise{{/if}}" data-listening-exercise data-topic-id="{{@root.topic.id}}" data-topic-title="{{@root.topic.title}}" data-exercise-number="{{number}}"{{#unless isSportsGrouping}} data-reading-exercise data-total="{{questions.length}}"{{/unless}}>
+            <h3>Exercise {{number}}</h3><p>{{#if isSportsGrouping}}{{activity.instruction}}{{else}}{{instruction}}{{/if}}</p>
+            {{#if isSportsGrouping}}
+              <h4>{{activity.title}}</h4>
+              <p class="sports-remaining" data-sports-remaining>{{allItems.length}} items remaining</p>
+              <div class="sports-items" data-sports-items>
+                {{#each allItems}}<button class="sport-item" type="button" draggable="true" data-sport="{{this}}">{{this}}</button>{{/each}}
+              </div>
+              <div class="sports-category-grid">
+                {{#each categories}}
+                  <section class="sports-drop-zone" data-category="{{id}}" data-sports="{{#each items}}{{this}}|{{/each}}">
+                    <h4>{{title}}</h4>
+                    <div class="sports-drop-items"></div>
+                  </section>
+                {{/each}}
+              </div>
+              <p class="json-score" data-sports-feedback aria-live="polite"></p>
+            {{else}}
+            {{#each questions}}
+              <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}>
+                <p class="question-progress">Question {{number}} of {{../questions.length}}</p>
+                <strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>
+                {{#if ../isTrueOrFalse}}<div class="answer-options"><button type="button" value="true">True</button><button type="button" value="false">False</button></div>{{else if ../isMultipleChoice}}<div class="answer-options">{{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}</div>{{else}}<input class="written-answer" type="text" aria-label="Your answer" autocomplete="off" /><button class="practice-button" type="button" data-reading-check>Check answer</button>{{/if}}
+                <p class="answer-feedback" hidden></p>
+              </div>
+            {{/each}}
+            <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: 0 / {{questions.length}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button></div>
+            {{/if}}
+          </article>
+        {{/each}}
+      </section>
+
+      <section class="discussion-panel"><p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2></section>
+      {{else}}
+      <div class="practice-heading">
+        <p class="eyebrow">Listening</p>
+        <h1>Level 2</h1>
+        <p>Listening topics for this level will appear here soon.</p>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+</main>
+
+<script>
+  document.querySelectorAll("[data-reading-exercise]").forEach((exercise) => {
+    const questions = [...exercise.querySelectorAll(".reading-question")];
+    const score = exercise.querySelector("[data-reading-score]");
+    const next = exercise.querySelector("[data-reading-next]");
+    let current = 0;
+    let points = 0;
+    const saveCompletion = () => {
+      fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityType: "listening",
+          difficultyLevel: `listening:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+          points,
+          totalPoints: questions.length,
+        }),
+      });
+    };
+    const answer = (question, value) => {
+      if (question.dataset.answered) return;
+      const correct = value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
+      question.dataset.answered = "true";
+      if (correct) points += 1;
+      question.querySelectorAll("button, input").forEach((element) => element.disabled = true);
+      const feedback = question.querySelector(".answer-feedback");
+      feedback.hidden = false;
+      feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
+      feedback.textContent = correct ? "Correct! +1 point." : `Not quite. The answer is “${question.dataset.answer}”.`;
+      score.textContent = `Points: ${points} / ${questions.length}`;
+      next.disabled = false;
+      next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
+    };
+    exercise.querySelectorAll(".answer-options button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
+    exercise.querySelectorAll("[data-reading-check]").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.previousElementSibling.value)));
+    next.addEventListener("click", () => {
+      questions[current].hidden = true;
+      current += 1;
+      if (current === questions.length) { next.hidden = true; score.textContent = `Final score: ${points} / ${questions.length}`; saveCompletion(); return; }
+      questions[current].hidden = false;
+      next.disabled = true;
+      next.textContent = "Choose an answer";
+    });
+  });
+
+  document.querySelectorAll(".sports-grouping-exercise").forEach((exercise) => {
+    const remaining = exercise.querySelector("[data-sports-remaining]");
+    const feedback = exercise.querySelector("[data-sports-feedback]");
+    let draggedItem;
+    let points = 0;
+
+    const updateRemaining = () => {
+      remaining.textContent = `${exercise.querySelectorAll(".sport-item").length} items remaining`;
+    };
+    const placeSport = (item, zone) => {
+      if (!item || !zone) return;
+      const acceptedSports = zone.dataset.sports.split("|").filter(Boolean);
+      const correct = acceptedSports.includes(item.dataset.sport);
+      if (correct) points += 1;
+      zone.querySelector(".sports-drop-items").append(item);
+      item.draggable = false;
+      item.disabled = true;
+      item.classList.add(correct ? "correct-sport" : "incorrect-sport");
+      feedback.textContent = correct ? "Correct!" : "Not quite. Try to remember this group.";
+      updateRemaining();
+      if (!exercise.querySelectorAll(".sport-item:not(:disabled)").length) {
+        feedback.textContent = `Final score: ${points} / ${exercise.querySelectorAll(".sport-item").length}`;
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            activityType: "listening",
+            difficultyLevel: `listening:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+            points,
+            totalPoints: exercise.querySelectorAll(".sport-item").length,
+          }),
+        });
+      }
+    };
+    exercise.querySelectorAll(".sport-item").forEach((item) => {
+      item.addEventListener("dragstart", () => { draggedItem = item; });
+      item.addEventListener("click", () => {
+        exercise.querySelectorAll(".sports-drop-zone").forEach((zone) => zone.classList.toggle("is-ready", draggedItem === item));
+        draggedItem = draggedItem === item ? null : item;
+      });
+    });
+    exercise.querySelectorAll(".sports-drop-zone").forEach((zone) => {
+      zone.addEventListener("dragover", (event) => { event.preventDefault(); zone.classList.add("is-ready"); });
+      zone.addEventListener("dragleave", () => zone.classList.remove("is-ready"));
+      zone.addEventListener("drop", (event) => { event.preventDefault(); zone.classList.remove("is-ready"); placeSport(draggedItem, zone); draggedItem = null; });
+      zone.addEventListener("click", () => { placeSport(draggedItem, zone); draggedItem = null; exercise.querySelectorAll(".sports-drop-zone").forEach((item) => item.classList.remove("is-ready")); });
+    });
+  });
+
+  document.querySelectorAll("[data-listening-level-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const level = button.closest(".listening-level");
+      const isOpen = level.classList.contains("is-open");
+      document.querySelectorAll(".listening-level").forEach((item) => {
+        item.classList.remove("is-open");
+        item.querySelector("[data-listening-level-toggle]").setAttribute("aria-expanded", "false");
+      });
+      if (!isOpen) {
+        level.classList.add("is-open");
+        button.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+</script>

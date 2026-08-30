@@ -1,0 +1,509 @@
+[
+  {
+    "topic": {
+      "id": "important-people",
+      "title": "Important people",
+      "level": "B1 Intermediate",
+      "category": "Relationships & People",
+      "description": "Listen to people talking about important individuals in their lives and complete the exercises."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_synonyms",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the idiom or phrasal verb on the left to its meaning on the right.",
+        "pairs": [
+          {
+            "phrase": "She looked after me.",
+            "meaning": "She took care of me."
+          },
+          {
+            "phrase": "We hang out a lot.",
+            "meaning": "We spend a lot of time together."
+          },
+          {
+            "phrase": "We get on well.",
+            "meaning": "We have a good, friendly relationship."
+          },
+          {
+            "phrase": "We fell out.",
+            "meaning": "We stopped being friends. (Especially after an argument)"
+          },
+          {
+            "phrase": "He’s into the same things.",
+            "meaning": "He likes the same things as me."
+          },
+          {
+            "phrase": "We have a lot in common.",
+            "meaning": "We have many similarities."
+          }
+        ]
+      },
+      {
+        "type": "speaker_matching",
+        "id": "matching-speakers",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each speaker with the person they are describing.",
+        "questions": [
+          {
+            "id": "speaker_1",
+            "speaker": "Speaker 1",
+            "answer": "Best friend"
+          },
+          {
+            "id": "speaker_2",
+            "speaker": "Speaker 2",
+            "answer": "Teacher / Mentor"
+          },
+          {
+            "id": "speaker_3",
+            "speaker": "Speaker 3",
+            "answer": "Grandmother"
+          },
+          {
+            "id": "speaker_4",
+            "speaker": "Speaker 4",
+            "answer": "Brother"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Who is the most important person in your life and why?"
+    }
+  },
+  {
+    "topic": {
+      "id": "llamas",
+      "title": "Llamas",
+      "level": "B1 Intermediate",
+      "category": "Animals & Nature",
+      "description": "Listen to an informational podcast about llamas, their behavior, wool, and habitats."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the vocabulary words with their definitions.",
+        "pairs": [
+          {
+            "word": "to spit",
+            "definition": "to force out liquid from the mouth"
+          },
+          {
+            "word": "wool",
+            "definition": "soft, thick hair that grows on the bodies of animals like sheep"
+          },
+          {
+            "word": "to shear",
+            "definition": "to cut the wool off a sheep or similar animal"
+          },
+          {
+            "word": "to lick",
+            "definition": "to pass the tongue over a surface"
+          },
+          {
+            "word": "to hum",
+            "definition": "to make a continuous sound with the lips closed"
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "multiple-choice-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct answer based on the facts about llamas.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where are llamas originally from?",
+            "options": [
+              "South America",
+              "North America",
+              "Africa"
+            ],
+            "answer": "South America"
+          },
+          {
+            "id": 2,
+            "question": "Why do llamas spit at each other?",
+            "options": [
+              "When they are happy",
+              "To communicate annoyed or defensive feelings",
+              "When they are thirsty"
+            ],
+            "answer": "To communicate annoyed or defensive feelings"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is the most interesting animal fact you have ever learned?"
+    }
+  },
+  {
+    "topic": {
+      "id": "my-favourite-film",
+      "title": "My favourite film",
+      "level": "B1 Intermediate",
+      "category": "Entertainment",
+      "description": "Listen to someone reviewing their favourite film, its plot, and main characters."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "film-review-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct options summarizing the film review.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What genre is the speaker's favourite film?",
+            "options": [
+              "Science Fiction / Fantasy",
+              "Historical Drama",
+              "Horror"
+            ],
+            "answer": "Science Fiction / Fantasy"
+          },
+          {
+            "id": 2,
+            "question": "What does the reviewer praise most about the film?",
+            "options": [
+              "The special effects and soundtrack",
+              "The length of the film",
+              "The comedy dialogues"
+            ],
+            "answer": "The special effects and soundtrack"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "film-details-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements about the review are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "The speaker has watched this movie more than once.",
+            "correctAnswer": true
+          },
+          {
+            "id": 2,
+            "statement": "The speaker recommends the film only for young children.",
+            "correctAnswer": false
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your all-time favourite film and what makes it special to you?"
+    }
+  },
+  {
+    "topic": {
+      "id": "organising-your-time",
+      "title": "Organising your time",
+      "level": "B1 Intermediate",
+      "category": "Study & Productivity Skills",
+      "description": "Listen to practical productivity strategies for students on managing daily study time."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the terms on the left to their definition on the right.",
+        "pairs": [
+          {
+            "word": "a timer",
+            "definition": "a device that makes a sound or shows you when a certain amount of time has passed"
+          },
+          {
+            "word": "an A-grade student",
+            "definition": "a student who gets the best marks at school"
+          },
+          {
+            "word": "productivity",
+            "definition": "how much is being done or achieved"
+          },
+          {
+            "word": "sensible",
+            "definition": "having good judgement or common sense"
+          },
+          {
+            "word": "'to-do' list",
+            "definition": "a list of things you need to do"
+          },
+          {
+            "word": "to go off",
+            "definition": "to start making a noise (as an alarm or signal)"
+          },
+          {
+            "word": "to deserve",
+            "definition": "to earn or merit something because of what you have done"
+          },
+          {
+            "word": "to waste time",
+            "definition": "to spend time doing something useless"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "productivity-gap-fill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words based on the productivity tips.",
+        "questions": [
+          {
+            "id": 1,
+            "sentence": "Writing a ________ list every morning helps keep your day organized.",
+            "answer": "to-do"
+          },
+          {
+            "id": 2,
+            "sentence": "Set a ________ for 25 minutes to stay focused on one task.",
+            "answer": "timer"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What techniques do you use when you need to stay organized and productive?"
+    }
+  },
+  {
+    "topic": {
+      "id": "sports-centres",
+      "title": "Sports centres",
+      "level": "B1 Intermediate",
+      "category": "Health & Sports",
+      "description": "Information about local sports center facilities, available classes, and team roles."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "drag_and_drop",
+        "id": "categorize-gym-items",
+        "title": "Preparation: Categorization",
+        "instruction": "Classify the items into Gym Staff, Gym Facilities, or Gym Classes.",
+        "categories": [
+          {
+            "id": "gym_staff",
+            "title": "Gym staff",
+            "items": [
+              "personal trainer",
+              "lifeguard",
+              "dance teacher",
+              "secretary"
+            ]
+          },
+          {
+            "id": "gym_facilities",
+            "title": "Gym facilities",
+            "items": [
+              "weight machines",
+              "changing rooms",
+              "sauna",
+              "swimming pool"
+            ]
+          },
+          {
+            "id": "gym_classes",
+            "title": "Gym classes",
+            "items": [
+              "Zumba",
+              "water aerobics",
+              "Pilates",
+              "jazz dancing"
+            ]
+          }
+        ],
+        "allItems": [
+          "Zumba",
+          "personal trainer",
+          "weight machines",
+          "lifeguard",
+          "changing rooms",
+          "water aerobics",
+          "sauna",
+          "dance teacher",
+          "Pilates",
+          "jazz dancing",
+          "swimming pool",
+          "secretary"
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "facility-questions",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct sports facility detail.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What feature is available in the newly renovated zone?",
+            "options": [
+              "Sauna and steam room",
+              "Outdoor tennis courts",
+              "Ice rink"
+            ],
+            "answer": "Sauna and steam room"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which gym classes or facilities would you take advantage of at a local sports centre?"
+    }
+  },
+  {
+    "topic": {
+      "id": "the-weekend",
+      "title": "The weekend",
+      "level": "B1 Intermediate",
+      "category": "Leisure & Daily Life",
+      "description": "Listen to conversations about weekend plans, activities, and relaxation routines."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "weekend-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct answer regarding weekend activities.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What is Speaker 1 planning to do on Saturday?",
+            "options": [
+              "Go hiking with friends",
+              "Study at the library",
+              "Visit family"
+            ],
+            "answer": "Go hiking with friends"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "weekend-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statement is True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "Speaker 2 plans to complete homework on Sunday evening.",
+            "correctAnswer": true
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Describe your ideal weekend activities from Saturday morning to Sunday evening."
+    }
+  },
+  {
+    "topic": {
+      "id": "theme-parks",
+      "title": "Theme parks",
+      "level": "B1 Intermediate",
+      "category": "Entertainment & Attractions",
+      "description": "Listen to a promotional guide describing popular rides and attractions at a theme park."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the theme park vocabulary to their descriptions.",
+        "pairs": [
+          {
+            "word": "rides",
+            "definition": "mechanical attractions at a theme park, for example a rollercoaster or a Ferris wheel"
+          },
+          {
+            "word": "rollercoaster",
+            "definition": "a type of ride that is like a fast train on tracks that curve, and go very high and low"
+          },
+          {
+            "word": "marine animals",
+            "definition": "animals that live in the sea"
+          },
+          {
+            "word": "a dark ride",
+            "definition": "a ride inside a building"
+          },
+          {
+            "word": "a Ferris wheel",
+            "definition": "a type of ride that consists of a big, rotating wheel"
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "theme-park-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct theme park attraction details.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Which attraction is recommended for visitors seeking extreme speed?",
+            "options": [
+              "The steel rollercoaster",
+              "The Ferris wheel",
+              "The dark ride"
+            ],
+            "answer": "The steel rollercoaster"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you enjoy visiting theme parks and going on fast rollercoasters?"
+    }
+  }
+]

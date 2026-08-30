@@ -1,0 +1,106 @@
+{
+  "topic": {
+    "id": "giving-directions",
+    "title": "Giving directions",
+    "level": "A2 Pre-intermediate",
+    "category": "Travel & Directions",
+    "description": "Listen to the directions and identify different locations on the town map, such as the post office, underground station, cinema, and bus station."
+  },
+  "content": {
+    "contextPassage": {
+      "title": "Map Navigation & Key Phrases",
+      "summary": "Practice following spoken instructions using common directional vocabulary: go straight on, turn left/right, go past, opposite, next to, roundabout, and traffic lights."
+    },
+    "vocabulary": [
+      "go straight on",
+      "turn left",
+      "turn right",
+      "go past",
+      "next to",
+      "opposite",
+      "roundabout",
+      "traffic lights",
+      "take the first left",
+      "take the second right"
+    ],
+    "audio": {
+      "src": "",
+      "placeholderText": "Insert your audio file URL here"
+    }
+  },
+  "exercises": [
+    {
+      "type": "multiple_choice_map",
+      "instruction": "Listen to each set of directions and identify the correct destination building on the map.",
+      "questions": [
+        {
+          "id": "speaker_A",
+          "label": "Speaker A",
+          "question": "Which building is Speaker A asking for?",
+          "options": ["Post office", "Underground station", "Cinema", "Bus station"],
+          "answer": "Post office"
+        },
+        {
+          "id": "speaker_B",
+          "label": "Speaker B",
+          "question": "Which building is Speaker B asking for?",
+          "options": ["Post office", "Underground station", "Cinema", "Bus station"],
+          "answer": "Underground station"
+        },
+        {
+          "id": "speaker_C",
+          "label": "Speaker C",
+          "question": "Which building is Speaker C asking for?",
+          "options": ["Post office", "Underground station", "Cinema", "Bus station"],
+          "answer": "Cinema"
+        },
+        {
+          "id": "speaker_D",
+          "label": "Speaker D",
+          "question": "Which building is Speaker D asking for?",
+          "options": ["Post office", "Underground station", "Cinema", "Bus station"],
+          "answer": "Bus station"
+        }
+      ]
+    },
+    {
+      "type": "gap_fill",
+      "instruction": "Complete the direction phrases with the correct words.",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "Go ________ on.",
+          "answer": "straight"
+        },
+        {
+          "id": 2,
+          "sentence": "________ past the traffic lights.",
+          "answer": "Go"
+        },
+        {
+          "id": 3,
+          "sentence": "It's the building next to the library ________ the left.",
+          "answer": "on"
+        },
+        {
+          "id": 4,
+          "sentence": "________ the roundabout turn left.",
+          "answer": "At"
+        },
+        {
+          "id": 5,
+          "sentence": "Then ________ the first left on to Green Street.",
+          "answer": "take"
+        },
+        {
+          "id": 6,
+          "sentence": "Go past the traffic lights and take the ________ right on to King's Road.",
+          "answer": "second"
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "When you are in a new city, do you prefer using a map app on your phone or asking people on the street for directions?"
+  }
+}

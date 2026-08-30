@@ -1,0 +1,117 @@
+{
+  "topic": {
+    "id": "going-cinema",
+    "title": "Going to the cinema",
+    "level": "A2 Pre-intermediate",
+    "category": "Entertainment & Leisure",
+    "description": "Mario and Tamara decide which film to see at the cinema, discussing genres, showtimes, and movie preferences."
+  },
+  "content": {
+    "contextPassage": {
+      "title": "Cinema Showtimes Summary",
+      "summary": "Mario and Tamara discuss movie options showing at the cinema today. The available films include two action movies in 3D (Mr and Mrs Jones, War Games), a sci-fi film (Robot 2075), a romantic comedy (Forever), and a horror film (Midnight Moon)."
+    },
+    "filmTypes": [
+      "Action",
+      "Science fiction",
+      "Romantic comedy",
+      "Horror"
+    ],
+    "audio": {
+      "src": "",
+      "placeholderText": "Insert your audio file URL here"
+    }
+  },
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "instruction": "Choose the correct option for each question.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Which action film has Mario already seen?",
+          "options": [
+            "Mr and Mrs Jones",
+            "War Games",
+            "Robot 2075",
+            "Midnight Moon"
+          ],
+          "answer": "Mr and Mrs Jones"
+        },
+        {
+          "id": 2,
+          "question": "Which film has Tamara already seen?",
+          "options": [
+            "War Games",
+            "Forever",
+            "Robot 2075",
+            "Midnight Moon"
+          ],
+          "answer": "Robot 2075"
+        },
+        {
+          "id": 3,
+          "question": "What type of film is Midnight Moon?",
+          "options": [
+            "Action film",
+            "Romantic comedy",
+            "Science fiction",
+            "Horror film"
+          ],
+          "answer": "Horror film"
+        },
+        {
+          "id": 4,
+          "question": "What time do Mario and Tamara decide to see the movie?",
+          "options": [
+            "12:00",
+            "2:30",
+            "7:00",
+            "7:30"
+          ],
+          "answer": "7:30"
+        },
+        {
+          "id": 5,
+          "question": "What time are they meeting outside the cinema?",
+          "options": [
+            "6:30",
+            "7:00",
+            "7:30",
+            "8:00"
+          ],
+          "answer": "7:00"
+        }
+      ]
+    },
+    {
+      "type": "gap_fill",
+      "instruction": "Fill in the missing words based on the cinema schedule details.",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "Mr and Mrs Jones and War Games are both in ________.",
+          "answer": "3D"
+        },
+        {
+          "id": 2,
+          "sentence": "Robot 2075 is a ________ fiction film.",
+          "answer": "science"
+        },
+        {
+          "id": 3,
+          "sentence": "Midnight Moon has ________ in it.",
+          "answer": "vampires"
+        },
+        {
+          "id": 4,
+          "sentence": "They decide to meet at the cinema at ________ o'clock.",
+          "answer": "7"
+        }
+      ]
+    }
+  ],
+  "discussion": {
+    "question": "What type of films do you like? What was the last film you saw at the cinema?"
+  }
+}

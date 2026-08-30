@@ -1,5 +1,17 @@
 <main class="practice-page">
-  <a class="back-link" href="/">← Back to grammar areas</a>
+  <div class="grammar-workspace">
+    <aside class="practice-nav">
+      <p class="exercise-overview-title">Grammar overview</p>
+      <nav aria-label="Practice pages">
+        <a href="/practice/questions"><strong>Chapters</strong></a>
+        <a href="/practice/sentence-fixer"><strong>Sentence Fixer</strong></a>
+        <a href="/practice/find-errors"><strong>Find Errors</strong></a>
+        <a href="/practice/final-test"><strong>Final Test</strong></a>
+      </nav>
+    </aside>
+
+    <div class="grammar-content">
+      <a class="back-link" href="/">← Back to grammar areas</a>
   <div class="practice-heading">
     <p class="eyebrow">English Labs / Practice</p>
     <h1>{{pageTitle}}</h1>
@@ -100,6 +112,8 @@
       </section>
     {{/if}}
   {{/if}}
+    </div>
+  </div>
 </main>
 
 <script>
@@ -259,7 +273,8 @@
     const completePanel = errorActivity.querySelector("[data-activity-complete]");
     const completeResult = errorActivity.querySelector("[data-complete-result]");
     const previousResult = JSON.parse(localStorage.getItem(resultKey) || "null");
-    let errorIndex = 0;
+    let questionQueue = errorQuestions.map((_, index) => index);
+    let currentQuestionIndex = questionQueue[0];
     let points = 0;
 
     const showCompletion = (result) => {
@@ -270,6 +285,9 @@
       score.textContent = `Final score: ${result.points} / ${result.total}`;
     };
     if (previousResult) showCompletion(previousResult);
+    errorQuestions.forEach((question, index) => {
+      question.hidden = index !== currentQuestionIndex;
+    });
     errorActivity.querySelector("[data-activity-restart]").addEventListener("click", () => {
       localStorage.removeItem(resultKey);
       location.reload();
@@ -284,8 +302,22 @@
           question.querySelector("[data-correction-options]").hidden = false;
           question.querySelector("[data-error-feedback]").textContent = "Good catch. Now choose the correct replacement.";
         } else {
+          if (question.dataset.retryPending === "true") return;
+          question.dataset.retryPending = "true";
+          question.classList.add("retry-wrong");
+          question.querySelectorAll("[data-word]").forEach((wordButton) => wordButton.disabled = true);
           question.querySelector("[data-correction-options]").hidden = true;
-          question.querySelector("[data-error-feedback]").textContent = "This word is correct. Keep looking.";
+          question.querySelector("[data-error-feedback]").textContent = "Good thing, you'll get a second chance.";
+          window.setTimeout(() => {
+            question.classList.remove("retry-wrong");
+            question.dataset.retryPending = "false";
+            question.querySelectorAll("[data-word]").forEach((wordButton) => wordButton.disabled = false);
+            questionQueue.shift();
+            questionQueue.push(errorQuestions.indexOf(question));
+            question.hidden = true;
+            currentQuestionIndex = questionQueue[0];
+            errorQuestions[currentQuestionIndex].hidden = false;
+          }, 4000);
         }
       }));
       question.querySelectorAll("[data-correction]").forEach((button) => button.addEventListener("click", () => {
@@ -297,7 +329,7 @@
           score.textContent = `Points: ${points} / ${errorQuestions.length}`;
           question.querySelector("[data-error-feedback]").textContent = "Correct! You can continue to the next sentence.";
           nextError.disabled = false;
-          nextError.textContent = errorIndex === errorQuestions.length - 1 ? "Finish activity" : "Next sentence";
+          nextError.textContent = questionQueue.length === 1 ? "Finish activity" : "Next sentence";
         } else {
           question.querySelector("[data-error-feedback]").textContent = "Not quite. Check the grammar rule and try again.";
         }
@@ -305,9 +337,9 @@
     });
 
     nextError.addEventListener("click", () => {
-      errorQuestions[errorIndex].hidden = true;
-      errorIndex += 1;
-      if (errorIndex >= errorQuestions.length) {
+      errorQuestions[currentQuestionIndex].hidden = true;
+      questionQueue.shift();
+      if (!questionQueue.length) {
         nextError.hidden = true;
         const percentage = Math.round((points / errorQuestions.length) * 100);
         const result = { points, total: errorQuestions.length, percentage };
@@ -316,7 +348,8 @@
         showCompletion(result);
         return;
       }
-      errorQuestions[errorIndex].hidden = false;
+      currentQuestionIndex = questionQueue[0];
+      errorQuestions[currentQuestionIndex].hidden = false;
       nextError.disabled = true;
       nextError.textContent = "Find the error first";
     });

@@ -1,0 +1,156 @@
+{
+  "quizTitle": "Irregular Verbs Exercise Part 3 (Past Participles)",
+  "instructions": "Fill in the correct past participle form of the irregular verb in parentheses.",
+  "questions": [
+    {
+      "id": 1,
+      "sentence": "Julie wasn't at home. She had _______ (go) to the shops.",
+      "baseVerb": "go",
+      "correctAnswer": "gone"
+    },
+    {
+      "id": 2,
+      "sentence": "We've already _______ (have) lunch.",
+      "baseVerb": "have",
+      "correctAnswer": "had"
+    },
+    {
+      "id": 3,
+      "sentence": "This was the first time she had _______ (do) her homework.",
+      "baseVerb": "do",
+      "correctAnswer": "done"
+    },
+    {
+      "id": 4,
+      "sentence": "They have _______ (begin) painting the living room.",
+      "baseVerb": "begin",
+      "correctAnswer": "begun"
+    },
+    {
+      "id": 5,
+      "sentence": "We have _______ (keep) this secret for three years.",
+      "baseVerb": "keep",
+      "correctAnswer": "kept"
+    },
+    {
+      "id": 6,
+      "sentence": "He has never _______ (drive) a motorbike before.",
+      "baseVerb": "drive",
+      "correctAnswer": "driven"
+    },
+    {
+      "id": 7,
+      "sentence": "I have _______ (be) sick all week.",
+      "baseVerb": "be",
+      "correctAnswer": "been"
+    },
+    {
+      "id": 8,
+      "sentence": "By the time we arrived, the children had _______ (eat) all the chocolate.",
+      "baseVerb": "eat",
+      "correctAnswer": "eaten"
+    },
+    {
+      "id": 9,
+      "sentence": "The books had _______ (fall) off the table and were all over the floor.",
+      "baseVerb": "fall",
+      "correctAnswer": "fallen"
+    },
+    {
+      "id": 10,
+      "sentence": "Are you okay? I've _______ (feel) better.",
+      "baseVerb": "feel",
+      "correctAnswer": "felt"
+    },
+    {
+      "id": 11,
+      "sentence": "I'd _______ (lend) my umbrella to John, so I got wet.",
+      "baseVerb": "lend",
+      "correctAnswer": "lent"
+    },
+    {
+      "id": 12,
+      "sentence": "I've been looking for ages but I haven't _______ (find) my keys yet.",
+      "baseVerb": "find",
+      "correctAnswer": "found"
+    },
+    {
+      "id": 13,
+      "sentence": "The birds have _______ (fly) south for the winter.",
+      "baseVerb": "fly",
+      "correctAnswer": "flown"
+    },
+    {
+      "id": 14,
+      "sentence": "She has finally _______ (come).",
+      "baseVerb": "come",
+      "correctAnswer": "come"
+    },
+    {
+      "id": 15,
+      "sentence": "Don't worry, we haven't _______ (forget) about the meeting.",
+      "baseVerb": "forget",
+      "correctAnswer": "forgotten"
+    },
+    {
+      "id": 16,
+      "sentence": "It had _______ (become) very cold, so we went inside.",
+      "baseVerb": "become",
+      "correctAnswer": "become"
+    },
+    {
+      "id": 17,
+      "sentence": "You have _______ (buy) a lot of clothes recently.",
+      "baseVerb": "buy",
+      "correctAnswer": "bought"
+    },
+    {
+      "id": 18,
+      "sentence": "I'd _______ (get) a lovely new bike for my birthday, so I was keen to try it.",
+      "baseVerb": "get",
+      "correctAnswer": "got"
+    },
+    {
+      "id": 19,
+      "sentence": "She'd _______ (bring) a cake to the party, but we didn't eat it.",
+      "baseVerb": "bring",
+      "correctAnswer": "brought"
+    },
+    {
+      "id": 20,
+      "sentence": "Have you _______ (choose) your university yet?",
+      "baseVerb": "choose",
+      "correctAnswer": "chosen"
+    },
+    {
+      "id": 21,
+      "sentence": "Have you ever _______ (drink) Turkish coffee?",
+      "baseVerb": "drink",
+      "correctAnswer": "drunk"
+    },
+    {
+      "id": 22,
+      "sentence": "I've _______ (give) some money to Julia.",
+      "baseVerb": "give",
+      "correctAnswer": "given"
+    },
+    {
+      "id": 23,
+      "sentence": "Had you _______ (hear) of this band before you came to the USA?",
+      "baseVerb": "hear",
+      "correctAnswer": "heard"
+    },
+    {
+      "id": 24,
+      "sentence": "She has _______ (know) about this problem for three months.",
+      "baseVerb": "know",
+      "correctAnswer": "known"
+    },
+    {
+      "id": 25,
+      "sentence": "Why has John _______ (leave) already?",
+      "baseVerb": "leave",
+      "correctAnswer": "left"
+    }
+  ]
+}

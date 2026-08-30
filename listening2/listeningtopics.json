@@ -1,0 +1,473 @@
+[
+  {
+    "topic": {
+      "id": "advice-exams",
+      "title": "Advice Exams",
+      "level": "B1 Intermediate",
+      "category": "Exams & Education",
+      "description": "Listen to the radio interview about exam advice and do the exercises to practice and improve your listening skills."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "word": "advice",
+            "definition": "an opinion or recommendation about what someone should do"
+          },
+          {
+            "word": "to be tempted",
+            "definition": "to be strongly attracted to doing something"
+          },
+          {
+            "word": "plenty",
+            "definition": "a good or full amount"
+          },
+          {
+            "word": "repetition",
+            "definition": "the act of doing something again"
+          },
+          {
+            "word": "anxious",
+            "definition": "nervous and worried"
+          },
+          {
+            "word": "a stroll around the block",
+            "definition": "a short walk around your local area"
+          },
+          {
+            "word": "to cover something up",
+            "definition": "to put something over something so that you can't see it"
+          },
+          {
+            "word": "last but not least",
+            "definition": "an expression used before the last thing in a list, to say that it is equally as important"
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "multiple-choice-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct option to complete the sentences based on the advice given.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Before you start revising, you should...",
+            "options": [
+              "make a timetable",
+              "clean your room",
+              "start reading immediately"
+            ],
+            "answer": "make a timetable"
+          },
+          {
+            "id": 2,
+            "question": "When you are studying, you should take a break every...",
+            "options": [
+              "30 minutes",
+              "45 to 60 minutes",
+              "2 hours"
+            ],
+            "answer": "45 to 60 minutes"
+          },
+          {
+            "id": 3,
+            "question": "To help remember key facts, you should use...",
+            "options": [
+              "mind maps and flashcards",
+              "only textbooks",
+              "recorded notes"
+            ],
+            "answer": "mind maps and flashcards"
+          },
+          {
+            "id": 4,
+            "question": "On the night before the exam, it is best to...",
+            "options": [
+              "study all night",
+              "get a good night's sleep",
+              "watch TV for hours"
+            ],
+            "answer": "get a good night's sleep"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "true-false-comprehension",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          {
+            "id": 1,
+            "statement": "You should study without taking any breaks until you finish.",
+            "correctAnswer": false
+          },
+          {
+            "id": 2,
+            "statement": "Drinking plenty of water is recommended during study sessions.",
+            "correctAnswer": true
+          },
+          {
+            "id": 3,
+            "statement": "Eating healthy snacks helps maintain focus while revising.",
+            "correctAnswer": true
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What advice would you give to someone preparing for an important exam?"
+    }
+  },
+  {
+    "topic": {
+      "id": "amazing-facts",
+      "title": "Amazing Facts",
+      "level": "B1 Intermediate",
+      "category": "Science & Nature",
+      "description": "Listen to the radio show about amazing scientific facts and do the exercises."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the science terms with their definitions.",
+        "pairs": [
+          {
+            "word": "cells",
+            "definition": "The smallest part of an animal or plant that can work independently. All plants and animals are made of these."
+          },
+          {
+            "word": "bacteria",
+            "definition": "The simplest and smallest forms of life. They live in air, water, soil, as well as in humans and animals (dead or alive). They are often the cause of disease."
+          },
+          {
+            "word": "mites",
+            "definition": "Very tiny creatures that live on plants or animals."
+          },
+          {
+            "word": "atom",
+            "definition": "The smallest part of a chemical element."
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "multiple-choice-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct factual answer based on the recording.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "How many cells is the human body composed of?",
+            "options": [
+              "Millions",
+              "Billions",
+              "Trillions"
+            ],
+            "answer": "Trillions"
+          },
+          {
+            "id": 2,
+            "question": "Where do dust mites usually live in the home?",
+            "options": [
+              "In mattresses and pillows",
+              "In refrigerator drawers",
+              "On kitchen counters"
+            ],
+            "answer": "In mattresses and pillows"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "gap-fill-comprehension",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Complete the missing scientific numbers and terms.",
+        "questions": [
+          {
+            "id": 1,
+            "sentence": "An ________ is so small that millions could fit on the head of a pin.",
+            "answer": "atom"
+          },
+          {
+            "id": 2,
+            "sentence": "There are more ________ in your mouth than there are people on Earth.",
+            "answer": "bacteria"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which scientific fact surprised you the most?"
+    }
+  },
+  {
+    "topic": {
+      "id": "celebrations",
+      "title": "Celebrations",
+      "level": "B1 Intermediate",
+      "category": "Culture & Events",
+      "description": "Listen to five different people talking about special celebrations and events."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "matching_definitions",
+        "id": "preparation-vocabulary",
+        "title": "Preparation: Matching",
+        "instruction": "Match the event names with their descriptions.",
+        "pairs": [
+          {
+            "word": "birthday party",
+            "definition": "a party to celebrate the anniversary of someone's birth"
+          },
+          {
+            "word": "Notting Hill Carnival",
+            "definition": "a West Indian carnival held in London every August"
+          },
+          {
+            "word": "Royal wedding",
+            "definition": "the marriage of a king, queen, prince or princess"
+          },
+          {
+            "word": "golden wedding anniversary",
+            "definition": "a celebration of 50 years of marriage"
+          },
+          {
+            "word": "end of exams party",
+            "definition": "a party normally organised by students to celebrate finishing the school year and completing their exams"
+          }
+        ]
+      },
+      {
+        "type": "speaker_matching",
+        "id": "matching-speakers",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each speaker with the event they are describing.",
+        "questions": [
+          {
+            "id": "speaker_1",
+            "speaker": "Speaker 1",
+            "answer": "birthday party"
+          },
+          {
+            "id": "speaker_2",
+            "speaker": "Speaker 2",
+            "answer": "Notting Hill Carnival"
+          },
+          {
+            "id": "speaker_3",
+            "speaker": "Speaker 3",
+            "answer": "golden wedding anniversary"
+          },
+          {
+            "id": "speaker_4",
+            "speaker": "Speaker 4",
+            "answer": "end of exams party"
+          },
+          {
+            "id": "speaker_5",
+            "speaker": "Speaker 5",
+            "answer": "Royal wedding"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your favorite celebration of the year and how do you celebrate it?"
+    }
+  },
+  {
+    "topic": {
+      "id": "difficult-situations",
+      "title": "Difficult situations",
+      "level": "B1 Intermediate",
+      "category": "Life Challenges",
+      "description": "Listen to four people talking about difficult situations they faced and how they solved them."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "phrase_matching",
+        "id": "preparation-matching",
+        "title": "Preparation: Matching",
+        "instruction": "Match the beginning of each clause to the correct ending.",
+        "pairs": [
+          {
+            "start": "Your bus breaks",
+            "end": "down."
+          },
+          {
+            "start": "You fail",
+            "end": "an exam."
+          },
+          {
+            "start": "Your dog",
+            "end": "dies."
+          },
+          {
+            "start": "Someone steals",
+            "end": "your phone."
+          },
+          {
+            "start": "You leave your",
+            "end": "keys inside the house."
+          },
+          {
+            "start": "Your friend's boyfriend breaks",
+            "end": "up with her."
+          }
+        ]
+      },
+      {
+        "type": "multiple_choice",
+        "id": "multiple-choice-comprehension",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Identify the situation described by each speaker.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What problem did Speaker A experience?",
+            "options": [
+              "Left keys inside the house",
+              "Stolen phone",
+              "Failed an exam"
+            ],
+            "answer": "Stolen phone"
+          },
+          {
+            "id": 2,
+            "question": "What problem did Speaker B experience?",
+            "options": [
+              "Bus broke down on the way to an exam",
+              "Lost a pet dog",
+              "Relationship breakup"
+            ],
+            "answer": "Bus broke down on the way to an exam"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What do you do when you face a difficult or stressful situation?"
+    }
+  },
+  {
+    "topic": {
+      "id": "favourite-things",
+      "title": "Favourite things",
+      "level": "B1 Intermediate",
+      "category": "Personal Life",
+      "description": "Listen to five people talking about their favourite possessions and hobbies."
+    },
+    "content": {
+      "audio": {
+        "src": "",
+        "placeholderText": "Insert your audio file URL here"
+      }
+    },
+    "exercises": [
+      {
+        "type": "phrase_matching",
+        "id": "preparation-matching",
+        "title": "Preparation: Matching",
+        "instruction": "Match the verb on the left to the noun on the right.",
+        "pairs": [
+          {
+            "verb": "take",
+            "noun": "photos"
+          },
+          {
+            "verb": "listen to",
+            "noun": "music"
+          },
+          {
+            "verb": "watch",
+            "noun": "films"
+          },
+          {
+            "verb": "stroke",
+            "noun": "the cat"
+          },
+          {
+            "verb": "park",
+            "noun": "your scooter"
+          },
+          {
+            "verb": "make it as",
+            "noun": "a designer"
+          },
+          {
+            "verb": "set up",
+            "noun": "a business"
+          }
+        ]
+      },
+      {
+        "type": "speaker_matching",
+        "id": "matching-favourite-things",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each speaker to their favourite thing.",
+        "questions": [
+          {
+            "id": "speaker_1",
+            "speaker": "Speaker 1",
+            "answer": "scooter"
+          },
+          {
+            "id": "speaker_2",
+            "speaker": "Speaker 2",
+            "answer": "cat"
+          },
+          {
+            "id": "speaker_3",
+            "speaker": "Speaker 3",
+            "answer": "camera / photo collection"
+          },
+          {
+            "id": "speaker_4",
+            "speaker": "Speaker 4",
+            "answer": "sewing machine / clothing design items"
+          },
+          {
+            "id": "speaker_5",
+            "speaker": "Speaker 5",
+            "answer": "tablet / music collection"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your absolute favourite object or possession, and why is it special to you?"
+    }
+  }
+]

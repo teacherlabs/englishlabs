@@ -1,0 +1,156 @@
+{
+  "quizTitle": "Irregular Verbs Exercise (Past Simple)",
+  "instructions": "Fill in the correct past simple form of the irregular verb in parentheses.",
+  "questions": [
+    {
+      "id": 1,
+      "sentence": "I _______ (hear) a new song on the radio.",
+      "baseVerb": "hear",
+      "correctAnswer": "heard"
+    },
+    {
+      "id": 2,
+      "sentence": "I _______ (read) three books last week.",
+      "baseVerb": "read",
+      "correctAnswer": "read"
+    },
+    {
+      "id": 3,
+      "sentence": "They _______ (speak) French to the waitress.",
+      "baseVerb": "speak",
+      "correctAnswer": "spoke"
+    },
+    {
+      "id": 4,
+      "sentence": "He _______ (understand) during the class, but now he doesn't understand.",
+      "baseVerb": "understand",
+      "correctAnswer": "understood"
+    },
+    {
+      "id": 5,
+      "sentence": "I _______ (forget) to buy some milk.",
+      "baseVerb": "forget",
+      "correctAnswer": "forgot"
+    },
+    {
+      "id": 6,
+      "sentence": "She _______ (have) a baby in June.",
+      "baseVerb": "have",
+      "correctAnswer": "had"
+    },
+    {
+      "id": 7,
+      "sentence": "You _______ (lose) your keys last week.",
+      "baseVerb": "lose",
+      "correctAnswer": "lost"
+    },
+    {
+      "id": 8,
+      "sentence": "They _______ (swim) 500m.",
+      "baseVerb": "swim",
+      "correctAnswer": "swam"
+    },
+    {
+      "id": 9,
+      "sentence": "I _______ (give) my mother a CD for Christmas.",
+      "baseVerb": "give",
+      "correctAnswer": "gave"
+    },
+    {
+      "id": 10,
+      "sentence": "At the age of 23, she _______ (become) a doctor.",
+      "baseVerb": "become",
+      "correctAnswer": "became"
+    },
+    {
+      "id": 11,
+      "sentence": "I _______ (know) the answer yesterday.",
+      "baseVerb": "know",
+      "correctAnswer": "knew"
+    },
+    {
+      "id": 12,
+      "sentence": "He _______ (tell) me that he lived in Toronto.",
+      "baseVerb": "tell",
+      "correctAnswer": "told"
+    },
+    {
+      "id": 13,
+      "sentence": "We _______ (lend) John £200.",
+      "baseVerb": "lend",
+      "correctAnswer": "lent"
+    },
+    {
+      "id": 14,
+      "sentence": "She _______ (drink) too much coffee yesterday.",
+      "baseVerb": "drink",
+      "correctAnswer": "drank"
+    },
+    {
+      "id": 15,
+      "sentence": "The children _______ (sleep) in the car.",
+      "baseVerb": "sleep",
+      "correctAnswer": "slept"
+    },
+    {
+      "id": 16,
+      "sentence": "He _______ (keep) his promise.",
+      "baseVerb": "keep",
+      "correctAnswer": "kept"
+    },
+    {
+      "id": 17,
+      "sentence": "I _______ (choose) steak for dinner.",
+      "baseVerb": "choose",
+      "correctAnswer": "chose"
+    },
+    {
+      "id": 18,
+      "sentence": "The film _______ (begin) late.",
+      "baseVerb": "begin",
+      "correctAnswer": "began"
+    },
+    {
+      "id": 19,
+      "sentence": "We _______ (fly) to Sydney.",
+      "baseVerb": "fly",
+      "correctAnswer": "flew"
+    },
+    {
+      "id": 20,
+      "sentence": "They _______ (drive) to Beijing.",
+      "baseVerb": "drive",
+      "correctAnswer": "drove"
+    },
+    {
+      "id": 21,
+      "sentence": "He _______ (teach) English at the University.",
+      "baseVerb": "teach",
+      "correctAnswer": "taught"
+    },
+    {
+      "id": 22,
+      "sentence": "I _______ (send) you an email earlier.",
+      "baseVerb": "send",
+      "correctAnswer": "sent"
+    },
+    {
+      "id": 23,
+      "sentence": "We _______ (leave) the house at 7am.",
+      "baseVerb": "leave",
+      "correctAnswer": "left"
+    },
+    {
+      "id": 24,
+      "sentence": "He _______ (feel) terrible after eating the prawns.",
+      "baseVerb": "feel",
+      "correctAnswer": "felt"
+    },
+    {
+      "id": 25,
+      "sentence": "She _______ (bring) some chocolates to the party.",
+      "baseVerb": "bring",
+      "correctAnswer": "brought"
+    }
+  ]
+}
