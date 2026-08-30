@@ -28,6 +28,7 @@
           {{#if session.isLoggedIn}}<li><a href="/">Grammar</a></li>
           <li><a href="/reading">Reading</a></li>
           <li><a href="/listening">Listening</a></li>
+          <li><a href="/writing">Writing</a></li>
           <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
           {{#if session.isLoggedIn}}<li><a href="/lobby">Enter Lobby</a></li>{{/if}}
         </ul>
@@ -42,6 +43,7 @@
               {{else}}
                 <span class="nav-avatar nav-avatar-placeholder" aria-label="Profile picture placeholder">{{session.avatar_initial}}</span>
               {{/if}}
+              {{#unless session.isAdmin}}{{#if unreadFeedbackCount}}<span class="nav-feedback-badge" aria-label="{{unreadFeedbackCount}} unread teacher feedback">{{unreadFeedbackCount}}</span>{{/if}}{{/unless}}
             </a>
 
             <a href="/logout" class="login-btn">Log out</a>

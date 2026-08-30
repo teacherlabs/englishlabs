@@ -1,0 +1,108 @@
+<main class="practice-page reading-page">
+  <div class="grammar-workspace">
+    <aside class="practice-nav">
+      <p class="exercise-overview-title">Reading topics</p>
+      <nav aria-label="Reading topics">
+        {{#each readingLevels}}
+          <div class="listening-level{{#if selected}} is-open{{/if}}">
+            <button class="listening-level-toggle" type="button" data-reading-level-toggle aria-expanded="{{#if selected}}true{{else}}false{{/if}}"><strong>Level {{number}}</strong><span aria-hidden="true">+</span></button>
+            <div class="listening-level-topics"><div>
+              {{#if topics}}{{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}" href="/reading?level={{../number}}&topic={{id}}">{{title}}{{#if completed}}<span class="topic-completion-tick" aria-label="Completed">&#10003;</span>{{/if}}</a>{{/each}}{{else}}<p>No topics yet.</p>{{/if}}
+            </div></div>
+          </div>
+        {{/each}}
+      </nav>
+    </aside>
+
+    <div class="grammar-content">
+      {{#if topic}}
+        <div class="practice-heading"><p class="eyebrow">Reading / {{topic.category}}</p><h1>{{topic.title}}</h1><p>{{topic.description}}</p></div>
+        {{#if content.readingPassage}}
+          <section class="reading-content"><div class="reading-section-heading"><p class="eyebrow">Read</p><h2>{{content.readingPassage.title}}</h2></div><p class="writing-passage-text">{{content.readingPassage.text}}</p></section>
+        {{/if}}
+        {{#if content.vocabulary}}
+          <section class="listening-context"><p class="eyebrow">Vocabulary</p><div class="reading-vocabulary-list">{{#each content.vocabulary}}<div><strong>{{word}}</strong><span>{{definition}}</span></div>{{/each}}</div></section>
+        {{/if}}
+        {{#if tips}}
+          <section class="writing-tips-card"><div class="reading-section-heading"><p class="eyebrow">Reading tips</p><h2>Tips for this text type</h2></div><ul>{{#each tips}}<li>{{this}}</li>{{/each}}</ul></section>
+        {{/if}}
+        <section class="reading-exercises"><div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
+          {{#each exercises}}
+            <article class="reading-exercise" data-reading-exercise data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
+              <h3>{{title}}</h3><p>{{instruction}}</p>
+              {{#each questions}}
+                <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}><p class="question-progress">Question {{number}} of {{../questions.length}}</p><strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>
+                  {{#if ../isTrueOrFalse}}<div class="answer-options"><button type="button" value="true">True</button><button type="button" value="false">False</button></div>{{else if ../isMultipleChoice}}<div class="answer-options">{{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}</div>{{else}}<input class="written-answer" type="text" aria-label="Your answer" autocomplete="off"><button class="practice-button" type="button" data-reading-check>Check answer</button>{{/if}}
+                  <p class="answer-feedback" hidden></p>
+                </div>
+              {{/each}}
+              <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: {{#if completed}}{{savedPoints}}{{else}}0{{/if}} / {{#if completed}}{{savedTotal}}{{else}}{{questions.length}}{{/if}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button></div>
+            </article>
+          {{/each}}
+        </section>
+        {{#if discussion}}<section class="discussion-panel"><p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2></section>{{/if}}
+      {{else}}
+        <div class="practice-heading"><p class="eyebrow">Reading</p><h1>No topic selected</h1><p>Reading topics for this level will appear here soon.</p></div>
+      {{/if}}
+    </div>
+  </div>
+</main>
+<script>
+  document.querySelectorAll("[data-reading-exercise]").forEach((exercise) => {
+    const questions = [...exercise.querySelectorAll(".reading-question")];
+    const score = exercise.querySelector("[data-reading-score]");
+    const next = exercise.querySelector("[data-reading-next]");
+    let current = 0;
+    let points = 0;
+    if (exercise.dataset.completed === "true") {
+      questions.forEach((question) => { question.hidden = true; });
+      next.hidden = true;
+      score.textContent = `Completed: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
+      return;
+    }
+    const answer = (question, value) => {
+      if (question.dataset.answered) return;
+      const correct = value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
+      question.dataset.answered = "true";
+      if (correct) points += 1;
+      question.querySelectorAll("button, input").forEach((element) => element.disabled = true);
+      const feedback = question.querySelector(".answer-feedback");
+      feedback.hidden = false;
+      feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
+      feedback.textContent = correct ? "Correct! +1 point." : `Not quite. The answer is “${question.dataset.answer}”.`;
+      score.textContent = `Points: ${points} / ${questions.length}`;
+      next.disabled = false;
+      next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
+    };
+    exercise.querySelectorAll(".answer-options button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
+    exercise.querySelectorAll("[data-reading-check]").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.previousElementSibling.value)));
+    next.addEventListener("click", () => {
+      questions[current].hidden = true;
+      current += 1;
+      if (current === questions.length) {
+        next.hidden = true;
+        score.textContent = `Final score: ${points} / ${questions.length}`;
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            activityType: "reading",
+            difficultyLevel: `reading:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+            points,
+            totalPoints: questions.length,
+          }),
+        });
+        return;
+      }
+      questions[current].hidden = false;
+      next.disabled = true;
+      next.textContent = "Choose an answer";
+    });
+  });
+  document.querySelectorAll("[data-reading-level-toggle]").forEach((button) => button.addEventListener("click", () => {
+    const level = button.closest(".listening-level");
+    const isOpen = level.classList.contains("is-open");
+    document.querySelectorAll(".listening-level").forEach((item) => { item.classList.remove("is-open"); item.querySelector("[data-reading-level-toggle]").setAttribute("aria-expanded", "false"); });
+    if (!isOpen) { level.classList.add("is-open"); button.setAttribute("aria-expanded", "true"); }
+  }));
+</script>

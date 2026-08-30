@@ -1,0 +1,716 @@
+[
+  {
+    "topic": {
+      "id": "about-my-family",
+      "title": "About my family",
+      "level": "A1 Elementary",
+      "category": "Family & Writing",
+      "description": "Read a short paragraph about a family to learn how to write about family members, ages, and jobs."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "My Family",
+        "text": "My name is Sara and I'm 13 years old. I live in Madrid with my family. There are four people in my family: my father, my mother, my brother, and me. My father is named Carlos and he is a doctor. My mother is named Ana and she is a teacher. My brother, Pablo, is 10 years old and he loves playing football. We have a dog named Max."
+      }
+    },
+    "tips": [
+      "Use 'There are [number] people in my family' to start.",
+      "Use possessive adjectives like 'my father', 'my mother', and 'my brother'.",
+      "Use 'is' to state names, ages, and jobs (e.g., 'My father is a doctor').",
+      "Capitalize names, family titles used as names, cities, and languages."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "family-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Read the text and decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Sara is 10 years old.", "correctAnswer": false },
+          { "id": 2, "statement": "Sara's family lives in Madrid.", "correctAnswer": true },
+          { "id": 3, "statement": "Sara's mother is a doctor.", "correctAnswer": false },
+          { "id": 4, "statement": "Pablo is Sara's brother.", "correctAnswer": true }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "family-gap-fill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words based on the reading passage.",
+        "questions": [
+          { "id": 1, "sentence": "There are ________ people in Sara's family.", "answer": "four" },
+          { "id": 2, "sentence": "Sara's father works as a ________.", "answer": "doctor" },
+          { "id": 3, "sentence": "The family pet is a dog named ________.", "answer": "Max" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How many people are there in your family? What are their names?"
+    }
+  },
+  {
+    "topic": {
+      "id": "study-diary",
+      "title": "A study diary",
+      "level": "A1 Elementary",
+      "category": "School & Daily Routine",
+      "description": "Read a daily study log to practice writing about school tasks, study times, and subjects."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "My Study Diary",
+        "text": "Monday:\n- 4:00 PM: Read Chapter 3 of the History textbook.\n- 5:30 PM: Do 10 English grammar exercises.\n\nTuesday:\n- 4:30 PM: Practice maths problems on page 42.\n- 6:00 PM: Learn 15 new Spanish vocabulary words.\n\nWednesday:\n- 5:00 PM: Finish Science project poster.\n- 7:00 PM: Rest and watch a movie."
+      }
+    },
+    "tips": [
+      "Use days of the week in chronological order.",
+      "Write time using 'AM' or 'PM' consistently.",
+      "Use action verbs to start tasks (e.g., 'Read', 'Do', 'Practice', 'Learn').",
+      "Keep entries concise using bullet points."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "diary-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct answer from the study diary.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What subject does the student study at 4:30 PM on Tuesday?",
+            "options": ["History", "Maths", "Spanish"],
+            "answer": "Maths"
+          },
+          {
+            "id": 2,
+            "question": "When does the student finish the Science project poster?",
+            "options": ["Monday", "Tuesday", "Wednesday"],
+            "answer": "Wednesday"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "diary-gap-fill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing details from the study diary.",
+        "questions": [
+          { "id": 1, "sentence": "On Monday at 5:30 PM, the student does 10 ________ grammar exercises.", "answer": "English" },
+          { "id": 2, "sentence": "On Tuesday, the student learns 15 new ________ words.", "answer": "Spanish" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you keep a study diary or a to-do list for your homework?"
+    }
+  },
+  {
+    "topic": {
+      "id": "study-date-email",
+      "title": "A study date email",
+      "level": "A1 Elementary",
+      "category": "Emails & Friendship",
+      "description": "Read an email between friends arranging a time and place to study together."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Studying Together",
+        "text": "Subject: Study together for the English test?\n\nHi Ben,\n\nAre you free to study together for our English test? We can meet at the city library on Thursday at 4:00 PM. We can review unit 4 and practice vocabulary.\n\nLet me know if this time works for you!\n\nBest,\nLeo"
+      }
+    },
+    "tips": [
+      "Include a clear, short subject line.",
+      "Use questions like 'Are you free to...?' to make suggestions.",
+      "Specify the day, time, and location clearly.",
+      "Close with a simple sign-off like 'Best' or 'See you soon'."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "study-email-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Leo wants to study for a maths test.", "correctAnswer": false },
+          { "id": 2, "statement": "They plan to meet at the library.", "correctAnswer": true },
+          { "id": 3, "statement": "The suggested meeting day is Thursday.", "correctAnswer": true }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "study-email-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words from the email.",
+        "questions": [
+          { "id": 1, "sentence": "Leo suggests meeting at ________ PM.", "answer": "4:00" },
+          { "id": 2, "sentence": "They plan to review unit ________.", "answer": "4" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Where do you like to study with your classmates or friends?"
+    }
+  },
+  {
+    "topic": {
+      "id": "student-card-application",
+      "title": "A student card application form",
+      "level": "A1 Elementary",
+      "category": "Forms & Applications",
+      "description": "Read a completed student ID card application form to learn how to fill out personal details."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Student ID Card Form",
+        "text": "First Name: Elena\nLast Name: Gomez\nDate of Birth: 12/05/2011\nNationality: Spanish\nSchool: Green Valley High School\nGrade: 8\nEmail Address: elena.gomez@email.com\nPhone Number: +34 612 345 678"
+      }
+    },
+    "tips": [
+      "Write clearly and check spelling for names and email addresses.",
+      "Format dates clearly (e.g., DD/MM/YYYY).",
+      "Capitalize proper nouns like names, nationalities, and school names.",
+      "Use international format for phone numbers where necessary."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "form-gap-fill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the form information based on the text.",
+        "questions": [
+          { "id": 1, "sentence": "Elena's last name is ________.", "answer": "Gomez" },
+          { "id": 2, "sentence": "Elena's nationality is ________.", "answer": "Spanish" },
+          { "id": 3, "sentence": "Elena is in grade ________.", "answer": "8" }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "form-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Elena's first name is Gomez.", "correctAnswer": false },
+          { "id": 2, "statement": "Elena attends Green Valley High School.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What information do you need to write when filling out a school form?"
+    }
+  },
+  {
+    "topic": {
+      "id": "school-poster-project",
+      "title": "A school project poster",
+      "level": "A1 Elementary",
+      "category": "School Projects",
+      "description": "Read a school poster about environmental protection to practice reading headings, bullet points, and simple rules."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Save Our Planet: Green School Project",
+        "text": "Help Us Keep Our School Green!\n\nEasy steps for every student:\n1. Recycle paper and plastic in the green bins.\n2. Turn off the lights when leaving the classroom.\n3. Turn off water taps completely after washing your hands.\n4. Walk or ride a bicycle to school instead of coming by car.\n\nJoin the Green Club every Tuesday at lunchtime in Room 12!"
+      }
+    },
+    "tips": [
+      "Use large, bold headers to grab attention.",
+      "Use imperative command verbs (e.g., 'Recycle', 'Turn off', 'Walk') for actions.",
+      "Keep rules short and easy to read.",
+      "Include call-to-action details at the bottom (time, place, club name)."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "poster-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct rule mentioned on the poster.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where should students recycle paper and plastic?",
+            "options": ["In the blue bins", "In the green bins", "In the classroom trash"],
+            "answer": "In the green bins"
+          },
+          {
+            "id": 2,
+            "question": "When does the Green Club meet?",
+            "options": ["Tuesday at lunchtime", "Friday after school", "Monday morning"],
+            "answer": "Tuesday at lunchtime"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "poster-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Students are encouraged to ride a bicycle to school.", "correctAnswer": true },
+          { "id": 2, "statement": "The Green Club meets in Room 10.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What green actions or recycling habits do you practice at your school?"
+    }
+  },
+  {
+    "topic": {
+      "id": "my-favourite-meal",
+      "title": "My favourite meal",
+      "level": "A1 Elementary",
+      "category": "Food & Preferences",
+      "description": "Read a description of a favorite meal to learn food vocabulary and expressions of taste."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "My Favourite Meal",
+        "text": "My favourite meal is dinner on Sunday. My dad makes homemade pizza. He puts tomato sauce, cheese, mushrooms, and chicken on top. I love eating it with a fresh salad and a glass of orange juice. For dessert, we have vanilla ice cream with strawberries. It is delicious!"
+      }
+    },
+    "tips": [
+      "State which meal is your favourite (breakfast, lunch, or dinner).",
+      "List main ingredients using 'with', 'and', or 'on top'.",
+      "Use simple descriptive words like 'delicious', 'fresh', 'tasty', or 'sweet'.",
+      "Mention a drink and a dessert to complete the meal description."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "meal-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words about the favourite meal.",
+        "questions": [
+          { "id": 1, "sentence": "The writer's dad makes homemade ________.", "answer": "pizza" },
+          { "id": 2, "sentence": "They drink a glass of fresh ________ juice.", "answer": "orange" },
+          { "id": 3, "sentence": "For dessert, they eat vanilla ice cream with ________.", "answer": "strawberries" }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "meal-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "The writer's favourite meal is lunch on Friday.", "correctAnswer": false },
+          { "id": 2, "statement": "The pizza has mushrooms and chicken on it.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your favourite meal and who cooks it for you?"
+    }
+  },
+  {
+    "topic": {
+      "id": "meeting-friends",
+      "title": "Meeting friends",
+      "level": "A1 Elementary",
+      "category": "Social & Leisure",
+      "description": "Read short text messages between friends making arrangements to meet up."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Text Messages: Weekend Plans",
+        "text": "Maya: Hi Tom! Are you free this Saturday afternoon?\nTom: Hi Maya! Yes, I am. What do you want to do?\nMaya: Do you want to go to the park and play badminton?\nTom: That sounds fun! What time shall we meet?\nMaya: Let's meet at 2:30 PM near the park entrance.\nTom: Great! See you on Saturday at 2:30."
+      }
+    },
+    "tips": [
+      "Start messages with informal greetings ('Hi', 'Hey').",
+      "Ask 'Do you want to...?' to invite someone to an activity.",
+      "Suggest a specific time and location.",
+      "Confirm agreement clearly ('Great!', 'See you then!')."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "friends-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct arrangement details.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What activity do Maya and Tom plan to do?",
+            "options": ["Play football", "Play badminton", "Watch a movie"],
+            "answer": "Play badminton"
+          },
+          {
+            "id": 2,
+            "question": "What time do they agree to meet?",
+            "options": ["2:00 PM", "2:30 PM", "3:00 PM"],
+            "answer": "2:30 PM"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "friends-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Complete the missing message details.",
+        "questions": [
+          { "id": 1, "sentence": "They agree to meet on ________ afternoon.", "answer": "Saturday" },
+          { "id": 2, "sentence": "They will meet near the park ________.", "answer": "entrance" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What activities do you usually do when you meet your friends on weekends?"
+    }
+  },
+  {
+    "topic": {
+      "id": "introducing-yourself-blog",
+      "title": "Introducing yourself on a blog",
+      "level": "A1 Elementary",
+      "category": "Blogs & Personal Profiles",
+      "description": "Read a blog post introduction to learn how to present your name, country, hobbies, and interests online."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Blog Post: Welcome to My World!",
+        "text": "Hello world!\n\nMy name is Kenji and I am 14 years old. I am from Tokyo, Japan. I am a student at Sakura Middle School.\n\nIn my free time, I love playing video games, drawing manga, and listening to pop music. My favourite subject at school is Art because I love painting.\n\nWelcome to my blog! Please leave a comment and tell me about yourself!"
+      }
+    },
+    "tips": [
+      "Use 'Hello' or 'Welcome to my blog' to start.",
+      "State your name, age, country, and school.",
+      "List hobbies using 'In my free time, I love...' or 'My favourite...'.",
+      "Encourage readers to respond with 'Leave a comment'."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "blog-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Kenji is 14 years old and lives in Japan.", "correctAnswer": true },
+          { "id": 2, "statement": "Kenji's favourite subject at school is Science.", "correctAnswer": false }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "blog-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words from the blog post.",
+        "questions": [
+          { "id": 1, "sentence": "Kenji lives in ________, Japan.", "answer": "Tokyo" },
+          { "id": 2, "sentence": "Kenji loves drawing ________ in his free time.", "answer": "manga" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "If you created a blog, what topics would you write about?"
+    }
+  },
+  {
+    "topic": {
+      "id": "introducing-yourself-email",
+      "title": "Introducing yourself in an email",
+      "level": "A1 Elementary",
+      "category": "Emails & Introductions",
+      "description": "Read an introductory email to an e-pal/penfriend to practice personal details and basic questions."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Hello from France!",
+        "text": "Subject: Hello from your new e-pal!\n\nDear Lucas,\n\nMy name is Lucas too! I am 12 years old and I live in Lyon, France. I have one sister named Camille.\n\nAt school, I like Physical Education and History. After school, I play basketball with my team. On weekends, I like watching movies and spending time with my family.\n\nWhere do you live? What are your favourite subjects?\n\nWrite back soon!\n\nBest wishes,\nLucas"
+      }
+    },
+    "tips": [
+      "Start with a friendly greeting ('Dear [Name]', 'Hi [Name]').",
+      "Share basic personal information (age, city, school subjects).",
+      "Ask your recipient 2-3 simple questions to encourage a response.",
+      "End with a standard closing phrase ('Write back soon', 'Best wishes')."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "intro-email-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct option based on the email.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where does Lucas live?",
+            "options": ["Paris", "Lyon", "Marseille"],
+            "answer": "Lyon"
+          },
+          {
+            "id": 2,
+            "question": "What sport does Lucas play after school?",
+            "options": ["Football", "Tennis", "Basketball"],
+            "answer": "Basketball"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "intro-email-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing details.",
+        "questions": [
+          { "id": 1, "sentence": "Lucas has one sister named ________.", "answer": "Camille" },
+          { "id": 2, "sentence": "Lucas's favourite subjects are PE and ________.", "answer": "History" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What questions would you ask a new penfriend from another country?"
+    }
+  },
+  {
+    "topic": {
+      "id": "library",
+      "title": "A library card application",
+      "level": "A1 Elementary",
+      "category": "Forms & Public Services",
+      "description": "Read a library card registration form and rules notice to learn public facility vocabulary and simple rules."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "City Library Registration & Rules",
+        "text": "Library Card Application Form\nFull Name: Oliver Smith\nAddress: 25 High Street, Oxford\nPostcode: OX1 4BH\nMembership Type: Junior (Under 16)\n\nLibrary Rules:\n1. You can borrow up to 6 books for 3 weeks.\n2. Please return books on time.\n3. Keep quiet in the study area.\n4. No food or drinks near the computers."
+      }
+    },
+    "tips": [
+      "Fill out contact details accurately (address, postcode).",
+      "Pay attention to numbers and limitations (e.g., '6 books', '3 weeks').",
+      "Understand modal verbs used in rules ('can borrow', 'please return').",
+      "Note negative prohibitions ('No food or drinks')."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "library-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False based on the text.",
+        "questions": [
+          { "id": 1, "statement": "Oliver can borrow up to 10 books at one time.", "correctAnswer": false },
+          { "id": 2, "statement": "Books can be kept for 3 weeks.", "correctAnswer": true },
+          { "id": 3, "statement": "Food is allowed near the library computers.", "correctAnswer": false }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "library-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing library form details.",
+        "questions": [
+          { "id": 1, "sentence": "Oliver's street address is 25 ________ Street.", "answer": "High" },
+          { "id": 2, "sentence": "Oliver qualifies for ________ membership because he is under 16.", "answer": "Junior" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How often do you visit your local or school library?"
+    }
+  },
+  {
+    "topic": {
+      "id": "school",
+      "title": "My school",
+      "level": "A1 Elementary",
+      "category": "School Life",
+      "description": "Read a short text describing a school building, subjects, and daily routines."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "My School: Oakridge Academy",
+        "text": "I go to Oakridge Academy. It is a big school with about 800 students. \n\nOur school day starts at 8:45 AM and finishes at 3:15 PM. We have six lessons every day. My favourite place in the school is the science laboratory because we do fun experiments. We also have a big football pitch and a library.\n\nThe teachers are friendly and helpful."
+      }
+    },
+    "tips": [
+      "State your school's name and general size.",
+      "Give start and finish times for the school day.",
+      "Mention school places (e.g., 'library', 'science lab', 'football pitch').",
+      "Use simple adjectives to describe teachers and facilities ('friendly', 'big', 'helpful')."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "school-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct detail about Oakridge Academy.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What time does the school day start?",
+            "options": ["8:15 AM", "8:45 AM", "9:00 AM"],
+            "answer": "8:45 AM"
+          },
+          {
+            "id": 2,
+            "question": "How many lessons do students have each day?",
+            "options": ["4", "5", "6"],
+            "answer": "6"
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "school-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words from the school description.",
+        "questions": [
+          { "id": 1, "sentence": "Oakridge Academy has about ________ students.", "answer": "800" },
+          { "id": 2, "sentence": "The writer's favourite place is the science ________.", "answer": "laboratory" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your favourite classroom or place in your school?"
+    }
+  },
+  {
+    "topic": {
+      "id": "applying-job",
+      "title": "Applying for a job",
+      "level": "A1 Elementary",
+      "category": "Work & Applications",
+      "description": "Read a simple job application form and short personal statement for a weekend job."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Application Form: Weekend Shop Assistant",
+        "text": "Job Applied For: Weekend Shop Assistant\nName: David Miller\nAge: 16\nAvailability: Saturdays and Sundays (9:00 AM – 5:00 PM)\n\nPersonal Statement:\nI am a hardworking and polite high school student. I am good at maths and enjoy talking to people. I want to work at your bookstore because I love books and reading."
+      }
+    },
+    "tips": [
+      "State the job position clearly.",
+      "List exact availability (days and hours).",
+      "Use positive personal qualities ('hardworking', 'polite', 'punctual').",
+      "Explain briefly why you want the job."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "applying-job-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False based on David's application.",
+        "questions": [
+          { "id": 1, "statement": "David is applying for a job as a bookstore shop assistant.", "correctAnswer": true },
+          { "id": 2, "statement": "David is available to work on weekdays.", "correctAnswer": false },
+          { "id": 3, "statement": "David is 16 years old.", "correctAnswer": true }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "applying-job-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Complete the missing details from David's form.",
+        "questions": [
+          { "id": 1, "sentence": "David describes himself as hardworking and ________.", "answer": "polite" },
+          { "id": 2, "sentence": "David is good at ________ and loves reading.", "answer": "maths" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What skills or qualities do you have that would help in a weekend job?"
+    }
+  },
+  {
+    "topic": {
+      "id": "trains-travel",
+      "title": "Trains and travel",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Transport",
+      "description": "Read information and notices about train journeys to learn travel vocabulary, platform details, and ticket choices."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Train Travel Information",
+        "text": "Important Passenger Information:\n- Trains to London depart from Platform 3 every 30 minutes.\n- Single tickets are valid for one journey only. Return tickets allow travel back on the same route.\n- Off-peak travel is cheaper and starts after 9:30 AM on weekdays.\n- Passengers with seat reservations should board at least 5 minutes before departure."
+      }
+    },
+    "tips": [
+      "Distinguish between single tickets (one-way) and return tickets (two-way).",
+      "Look for key departure numbers like platform numbers and times.",
+      "Notice rules regarding off-peak savings and seat reservations."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "trains-travel-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct answer based on the travel notice.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Which platform do London trains depart from?",
+            "options": ["Platform 1", "Platform 2", "Platform 3"],
+            "answer": "Platform 3"
+          },
+          {
+            "id": 2,
+            "question": "When does cheaper off-peak travel begin on weekdays?",
+            "options": ["Before 8:00 AM", "After 9:30 AM", "After 5:00 PM"],
+            "answer": "After 9:30 AM"
+          }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "trains-travel-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "A single ticket allows you to travel back on the same route.", "correctAnswer": false },
+          { "id": 2, "statement": "Trains to London depart every 30 minutes.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you prefer traveling by train, bus, or car when taking a trip?"
+    }
+  },
+  {
+    "topic": {
+      "id": "travelling-abroad",
+      "title": "Travelling abroad",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Airport Routine",
+      "description": "Read a guide on airport procedures and travelling abroad to understand stages from check-in to flight takeoff."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Airport Step-by-Step Guide",
+        "text": "Step 1: Arrive at the airport 2 to 3 hours before your flight.\nStep 2: Go to the check-in desk to drop off your luggage and get your boarding pass.\nStep 3: Go through security and passport control.\nStep 4: Wait in the departure lounge near your boarding gate.\nStep 5: Board the plane when your gate number is called.\nStep 6: Fasten your seatbelt as the plane prepares to take off."
+      }
+    },
+    "tips": [
+      "Use sequential order numbers or transition words (Step 1, Step 2, Next, Finally).",
+      "Learn key airport terms like 'boarding pass', 'passport control', and 'departure lounge'.",
+      "Pay attention to time guidelines before international flights."
+    ],
+    "exercises": [
+      {
+        "type": "ordering_stages",
+        "id": "travelling-abroad-ordering",
+        "title": "Check your understanding: sequencing",
+        "instruction": "Put the stages of airport travel in the correct order.",
+        "stages": [
+          { "order": 1, "text": "Arrive at the airport." },
+          { "order": 2, "text": "Go to the check-in desk." },
+          { "order": 3, "text": "Go through security and passport control." },
+          { "order": 4, "text": "Wait in the departure lounge." },
+          { "order": 5, "text": "Board the plane." },
+          { "order": 6, "text": "Fasten seatbelt for takeoff." }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "travelling-abroad-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "You get your boarding pass at the check-in desk.", "correctAnswer": true },
+          { "id": 2, "statement": "You go through security after boarding the plane.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which country would you most like to travel to abroad?"
+    }
+  }
+]

@@ -1,0 +1,428 @@
+[
+  {
+    "topic": {
+      "id": "olympic-blog",
+      "title": "An Olympic blog",
+      "level": "B1 Intermediate",
+      "category": "Sports & Events",
+      "description": "Read a blog post written during the Olympic Games to learn about sports, venues, and spectator experiences."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "My Olympic Games Experience",
+        "text": "Day 4 of the Games has been incredible! I woke up early to catch the train to the Olympic Park. The atmosphere here is electric, with fans from all over the world wearing their national team colors.\n\nFirst, we watched the gymnastics finals. The athletic ability of the athletes was mind-blowing, especially on the high bar. In the afternoon, we headed to the aquatics center for the 100m freestyle swimming. The crowd went wild when the home athlete won silver by just 0.05 seconds!\n\nTonight, we're taking the tube to the main stadium to watch the athletics track events. It’s been a dream come true to experience the Games live."
+      },
+      "vocabulary": [
+        { "word": "Atmosphere", "definition": "The mood or feeling in a place or situation." },
+        { "word": "Aquatics center", "definition": "A facility specifically designed for water sports like swimming and diving." },
+        { "word": "Silver", "definition": "The medal awarded for finishing in second place in a competition." }
+      ]
+    },
+    "tips": [
+      "Pay attention to chronological order markers ('First', 'In the afternoon', 'Tonight').",
+      "Look for emotional and descriptive adjectives ('electric', 'mind-blowing', 'wild') to understand spectator tone."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "olympic-blog-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct answer based on the blog post.",
+        "questions": [
+          { "id": 1, "question": "What sport did the blogger watch in the morning?", "options": ["Swimming", "Gymnastics", "Track events"], "answer": "Gymnastics" },
+          { "id": 2, "question": "What medal did the home country athlete win in swimming?", "options": ["Gold", "Silver", "Bronze"], "answer": "Silver" }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "olympic-blog-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "The blogger is going to watch athletics at the main stadium tonight.", "correctAnswer": true },
+          { "id": 2, "statement": "The blogger travelled to the Olympic Park by bicycle.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which Olympic sport would you most like to watch live in a stadium?"
+    }
+  },
+  {
+    "topic": {
+      "id": "adventure-travel",
+      "title": "Adventure travel",
+      "level": "B1 Intermediate",
+      "category": "Travel & Exploration",
+      "description": "Read an adventure travel brochure offering extreme sports trips and wilderness expeditions."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Extreme Outdoor Expeditions",
+        "text": "Trip A: White-Water Rafting in Patagonia\nNavigate thrilling rapids through stunning glacier valleys. Suitable for brave beginners with strong swimming skills. All safety gear provided. (Duration: 5 days)\n\nTrip B: Trekking the Inca Trail\nHike through high-altitude cloud forests to reach ancient ruins. Requires high physical fitness and endurance. Tents and guides included. (Duration: 7 days)\n\nTrip C: Desert Safari & Sandboarding\nDrive 4x4 vehicles across giant sand dunes and experience sandboarding under the stars. Includes camping in traditional Bedouin tents. (Duration: 3 days)"
+      },
+      "vocabulary": [
+        { "word": "Rapids", "definition": "Fast-flowing, turbulent parts of a river." },
+        { "word": "Endurance", "definition": "The ability to withstand sustained hardship or physical stress." },
+        { "word": "High-altitude", "definition": "Situated at a great height above sea level." }
+      ]
+    },
+    "tips": [
+      "Compare requirements like fitness level, equipment provided, and duration across trips.",
+      "Identify key action verbs and activity types to match traveler preferences."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "adventure-mc",
+        "title": "Check your understanding: trip selection",
+        "instruction": "Choose the best adventure trip for each person.",
+        "questions": [
+          { "id": 1, "question": "Which trip is shortest in duration?", "options": ["Trip A", "Trip B", "Trip C"], "answer": "Trip C" },
+          { "id": 2, "question": "Which trip requires high physical fitness for mountain hiking?", "options": ["Trip A", "Trip B", "Trip C"], "answer": "Trip B" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which of these three extreme adventure trips would you choose to go on?"
+    }
+  },
+  {
+    "topic": {
+      "id": "food-restaurants",
+      "title": "Food and restaurants review",
+      "level": "B1 Intermediate",
+      "category": "Food & Dining",
+      "description": "Read reviews of four popular city restaurants specializing in different international cuisines."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "City Dining Guide",
+        "text": "1. Spice Garden (Indian): Authentic street food and rich curries. Great vegan options and affordable prices, but booking is essential as tables fill quickly.\n2. La Trattoria (Italian): Cozy family restaurant serving wood-fired pizzas and homemade pasta. Excellent house wine and warm service.\n3. Sakura Sushi (Japanese): Sleek, modern dining with fresh sashimi and bento boxes. Slightly expensive, but perfect for a special celebration.\n4. El Tapeo (Spanish): Vibrant tapas bar with live flamenco guitar. Great for sharing small plates with large groups of friends."
+      },
+      "vocabulary": [
+        { "word": "Authentic", "definition": "Made or done in a traditional, genuine way." },
+        { "word": "Sleek", "definition": "Smooth, elegant, and modern in appearance." },
+        { "word": "Tapas", "definition": "Small savory Spanish dishes served with drinks." }
+      ]
+    },
+    "tips": [
+      "Scan for price indicators ('affordable', 'expensive') and dietary notes ('vegan options').",
+      "Match group sizes and dining occasions to restaurant atmospheres."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "food-review-mc",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each dining situation to the appropriate restaurant.",
+        "questions": [
+          { "id": 1, "question": "Where should a large group go if they want to share small dishes?", "options": ["Spice Garden", "La Trattoria", "Sakura Sushi", "El Tapeo"], "answer": "El Tapeo" },
+          { "id": 2, "question": "Which restaurant is best for a special occasion despite higher prices?", "options": ["Spice Garden", "La Trattoria", "Sakura Sushi", "El Tapeo"], "answer": "Sakura Sushi" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What type of international cuisine is your absolute favorite when dining out?"
+    }
+  },
+  {
+    "topic": {
+      "id": "foreign-exchange-emails",
+      "title": "Foreign exchange student emails",
+      "level": "B1 Intermediate",
+      "category": "Intercultural Exchange",
+      "description": "Read emails between a foreign exchange host family and an incoming international student."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Exchange Visit Preparation",
+        "text": "Dear Anna,\n\nWe are so excited to welcome you to London next month for your exchange stay! My name is Mrs. Davies, and I live with my husband and our 15-year-old daughter, Sophie.\n\nYour room is upstairs and has a desk where you can study. Sophie loves playing volleyball and baking, and she can't wait to show you around her school. Please let us know if you have any dietary allergies or preferences so we can prepare meals accordingly.\n\nSafe travels!\nBest regards,\nMrs. Davies"
+      },
+      "vocabulary": [
+        { "word": "Exchange stay", "definition": "A visit where a student lives with a host family in another country." },
+        { "word": "Dietary preferences", "definition": "Specific choices regarding food, such as being vegetarian or dairy-free." }
+      ]
+    },
+    "tips": [
+      "Distinguish between formal host-family greetings and student responses.",
+      "Identify logistical details regarding accommodation and meal requirements."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "exchange-email-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False based on the host's email.",
+        "questions": [
+          { "id": 1, "statement": "Sophie is Mrs. Davies' 15-year-old daughter.", "correctAnswer": true },
+          { "id": 2, "statement": "Anna is asked to bring her own desk.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Would you like to participate in a student exchange program in another country?"
+    }
+  },
+  {
+    "topic": {
+      "id": "friendship-quiz",
+      "title": "A friendship quiz",
+      "level": "B1 Intermediate",
+      "category": "Relationships & Personality",
+      "description": "Read a magazine-style personality quiz to evaluate friendship traits and loyalty."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "What Kind of Friend Are You?",
+        "text": "Question 1: Your best friend is upset about a bad exam result. What do you do?\nA) Listen patiently and help them study for the retake.\nB) Tell them not to worry and distract them with a fun activity.\nC) Give them space until they feel better.\n\nQuestion 2: Your friend invites you out, but you are very tired. What do you do?\nA) Go anyway because you don't want to let them down.\nB) Explain honestly that you are tired and suggest meeting tomorrow instead.\nC) Make up an excuse and stay home."
+      },
+      "vocabulary": [
+        { "word": "Distract", "definition": "To divert someone's attention away from something troubling." },
+        { "word": "Let down", "definition": "To fail to support or satisfy someone who relies on you." }
+      ]
+    },
+    "tips": [
+      "Analyze scenario options for emotional and practical responses.",
+      "Understand idiomatic expressions related to personal relationships."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "friendship-quiz-mc",
+        "title": "Check your understanding: quiz scenario",
+        "instruction": "Select the option representing honest communication.",
+        "questions": [
+          { "id": 1, "question": "In Question 2, which option represents honest communication about being tired?", "options": ["Option A", "Option B", "Option C"], "answer": "Option B" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What quality do you value most in a close friend?"
+    }
+  },
+  {
+    "topic": {
+      "id": "how-be-safe-smart-searcher",
+      "title": "How to be a safe and smart searcher",
+      "level": "B1 Intermediate",
+      "category": "Digital Literacy",
+      "description": "Read an instructional guide on evaluating search engine results, online sources, and digital credibility."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Smart Online Research Guide",
+        "text": "1. Use precise keywords: Instead of searching 'history of cars', try 'electric car technological history 21st century'.\n2. Check the domain extension: Educational (.edu) and government (.gov) websites are generally more reliable than commercial (.com) blogs.\n3. Cross-check facts: Always verify news or facts across at least two independent reliable sources.\n4. Look for the author and publication date to ensure information is current."
+      },
+      "vocabulary": [
+        { "word": "Domain extension", "definition": "The ending of a web address (e.g., .edu, .org, .com) indicating the site type." },
+        { "word": "Cross-check", "definition": "To verify information by comparing different sources." }
+      ]
+    },
+    "tips": [
+      "Pay attention to research terminology like 'keywords', 'domain extensions', and 'cross-checking'.",
+      "Identify criteria used to determine web credibility."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "searcher-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements represent smart search strategies.",
+        "questions": [
+          { "id": 1, "statement": "Educational domains (.edu) are often more reliable than personal blogs.", "correctAnswer": true },
+          { "id": 2, "statement": "You should rely on the first search result without checking other sources.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you check if news or information you read online is real or fake?"
+    }
+  },
+  {
+    "topic": {
+      "id": "job-adverts",
+      "title": "Job advertisements",
+      "level": "B1 Intermediate",
+      "category": "Careers & Employment",
+      "description": "Read formal intermediate job listings to understand job requirements, responsibilities, and application steps."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Career Opportunities",
+        "text": "Role 1: IT Support Specialist\nResponsibilities: Troubleshoot network issues, install hardware, and provide tech support to staff.\nQualifications: Degree in Computer Science or 2 years equivalent technical experience. Good problem-solving skills.\n\nRole 2: Social Media Manager\nResponsibilities: Create engaging visual content, write promotional posts, and monitor brand analytics.\nQualifications: Excellent written communication skills and experience with digital design tools."
+      },
+      "vocabulary": [
+        { "word": "Troubleshoot", "definition": "To analyze and solve technical problems." },
+        { "word": "Analytics", "definition": "Data and statistics used to measure performance." }
+      ]
+    },
+    "tips": [
+      "Distinguish between 'Responsibilities' (what you will do) and 'Qualifications' (what you need to apply).",
+      "Match specific skills to technical role descriptions."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "b1-job-mc",
+        "title": "Check your understanding: job matching",
+        "instruction": "Select the correct role for each skill set.",
+        "questions": [
+          { "id": 1, "question": "Which role requires experience with digital design and writing promotional posts?", "options": ["IT Support Specialist", "Social Media Manager"], "answer": "Social Media Manager" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Would you prefer a technical IT job or a creative marketing role?"
+    }
+  },
+  {
+    "topic": {
+      "id": "skills-21st-century-workplace",
+      "title": "Skills for the 21st-century workplace",
+      "level": "B1 Intermediate",
+      "category": "Work & Professional Growth",
+      "description": "Read an educational article discussing adaptability, collaboration, critical thinking, and digital intelligence in modern careers."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Essential Workplace Skills",
+        "text": "In today's rapidly changing economy, hard technical skills alone are not enough. Employers increasingly seek soft skills:\n- Adaptability: The ability to learn new tools and adjust to changing environments.\n- Critical Thinking: Analyzing information objectively rather than accepting it without evidence.\n- Collaboration: Working productively across diverse remote and international teams.\n- Emotional Intelligence: Understanding and managing your emotions and communicating empathetically."
+      },
+      "vocabulary": [
+        { "word": "Adaptability", "definition": "The capacity to adjust easily to new conditions or changes." },
+        { "word": "Collaboration", "definition": "Working jointly with others toward a shared goal." }
+      ]
+    },
+    "tips": [
+      "Understand the difference between 'hard skills' (technical knowledge) and 'soft skills' (interpersonal abilities).",
+      "Learn key abstract nouns used in career articles."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "skills-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing workplace skill terms.",
+        "questions": [
+          { "id": 1, "sentence": "The skill of analyzing information objectively is called ________ thinking.", "answer": "critical" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which soft skill do you think is most important for future jobs?"
+    }
+  },
+  {
+    "topic": {
+      "id": "noticeboard",
+      "title": "A community noticeboard",
+      "level": "B1 Intermediate",
+      "category": "Community Life",
+      "description": "Read local community notices regarding lost pets, volunteer groups, club announcements, and local sales."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Town Community Board",
+        "text": "Notice A: Volunteer Park Clean-Up! Join us this Saturday at 10 AM to remove litter and plant wildflowers. Gloves and bags provided.\nNotice B: Lost Tabby Cat! Named Whiskers. Last seen near Green Street. Please call 555-0192 if found.\nNotice C: Second-Hand Guitar Sale. Acoustic guitar in excellent condition. Includes padded case. £85 or best offer."
+      },
+      "vocabulary": [
+        { "word": "Volunteer", "definition": "A person who offers to do work without being paid." },
+        { "word": "Acoustic", "definition": "An instrument that produces sound naturally without electrical amplification." }
+      ]
+    },
+    "tips": [
+      "Identify the main purpose of each notice (event invitation, lost item alert, item for sale).",
+      "Locate contact details and event schedules quickly."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "noticeboard-mc",
+        "title": "Check your understanding: matching",
+        "instruction": "Match the situation to the correct notice.",
+        "questions": [
+          { "id": 1, "question": "Which notice asks for unpaid community help?", "options": ["Notice A", "Notice B", "Notice C"], "answer": "Notice A" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Have you ever participated in a local volunteer event or park clean-up?"
+    }
+  },
+  {
+    "topic": {
+      "id": "tips-being-super-organised-student",
+      "title": "Tips for being a super-organised student",
+      "level": "B1 Intermediate",
+      "category": "Study Habits",
+      "description": "Read advice on time blocking, workspace management, digital archiving, and study-life balance."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Master Your Study Schedule",
+        "text": "Becoming an organized student isn't about studying 10 hours a day—it's about smart planning.\n1. Time Blocking: Divide your afternoon into fixed blocks for study, exercise, and hobbies.\n2. Digital Backups: Save all assignment drafts to a cloud storage folder to avoid losing work.\n3. The 2-Minute Rule: If a small task takes less than two minutes (like replying to an email or filing a sheet), do it immediately instead of putting it off."
+      },
+      "vocabulary": [
+        { "word": "Time Blocking", "definition": "A scheduling method where time is divided into specific blocks for different tasks." },
+        { "word": "Cloud storage", "definition": "Online file storage accessible from any device over the internet." }
+      ]
+    },
+    "tips": [
+      "Recognize actionable study productivity techniques.",
+      "Understand time-management idioms and guidelines."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "organised-student-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the advice matches the organizing tips.",
+        "questions": [
+          { "id": 1, "statement": "According to the 2-Minute Rule, small quick tasks should be done immediately.", "correctAnswer": true },
+          { "id": 2, "statement": "You should save your homework only on a single USB stick.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which of these productivity tips would help you most with your schoolwork?"
+    }
+  },
+  {
+    "topic": {
+      "id": "travel-guide",
+      "title": "A travel guide to Costa Rica",
+      "level": "B1 Intermediate",
+      "category": "Travel & Geography",
+      "description": "Read a travel guide highlighting rainforest wildlife, volcano tours, and eco-tourism activities in Costa Rica."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Discover Costa Rica",
+        "text": "Costa Rica is a tropical paradise in Central America known for its incredible biodiversity and eco-friendly tourism. \n\nTop Highlights:\n- Monteverde Cloud Forest: Walk across hanging bridges surrounded by misty trees, sloths, and exotic birds.\n- Arenal Volcano: Hike near an active volcano and relax in natural geothermal hot springs afterwards.\n- Pacific Coast Beaches: Perfect for surfing, turtle watching, and enjoying gorgeous sunsets."
+      },
+      "vocabulary": [
+        { "word": "Biodiversity", "definition": "The variety of plant and animal life in a particular habitat." },
+        { "word": "Geothermal", "definition": "Relating to or produced by the internal heat of the Earth." }
+      ]
+    },
+    "tips": [
+      "Identify tourist regions and their specific nature highlights.",
+      "Understand geographical vocabulary describing tropical and volcanic environments."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "travel-guide-mc",
+        "title": "Check your understanding: travel facts",
+        "instruction": "Select the correct destination based on the guide.",
+        "questions": [
+          { "id": 1, "question": "Where can visitors relax in natural hot springs?", "options": ["Monteverde Cloud Forest", "Arenal Volcano", "Pacific Coast Beaches"], "answer": "Arenal Volcano" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Would you enjoy an eco-tourism holiday in a rainforest environment?"
+    }
+  }
+]

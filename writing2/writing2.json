@@ -1,0 +1,869 @@
+[
+  {
+    "topic": {
+      "id": "personal-profile",
+      "title": "A personal profile",
+      "level": "A2 Pre-intermediate",
+      "category": "Profiles & Introductions",
+      "description": "Read a personal profile to learn how to present your personal details, education, work experience, and interests."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Personal Profile: Alex Morgan",
+        "text": "Name: Alex Morgan\nLocation: London, UK\nAbout Me: I am an enthusiastic A2-level English learner and junior web designer. I love technology, creative arts, and traveling.\nEducation: Diploma in Graphic Design, London City College (2022)\nWork Experience: Junior Designer at WebDesign Co. (2023–Present). I assist with creating website layouts and graphics.\nInterests: Photography, cycling, learning languages, and attending tech meetups."
+      }
+    },
+    "tips": [
+      "Keep personal statements direct and clear.",
+      "List work experience in chronological order starting with your current position.",
+      "Use bullet points or separate headings for readability.",
+      "Include key hobbies that showcase your skills or personality."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "personal-profile-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False based on Alex's profile.",
+        "questions": [
+          { "id": 1, "statement": "Alex works as a senior web designer.", "correctAnswer": false },
+          { "id": 2, "statement": "Alex completed a diploma in Graphic Design in 2022.", "correctAnswer": true }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "id": "personal-profile-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing profile information.",
+        "questions": [
+          { "id": 1, "sentence": "Alex lives in ________, UK.", "answer": "London" },
+          { "id": 2, "sentence": "Alex works at a company called ________ Co.", "answer": "WebDesign" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What information would you include in your personal professional profile?"
+    }
+  },
+  {
+    "topic": {
+      "id": "accommodation-form",
+      "title": "An accommodation form",
+      "level": "A2 Pre-intermediate",
+      "category": "Forms & Applications",
+      "description": "Read a housing application form to learn housing preferences, dates, and contact details."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Student Accommodation Request Form",
+        "text": "Applicant Name: Sophia Martinez\nMove-in Date: 15 September\nRoom Type: Single room with private bathroom\nDietary Preferences: Vegetarian\nSpecial Requests: Quiet room on an upper floor for studying."
+      }
+    },
+    "tips": [
+      "State move-in dates using standard date formats.",
+      "Specify exact room preferences (single/shared, en-suite/shared bathroom).",
+      "List dietary requirements and special requests clearly."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "accommodation-form-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct detail from Sophia's form.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What type of room does Sophia request?",
+            "options": ["Shared room", "Single room with private bathroom", "Studio apartment"],
+            "answer": "Single room with private bathroom"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What special requests would you make on a university accommodation form?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-about-business-event",
+      "title": "An email about a business event",
+      "level": "A2 Pre-intermediate",
+      "category": "Business Communication",
+      "description": "Read an invitation email to a corporate workshop to learn venue, time, and registration details."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Annual Tech Seminar",
+        "text": "Subject: Invitation to Annual Tech Seminar\n\nDear Colleagues,\n\nWe are pleased to invite you to our Annual Tech Seminar on Friday, October 12th at 10:00 AM in Conference Room B.\n\nPlease confirm your attendance by replying to this email by Wednesday."
+      }
+    },
+    "tips": [
+      "Use formal email greetings like 'Dear Colleagues' or 'Dear Team'.",
+      "Clearly state event purpose, location, date, and time.",
+      "Set a clear deadline for responses or RSVPs."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "business-event-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing details about the seminar.",
+        "questions": [
+          { "id": 1, "sentence": "The seminar takes place in Conference Room ________.", "answer": "B" },
+          { "id": 2, "sentence": "Colleagues must confirm attendance by ________.", "answer": "Wednesday" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Have you ever organized or attended an educational seminar?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-cover-letter",
+      "title": "An email cover letter",
+      "level": "A2 Pre-intermediate",
+      "category": "Job Applications",
+      "description": "Read a cover letter applying for a part-time position."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Cover Letter: Sales Assistant Position",
+        "text": "Dear Hiring Manager,\n\nI am writing to apply for the Sales Assistant position advertised on your website. I have strong customer service skills and experience working in retail.\n\nI have attached my CV for your review and look forward to hearing from you.\n\nSincerely,\nDaniel Reed"
+      }
+    },
+    "tips": [
+      "State the job title you are applying for in the first sentence.",
+      "Briefly highlight 1-2 key skills matching the position.",
+      "Mention attached documents like a CV or resume.",
+      "Use formal sign-offs such as 'Sincerely' or 'Kind regards'."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "cover-letter-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Daniel is applying for a Sales Assistant position.", "correctAnswer": true },
+          { "id": 2, "statement": "Daniel forgot to attach his CV.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What key skills would you mention in a cover letter?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-explaining-problem",
+      "title": "An email explaining a problem",
+      "level": "A2 Pre-intermediate",
+      "category": "Problem Solving & Emails",
+      "description": "Read an email notifying a manager about a technical issue or delay."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Technical Issue with Printer",
+        "text": "Dear Sarah,\n\nI am writing to let you know that the office printer on the second floor is broken. I have contacted IT support, and a technician will repair it by 2:00 PM today. In the meantime, please use the third-floor printer.\n\nBest regards,\nMark"
+      }
+    },
+    "tips": [
+      "Describe the problem clearly and concisely.",
+      "Explain what actions have already been taken.",
+      "Offer a temporary alternative or solution while waiting."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "explaining-problem-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct solution proposed in the email.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Where should staff print while the second-floor printer is repaired?",
+            "options": ["First floor", "Third floor", "Main lobby"],
+            "answer": "Third floor"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you handle unexpected technical problems at school or work?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-ask-colleague-do-something",
+      "title": "An email asking a colleague to do something",
+      "level": "A2 Pre-intermediate",
+      "category": "Workplace Communication",
+      "description": "Read an email requesting assistance from a team member."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Request for Meeting Notes",
+        "text": "Hi Rachel,\n\nCould you please send me the notes from yesterday's team meeting? I was absent due to a dentist appointment and need to update the weekly report.\n\nThanks a lot,\nTom"
+      }
+    },
+    "tips": [
+      "Use polite request structures ('Could you please...', 'Would you mind...').",
+      "Provide a brief reason for your request.",
+      "Express gratitude in advance ('Thanks a lot', 'I appreciate your help')."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "ask-colleague-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing details.",
+        "questions": [
+          { "id": 1, "sentence": "Tom was absent due to a ________ appointment.", "answer": "dentist" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you politely ask a classmate for notes when you miss a class?"
+    }
+  },
+  {
+    "topic": {
+      "id": "expression-interest",
+      "title": "An expression of interest",
+      "level": "A2 Pre-intermediate",
+      "category": "Formal Inquiries",
+      "description": "Read an inquiry email expressing interest in a training course."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Interest in Digital Marketing Course",
+        "text": "Dear Admissions Team,\n\nI am writing to express my interest in the Digital Marketing Course starting in November. Could you please send me details regarding tuition fees and course schedules?\n\nSincerely,\nLaura Vance"
+      }
+    },
+    "tips": [
+      "Use 'I am writing to express my interest in...' to open.",
+      "List specific details you require (fees, start dates, prerequisites).",
+      "Maintain formal, polite language throughout."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "expression-interest-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Laura is asking about a Digital Marketing Course.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What course or subject would you express interest in learning next?"
+    }
+  },
+  {
+    "topic": {
+      "id": "online-discussion-forum",
+      "title": "An online discussion forum",
+      "level": "A2 Pre-intermediate",
+      "category": "Online Forums",
+      "description": "Read forum posts discussing study techniques and online learning tips."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Forum Topic: Best Study Apps",
+        "text": "User_101: Hi everyone! What study apps do you recommend for vocabulary practice?\nStudyPro: I recommend Quizlet! You can make custom flashcards and test yourself with quizzes.\nGrammarFan: Anki is great too, especially for spaced repetition learning."
+      }
+    },
+    "tips": [
+      "Use short posts directly addressing the forum prompt.",
+      "Share specific tool or app recommendations with short explanations.",
+      "Keep the tone friendly and encouraging."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "forum-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct app recommendation.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Which app does StudyPro recommend for making custom flashcards?",
+            "options": ["Quizlet", "Anki", "Duolingo"],
+            "answer": "Quizlet"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What online forums or communities do you participate in?"
+    }
+  },
+  {
+    "topic": {
+      "id": "instructions-colleague",
+      "title": "Instructions for a colleague",
+      "level": "A2 Pre-intermediate",
+      "category": "Workplace Tasks",
+      "description": "Read written instructions detailing how to lock up an office."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Office Closing Checklist",
+        "text": "1. Turn off all lights and computers.\n2. Ensure the back door is locked securely.\n3. Turn on the alarm system using code 4092.\n4. Lock the main entrance door with the master key."
+      }
+    },
+    "tips": [
+      "Number steps sequentially.",
+      "Use strong imperative action verbs (e.g., 'Turn off', 'Lock', 'Ensure').",
+      "Highlight important numerical codes clearly."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "instructions-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing instruction step.",
+        "questions": [
+          { "id": 1, "sentence": "The alarm code to turn on the system is ________.", "answer": "4092" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What steps do you take when leaving your house or classroom?"
+    }
+  },
+  {
+    "topic": {
+      "id": "messaging-cancel-plan",
+      "title": "Messaging to cancel a plan",
+      "level": "A2 Pre-intermediate",
+      "category": "Casual Messaging",
+      "description": "Read casual text messages apologizing for canceling a meetup due to illness."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Chat Message: Canceling Dinner",
+        "text": "Sam: Hey Alex, I'm so sorry but I won't be able to make it to dinner tonight. I've caught a bad cold and need to rest. Can we reschedule for next weekend?\nAlex: Oh no! Don't worry at all Sam. Rest up and feel better soon! Let's talk next week."
+      }
+    },
+    "tips": [
+      "Apologize early in the message ('I'm so sorry but...').",
+      "State the reason for cancellation briefly.",
+      "Propose rescheduling to maintain good relations ('Can we reschedule...')."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "cancel-plan-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Sam cancels dinner because of a cold.", "correctAnswer": true },
+          { "id": 2, "statement": "Alex gets angry about the cancellation.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you politely notify someone when you have to cancel plans?"
+    }
+  },
+  {
+    "topic": {
+      "id": "messaging-make-plans",
+      "title": "Messaging to make plans",
+      "level": "A2 Pre-intermediate",
+      "category": "Casual Messaging",
+      "description": "Read text messages proposing a weekend movie outing."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Chat Message: Weekend Cinema",
+        "text": "Emma: Hey Maya! Are you free this Saturday afternoon? Do you want to go see the new sci-fi movie at the Odeon?\nMaya: Hi Emma! I'd love to! What time is the show?\nEmma: There's a show at 3:15 PM. Let's meet at 3:00 outside the cinema."
+      }
+    },
+    "tips": [
+      "Ask 'Are you free...?' or 'Do you want to...?' to propose plans.",
+      "State specific venue names and movie times.",
+      "Fix a meeting time slightly earlier than the activity start time."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "make-plans-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct meeting time.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What time do Emma and Maya agree to meet outside the cinema?",
+            "options": ["2:45 PM", "3:00 PM", "3:15 PM"],
+            "answer": "3:00 PM"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What plans do you usually make with friends over text messages?"
+    }
+  },
+  {
+    "topic": {
+      "id": "my-last-holiday",
+      "title": "My last holiday",
+      "level": "A2 Pre-intermediate",
+      "category": "Personal Narratives",
+      "description": "Read a short paragraph describing a trip to Spain."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Holiday Essay: Trip to Barcelona",
+        "text": "Last summer, I went to Barcelona with my family for one week. We stayed in a cozy hotel near the beach. Every morning we explored famous sights like Park Güell and Sagrada Família, and in the evening we ate delicious tapas. It was an unforgettable trip!"
+      }
+    },
+    "tips": [
+      "Use past simple verbs consistently ('went', 'stayed', 'explored', 'ate').",
+      "Mention duration, travel companions, and destination clearly.",
+      "Add sensory details about food, weather, and landmarks."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "last-holiday-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing holiday details.",
+        "questions": [
+          { "id": 1, "sentence": "The writer visited the city of ________ last summer.", "answer": "Barcelona" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Where did you go on your last holiday and what was your favorite part?"
+    }
+  },
+  {
+    "topic": {
+      "id": "class-forum",
+      "title": "A class forum",
+      "level": "B1 Intermediate",
+      "category": "Academic Discussion",
+      "description": "Read a student class discussion thread about environmental responsibility."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Discussion Board: Single-Use Plastics",
+        "text": "Student_A: I believe schools should ban all single-use plastic bottles from cafeterias. We should encourage everyone to bring reusable water flasks.\nStudent_B: I agree with Student_A, but the school must also install more water refill stations to make it convenient for everyone."
+      }
+    },
+    "tips": [
+      "State opinions clearly using phrases like 'I believe...', 'In my view...'.",
+      "Acknowledge classmates' contributions before offering additional ideas.",
+      "Suggest practical remedies alongside criticism."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "class-forum-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Student_B wants the school to install refill stations.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What environmental initiative would you support at your school?"
+    }
+  },
+  {
+    "topic": {
+      "id": "professional-profile",
+      "title": "A professional profile",
+      "level": "B1 Intermediate",
+      "category": "Career Development",
+      "description": "Read a LinkedIn-style profile highlighting technical skills, projects, and achievements."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Professional Profile: Maria Santos",
+        "text": "Summary: Experienced Project Coordinator with over 4 years of expertise in managing software development teams and digital campaigns. Skilled in Agile methodologies, budget management, and cross-functional communication.\nKey Achievement: Led a team of 8 developers to successfully launch a mobile banking app ahead of deadline."
+      }
+    },
+    "tips": [
+      "Write a strong summary emphasizing years of experience and core skills.",
+      "Use industry keywords (e.g., 'Agile', 'Cross-functional', 'Budget management').",
+      "Include quantifiable key achievements."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "prof-profile-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct achievement details.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "How many years of project coordination experience does Maria have?",
+            "options": ["2 years", "4 years", "6 years"],
+            "answer": "4 years"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What key achievements would you like to build for your professional future?"
+    }
+  },
+  {
+    "topic": {
+      "id": "report-student-meeting",
+      "title": "A report on a student meeting",
+      "level": "B1 Intermediate",
+      "category": "Formal Writing & Reports",
+      "description": "Read a formal report summarizing student council discussions on library hours."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Report: Student Council Library Meeting",
+        "text": "Introduction: This report summarizes student requests regarding library hours during exam periods.\nKey Findings: 85% of surveyed students expressed a need for weekend opening hours.\nRecommendations: It is recommended that the library extends opening hours until 8:00 PM on Saturdays during May and June."
+      }
+    },
+    "tips": [
+      "Use clear formal report sections: Introduction, Key Findings, Recommendations.",
+      "Present statistical evidence (e.g., '85% of surveyed students').",
+      "Formulate recommendations using formal passive structures ('It is recommended that...')."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "report-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the report recommendation time.",
+        "questions": [
+          { "id": 1, "sentence": "The report recommends extending Saturday opening hours until ________ PM.", "answer": "8:00" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What changes or recommendations would you present to your school council?"
+    }
+  },
+  {
+    "topic": {
+      "id": "restaurant-review",
+      "title": "A restaurant review",
+      "level": "B1 Intermediate",
+      "category": "Reviews & Opinions",
+      "description": "Read a detailed review analyzing food quality, service, and ambiance at a local bistro."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Review: The Riverside Bistro",
+        "text": "Located by the river, The Riverside Bistro offers a modern European menu with fresh seasonal ingredients. I tried the roasted salmon with asparagus, which was cooked to perfection. The service was attentive, though slightly slow during peak evening hours. Overall, highly recommended for romantic dinners or family celebrations. Rating: 4.5/5."
+      }
+    },
+    "tips": [
+      "Combine praise for food quality with balanced observations on service or wait times.",
+      "Describe ambiance and specific dishes using vivid adjectives.",
+      "End with a clear overall rating and target customer recommendation."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "restaurant-review-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "The reviewer gave the restaurant a rating of 4.5 out of 5.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What factors make a restaurant experience great for you?"
+    }
+  },
+  {
+    "topic": {
+      "id": "thank-you-message",
+      "title": "A thank-you message",
+      "level": "B1 Intermediate",
+      "category": "Interpersonal Communication",
+      "description": "Read a warm thank-you message sent to a host family after an exchange stay."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Thank-You Note to Host Family",
+        "text": "Dear Miller Family,\n\nI am writing to express my heartfelt thanks for hosting me during my exchange month in Oxford. Your hospitality and wonderful home-cooked meals made my stay unforgettable. I arrived back home safely yesterday and hope we can stay in touch!\n\nWarmest regards,\nKenji"
+      }
+    },
+    "tips": [
+      "Express gratitude specifically for hospitality, assistance, or gifts.",
+      "Mention a specific memory or kindness (e.g., 'home-cooked meals').",
+      "Reiterate a desire to maintain contact."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "thank-you-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing words from Kenji's note.",
+        "questions": [
+          { "id": 1, "sentence": "Kenji spent his exchange month in the city of ________.", "answer": "Oxford" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "When was the last time you sent a written thank-you note?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-giving-holiday-advice",
+      "title": "An email giving holiday advice",
+      "level": "B1 Intermediate",
+      "category": "Advice & Suggestions",
+      "description": "Read an email offering travel tips, local attractions, and advice for visiting Rome."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Travel Tips for Rome",
+        "text": "Hi David,\n\nIt's great to hear you're visiting Rome next month! I strongly recommend buying your Colosseum tickets online in advance to skip the long queues. Also, make sure to visit Trastevere for authentic pasta. Don't forget to wear comfortable shoes because you'll do a lot of walking!\n\nHave an amazing trip!\nElena"
+      }
+    },
+    "tips": [
+      "Use recommendation phrases ('I strongly recommend...', 'Make sure to...').",
+      "Provide practical advice regarding booking ahead or footwear.",
+      "Include specific food or district suggestions."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "holiday-advice-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the advice given by Elena.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Why does Elena advise buying Colosseum tickets online?",
+            "options": ["To save money", "To skip long queues", "To get free guided tours"],
+            "answer": "To skip long queues"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What advice would you give a foreign tourist visiting your hometown?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-explain-accommodation-problem",
+      "title": "An email to explain an accommodation problem",
+      "level": "B1 Intermediate",
+      "category": "Formal Complaints & Inquiries",
+      "description": "Read an email sent to a hotel manager reporting issues with a booking."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Issue with Room Reservation",
+        "text": "Dear Customer Service,\n\nI am writing regarding my reservation (#89012) for July 10th. Upon arrival, I noticed that the air conditioning in Room 204 was out of order, and there was no hot water. I request an immediate room transfer or a partial refund for the inconvenience caused.\n\nSincerely,\nRobert Chen"
+      }
+    },
+    "tips": [
+      "Quote booking reference numbers clearly.",
+      "Describe issues objectively using polite, firm language.",
+      "Specify desired resolutions clearly (room transfer, refund, compensation)."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "accommodation-problem-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Robert's room had an air conditioning issue and no hot water.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you politely handle poor service or broken facilities at a hotel?"
+    }
+  },
+  {
+    "topic": {
+      "id": "email-invite-someone-job-interview",
+      "title": "An email to invite someone to a job interview",
+      "level": "B1 Intermediate",
+      "category": "Professional HR Emails",
+      "description": "Read a formal HR email inviting a job applicant for an interview."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Email: Interview Invitation - Marketing Assistant",
+        "text": "Dear Ms. Watson,\n\nThank you for applying for the Marketing Assistant position. We were impressed by your application and would like to invite you for a 30-minute interview on Thursday, November 5th at 10:00 AM via video call.\n\nPlease confirm if this time is convenient for you.\n\nKind regards,\nHR Department"
+      }
+    },
+    "tips": [
+      "Acknowledge receipt of the application politely.",
+      "Specify date, time, duration, and format (in-person or video call).",
+      "Ask the candidate to confirm availability."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "job-interview-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the interview details.",
+        "questions": [
+          { "id": 1, "sentence": "The interview is scheduled for ________ minutes.", "answer": "30" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How do you prepare when invited for an important interview?"
+    }
+  },
+  {
+    "topic": {
+      "id": "describing-bar-chart",
+      "title": "Describing a bar chart",
+      "level": "B1 Intermediate",
+      "category": "Data Analysis & Writing",
+      "description": "Read a short analytical report describing student transport preferences using bar chart data."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Report: Student Transport Preferences",
+        "text": "The bar chart illustrates how secondary school students travel to school in 2026. \n\nAccording to the chart, the vast majority of students (55%) travel by bus, making it the most popular mode of transport. Walking accounts for 25%, while only 12% come by bicycle. Coming by car represents the smallest proportion at 8%.\n\nIn summary, public transport remains the dominant choice among students."
+      }
+    },
+    "tips": [
+      "Introduce the chart topic clearly in the opening sentence.",
+      "Use data descriptions ('vast majority', 'smallest proportion', 'accounts for').",
+      "Group data logically and end with an overall summary trend."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "bar-chart-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Select the correct percentage from the data report.",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What percentage of students travel to school by bus?",
+            "options": ["25%", "55%", "8%"],
+            "answer": "55%"
+          }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What mode of transport is most common among students in your city?"
+    }
+  },
+  {
+    "topic": {
+      "id": "describing-charts",
+      "title": "Describing charts and trends",
+      "level": "B1 Intermediate",
+      "category": "Data Analysis & Writing",
+      "description": "Read a report describing internet usage trends over a five-year period."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Report: Global Mobile Internet Trends",
+        "text": "The line graph shows changes in mobile internet usage between 2020 and 2025. \n\nOverall, there was a steady increase in daily mobile data consumption. Usage rose sharply from 2.5 GB per person in 2020 to 6.8 GB in 2023, followed by a gradual rise to 8.5 GB by 2025."
+      }
+    },
+    "tips": [
+      "Use trend verbs and adverbs ('rose sharply', 'steady increase', 'gradual rise').",
+      "Specify timeframe parameters (between 2020 and 2025).",
+      "Highlight significant turning points or milestones."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "describing-charts-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Mobile internet usage experienced a steady increase over the 5-year period.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How has your own daily internet usage changed over the past few years?"
+    }
+  },
+  {
+    "topic": {
+      "id": "new-years-resolutions",
+      "title": "New Year's resolutions",
+      "level": "B1 Intermediate",
+      "category": "Personal Writing",
+      "description": "Read a blog post reflecting on personal goals, health habits, and self-improvement."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Blog: My Goals for the New Year",
+        "text": "As the new year begins, I have set three main resolutions. First, I aim to read at least one book every month to expand my knowledge. Second, I plan to reduce screen time by turning off my phone after 9 PM. Finally, I intend to practice mindfulness meditation daily to manage stress."
+      }
+    },
+    "tips": [
+      "Use future intent verbs ('I aim to...', 'I plan to...', 'I intend to...').",
+      "Structure goals using transition markers ('First', 'Second', 'Finally').",
+      "Keep goals realistic and specific."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "resolutions-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing resolution details.",
+        "questions": [
+          { "id": 1, "sentence": "The writer plans to turn off their phone after ________ PM.", "answer": "9" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is one personal goal or resolution you would like to achieve this year?"
+    }
+  },
+  {
+    "topic": {
+      "id": "reflective-writing",
+      "title": "Reflective writing",
+      "level": "B1 Intermediate",
+      "category": "Academic Writing",
+      "description": "Read a reflective journal entry analyzing a completed team presentation project."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Reflective Journal: Team Presentation Project",
+        "text": "Looking back on our group presentation last week, I learned a lot about teamwork under pressure. While our slide design was visually appealing, we struggled with time management during the Q&A session. Next time, I will ensure we conduct timed practice runs to improve our time distribution."
+      }
+    },
+    "tips": [
+      "Evaluate both successes ('visually appealing') and areas for growth ('struggled with time management').",
+      "Use reflective opening markers ('Looking back on...', 'Upon reflection...').",
+      "End with specific action plans for future improvement."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "reflective-writing-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "The writer plans to do timed practice runs for future presentations.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What lesson have you learned from a past group project or presentation experience?"
+    }
+  }
+]

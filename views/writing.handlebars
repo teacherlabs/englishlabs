@@ -1,16 +1,16 @@
 <main class="practice-page reading-page">
   <div class="grammar-workspace">
     <aside class="practice-nav">
-      <p class="exercise-overview-title">Listening topics</p>
-      <nav aria-label="Listening topics">
-        {{#each listeningLevels}}
+      <p class="exercise-overview-title">Writing topics</p>
+      <nav aria-label="Writing topics">
+        {{#each writingLevels}}
           <div class="listening-level{{#if selected}} is-open{{/if}}">
-            <button class="listening-level-toggle" type="button" data-listening-level-toggle aria-expanded="{{#if selected}}true{{else}}false{{/if}}">
+            <button class="listening-level-toggle" type="button" data-writing-level-toggle aria-expanded="{{#if selected}}true{{else}}false{{/if}}">
               <strong>Level {{number}}</strong><span aria-hidden="true">+</span>
             </button>
             <div class="listening-level-topics"><div>
               {{#if topics}}
-                {{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}" href="/listening?level={{../number}}&topic={{id}}">{{title}}{{#if completed}}<span class="topic-completion-tick" aria-label="Completed">&#10003;</span>{{/if}}</a>{{/each}}
+                {{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}" href="/writing?level={{../number}}&topic={{id}}">{{title}}{{#if completed}}<span class="topic-completion-tick" aria-label="Completed">&#10003;</span>{{/if}}</a>{{/each}}
               {{else}}
                 <p>No topics yet.</p>
               {{/if}}
@@ -23,58 +23,41 @@
     <div class="grammar-content">
       {{#if topic}}
       <div class="practice-heading">
-        <p class="eyebrow">Listening / {{topic.category}}</p>
+        <p class="eyebrow">Writing / {{topic.category}}</p>
         <h1>{{topic.title}}</h1>
         <p>{{topic.description}}</p>
       </div>
 
-      {{#if content.restaurantInfo}}
-      <section class="restaurant-details" aria-label="Restaurant details">
-        <div><span>Restaurant</span><strong>{{content.restaurantInfo.name}}</strong></div>
-        <div><span>Rating</span><strong>{{content.restaurantInfo.rating}} / 5 ({{content.restaurantInfo.totalReviews}} reviews)</strong></div>
-        <div><span>Lunch</span><strong>{{content.restaurantInfo.hours.lunch}}</strong></div>
-        <div><span>Dinner</span><strong>{{content.restaurantInfo.hours.dinner}}</strong></div>
-      </section>
-      {{else}}
-      <section class="listening-context">
-        <p class="eyebrow">Listen for</p>
-        <h2>{{content.contextPassage.title}}</h2>
-        <p>{{content.contextPassage.summary}}</p>
-        {{#if content.vocabulary}}
-          <div class="listening-vocabulary">
-            {{#each content.vocabulary}}<span>{{this}}</span>{{/each}}
-          </div>
-        {{/if}}
-        {{#if content.filmTypes}}
-          <div class="listening-vocabulary">
-            {{#each content.filmTypes}}<span>{{this}}</span>{{/each}}
-          </div>
-        {{/if}}
-      </section>
-      {{/if}}
-
-      <section class="listening-player-panel">
-        <div class="reading-section-heading"><p class="eyebrow">Listen</p><h2>{{topic.title}}</h2></div>
-        <audio class="listening-player" controls preload="metadata">
-          <source src="{{audioUrl}}" type="audio/mpeg" />
-          Your browser does not support audio playback.
-        </audio>
-      </section>
-
       {{#if content.readingPassage}}
       <section class="reading-content">
-        <div class="reading-section-heading"><p class="eyebrow">Restaurant menu</p><h2>{{content.readingPassage.title}}</h2></div>
-        <div class="menu-grid">
-          {{#each content.readingPassage.sections}}
-            <article class="menu-section">
-              <h3>{{category}}</h3>
-              {{#if note}}<p>{{note}}</p>{{/if}}
-              <ul>{{#each items}}<li><span>{{name}}</span><strong>{{price}}</strong></li>{{/each}}</ul>
-            </article>
-          {{/each}}
-        </div>
+        <div class="reading-section-heading"><p class="eyebrow">Read</p><h2>{{content.readingPassage.title}}</h2></div>
+        <p class="writing-passage-text">{{content.readingPassage.text}}</p>
       </section>
       {{/if}}
+
+      {{#if tips}}
+      <section class="writing-tips-card">
+        <div class="reading-section-heading"><p class="eyebrow">Writing tips</p><h2>Tips for this text type</h2></div>
+        <ul>{{#each tips}}<li>{{this}}</li>{{/each}}</ul>
+      </section>
+      {{/if}}
+
+      <section class="reading-content writing-submission-panel" data-writing-submission data-topic-id="{{topic.id}}" data-topic-title="{{topic.title}}">
+        <div class="reading-section-heading"><p class="eyebrow">Your turn</p><h2>Write your own {{topic.title}}</h2></div>
+        <p>Write your own version below, then send it to your teacher for feedback.</p>
+        <textarea class="writing-submission-textarea" data-writing-textarea rows="10" placeholder="Start writing here...">{{mySubmission.submission_text}}</textarea>
+        <div class="writing-submission-actions">
+          <button class="practice-button" type="button" data-writing-submit>Send to teacher</button>
+          <span class="writing-submission-status" data-writing-status>{{#if mySubmission.submitted_at}}Last submitted {{mySubmission.submitted_at}}{{/if}}</span>
+        </div>
+        {{#if mySubmission.feedback}}
+        <div class="writing-feedback-card">
+          <p class="eyebrow">Teacher feedback</p>
+          <p class="writing-feedback-text">{{mySubmission.feedback}}</p>
+          <small>{{mySubmission.feedback_at}}</small>
+        </div>
+        {{/if}}
+      </section>
 
       <section class="reading-exercises" data-reading-exercises>
         <div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
@@ -114,9 +97,9 @@
       <section class="discussion-panel"><p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2></section>
       {{else}}
       <div class="practice-heading">
-        <p class="eyebrow">Listening</p>
-        <h1>Level 2</h1>
-        <p>Listening topics for this level will appear here soon.</p>
+        <p class="eyebrow">Writing</p>
+        <h1>No topic selected</h1>
+        <p>Writing topics for this level will appear here soon.</p>
       </div>
       {{/if}}
     </div>
@@ -141,8 +124,8 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          activityType: "listening",
-          difficultyLevel: `listening:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+          activityType: "writing",
+          difficultyLevel: `writing:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
           points,
           totalPoints: questions.length,
         }),
@@ -206,8 +189,8 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            activityType: "listening",
-            difficultyLevel: `listening:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+            activityType: "writing",
+            difficultyLevel: `writing:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
             points,
             totalPoints: exercise.querySelectorAll(".sport-item").length,
           }),
@@ -229,18 +212,47 @@
     });
   });
 
-  document.querySelectorAll("[data-listening-level-toggle]").forEach((button) => {
+  document.querySelectorAll("[data-writing-level-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
       const level = button.closest(".listening-level");
       const isOpen = level.classList.contains("is-open");
       document.querySelectorAll(".listening-level").forEach((item) => {
         item.classList.remove("is-open");
-        item.querySelector("[data-listening-level-toggle]").setAttribute("aria-expanded", "false");
+        item.querySelector("[data-writing-level-toggle]").setAttribute("aria-expanded", "false");
       });
       if (!isOpen) {
         level.classList.add("is-open");
         button.setAttribute("aria-expanded", "true");
       }
+    });
+  });
+
+  document.querySelectorAll("[data-writing-submission]").forEach((panel) => {
+    const submitButton = panel.querySelector("[data-writing-submit]");
+    const textarea = panel.querySelector("[data-writing-textarea]");
+    const status = panel.querySelector("[data-writing-status]");
+    submitButton.addEventListener("click", () => {
+      const text = textarea.value.trim();
+      if (!text) { status.textContent = "Write something before sending."; return; }
+      submitButton.disabled = true;
+      fetch("/api/writing/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topicId: panel.dataset.topicId,
+          topicTitle: panel.dataset.topicTitle,
+          text,
+        }),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          submitButton.disabled = false;
+          status.textContent = result.saved ? "Sent to your teacher just now." : (result.error || "Unable to save your writing.");
+        })
+        .catch(() => {
+          submitButton.disabled = false;
+          status.textContent = "Unable to save your writing.";
+        });
     });
   });
 </script>

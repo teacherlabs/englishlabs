@@ -151,7 +151,7 @@ const practiceQuestionChapters = [
     ],
   },
 ];
-const readingTopics = [
+const listeningTopics = [
   (() => {
     const reading = JSON.parse(
       fs.readFileSync(
@@ -314,7 +314,11 @@ const audioUrlByTopicId = {
   work: "/audio/work",
 };
 
-const matchingPairTypes = ["matching_definitions", "phrase_matching", "matching_synonyms"];
+const matchingPairTypes = [
+  "matching_definitions",
+  "phrase_matching",
+  "matching_synonyms",
+];
 
 const buildTopicExercise = (exercise, index) => {
   const base = { ...exercise, id: `exercise-${index + 1}`, number: index + 1 };
@@ -418,7 +422,7 @@ const level2Topics = [
   audioUrl: audioUrlByTopicId[entry.topic.id] || "",
   exercises: entry.exercises.map(buildTopicExercise),
 }));
-readingTopics.push(...level2Topics);
+listeningTopics.push(...level2Topics);
 
 const level1ExtraTopics = JSON.parse(
   fs.readFileSync(
@@ -431,7 +435,134 @@ const level1ExtraTopics = JSON.parse(
   audioUrl: audioUrlByTopicId[entry.topic.id] || "",
   exercises: entry.exercises.map(buildTopicExercise),
 }));
-readingTopics.push(...level1ExtraTopics);
+listeningTopics.push(...level1ExtraTopics);
+
+const writingTopics = [
+  ...JSON.parse(
+    fs.readFileSync(path.join(__dirname, "writing1", "writing1.json"), "utf8"),
+  ).map((entry) => ({ ...entry, writingLevel: "1" })),
+  ...JSON.parse(
+    fs.readFileSync(path.join(__dirname, "writing2", "writing2.json"), "utf8"),
+  ).map((entry) => ({ ...entry, writingLevel: "2" })),
+].map((entry) => ({
+  ...entry,
+  exercises: entry.exercises.map(buildTopicExercise),
+}));
+
+const readingTopics = [
+  ...JSON.parse(
+    fs.readFileSync(path.join(__dirname, "reading1", "reading1.json"), "utf8"),
+  ).map((entry) => ({ ...entry, readingLevel: "1" })),
+  ...JSON.parse(
+    fs.readFileSync(path.join(__dirname, "reading2", "reading2.json"), "utf8"),
+  ).map((entry) => ({ ...entry, readingLevel: "2" })),
+].map((entry) => ({
+  ...entry,
+  exercises: entry.exercises.map(buildTopicExercise),
+}));
+
+const topicExerciseCount = (topic) => topic.exercises.length;
+const decorateTopics = (topics, progress, activityType, levelKey) => {
+  const completions = new Map();
+  progress
+    .filter(
+      (item) =>
+        item.activity_type === activityType &&
+        item.difficulty_level.startsWith(`${activityType}:`),
+    )
+    .forEach((item) => {
+      const [, topicId, exerciseNumber] = item.difficulty_level.split(":");
+      if (topicId && exerciseNumber && !completions.has(`${topicId}:${exerciseNumber}`)) {
+        completions.set(`${topicId}:${exerciseNumber}`, item);
+      }
+    });
+  return topics.map((topic) => {
+    const exercises = topic.exercises.map((exercise, index) => {
+      const completion = completions.get(`${topic.topic.id}:${index + 1}`);
+      return {
+        ...exercise,
+        completed: Boolean(completion),
+        savedPoints: completion?.points,
+        savedTotal: completion?.total_points,
+      };
+    });
+    return {
+    ...topic,
+    exercises,
+    completed: exercises.length > 0 && exercises.every((exercise) => exercise.completed),
+    [levelKey]: topic[levelKey],
+    };
+  });
+};
+const buildAreaProgress = (progress) => {
+  const areas = [
+    {
+      key: "grammar",
+      label: "Grammar",
+      rows: progress.filter((item) =>
+        ["questions", "final"].includes(item.activity_type),
+      ),
+      total: null,
+    },
+    {
+      key: "vocabulary",
+      label: "Vocabulary",
+      rows: progress.filter((item) => item.activity_type === "flip-cards"),
+      total: null,
+    },
+    {
+      key: "reading",
+      label: "Reading",
+      topics: readingTopics,
+      type: "reading",
+    },
+    {
+      key: "writing",
+      label: "Writing",
+      topics: writingTopics,
+      type: "writing",
+    },
+    {
+      key: "listening",
+      label: "Listening",
+      topics: listeningTopics,
+      type: "listening",
+    },
+  ];
+  return areas.map((area) => {
+    if (!area.topics) {
+      const percentage = area.rows.length
+        ? Math.round(
+            area.rows.reduce((sum, row) => sum + row.percentage, 0) /
+              area.rows.length,
+          )
+        : 0;
+      return {
+        ...area,
+        percentage,
+        completed: area.rows.length,
+        total: area.rows.length || 1,
+      };
+    }
+    const total = area.topics.reduce(
+      (sum, topic) => sum + topicExerciseCount(topic),
+      0,
+    );
+    const completed = progress.filter(
+      (item) =>
+        item.activity_type === area.type &&
+        item.difficulty_level.startsWith(`${area.type}:`),
+    ).length;
+    return {
+      ...area,
+      percentage: total
+        ? Math.min(100, Math.round((completed / total) * 100))
+        : 0,
+      completed,
+      total,
+    };
+  });
+};
 
 //----------
 // APPLICATION
@@ -721,6 +852,17 @@ app.use(
   "/uploads/profiles",
   express.static(path.join(dataDir, "uploads", "profiles")),
 );
+app.use((req, res, next) => {
+  if (!req.session.name || req.session.isAdmin) return next();
+  db.get(
+    "SELECT COUNT(*) AS count FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0",
+    [req.session.name],
+    (error, row) => {
+      res.locals.unreadFeedbackCount = error ? 0 : row.count;
+      next();
+    },
+  );
+});
 app.get("/audio/eating-out", (req, res) => {
   res.sendFile(path.join(__dirname, "audio1", "A2_eating_out.mp3"));
 });
@@ -798,7 +940,6 @@ app.get("/audio/weather-forecast", (req, res) => {
 app.get("/audio/work", (req, res) => {
   res.sendFile(path.join(__dirname, "audio1", "A2_work.mp3"));
 });
-
 
 db.serialize(() => {
   db.run("ALTER TABLE members ADD COLUMN password_hash TEXT", () => {});
@@ -881,6 +1022,22 @@ db.serialize(() => {
     submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (username) REFERENCES members(username)
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS writing_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    topic_id TEXT NOT NULL,
+    topic_title TEXT NOT NULL,
+    submission_text TEXT NOT NULL,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    feedback TEXT,
+    feedback_at TEXT,
+    FOREIGN KEY (username) REFERENCES members(username),
+    UNIQUE (username, topic_id)
+  )`);
+  db.run(
+    "ALTER TABLE writing_submissions ADD COLUMN feedback_seen INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS password_resets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -963,29 +1120,173 @@ app.get("/vocabulary", requireAuthenticated, (req, res) => {
 
 app.get("/listening", requireAuthenticated, (req, res) => {
   const selectedLevel = req.query.level === "2" ? "2" : "1";
-  const selectedTopic =
-    readingTopics.find(
-      (topic) =>
-        topic.topic.id === req.query.topic &&
-        topic.listeningLevel === selectedLevel,
-    ) || readingTopics.find((topic) => topic.listeningLevel === selectedLevel);
-  res.render("listening.handlebars", {
-    listeningLevels: ["1", "2"].map((level) => ({
-      number: level,
-      selected: level === selectedLevel,
-      topics: readingTopics
-        .filter((topic) => topic.listeningLevel === level)
-        .map((topic) => ({
-          ...topic.topic,
-          selected: topic.topic.id === selectedTopic?.topic.id,
+  db.all(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
+    [req.session.name],
+    (error, progress) => {
+      if (error)
+        return res.status(500).send("Unable to load listening progress.");
+      const decorated = decorateTopics(
+        listeningTopics,
+        progress,
+        "listening",
+        "listeningLevel",
+      );
+      const selectedTopic =
+        decorated.find(
+          (topic) =>
+            topic.topic.id === req.query.topic &&
+            topic.listeningLevel === selectedLevel,
+        ) || decorated.find((topic) => topic.listeningLevel === selectedLevel);
+      res.render("listening.handlebars", {
+        listeningLevels: ["1", "2"].map((level) => ({
+          number: level,
+          selected: level === selectedLevel,
+          topics: decorated
+            .filter((topic) => topic.listeningLevel === level)
+            .map((topic) => ({
+              ...topic.topic,
+              selected: topic.topic.id === selectedTopic?.topic.id,
+            })),
         })),
-    })),
-    topic: selectedTopic?.topic,
-    content: selectedTopic?.content,
-    audioUrl: selectedTopic?.audioUrl,
-    exercises: selectedTopic?.exercises,
-    discussion: selectedTopic?.discussion,
-  });
+        topic: selectedTopic?.topic,
+        content: selectedTopic?.content,
+        audioUrl: selectedTopic?.audioUrl,
+        exercises: selectedTopic?.exercises,
+        discussion: selectedTopic?.discussion,
+      });
+    },
+  );
+});
+
+app.get("/writing", requireAuthenticated, (req, res) => {
+  const selectedLevel = req.query.level === "1" ? "1" : "2";
+  db.all(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
+    [req.session.name],
+    (progressError, progress) => {
+      if (progressError)
+        return res.status(500).send("Unable to load writing progress.");
+      const decorated = decorateTopics(
+        writingTopics,
+        progress,
+        "writing",
+        "writingLevel",
+      );
+      const selectedTopic =
+        decorated.find(
+          (topic) =>
+            topic.topic.id === req.query.topic &&
+            topic.writingLevel === selectedLevel,
+        ) || decorated.find((topic) => topic.writingLevel === selectedLevel);
+      const renderWriting = (mySubmission) => {
+        res.render("writing.handlebars", {
+          writingLevels: ["1", "2"].map((level) => ({
+            number: level,
+            selected: level === selectedLevel,
+            topics: decorated
+              .filter((topic) => topic.writingLevel === level)
+              .map((topic) => ({
+                ...topic.topic,
+                selected: topic.topic.id === selectedTopic?.topic.id,
+              })),
+          })),
+          topic: selectedTopic?.topic,
+          content: selectedTopic?.content,
+          tips: selectedTopic?.tips,
+          exercises: selectedTopic?.exercises,
+          discussion: selectedTopic?.discussion,
+          mySubmission,
+        });
+      };
+      if (!selectedTopic) return renderWriting(null);
+      db.get(
+        "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? AND topic_id = ?",
+        [req.session.name, selectedTopic.topic.id],
+        (error, submission) => renderWriting(error ? null : submission),
+      );
+    },
+  );
+});
+
+app.get("/reading", requireAuthenticated, (req, res) => {
+  const selectedLevel = req.query.level === "1" ? "1" : "2";
+  db.all(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
+    [req.session.name],
+    (progressError, progress) => {
+      if (progressError)
+        return res.status(500).send("Unable to load reading progress.");
+      const decorated = decorateTopics(
+        readingTopics,
+        progress,
+        "reading",
+        "readingLevel",
+      );
+      const selectedTopic =
+        decorated.find(
+          (topic) =>
+            topic.topic.id === req.query.topic &&
+            topic.readingLevel === selectedLevel,
+        ) || decorated.find((topic) => topic.readingLevel === selectedLevel);
+      res.render("reading.handlebars", {
+        readingLevels: ["1", "2"].map((level) => ({
+          number: level,
+          selected: level === selectedLevel,
+          topics: decorated
+            .filter((topic) => topic.readingLevel === level)
+            .map((topic) => ({
+              ...topic.topic,
+              selected: topic.topic.id === selectedTopic?.topic.id,
+            })),
+        })),
+        topic: selectedTopic?.topic,
+        content: selectedTopic?.content,
+        tips: selectedTopic?.tips,
+        exercises: selectedTopic?.exercises,
+        discussion: selectedTopic?.discussion,
+      });
+    },
+  );
+});
+
+app.post("/api/writing/submissions", requireLogin, (req, res) => {
+  const topicId = String(req.body.topicId || "").trim();
+  const topicTitle = String(req.body.topicTitle || "").trim();
+  const text = String(req.body.text || "").trim();
+  if (!topicId || !text)
+    return res.status(400).json({ error: "Writing text is required." });
+  db.run(
+    `INSERT INTO writing_submissions (username, topic_id, topic_title, submission_text)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(username, topic_id)
+     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
+    [req.session.name, topicId, topicTitle, text],
+    (error) =>
+      error
+        ? res.status(500).json({ error: "Unable to save your writing." })
+        : res.json({ saved: true }),
+  );
+});
+
+app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
+  db.get(
+    "SELECT topic_id FROM writing_submissions WHERE id = ? AND username = ?",
+    [req.params.id, req.session.name],
+    (error, submission) => {
+      if (error || !submission) return res.redirect("/writing");
+      db.run(
+        "UPDATE writing_submissions SET feedback_seen = 1 WHERE id = ? AND username = ?",
+        [req.params.id, req.session.name],
+      );
+      const topic = writingTopics.find(
+        (entry) => entry.topic.id === submission.topic_id,
+      );
+      res.redirect(
+        `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
+      );
+    },
+  );
 });
 
 app.get("/vocabulary/useful-chunks", requireAuthenticated, (req, res) => {
@@ -1656,6 +1957,11 @@ function requireAdmin(req, res, next) {
 }
 
 app.get("/profile", requireLogin, (req, res) => {
+  res.locals.unreadFeedbackCount = 0;
+  db.run(
+    "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
+    [req.session.name],
+  );
   db.get(
     "SELECT username, goal, avatar, avatar_hair, avatar_skin, avatar_shirt, avatar_bottom, avatar_shoes, avatar_eyes, avatar_hair_style, avatar_customized FROM members WHERE username = ?",
     [req.session.name],
@@ -1711,17 +2017,30 @@ app.get("/profile", requireLogin, (req, res) => {
                       ? chapterNames[item.chapter_id] || item.activity_type
                       : item.activity_type;
                   });
-                  res.render("profile.handlebars", {
-                    student,
-                    progress,
-                    stats,
-                    passportStamps,
-                    hairStyles: Array.from(
-                      { length: 10 },
-                      (_, index) => index + 1,
-                    ),
-                    query: req.query,
-                  });
+                  db.all(
+                    "SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL ORDER BY feedback_at DESC",
+                    [req.session.name],
+                    (feedbackError, feedbackMessages) => {
+                      if (feedbackError)
+                        return res.status(500).send("Unable to load messages.");
+                      res.render("profile.handlebars", {
+                        student,
+                        progress,
+                        stats,
+                        areaProgress: buildAreaProgress(progress),
+                        passportStamps,
+                        feedbackMessages,
+                        unreadFeedbackCount: feedbackMessages.filter(
+                          (message) => !message.feedback_seen,
+                        ).length,
+                        hairStyles: Array.from(
+                          { length: 10 },
+                          (_, index) => index + 1,
+                        ),
+                        query: req.query,
+                      });
+                    },
+                  );
                 },
               );
             },
@@ -2208,7 +2527,23 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
   );
 });
 
+const teacherCategories = {
+  grammar: { label: "Grammar", activityTypes: ["questions", "final"] },
+  vocabulary: { label: "Vocabulary", activityTypes: ["flip-cards"] },
+  reading: { label: "Reading", activityTypes: ["reading"] },
+  writing: { label: "Writing", activityTypes: ["writing"] },
+  listening: { label: "Listening", activityTypes: ["listening"] },
+};
+
 app.get("/teacher/dashboard", requireAdmin, (req, res) => {
+  const categoryKey = teacherCategories[req.query.category]
+    ? req.query.category
+    : null;
+  const category = categoryKey ? teacherCategories[categoryKey] : null;
+  const joinFilter = category
+    ? `AND progress.activity_type IN (${category.activityTypes.map(() => "?").join(",")})`
+    : "";
+  const params = category ? category.activityTypes : [];
   db.all(
     `SELECT members.username, members.fname, members.lname, members.goal,
     COALESCE(SUM(progress.points), 0) AS points,
@@ -2217,34 +2552,59 @@ app.get("/teacher/dashboard", requireAdmin, (req, res) => {
     COALESCE(GROUP_CONCAT(DISTINCT progress.difficulty_level), '') AS levels,
     COALESCE(SUM(CASE WHEN progress.difficulty_level = 'easy' THEN 1 ELSE 0 END), 0) AS easy_activities,
     COALESCE(SUM(CASE WHEN progress.difficulty_level = 'medium' THEN 1 ELSE 0 END), 0) AS medium_activities
-    FROM members LEFT JOIN progress ON progress.username = members.username
+    FROM members LEFT JOIN progress ON progress.username = members.username ${joinFilter}
     WHERE members.role = 'student'
     GROUP BY members.username ORDER BY members.username`,
+    params,
     (error, students) => {
       if (error)
         return res.status(500).send("Unable to load student progress.");
-      res.render("teacher.handlebars", {
-        students: students.map((student) => ({
-          ...student,
-          levelBadges: [
-            {
-              label: "Easy",
-              stronger: student.easy_activities >= student.medium_activities,
-            },
-            {
-              label: "Medium",
-              stronger: student.medium_activities > student.easy_activities,
-            },
-          ],
-        })),
-      });
+      const renderDashboard = (pendingWritingByUsername) => {
+        res.render("teacher.handlebars", {
+          categoryKey,
+          categoryLabel: category?.label,
+          categories: Object.entries(teacherCategories).map(([key, value]) => ({
+            key,
+            label: value.label,
+            selected: key === categoryKey,
+          })),
+          students: students.map((student) => ({
+            ...student,
+            pendingWriting: pendingWritingByUsername?.[student.username] || 0,
+            levelBadges: [
+              {
+                label: "Easy",
+                stronger: student.easy_activities >= student.medium_activities,
+              },
+              {
+                label: "Medium",
+                stronger: student.medium_activities > student.easy_activities,
+              },
+            ],
+          })),
+        });
+      };
+      if (categoryKey !== "writing") return renderDashboard(null);
+      db.all(
+        "SELECT username, COUNT(*) AS pending FROM writing_submissions WHERE feedback IS NULL GROUP BY username",
+        (pendingError, pendingRows) => {
+          if (pendingError) return renderDashboard(null);
+          const pendingWritingByUsername = Object.fromEntries(
+            pendingRows.map((row) => [row.username, row.pending]),
+          );
+          renderDashboard(pendingWritingByUsername);
+        },
+      );
     },
   );
 });
 
 app.get("/teacher/student/:username", requireAdmin, (req, res) => {
+  const profileCategory = teacherCategories[req.query.category]
+    ? req.query.category
+    : "grammar";
   db.get(
-    "SELECT username, fname, lname, goal FROM members WHERE username = ? AND role = 'student'",
+    "SELECT username, fname, lname, goal, avatar FROM members WHERE username = ? AND role = 'student'",
     [req.params.username],
     (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
@@ -2331,29 +2691,91 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                             .map((item) => {
                               const [, topicId, exerciseNumber] =
                                 item.difficulty_level.split(":");
-                              const topic = readingTopics.find(
+                              const topic = listeningTopics.find(
                                 (entry) => entry.topic.id === topicId,
                               );
                               return {
                                 ...item,
                                 title: topic?.topic.title || "Listening topic",
+                                level: topic?.listeningLevel || "1",
                                 exerciseNumber,
                               };
                             });
-                          res.render("teacher-student.handlebars", {
-                            student,
-                            progress,
-                            activityStats: preparedStats,
-                            bestActivity: rankedStats[0],
-                            needsFocus: rankedStats[rankedStats.length - 1],
-                            usefulChunkSubmissions,
-                            usefulChunkSubmissionCount:
-                              usefulChunkSubmissions.length,
-                            usefulChunkListsForAdmin,
-                            flipCompletions,
-                            hardestWords,
-                            listeningCompletions,
-                          });
+                          const readingCompletions = progress
+                            .filter(
+                              (item) =>
+                                item.activity_type === "reading" &&
+                                item.difficulty_level.startsWith("reading:"),
+                            )
+                            .map((item) => {
+                              const [, topicId, exerciseNumber] =
+                                item.difficulty_level.split(":");
+                              const topic = readingTopics.find(
+                                (entry) => entry.topic.id === topicId,
+                              );
+                              return {
+                                ...item,
+                                title: topic?.topic.title || "Reading topic",
+                                level: topic?.readingLevel || "1",
+                                exerciseNumber,
+                              };
+                            });
+                          db.all(
+                            "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                            [student.username],
+                            (writingError, writingSubmissions) => {
+                              if (writingError)
+                                return res
+                                  .status(500)
+                                  .send("Unable to load writing submissions.");
+                              res.render("teacher-student.handlebars", {
+                                student,
+                                profileCategory,
+                                profileIsGrammar: profileCategory === "grammar",
+                                profileIsReading: profileCategory === "reading",
+                                profileIsActivity:
+                                  profileCategory === "grammar" ||
+                                  profileCategory === "reading",
+                                profileIsVocabulary:
+                                  profileCategory === "vocabulary",
+                                profileIsWriting: profileCategory === "writing",
+                                profileIsListening:
+                                  profileCategory === "listening",
+                                progress,
+                                grammarStats: preparedStats.filter((stat) =>
+                                  ["questions", "final"].includes(
+                                    stat.activity_type,
+                                  ),
+                                ),
+                                activityStats: preparedStats,
+                                bestActivity: rankedStats[0],
+                                needsFocus: rankedStats[rankedStats.length - 1],
+                                usefulChunkSubmissions,
+                                usefulChunkSubmissionCount:
+                                  usefulChunkSubmissions.length,
+                                usefulChunkListsForAdmin,
+                                flipCompletions,
+                                hardestWords,
+                                listeningCompletions,
+                                readingCompletions,
+                                writingSubmissions: writingSubmissions.map(
+                                  (submission) => {
+                                    const topic = writingTopics.find(
+                                      (entry) =>
+                                        entry.topic.id === submission.topic_id,
+                                    );
+                                    return {
+                                      ...submission,
+                                      level: topic?.writingLevel || "2",
+                                      needsFeedback: !submission.feedback,
+                                    };
+                                  },
+                                ),
+                                writingSubmissionCount:
+                                  writingSubmissions.length,
+                              });
+                            },
+                          );
                         },
                       );
                     },
@@ -2367,6 +2789,21 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     },
   );
 });
+
+app.post(
+  "/teacher/student/:username/writing/:id/feedback",
+  requireAdmin,
+  (req, res) => {
+    const feedback = String(req.body.feedback || "").trim();
+    if (!feedback)
+      return res.redirect(`/teacher/student/${req.params.username}`);
+    db.run(
+      "UPDATE writing_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP, feedback_seen = 0 WHERE id = ? AND username = ?",
+      [feedback, req.params.id, req.params.username],
+      () => res.redirect(`/teacher/student/${req.params.username}`),
+    );
+  },
+);
 
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {

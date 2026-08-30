@@ -2,45 +2,112 @@
   <section class="profile-card student-profile-card">
     <a class="back-link" href="/teacher/dashboard">← All students</a>
     <p class="eyebrow">Student profile</p>
-    <div class="student-profile-identity"><canvas class="student-character-preview" data-student-character="{{student.username}}" width="96" height="96" aria-label="Student character"></canvas><div><h1 class="student-profile-name">{{#if student.fname}}{{student.fname}} {{student.lname}}{{else}}{{student.username}}{{/if}}</h1>
+    <div class="student-profile-identity">{{#if student.avatar}}<img class="student-character-preview student-uploaded-avatar" src="/uploads/profiles/{{student.avatar}}" alt="{{student.username}}'s profile picture" />{{else}}<canvas class="student-character-preview" data-student-character="{{student.username}}" width="96" height="96" aria-label="Student character"></canvas>{{/if}}<div><h1 class="student-profile-name">{{#if student.fname}}{{student.fname}} {{student.lname}}{{else}}{{student.username}}{{/if}}</h1>
     <p class="student-username">@{{student.username}}</p></div></div>
 
     <div class="student-profile-layout">
       <aside class="student-profile-nav" aria-label="Student profile sections">
         <p class="exercise-overview-title">Profile sections</p>
-        <button class="student-section-link active" type="button" data-student-section="activity-section">Activity performance</button>
-        <button class="student-section-link" type="button" data-student-section="listening-section">Listening comprehension <span class="section-count">{{listeningCompletions.length}}</span></button>
-        <button class="student-section-link" type="button" data-student-section="flip-section">Flip-card progress</button>
-        <button class="student-section-link" type="button" data-student-section="chunks-section">Useful Chunk sentences <span class="section-count">{{usefulChunkSubmissionCount}}</span></button>
+        <button class="student-section-link{{#if profileIsGrammar}} active{{/if}}" type="button" data-student-section="activity-section">Grammar</button>
+        <button class="student-section-link{{#if profileIsVocabulary}} active{{/if}}" type="button" data-student-section="flip-section">Vocabulary</button>
+        <button class="student-section-link{{#if profileIsReading}} active{{/if}}" type="button" data-student-section="reading-section">Reading</button>
+        {{#if profileIsReading}}<div class="student-profile-level-links" aria-label="Reading levels"><span>Levels</span><button type="button" data-reading-level="1">1</button><button type="button" data-reading-level="2">2</button></div>{{/if}}
+        <button class="student-section-link{{#if profileIsWriting}} active{{/if}}" type="button" data-student-section="writing-section">Writing <span class="section-count">{{writingSubmissionCount}}</span></button>
+        {{#if profileIsWriting}}<div class="student-profile-level-links" aria-label="Writing levels"><span>Levels</span><button type="button" data-writing-level="1">1</button><button type="button" data-writing-level="2">2</button></div>{{/if}}
+        <button class="student-section-link{{#if profileIsListening}} active{{/if}}" type="button" data-student-section="listening-section">Listening <span class="section-count">{{listeningCompletions.length}}</span></button>
+        {{#if profileIsListening}}<div class="student-profile-level-links" aria-label="Listening levels"><span>Levels</span><button type="button" data-listening-level="1">1</button><button type="button" data-listening-level="2">2</button></div>{{/if}}
       </aside>
 
       <div class="student-profile-sections">
-        <section class="student-profile-section active" id="activity-section" data-student-panel>
+        <section class="student-profile-section{{#if profileIsActivity}} active{{/if}}" id="activity-section" data-student-panel{{#unless profileIsActivity}} hidden{{/unless}}>
           <div class="student-section-heading">
             <div><p class="eyebrow">Learning goal</p><strong class="student-goal">{{#if student.goal}}{{student.goal}}{{else}}No goal set{{/if}}</strong></div>
           </div>
           <h2>Activity performance</h2>
           <div class="student-stats">
-            {{#each activityStats}}
+            {{#each grammarStats}}
               <article><strong>{{activity_type}}</strong><b>{{points}} / {{possible_points}}</b><span>Average {{average_score}}% · Levels: {{#if levels}}{{levels}}{{else}}-{{/if}}</span></article>
             {{else}}
-              <p class="empty-state">No completed activities yet.</p>
+              <p class="empty-state">No completed grammar activities yet.</p>
             {{/each}}
           </div>
         </section>
 
-        <section class="student-profile-section" id="listening-section" data-student-panel hidden>
-          <h2>Listening comprehension</h2>
+        <section class="student-profile-section{{#if profileIsReading}} active{{/if}}" id="reading-section" data-student-panel{{#unless profileIsReading}} hidden{{/unless}}>
+          <h2>Reading</h2>
+          <div class="student-stats">
+            {{#each readingCompletions}}
+              <article data-reading-completion-level="{{level}}"><strong>{{title}} - Exercise {{exerciseNumber}}</strong><b>{{points}} / {{total_points}}</b><span>{{percentage}}% · Completed {{completed_at}}</span></article>
+            {{else}}
+              <p class="empty-state">No completed reading exercises yet.</p>
+            {{/each}}
+          </div>
+        </section>
+
+        <section class="student-profile-section{{#if profileIsListening}} active{{/if}}" id="listening-section" data-student-panel{{#unless profileIsListening}} hidden{{/unless}}>
+          <h2>Listening</h2>
           <div class="student-stats">
             {{#each listeningCompletions}}
-              <article><strong>{{title}} - Exercise {{exerciseNumber}}</strong><b>{{points}} / {{total_points}}</b><span>{{percentage}}% · Completed {{completed_at}}</span></article>
+              <article data-listening-completion-level="{{level}}"><strong>{{title}} - Exercise {{exerciseNumber}}</strong><b>{{points}} / {{total_points}}</b><span>{{percentage}}% · Completed {{completed_at}}</span></article>
             {{else}}
               <p class="empty-state">No completed listening exercises yet.</p>
             {{/each}}
           </div>
         </section>
 
-        <section class="student-profile-section" id="flip-section" data-student-panel hidden>
+        <section class="student-profile-section{{#if profileIsWriting}} active{{/if}}" id="writing-section" data-student-panel{{#unless profileIsWriting}} hidden{{/unless}}>
+          <h2>Writing</h2>
+          <div class="admin-chunk-lists">
+            {{#each writingSubmissions}}
+              <details class="admin-chunk-list" data-writing-submission-level="{{level}}"{{#if needsFeedback}} open{{/if}}>
+                <summary><strong>{{topic_title}}</strong><span>{{#if needsFeedback}}Awaiting feedback{{else}}Feedback sent{{/if}}</span></summary>
+                <div class="admin-chunk-statuses">
+                  <article class="admin-chunk-status submitted">
+                    <div><strong>Student's writing</strong><span>Submitted {{submitted_at}}</span></div>
+                    <p class="writing-feedback-text">{{submission_text}}</p>
+                  </article>
+                  {{#if feedback}}
+                  <article class="admin-chunk-status submitted">
+                    <div><strong>Your feedback</strong><span>Sent {{feedback_at}}</span></div>
+                    <p class="writing-feedback-text">{{feedback}}</p>
+                  </article>
+                  {{/if}}
+                  <form class="teacher-feedback-form" method="POST" action="/teacher/student/{{@root.student.username}}/writing/{{id}}/feedback">
+                    <textarea name="feedback" rows="4" placeholder="Write feedback for the student...">{{feedback}}</textarea>
+                    <button class="practice-button" type="submit">Send feedback</button>
+                  </form>
+                </div>
+              </details>
+            {{else}}
+              <p class="empty-state">No writing submissions yet.</p>
+            {{/each}}
+          </div>
+            <script>
+              document.querySelectorAll("[data-writing-level]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  document.querySelectorAll("[data-writing-submission-level]").forEach((submission) => {
+                    submission.hidden = submission.dataset.writingSubmissionLevel !== button.dataset.writingLevel;
+                  });
+                });
+              });
+              document.querySelectorAll("[data-listening-level]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  document.querySelectorAll("[data-listening-completion-level]").forEach((completion) => {
+                    completion.hidden = completion.dataset.listeningCompletionLevel !== button.dataset.listeningLevel;
+                  });
+                });
+              });
+              document.querySelectorAll("[data-reading-level]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  document.querySelectorAll("[data-reading-completion-level]").forEach((completion) => {
+                    completion.hidden = completion.dataset.readingCompletionLevel !== button.dataset.readingLevel;
+                  });
+                });
+              });
+            </script>
+        </section>
+
+        <section class="student-profile-section{{#if profileIsVocabulary}} active{{/if}}" id="flip-section" data-student-panel{{#unless profileIsVocabulary}} hidden{{/unless}}>
           <h2>Flip-card progress</h2>
           <div class="flip-levels"><span class="{{#if flipCompletions.[0]}}completed{{/if}}">Easy{{#if flipCompletions.[0]}} completed{{else}} not completed{{/if}}</span><span class="{{#if flipCompletions.[1]}}completed{{/if}}">Medium{{#if flipCompletions.[1]}} completed{{else}} not completed{{/if}}</span></div>
           <h3>Hardest words</h3>

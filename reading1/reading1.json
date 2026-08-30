@@ -1,0 +1,528 @@
+[
+  {
+    "topic": {
+      "id": "reading-test-a2-cities",
+      "title": "A guide to famous cities",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Reading Comprehension",
+      "description": "Read about three famous world cities to practice scanning for specific details, comparing facts, and answering comprehension questions."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Three Great Cities to Visit",
+        "text": "London\nLondon is the capital city of the United Kingdom. It is famous for its historical landmarks like Big Ben, the Tower of London, and Buckingham Palace. Millions of tourists visit every year to walk along the River Thames and visit famous museums, which are mostly free to enter.\n\nTokyo\nTokyo is the bustling capital of Japan. It blends modern technology, high-speed trains, and tall skyscrapers with traditional temples and peaceful gardens. The city is world-famous for its delicious sushi, ramen, and vibrant shopping districts like Shibuya.\n\nSydney\nSydney is the largest city in Australia. Situated on the coast, it is famous for its iconic Opera House and Harbour Bridge. Visitors love spending hot summer days at Bondi Beach, swimming in the ocean, or trying out surfing lessons."
+      },
+      "vocabulary": [
+        { "word": "Landmarks", "definition": "Famous buildings or structures that are easily recognized." },
+        { "word": "Bustling", "definition": "Full of energetic activity, people, and noise." },
+        { "word": "Iconic", "definition": "Very famous and representative of a particular place or idea." }
+      ]
+    },
+    "tips": [
+      "Scan the headings (city names) first before reading the entire text.",
+      "Look for keywords in the questions (like 'museums' or 'beach') and match them with the relevant section.",
+      "Pay attention to geographical adjectives (e.g., 'capital', 'coast', 'largest')."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "cities-mc",
+        "title": "Check your understanding: multiple choice",
+        "instruction": "Choose the correct city for each question based on the text.",
+        "questions": [
+          { "id": 1, "question": "Which city offers free entry to most of its museums?", "options": ["London", "Tokyo", "Sydney"], "answer": "London" },
+          { "id": 2, "question": "Which city is famous for Bondi Beach and surfing?", "options": ["London", "Tokyo", "Sydney"], "answer": "Sydney" },
+          { "id": 3, "question": "Which city combines high-speed trains with traditional temples?", "options": ["London", "Tokyo", "Sydney"], "answer": "Tokyo" }
+        ]
+      },
+      {
+        "type": "true_or_false",
+        "id": "cities-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False based on the text.",
+        "questions": [
+          { "id": 1, "statement": "Sydney is the capital city of Australia.", "correctAnswer": false },
+          { "id": 2, "statement": "Shibuya is a famous shopping district in Tokyo.", "correctAnswer": true },
+          { "id": 3, "statement": "Buckingham Palace is located in London.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which of these three cities would you like to visit most, and why?"
+    }
+  },
+  {
+    "topic": {
+      "id": "finding-job",
+      "title": "Finding a job",
+      "level": "A2 Pre-intermediate",
+      "category": "Work & Careers",
+      "description": "Read four job advertisements to practice matching job requirements with candidate profiles."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Job Advertisements",
+        "text": "Job A: Babysitter wanted for two children (ages 4 and 6). Afternoons from 3:30 PM to 6:30 PM, Monday to Friday. Must love games and outdoor play.\n\nJob B: Newspaper delivery driver. Early mornings from 5:30 AM to 7:30 AM. Must have a valid driving license and reliable car.\n\nJob C: Cafe Assistant. Weekend shifts (Saturday & Sunday, 8:00 AM – 4:00 PM). Duties include making coffee, serving food, and operating the till. Experience required.\n\nJob D: Dog Walker. Flexible hours during weekdays. Must be energetic and comfortable with large dogs."
+      }
+    },
+    "tips": [
+      "Identify key criteria in job adverts: working hours, required experience, and necessary equipment/licenses.",
+      "Match candidate preferences directly to advert conditions."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "finding-job-mc",
+        "title": "Check your understanding: matching",
+        "instruction": "Match each candidate to the best job advert.",
+        "questions": [
+          { "id": 1, "question": "Which job requires a driving license and a car?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job B" },
+          { "id": 2, "question": "Which job is only for weekend work?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job C" },
+          { "id": 3, "question": "Which job involves taking care of young children after school?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job A" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Which of these four jobs would you prefer to apply for?"
+    }
+  },
+  {
+    "topic": {
+      "id": "films-entertainment",
+      "title": "Films and entertainment",
+      "level": "A2 Pre-intermediate",
+      "category": "Media & Reviews",
+      "description": "Read short movie reviews and listings to learn how to choose a movie based on interests."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Cinema Guide",
+        "text": "1. Galaxy Wars (Sci-Fi, 120 mins): An epic space battle across distant star systems with amazing CGI effects.\n2. Laugh Out Loud (Comedy, 90 mins): Two best friends accidentally enter a national talent contest. Hilarious for the whole family.\n3. Deep Blue Secret (Mystery/Thriller, 105 mins): A detective investigates a mysterious disappearance in a sleepy coastal town.\n4. Animal Kingdom (Documentary, 75 mins): Stunning footage of wildlife in African national parks."
+      }
+    },
+    "tips": [
+      "Pay attention to genre labels (Sci-Fi, Comedy, Mystery) to match viewer preferences.",
+      "Check running times if you have a tight schedule."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "films-mc",
+        "title": "Check your understanding: film selection",
+        "instruction": "Choose the best film for each person.",
+        "questions": [
+          { "id": 1, "question": "Which film should someone watch if they love nature and wildlife?", "options": ["Galaxy Wars", "Laugh Out Loud", "Deep Blue Secret", "Animal Kingdom"], "answer": "Animal Kingdom" },
+          { "id": 2, "question": "Which film is best for someone looking for a funny movie?", "options": ["Galaxy Wars", "Laugh Out Loud", "Deep Blue Secret", "Animal Kingdom"], "answer": "Laugh Out Loud" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What film genre is your favorite when you go to the cinema?"
+    }
+  },
+  {
+    "topic": {
+      "id": "are-you-good-digital-citizen",
+      "title": "Are you a good digital citizen?",
+      "level": "A2 Pre-intermediate",
+      "category": "Technology & Ethics",
+      "description": "Read a quiz and guidance checklist about safe and responsible internet usage."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Digital Citizenship Checklist",
+        "text": "Being a good digital citizen means treating others with respect online.\n- Always ask permission before posting photos of your friends.\n- Never share personal information like your address or passwords.\n- Think before you comment: Is it kind? Is it true?\n- Report cyberbullying or mean behavior to a trusted adult or site moderator."
+      }
+    },
+    "tips": [
+      "Look for modal verbs of obligation and advice (e.g., 'always', 'never', 'must').",
+      "Understand safety imperatives for protecting personal data."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "digital-citizen-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements represent good digital citizenship.",
+        "questions": [
+          { "id": 1, "statement": "You should post photos of your friends without asking them first.", "correctAnswer": false },
+          { "id": 2, "statement": "It is safe to share your passwords with online friends.", "correctAnswer": false },
+          { "id": 3, "statement": "You should report cyberbullying to an adult.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What rules do you follow to stay safe and polite online?"
+    }
+  },
+  {
+    "topic": {
+      "id": "about-earth",
+      "title": "About Earth",
+      "level": "A2 Pre-intermediate",
+      "category": "Science & Planet",
+      "description": "Read key scientific facts about Planet Earth, its oceans, atmosphere, and continents."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Planet Earth Facts",
+        "text": "Earth is the third planet from the Sun and the only astronomical object known to harbor life. About 71% of Earth's surface is covered with water, mostly by oceans. The atmosphere consists mostly of nitrogen and oxygen, which protects living organisms from harmful solar radiation and keeps the planet warm through the greenhouse effect."
+      }
+    },
+    "tips": [
+      "Pay attention to numerical statistics and percentages.",
+      "Identify scientific cause-and-effect relationships."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "earth-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing facts about Earth.",
+        "questions": [
+          { "id": 1, "sentence": "Earth is the ________ planet from the Sun.", "answer": "third" },
+          { "id": 2, "sentence": "Water covers about ________% of Earth's surface.", "answer": "71" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What action can we take to protect Earth's environment?"
+    }
+  },
+  {
+    "topic": {
+      "id": "train-timetable",
+      "title": "A train timetable",
+      "level": "A2 Pre-intermediate",
+      "category": "Travel & Schedules",
+      "description": "Read a train schedule table to practice finding arrival, departure, and platform information."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Morning Express Timetable (Station -> Central)",
+        "text": "Train 101 | Departs: 07:15 | Arrives: 07:45 | Platform 2 | Calling at: North Park, Eastgate\nTrain 103 | Departs: 07:35 | Arrives: 08:00 | Platform 1 | Direct (Express)\nTrain 105 | Departs: 08:05 | Arrives: 08:40 | Platform 3 | Calling at: North Park, Riverdale, Eastgate"
+      }
+    },
+    "tips": [
+      "Distinguish between departure times and arrival times.",
+      "Look for terms like 'Direct' or 'Express' vs. stopping trains ('Calling at')."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "timetable-mc",
+        "title": "Check your understanding: schedule lookup",
+        "instruction": "Select the correct train option.",
+        "questions": [
+          { "id": 1, "question": "Which train is the fastest direct route to Central?", "options": ["Train 101", "Train 103", "Train 105"], "answer": "Train 103" },
+          { "id": 2, "question": "What platform does Train 101 depart from?", "options": ["Platform 1", "Platform 2", "Platform 3"], "answer": "Platform 2" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How often do you use train timetables or transit apps when traveling?"
+    }
+  },
+  {
+    "topic": {
+      "id": "restaurant-menu",
+      "title": "A restaurant menu",
+      "level": "A2 Pre-intermediate",
+      "category": "Food & Life Skills",
+      "description": "Read a restaurant menu to understand dish components, prices, and special dietary options."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Green Bistro Menu",
+        "text": "Starters:\n- Garlic Bread (£3.50)\n- Vegetable Soup (V) (£4.00)\n\nMains:\n- Grilled Chicken Burger with Fries (£8.50)\n- Spinach & Ricotta Pasta (V) (£7.95)\n- Fish and Chips (£9.00)\n\nDesserts:\n- Chocolate Brownie with Ice Cream (£4.50)\n- Fruit Salad (£3.50)\n\n(V) = Vegetarian option"
+      }
+    },
+    "tips": [
+      "Look for dietary symbols like '(V)' for vegetarian options.",
+      "Calculate total meal costs by summing starters, mains, and desserts."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "menu-mc",
+        "title": "Check your understanding: prices & options",
+        "instruction": "Choose the correct details based on the menu.",
+        "questions": [
+          { "id": 1, "question": "Which main course is vegetarian?", "options": ["Chicken Burger", "Spinach & Ricotta Pasta", "Fish and Chips"], "answer": "Spinach & Ricotta Pasta" },
+          { "id": 2, "question": "How much is the Garlic Bread starter?", "options": ["£3.50", "£4.00", "£4.50"], "answer": "£3.50" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What dish would you order from the Green Bistro menu?"
+    }
+  },
+  {
+    "topic": {
+      "id": "7-tips-tidy-desk",
+      "title": "7 tips for a tidy desk",
+      "level": "A2 Pre-intermediate",
+      "category": "Study Skills & Organization",
+      "description": "Read practical advice on maintaining a clean and organized study desk workspace."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Keep Your Desk Tidy!",
+        "text": "1. Only keep items you use every day on your desk.\n2. Use pen holders and small boxes for stationery.\n3. Keep papers in organized folders instead of piles.\n4. Clean your computer screen and keyboard once a week.\n5. Put your school bag next to your desk, not on it.\n6. Throw away old rubbish at the end of every day.\n7. Keep a water bottle nearby to stay hydrated."
+      }
+    },
+    "tips": [
+      "Use imperative verbs for organizational rules ('Keep', 'Clean', 'Throw away').",
+      "Recognize time frequency words ('every day', 'once a week')."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "tidy-desk-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the advice matches the text.",
+        "questions": [
+          { "id": 1, "statement": "You should leave all your papers in large piles on the desk.", "correctAnswer": false },
+          { "id": 2, "statement": "Rubbish should be thrown away at the end of each day.", "correctAnswer": true }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How tidy is your study desk right now?"
+    }
+  },
+  {
+    "topic": {
+      "id": "shopping-signs-notices",
+      "title": "Shopping signs and notices",
+      "level": "A2 Pre-intermediate",
+      "category": "Shopping & Notices",
+      "description": "Read common store notices, sale signs, and store opening announcements."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Store Notices",
+        "text": "Notice 1: Summer Sale - Up to 50% off selected summer clothing! Today only.\nNotice 2: Fitting rooms closed for cleaning. Please ask staff for assistance.\nNotice 3: Buy 2 T-shirts, get 1 free!\nNotice 4: Please pay for items at the main cash desk near the exit."
+      }
+    },
+    "tips": [
+      "Understand common retail vocabulary ('sale', 'discount', 'fitting rooms', 'cash desk').",
+      "Match store signs with customer situations."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "signs-mc",
+        "title": "Check your understanding: sign meanings",
+        "instruction": "Select the correct meaning for each notice.",
+        "questions": [
+          { "id": 1, "question": "Which notice offers a special deal on buying multiple items?", "options": ["Notice 1", "Notice 2", "Notice 3", "Notice 4"], "answer": "Notice 3" },
+          { "id": 2, "question": "Where should customers take their clothing items to buy them?", "options": ["Fitting rooms", "Main cash desk", "Outside"], "answer": "Main cash desk" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What sign or deal catches your attention when shopping?"
+    }
+  },
+  {
+    "topic": {
+      "id": "online-safety-poster",
+      "title": "Online safety poster",
+      "level": "A2 Pre-intermediate",
+      "category": "Technology & Safety",
+      "description": "Read safety guidelines on protecting accounts, passwords, and personal information online."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Stay Safe Online!",
+        "text": "- Create strong passwords combining letters, numbers, and symbols.\n- Never share your passwords with friends or classmates.\n- Do not click on unknown links or download unexpected attachments.\n- Keep your social media accounts private.\n- Talk to a parent or teacher if something online makes you uncomfortable."
+      }
+    },
+    "tips": [
+      "Identify negative imperatives ('Do not click', 'Never share').",
+      "Remember password security rules."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "online-safety-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements represent safe online behavior.",
+        "questions": [
+          { "id": 1, "statement": "Strong passwords should include numbers and symbols.", "correctAnswer": true },
+          { "id": 2, "statement": "You should click on links sent by strangers.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "How often do you update or change your online passwords?"
+    }
+  },
+  {
+    "topic": {
+      "id": "internet",
+      "title": "The internet",
+      "level": "A2 Pre-intermediate",
+      "category": "Technology & History",
+      "description": "Read a short article explaining the history and everyday impact of the World Wide Web."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "How the Internet Changed the World",
+        "text": "The internet connects millions of computers worldwide. Invented in the late 20th century, it revolutionized how people communicate, work, and learn. Today, people use web browsers to access information, stream videos, play online games, and keep in touch with friends instantly across global distances."
+      }
+    },
+    "tips": [
+      "Understand general technological verbs ('connects', 'stream', 'access').",
+      "Summarize global impacts mentioned in informative texts."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "internet-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Complete the missing terms.",
+        "questions": [
+          { "id": 1, "sentence": "The internet connects millions of ________ worldwide.", "answer": "computers" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is the most useful thing you use the internet for every day?"
+    }
+  },
+  {
+    "topic": {
+      "id": "my-town",
+      "title": "My town",
+      "level": "A2 Pre-intermediate",
+      "category": "Places & Environment",
+      "description": "Read a description of a small town, its local shops, parks, and community facilities."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Welcome to Oakwood",
+        "text": "Oakwood is a quiet town located near a large forest. It has a high street with small bakeries, a library, and a cozy cafe. In the center of town, there is a peaceful public park with a duck pond and playground. On Saturdays, local farmers sell fresh fruit and vegetables at the market square."
+      }
+    },
+    "tips": [
+      "Locate prepositions of place ('near', 'in the center of', 'at the market square').",
+      "Identify key amenities available in small towns."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "my-town-mc",
+        "title": "Check your understanding: location details",
+        "instruction": "Select the correct facility in Oakwood.",
+        "questions": [
+          { "id": 1, "question": "Where do farmers sell fresh produce on Saturdays?", "options": ["At the library", "At the market square", "In the forest"], "answer": "At the market square" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your favorite place in your hometown?"
+    }
+  },
+  {
+    "topic": {
+      "id": "my-city",
+      "title": "My city",
+      "level": "A2 Pre-intermediate",
+      "category": "Places & Urban Life",
+      "description": "Read a short essay describing a major metropolitan city's public transport and nightlife."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Living in Metroville",
+        "text": "Metroville is a fast-paced city with over two million residents. The public transportation system includes modern underground trains and electric buses that run 24 hours a day. The city skyline is filled with glass skyscrapers, art galleries, and bustling night markets."
+      }
+    },
+    "tips": [
+      "Notice vocabulary related to urban environments ('skyscrapers', 'underground trains', 'residents')."
+    ],
+    "exercises": [
+      {
+        "type": "true_or_false",
+        "id": "my-city-tf",
+        "title": "Check your understanding: true or false",
+        "instruction": "Decide if the statements are True or False.",
+        "questions": [
+          { "id": 1, "statement": "Metroville has electric buses that operate 24 hours a day.", "correctAnswer": true },
+          { "id": 2, "statement": "Metroville is a quiet village with few residents.", "correctAnswer": false }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Do you prefer living in a quiet small town or a bustling big city?"
+    }
+  },
+  {
+    "topic": {
+      "id": "mind-maps",
+      "title": "Using mind maps",
+      "level": "A2 Pre-intermediate",
+      "category": "Study Skills",
+      "description": "Read an educational article explaining how mind mapping helps revision and brain storming."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "How to Create a Mind Map",
+        "text": "A mind map is a visual diagram used to organize information. Start by drawing your main idea in the center of a blank page. Draw main branches connecting to sub-topics, using different colors and short key phrases. Adding small pictures or symbols helps your brain remember information much faster!"
+      }
+    },
+    "tips": [
+      "Follow step-by-step visual creation instructions.",
+      "Identify the core benefits of mind mapping for study recall."
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "id": "mind-maps-gapfill",
+        "title": "Check your understanding: gap fill",
+        "instruction": "Fill in the missing step.",
+        "questions": [
+          { "id": 1, "sentence": "Draw your main idea in the ________ of the page.", "answer": "center" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "Have you ever created a mind map to prepare for an exam?"
+    }
+  },
+  {
+    "topic": {
+      "id": "going-out",
+      "title": "Going out",
+      "level": "A2 Pre-intermediate",
+      "category": "Social Life",
+      "description": "Read text messages between teenagers deciding where to go out on a Friday evening."
+    },
+    "content": {
+      "readingPassage": {
+        "title": "Friday Night Plans",
+        "text": "Liam: Hey guys, what are we doing tonight? Bowling or cinema?\nSophia: I'd prefer bowling! The new bowling alley near the mall has student discounts on Fridays.\nEthan: Bowling sounds great. What time?\nSophia: Let's meet at 6:30 PM so we can grab pizza first!"
+      }
+    },
+    "tips": [
+      "Pay attention to peer negotiations and activity choices.",
+      "Check specific meeting times and pre-activity plans (like eating pizza)."
+    ],
+    "exercises": [
+      {
+        "type": "multiple_choice",
+        "id": "going-out-mc",
+        "title": "Check your understanding: social plans",
+        "instruction": "Select the correct arrangement details.",
+        "questions": [
+          { "id": 1, "question": "What activity do the friends choose for Friday night?", "options": ["Cinema", "Bowling", "Shopping"], "answer": "Bowling" },
+          { "id": 2, "question": "Why does Sophia choose the bowling alley?", "options": ["It has student discounts", "It is closer to her house", "It has movies"], "answer": "It has student discounts" }
+        ]
+      }
+    ],
+    "discussion": {
+      "question": "What is your favorite activity when going out with your friends?"
+    }
+  }
+]

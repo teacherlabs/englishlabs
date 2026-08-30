@@ -545,6 +545,37 @@ legend {
 .student-stats span {
   color: #68758a;
 }
+.profile-area-progress {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+.profile-area-progress-row {
+  display: grid;
+  gap: 8px;
+}
+.profile-area-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #14213d;
+}
+.profile-area-progress-heading span {
+  color: #68758a;
+  font-size: 13px;
+}
+.profile-progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6edf5;
+}
+.profile-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #5ca66d;
+}
 
 @media (max-width: 600px) {
   .profile-layout {
@@ -853,14 +884,34 @@ header > nav > .auth-button {
 
 .profile-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 18px;
   max-width: 1120px;
   margin: 0 auto;
+  padding: 18px;
+  border: 1px solid #dbe2ed;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .profile-layout .profile-card {
   max-width: none;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.profile-messages-panel {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 14px;
+}
+.profile-messages-heading h2 {
+  font-size: 16px;
+}
+.profile-message {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 12px;
 }
 
 .profile-stats {
@@ -1010,6 +1061,19 @@ header > nav > .auth-button {
 }
 
 .avatar-form small {
+  .topic-completion-tick {
+    display: inline-grid;
+    width: 18px;
+    height: 18px;
+    margin-left: 7px;
+    place-items: center;
+    border-radius: 50%;
+    background: #5ca66d;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+  }
   color: #68758a;
 }
 
@@ -1164,6 +1228,131 @@ header > nav > .auth-button {
   background: #236044;
 }
 
+.teacher-category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+.teacher-category-link {
+  padding: 7px 14px;
+  border: 1px solid #dbe2ed;
+  border-radius: 999px;
+  background: #f7f9fc;
+  color: #14213d;
+  font-size: 13px;
+  text-decoration: none;
+}
+.teacher-category-link.selected {
+  background: #14213d;
+  border-color: #14213d;
+  color: #fff;
+}
+.teacher-pending-badge {
+  color: #8f3028;
+}
+.teacher-feedback-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.teacher-feedback-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #b9d7f2;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #14213d;
+  font: inherit;
+  resize: vertical;
+}
+
+.profile-messages-panel {
+  align-self: start;
+  padding: 20px;
+  border: 1px solid #dbe2ed;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.profile-messages-heading h2 {
+  margin-top: 6px;
+  color: #14213d;
+}
+.profile-message-badge {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d05a3a;
+  color: #fff;
+  font-size: 12px;
+  vertical-align: middle;
+}
+.profile-message {
+  display: grid;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 14px;
+  border-left: 4px solid #b9d7f2;
+  background: #f8fbff;
+}
+.profile-message.unread {
+  border-left-color: #f0c94f;
+  background: #fffaf0;
+}
+.profile-message p {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  color: #526074;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.profile-message small {
+  color: #68758a;
+}
+.profile-message-link {
+  font-size: 12px;
+  color: #236044;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+  .profile-messages-panel,
+  .profile-layout .profile-card {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+.student-profile-level-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 8px 12px;
+  color: #68758a;
+  font-size: 12px;
+}
+.student-profile-level-links button {
+  min-width: 24px;
+  padding: 3px 7px;
+  border: 1px solid #b9d7f2;
+  border-radius: 4px;
+  background: #f8fbff;
+  color: #236044;
+  cursor: pointer;
+}
+
 .student-profile-name {
   font-size: 30px !important;
   overflow-wrap: anywhere;
@@ -1187,6 +1376,10 @@ header > nav > .auth-button {
   border-radius: 50%;
   background: #fff9eb;
   image-rendering: pixelated;
+}
+.student-uploaded-avatar {
+  object-fit: cover;
+  image-rendering: auto;
 }
 
 .student-profile-card {
@@ -1643,6 +1836,29 @@ nav ul li a:hover {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.profile-pic-link {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-feedback-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #d05a3a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Round Profile Picture */
@@ -2828,6 +3044,80 @@ nav ul li a:hover {
   color: #236044;
   font-size: 13px;
 }
+.writing-passage-text {
+  width: auto;
+  margin-top: 16px;
+  padding: 0;
+  color: #526074;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.reading-vocabulary-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.reading-vocabulary-list div {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  background: #f8fbff;
+}
+.reading-vocabulary-list strong {
+  color: #236044;
+}
+.reading-vocabulary-list span {
+  color: #526074;
+  font-size: 13px;
+}
+.writing-tips-card {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #dbe2ed;
+  border-left: 5px solid #f0c94f;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+.writing-tips-card ul {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-left: 20px;
+  color: #7c5e1c;
+}
+.writing-submission-textarea {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #b9d7f2;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #14213d;
+  font: inherit;
+  resize: vertical;
+}
+.writing-submission-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+.writing-submission-status {
+  color: #68758a;
+  font-size: 13px;
+}
+.writing-feedback-card {
+  margin-top: 18px;
+  padding: 16px;
+  border-left: 4px solid #5ca66d;
+  border-radius: 6px;
+  background: #eef8f0;
+}
+.writing-feedback-text {
+  margin-top: 6px;
+  color: #236044;
+  white-space: pre-line;
+}
 .reading-content,
 .reading-exercises,
 .discussion-panel {
@@ -2915,7 +3205,9 @@ nav ul li a:hover {
   flex-wrap: wrap;
   gap: 14px;
 }
-.sports-items { margin: 16px 0; }
+.sports-items {
+  margin: 16px 0;
+}
 .sport-item {
   padding: 10px 14px;
   margin: 2px;
@@ -2926,7 +3218,9 @@ nav ul li a:hover {
   cursor: grab;
   font: inherit;
 }
-.sport-item:disabled { cursor: default; }
+.sport-item:disabled {
+  cursor: default;
+}
 .sports-category-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2939,15 +3233,31 @@ nav ul li a:hover {
   border-radius: 6px;
   background: #f8fbff;
 }
-.sports-drop-zone.is-ready { border-color: #f0c94f; background: #fffaf0; }
-.sports-drop-zone h4 { margin: 0 0 14px; }
-.sports-drop-items { gap: 10px; }
-.correct-sport { border-color: #5ca66d; background: #eef8f0; color: #236044; }
-.incorrect-sport { border-color: #d05a3a; background: #fff3f0; color: #7c3429; }
-
+.sports-drop-zone.is-ready {
+  border-color: #f0c94f;
+  background: #fffaf0;
+}
+.sports-drop-zone h4 {
+  margin: 0 0 14px;
+}
+.sports-drop-items {
+  gap: 10px;
+}
+.correct-sport {
+  border-color: #5ca66d;
+  background: #eef8f0;
+  color: #236044;
+}
+.incorrect-sport {
+  border-color: #d05a3a;
+  background: #fff3f0;
+  color: #7c3429;
+}
 
 @media (max-width: 600px) {
-  .sports-category-grid { grid-template-columns: 1fr; }
+  .sports-category-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {

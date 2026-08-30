@@ -1,5 +1,18 @@
 <main class="account-page">
   <div class="profile-layout">
+    <aside class="profile-messages-panel">
+      <div class="profile-messages-heading"><p class="eyebrow">Messages</p><h2>Teacher feedback{{#if unreadFeedbackCount}} <span class="profile-message-badge">{{unreadFeedbackCount}}</span>{{/if}}</h2></div>
+      {{#each feedbackMessages}}
+        <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
+          <strong>{{topic_title}}</strong>
+          <p>{{feedback}}</p>
+          <small>{{feedback_at}}</small>
+          <a class="profile-message-link" href="/writing/feedback/{{id}}/open">Go to exercise <span aria-hidden="true">→</span></a>
+        </article>
+      {{else}}
+        <p class="empty-state">No teacher feedback yet.</p>
+      {{/each}}
+    </aside>
     <section class="profile-card">
       <div class="profile-heading">
         <div class="profile-identity">
@@ -78,10 +91,11 @@
         <a id="character-lobby-link" class="notes-button" href="/lobby">Enter lobby</a>
       </div>
       <h2>Progress overview</h2>
-      <div class="profile-stats"><div><strong>{{stats.activities}}</strong><span
-          >Activities</span></div><div><strong>{{stats.points}}</strong><span
-          >Points earned</span></div><div><strong
-          >{{stats.average_score}}%</strong><span>Average score</span></div></div>
+      <div class="profile-area-progress">
+        {{#each areaProgress}}
+          <div class="profile-area-progress-row"><div class="profile-area-progress-heading"><strong>{{label}}</strong><span>{{percentage}}% finished</span></div><div class="profile-progress-track" role="progressbar" aria-label="{{label}} progress" aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{percentage}}%"></span></div></div>
+        {{/each}}
+      </div>
     </section>
   </div>
 </main>

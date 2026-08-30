@@ -1,18 +1,22 @@
 <main class="account-page">
   <section class="profile-card teacher-card">
     <div class="profile-heading"><div><p class="eyebrow">Teacher dashboard</p><h1
-        >Student progress</h1></div><a
+        >Student progress{{#if categoryLabel}} · {{categoryLabel}}{{/if}}</h1></div><a
         class="practice-button"
         href="/logout"
       >Log out</a></div>
+    <nav class="teacher-category-nav" aria-label="Progress categories">
+      <a class="teacher-category-link{{#unless categoryKey}} selected{{/unless}}" href="/teacher/dashboard">All</a>
+      {{#each categories}}<a class="teacher-category-link{{#if selected}} selected{{/if}}" href="/teacher/dashboard?category={{key}}">{{label}}</a>{{/each}}
+    </nav>
     <div class="student-table"><div class="student-table-head"><span
         >Student</span><span>Goal</span></div>{{#each students}}<a
           class="student-row student-link"
-          href="/teacher/student/{{username}}"
+          href="/teacher/student/{{username}}?category={{@root.categoryKey}}"
         ><strong>{{#if fname}}{{fname}}
               {{lname}}{{else}}{{username}}{{/if}}</strong><span>{{#if
               goal
-            }}{{goal}}{{else}}No goal set{{/if}}</span></a>{{else}}<p
+            }}{{goal}}{{else}}No goal set{{/if}}{{#if pendingWriting}} · <b class="teacher-pending-badge">{{pendingWriting}} awaiting feedback</b>{{/if}}</span></a>{{else}}<p
           class="empty-state"
         >No student accounts yet.</p>{{/each}}</div>
   </section>
