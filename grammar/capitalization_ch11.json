@@ -1,0 +1,156 @@
+{
+  "chapter": {
+    "id": "capitalization",
+    "title": "Capitalization",
+    "level": "Grammar & Mechanics",
+    "description": "Learn the essential capitalization rules for proper nouns, job titles, geographical names, publication titles, and sentence openings."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Proper Nouns and Specific Names",
+      "explanation": "Capitalize the names of specific people, places, organizations, and brand names (e.g., John, London, Microsoft). Do not capitalize general or common nouns.",
+      "example": "We went to Paris last summer. / We went to a big city last summer."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Job Titles and Honorifics",
+      "explanation": "Capitalize job titles only when they immediately precede a person's name as part of the formal name. Do not capitalize job titles when they stand alone or follow a name.",
+      "example": "President Biden gave a speech. / Joe Biden, the president, gave a speech."
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Geographical Directions and Regions",
+      "explanation": "Capitalize compass directions (north, south, east, west) when they designate a specific geographical region, but NOT when they refer to a general direction or compass point.",
+      "example": "She moved to the Midwest. / Drive north for three miles."
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Days, Months, and Holidays",
+      "explanation": "Capitalize the days of the week, months of the year, and specific holiday names. Do NOT capitalize the four seasons (spring, summer, autumn/fall, winter) unless part of a formal proper title.",
+      "example": "We leave on Monday, August 15th for Thanksgiving. / I love the autumn weather."
+    },
+    {
+      "ruleNumber": 5,
+      "title": "Titles of Publications and Works",
+      "explanation": "In title case capitalization, capitalize the first and last words, as well as all principal words (nouns, pronouns, verbs, adjectives, adverbs). Do not capitalize short prepositions, conjunctions, or articles unless they are the first word.",
+      "example": "The Catcher in the Rye / Gone with the Wind"
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: grammarbook.com",
+      "title": "Capitalization Practice - Quiz 1",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "We traveled south on Highway 101 to visit Uncle David.",
+            "We traveled South on highway 101 to visit uncle David."
+          ],
+          "answer": "We traveled south on Highway 101 to visit Uncle David.",
+          "explanation": "'South' is a direction here so it remains lowercase. 'Highway 101' is a formal highway designation and 'Uncle David' uses 'Uncle' as a title directly preceding a proper name."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "I registered for History 101 and a French literature course this semester.",
+            "I registered for history 101 and a french literature course this semester."
+          ],
+          "answer": "I registered for History 101 and a French literature course this semester.",
+          "explanation": "Specific course titles with numbers ('History 101') and proper national adjectives ('French') are capitalized."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "The President met with Prime Minister Trudeau in Washington, D.C.",
+            "The president met with prime minister Trudeau in Washington, D.C."
+          ],
+          "answer": "The President met with Prime Minister Trudeau in Washington, D.C.",
+          "explanation": "'Prime Minister' directly precedes the name 'Trudeau', and 'Washington, D.C.' is a specific geographic location."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "My favorite season is autumn, especially around Halloween.",
+            "My favorite season is Autumn, especially around halloween."
+          ],
+          "answer": "My favorite season is autumn, especially around Halloween.",
+          "explanation": "Seasons ('autumn') are kept lowercase, while specific holidays ('Halloween') are capitalized."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "Have you read the book 'To Kill a Mockingbird' by Harper Lee?",
+            "Have you read the book 'To Kill A Mockingbird' by Harper Lee?"
+          ],
+          "answer": "Have you read the book 'To Kill a Mockingbird' by Harper Lee?",
+          "explanation": "Articles like 'a' are kept lowercase in titles unless they appear at the start of the title."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: grammarbook.com",
+      "title": "Capitalization Mastery - Quiz 2",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "Many retirees enjoy living in the Southwest during the winter months.",
+            "Many retirees enjoy living in the southwest during the Winter months."
+          ],
+          "answer": "Many retirees enjoy living in the Southwest during the winter months.",
+          "explanation": "'Southwest' refers to a specific geographic region of the country, while 'winter' is a season and remains lowercase."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "Mayor Smith greeted the governor as he stepped off the train.",
+            "Mayor Smith greeted the Governor as he stepped off the train."
+          ],
+          "answer": "Mayor Smith greeted the governor as he stepped off the train.",
+          "explanation": "'Mayor' is capitalized because it directly precedes 'Smith'. 'Governor' stands alone without a name, so it is kept lowercase."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "Our company headquarters is located on Fifth Avenue near Central Park.",
+            "Our Company headquarters is located on fifth avenue near Central Park."
+          ],
+          "answer": "Our company headquarters is located on Fifth Avenue near Central Park.",
+          "explanation": "'Fifth Avenue' and 'Central Park' are proper street and landmark names requiring capitalization."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "She holds a bachelor's degree in science from the University of Michigan.",
+            "She holds a Bachelor's Degree in Science from the University Of Michigan."
+          ],
+          "answer": "She holds a bachelor's degree in science from the University of Michigan.",
+          "explanation": "Academic degrees ('bachelor's degree') are lowercased unless using the formal name (e.g., Bachelor of Science). Prepositions like 'of' remain lowercase in institution titles."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence with correct capitalization.",
+          "options": [
+            "We celebrated Mother's Day at a nice Italian restaurant.",
+            "We celebrated mother's day at a nice italian restaurant."
+          ],
+          "answer": "We celebrated Mother's Day at a nice Italian restaurant.",
+          "explanation": "Holidays ('Mother's Day') and proper adjectives derived from country names ('Italian') are capitalized."
+        }
+      ]
+    }
+  ]
+}

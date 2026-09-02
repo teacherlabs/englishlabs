@@ -1,0 +1,577 @@
+{
+  "chapter": {
+    "id": "this-or-that",
+    "title": "This or That: Commonly Confused Words",
+    "level": "Grammar & Vocabulary",
+    "description": "Master frequently confused word pairs in English with clear, individual comparisons, simple explanations, and distinct examples for both words."
+  },
+  "sections": [
+    {
+      "id": "good-vs-well",
+      "title": "Good vs. Well",
+      "explanation": "'Good' is an adjective that describes a person, place, or thing. 'Well' is an adverb that describes how an action is performed (or refers to physical health).",
+      "examples": {
+        "good": "She is a good pianist.",
+        "well": "She plays the piano well."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Choose the correct sentence.",
+          "options": ["You did a good job on that presentation.", "You did a well job on that presentation."],
+          "answer": "You did a good job on that presentation.",
+          "explanation": "'Good' is an adjective modifying the noun 'job'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct sentence.",
+          "options": ["She sings good.", "She sings well."],
+          "answer": "She sings well.",
+          "explanation": "'Well' is an adverb describing the action verb 'sings'."
+        },
+        {
+          "id": 3,
+          "question": "Choose the correct sentence.",
+          "options": ["I do not feel good today, so I am staying home.", "I do not feel well today, so I am staying home."],
+          "answer": "I do not feel well today, so I am staying home.",
+          "explanation": "Use 'well' when referring to health."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct sentence.",
+          "options": ["The pasta sauce smells really good.", "The pasta sauce smells really well."],
+          "answer": "The pasta sauce smells really good.",
+          "explanation": "Sense verbs like 'smells' take the adjective 'good'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct sentence.",
+          "options": ["He speaks Spanish good.", "He speaks Spanish well."],
+          "answer": "He speaks Spanish well.",
+          "explanation": "'Well' modifies how he performs the verb 'speaks'."
+        }
+      ]
+    },
+    {
+      "id": "bad-vs-badly",
+      "title": "Bad vs. Badly",
+      "explanation": "'Bad' is an adjective that describes a noun or follows a linking verb like 'feel' or 'smell'. 'Badly' is an adverb that describes how an action verb is performed.",
+      "examples": {
+        "bad": "I feel bad about missing your party.",
+        "badly": "The team played badly in the first half."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "I feel ________ about forgetting your birthday.",
+          "options": ["bad", "badly"],
+          "answer": "bad",
+          "explanation": "Linking verbs of emotion ('feel') take the adjective 'bad'."
+        },
+        {
+          "id": 2,
+          "question": "The engine was damaged ________ in the accident.",
+          "options": ["bad", "badly"],
+          "answer": "badly",
+          "explanation": "'Badly' is an adverb describing the extent of the damage."
+        },
+        {
+          "id": 3,
+          "question": "That milk smells ________.",
+          "options": ["bad", "badly"],
+          "answer": "bad",
+          "explanation": "Sense verbs take adjectives."
+        },
+        {
+          "id": 4,
+          "question": "He performed ________ during the audition.",
+          "options": ["bad", "badly"],
+          "answer": "badly",
+          "explanation": "'Badly' modifies the action verb 'performed'."
+        },
+        {
+          "id": 5,
+          "question": "It is a ________ situation for everyone involved.",
+          "options": ["bad", "badly"],
+          "answer": "bad",
+          "explanation": "'Bad' is an adjective modifying 'situation'."
+        }
+      ]
+    },
+    {
+      "id": "i-vs-me",
+      "title": "I vs. Me",
+      "explanation": "Use 'I' when you are the subject doing the action. Use 'me' when you are the object receiving the action or after a preposition.",
+      "examples": {
+        "i": "Sarah and I went to the market.",
+        "me": "The teacher called Sarah and me."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Sarah and ________ went to the movies.",
+          "options": ["I", "me"],
+          "answer": "I",
+          "explanation": "'I' is part of the compound subject of the sentence."
+        },
+        {
+          "id": 2,
+          "question": "The teacher gave the books to Mark and ________.",
+          "options": ["I", "me"],
+          "answer": "me",
+          "explanation": "'Me' is the object of the preposition 'to'."
+        },
+        {
+          "id": 3,
+          "question": "Between you and ________, this project is exhausting.",
+          "options": ["I", "me"],
+          "answer": "me",
+          "explanation": "The preposition 'between' requires the object pronoun 'me'."
+        },
+        {
+          "id": 4,
+          "question": "He is taller than ________.",
+          "options": ["I", "me"],
+          "answer": "I",
+          "explanation": "'Than I' is short for 'than I am'."
+        },
+        {
+          "id": 5,
+          "question": "They invited my brother and ________ to the party.",
+          "options": ["I", "me"],
+          "answer": "me",
+          "explanation": "'Me' is a direct object of the verb 'invited'."
+        }
+      ]
+    },
+    {
+      "id": "lie-vs-lay",
+      "title": "Lie vs. Lay",
+      "explanation": "Use 'lie' to mean resting or reclining yourself (no object needed). Use 'lay' to mean placing an object down (requires an object).",
+      "examples": {
+        "lie": "I need to lie down on the couch.",
+        "lay": "Please lay the book on the table."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Please ____ the carpet flat on the floor.",
+          "options": ["lie", "lay"],
+          "answer": "lay",
+          "explanation": "'Lay' requires a direct object ('carpet')."
+        },
+        {
+          "id": 2,
+          "question": "I am going to ____ down for an hour.",
+          "options": ["lie", "lay"],
+          "answer": "lie",
+          "explanation": "'Lie' is intransitive and takes no direct object."
+        },
+        {
+          "id": 3,
+          "question": "Yesterday, he ____ on the couch all afternoon.",
+          "options": ["lay", "laid"],
+          "answer": "lay",
+          "explanation": "'Lay' is the past tense of 'lie' (to recline)."
+        },
+        {
+          "id": 4,
+          "question": "She ____ her keys on the counter this morning.",
+          "options": ["lay", "laid"],
+          "answer": "laid",
+          "explanation": "'Laid' is the past tense of 'lay' (to place something down)."
+        },
+        {
+          "id": 5,
+          "question": "The dog has ____ in the sun all morning.",
+          "options": ["lain", "laid"],
+          "answer": "lain",
+          "explanation": "'Lain' is the past participle of the intransitive verb 'lie'."
+        },
+        {
+          "id": 6,
+          "question": "The hens have ____ three eggs today.",
+          "options": ["lain", "laid"],
+          "answer": "laid",
+          "explanation": "'Laid' is the past participle of 'lay' (to produce/place eggs)."
+        },
+        {
+          "id": 7,
+          "question": "____ the baby in her crib carefully.",
+          "options": ["Lie", "Lay"],
+          "answer": "Lay",
+          "explanation": "'Lay' takes the direct object 'baby'."
+        },
+        {
+          "id": 8,
+          "question": "The papers were ____ on the table when I arrived.",
+          "options": ["lying", "laying"],
+          "answer": "lying",
+          "explanation": "'Lying' is the present participle of 'lie'."
+        },
+        {
+          "id": 9,
+          "question": "He told me to ____ the book down.",
+          "options": ["lie", "lay"],
+          "answer": "lay",
+          "explanation": "'Lay' takes the direct object 'book'."
+        },
+        {
+          "id": 10,
+          "question": "The patient was ____ on the examination table.",
+          "options": ["lying", "laying"],
+          "answer": "lying",
+          "explanation": "'Lying' is used because the patient is reclining (no direct object)."
+        }
+      ]
+    },
+    {
+      "id": "rise-vs-raise",
+      "title": "Rise vs. Raise",
+      "explanation": "Use 'rise' when something moves upward on its own (no object needed). Use 'raise' when someone lifts something else up (requires an object).",
+      "examples": {
+        "rise": "The sun rises in the east.",
+        "raise": "Please raise your hand to ask a question."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "The sun will ____ at 6:00 AM tomorrow.",
+          "options": ["rise", "raise"],
+          "answer": "rise",
+          "explanation": "'Rise' is an intransitive verb (no direct object)."
+        },
+        {
+          "id": 2,
+          "question": "The company decided to ____ prices next month.",
+          "options": ["raise", "rise"],
+          "answer": "raise",
+          "explanation": "'Raise' is a transitive verb taking the direct object ('prices')."
+        },
+        {
+          "id": 3,
+          "question": "Prices tend to ____ during inflation.",
+          "options": ["rise", "raise"],
+          "answer": "rise",
+          "explanation": "'Rise' is an intransitive action (goes up by itself)."
+        },
+        {
+          "id": 4,
+          "question": "Please ____ your hand if you have a question.",
+          "options": ["raise", "rise"],
+          "answer": "raise",
+          "explanation": "'Raise' takes a direct object ('hand')."
+        }
+      ]
+    },
+    {
+      "id": "into-vs-in-to",
+      "title": "Into vs. In to",
+      "explanation": "Use 'into' as a single preposition to show movement toward the inside of something. Use 'in to' when 'in' is part of a verb phrase and 'to' belongs to the next word.",
+      "examples": {
+        "into": "She walked into the room.",
+        "in-to": "He turned his assignment in to the teacher."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "She walked ________ the store to buy bread.",
+          "options": ["into", "in to"],
+          "answer": "into",
+          "explanation": "'Into' indicates entering a location."
+        },
+        {
+          "id": 2,
+          "question": "Please come ________ see me tomorrow.",
+          "options": ["into", "in to"],
+          "answer": "in to",
+          "explanation": "'In' is part of the verb phrase 'come in', followed by the infinitive 'to'."
+        },
+        {
+          "id": 3,
+          "question": "He dropped his phone ________ the water.",
+          "options": ["into", "in to"],
+          "answer": "into",
+          "explanation": "'Into' shows motion entering liquid."
+        },
+        {
+          "id": 4,
+          "question": "Turn your tests ________ the teacher when finished.",
+          "options": ["into", "in to"],
+          "answer": "in to",
+          "explanation": "'In' goes with 'turn in' (submit), followed by 'to'."
+        },
+        {
+          "id": 5,
+          "question": "The caterpillar transformed ________ a butterfly.",
+          "options": ["into", "in to"],
+          "answer": "into",
+          "explanation": "'Into' indicates change or transformation."
+        }
+      ]
+    },
+    {
+      "id": "onto-vs-on-to",
+      "title": "Onto vs. On to",
+      "explanation": "Use 'onto' as a single preposition to show movement moving on top of a surface. Use 'on to' when 'on' is part of a verb phrase or leads to an infinitive.",
+      "examples": {
+        "onto": "The cat jumped onto the roof.",
+        "on-to": "We decided to hold on to the railing."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "The cat jumped ________ the counter.",
+          "options": ["onto", "on to"],
+          "answer": "onto",
+          "explanation": "'Onto' shows movement toward a surface."
+        },
+        {
+          "id": 2,
+          "question": "Hold ________ your hat in this wind!",
+          "options": ["onto", "on to"],
+          "answer": "on to",
+          "explanation": "'On' belongs to the phrasal verb 'hold on'."
+        },
+        {
+          "id": 3,
+          "question": "We moved ________ the next topic on the agenda.",
+          "options": ["onto", "on to"],
+          "answer": "on to",
+          "explanation": "'On' belongs to 'move on'."
+        },
+        {
+          "id": 4,
+          "question": "He stepped out ________ the balcony.",
+          "options": ["onto", "on to"],
+          "answer": "onto",
+          "explanation": "'Onto' shows movement to a surface."
+        },
+        {
+          "id": 5,
+          "question": "Log ________ the website to register.",
+          "options": ["onto", "on to"],
+          "answer": "on to",
+          "explanation": "'On' forms part of 'log on'."
+        }
+      ]
+    },
+    {
+      "id": "look-vs-see-vs-watch",
+      "title": "Look vs. See vs. Watch",
+      "explanation": "Use 'see' when a sound or image comes into your sight automatically. Use 'look (at)' when you direct your eyes on purpose. Use 'watch' when you pay attention to something in motion over time.",
+      "examples": {
+        "see": "I can see the mountains from here.",
+        "look": "Look at this picture!",
+        "watch": "We watch a movie every Friday."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Can you ____ that bird in the tree?",
+          "options": ["see", "look", "watch"],
+          "answer": "see",
+          "explanation": "'See' refers to passive sight."
+        },
+        {
+          "id": 2,
+          "question": "____ at the blackboard, please.",
+          "options": ["Look", "See", "Watch"],
+          "answer": "Look",
+          "explanation": "'Look' indicates active direction of sight."
+        },
+        {
+          "id": 3,
+          "question": "Did you ____ the football match last night?",
+          "options": ["watch", "see", "look"],
+          "answer": "watch",
+          "explanation": "'Watch' means paying attention to an event over time."
+        },
+        {
+          "id": 4,
+          "question": "I turned around and ____ him standing there.",
+          "options": ["saw", "looked", "watched"],
+          "answer": "saw",
+          "explanation": "Noticing something instantly is 'seeing'."
+        },
+        {
+          "id": 5,
+          "question": "She loves to ____ movies on weekends.",
+          "options": ["watch", "see", "look"],
+          "answer": "watch",
+          "explanation": "Films/movies are 'watched'."
+        }
+      ]
+    },
+    {
+      "id": "hear-vs-listen",
+      "title": "Hear vs. Listen",
+      "explanation": "Use 'hear' when sounds enter your ears naturally without effort. Use 'listen (to)' when you pay active attention to a sound on purpose.",
+      "examples": {
+        "hear": "Did you hear that noise outside?",
+        "listen": "I listen to music while working."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Speak up, I can't ____ you very well.",
+          "options": ["hear", "listen"],
+          "answer": "hear",
+          "explanation": "'Hear' refers to physical auditory reception."
+        },
+        {
+          "id": 2,
+          "question": "Are you ____ to the radio right now?",
+          "options": ["listening", "hearing"],
+          "answer": "listening",
+          "explanation": "'Listening' requires active focus."
+        },
+        {
+          "id": 3,
+          "question": "Suddenly, we ____ a loud explosion.",
+          "options": ["heard", "listened"],
+          "answer": "heard",
+          "explanation": "Noticing a sudden sound is 'hearing'."
+        },
+        {
+          "id": 4,
+          "question": "You should ____ to your doctor's advice.",
+          "options": ["listen", "hear"],
+          "answer": "listen",
+          "explanation": "Pay attention to advice = 'listen'."
+        },
+        {
+          "id": 5,
+          "question": "Did you ____ what she said?",
+          "options": ["hear", "listen"],
+          "answer": "hear",
+          "explanation": "Catching spoken words = 'hear'."
+        }
+      ]
+    },
+    {
+      "id": "lose-vs-loose",
+      "title": "Lose vs. Loose",
+      "explanation": "Use 'lose' (verb) when you misplace something or suffer defeat. Use 'loose' (adjective) when something is not tight or fixed securely.",
+      "examples": {
+        "lose": "Don't lose your keys.",
+        "loose": "This tooth feels loose."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Be careful not to ________ your passport.",
+          "options": ["lose", "loose"],
+          "answer": "lose",
+          "explanation": "'Lose' is a verb meaning to misplace."
+        },
+        {
+          "id": 2,
+          "question": "This knot is ________; it might come undone.",
+          "options": ["loose", "lose"],
+          "answer": "loose",
+          "explanation": "'Loose' means not tight."
+        },
+        {
+          "id": 3,
+          "question": "If we ________ this game, we are out of the tournament.",
+          "options": ["lose", "loose"],
+          "answer": "lose",
+          "explanation": "'Lose' means to suffer defeat."
+        },
+        {
+          "id": 4,
+          "question": "She wears ________ clothing in the summer.",
+          "options": ["loose", "lose"],
+          "answer": "loose",
+          "explanation": "'Loose' describes comfortable, non-fitting clothes."
+        },
+        {
+          "id": 5,
+          "question": "Did you ________ your keys again?",
+          "options": ["lose", "loose"],
+          "answer": "lose",
+          "explanation": "Misplacing keys uses 'lose'."
+        }
+      ]
+    },
+    {
+      "id": "bring-vs-take",
+      "title": "Bring vs. Take",
+      "explanation": "Use 'bring' when moving something toward the speaker/listener location. Use 'take' when carrying something away from the current location.",
+      "examples": {
+        "bring": "Please bring me a cup of coffee.",
+        "take": "Don't forget to take your umbrella when you leave."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "Please ________ your homework to class tomorrow.",
+          "options": ["bring", "take"],
+          "answer": "bring",
+          "explanation": "'Bring' indicates movement toward the destination/speaker."
+        },
+        {
+          "id": 2,
+          "question": "Remember to ________ out the trash when you leave.",
+          "options": ["take", "bring"],
+          "answer": "take",
+          "explanation": "'Take' means movement away from a place."
+        },
+        {
+          "id": 3,
+          "question": "Can you ________ me a glass of water?",
+          "options": ["bring", "take"],
+          "answer": "bring",
+          "explanation": "'Bring' means carry toward the person asking."
+        },
+        {
+          "id": 4,
+          "question": "He will ________ his dog to the vet later.",
+          "options": ["take", "bring"],
+          "answer": "take",
+          "explanation": "'Take' means moving away to another destination."
+        },
+        {
+          "id": 5,
+          "question": "________ some snacks when you come over!",
+          "options": ["Bring", "Take"],
+          "answer": "Bring",
+          "explanation": "'Bring' indicates bringing items to the host's place."
+        }
+      ]
+    },
+    {
+      "id": "say-vs-tell",
+      "title": "Say vs. Tell",
+      "explanation": "Use 'say' to express words directly (often followed by 'to someone'). Use 'tell' when giving information directly to a person (requires a personal object like me, him, us).",
+      "examples": {
+        "say": "She said hello to everyone.",
+        "tell": "She told me a secret."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "question": "What did he ____ to you?",
+          "options": ["say", "tell"],
+          "answer": "say",
+          "explanation": "'Say' goes with 'to someone'."
+        },
+        {
+          "id": 2,
+          "question": "Don't ____ anyone my secret!",
+          "options": ["tell", "say"],
+          "answer": "tell",
+          "explanation": "'Tell' takes a direct personal object ('anyone')."
+        },
+        {
+          "id": 3,
+          "question": "She ____ goodbye and left the room.",
+          "options": ["said", "told"],
+          "answer": "said",
+          "explanation": "Expressing words without a personal object uses 'said'."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,450 @@
+{
+  "chapter": {
+    "id": "subject-verb-agreement",
+    "title": "Subject-Verb Agreement",
+    "level": "Grammar & Mechanics",
+    "description": "Learn the core rules governing how singular and plural subjects agree with their corresponding verbs, including compound subjects, indefinite pronouns, collective nouns, and special phrases."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Basic Singular and Plural Agreement",
+      "explanation": "A singular subject takes a singular verb, while a plural subject takes a plural verb.",
+      "example": "The dog barks. / The dogs bark."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Compound Subjects with 'And'",
+      "explanation": "Two or more subjects joined by 'and' usually take a plural verb.",
+      "example": "Emily and Greg come to my house every Friday."
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Subjects Joined by 'Or' / 'Nor' (or 'Either...or' / 'Neither...nor')",
+      "explanation": "When two subjects are joined by 'or' or 'nor', the verb agrees with the subject closest to it.",
+      "example": "Either my mother or my father is coming. / Neither my friends nor I am interested."
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Intervening Phrases and Parenthetical Expressions",
+      "explanation": "Words or phrases coming between the subject and the verb (e.g., 'together with', 'along with', 'as well as', 'including') do not change the number of the subject.",
+      "example": "The Prime Minister, together with his wife, greets the press."
+    },
+    {
+      "ruleNumber": 5,
+      "title": "Indefinite Pronouns",
+      "explanation": "Pronouns like 'everyone', 'everybody', 'someone', 'nobody', 'each', and 'one' are grammatically singular. Pronouns like 'few', 'many', and 'several' are plural.",
+      "example": "Everyone needs time to relax. / A few think it is too complicated."
+    },
+    {
+      "ruleNumber": 6,
+      "title": "Plural-Form Nouns and Collective Nouns",
+      "explanation": "Nouns representing pairs (e.g., 'pants', 'tweezers', 'trousers') take plural verbs. Collective nouns (e.g., 'jury', 'committee', 'team') usually take singular verbs when acting as a single unit.",
+      "example": "Your pants are at the cleaner's. / The jury was not convinced."
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: learngrammar.net",
+      "title": "Subject-Verb Agreement Practice",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "His pants ____ torn during the match.",
+          "options": ["was", "is", "were", "are"],
+          "answer": "were",
+          "explanation": "Nouns that exist as pairs or plural forms (like 'pants') take a plural verb. Since the event occurred in the past, 'were' is correct."
+        },
+        {
+          "id": 2,
+          "question": "Aron, together with his wife ____ the guests of the party.",
+          "options": ["greets", "greet", "greeting", "are greeting"],
+          "answer": "greets",
+          "explanation": "Phrases like 'together with' do not make the subject plural. The verb agrees with 'Aron' (singular)."
+        },
+        {
+          "id": 3,
+          "question": "Tweezers ____ always useful to handle small objects.",
+          "options": ["may", "is", "will", "are"],
+          "answer": "are",
+          "explanation": "'Tweezers' is a plural noun and requires a plural verb."
+        },
+        {
+          "id": 4,
+          "question": "The jury ____ not convinced.",
+          "options": ["might", "was", "were", "would"],
+          "answer": "was",
+          "explanation": "'Jury' is a collective noun acting as a single unit, requiring a singular verb."
+        },
+        {
+          "id": 5,
+          "question": "The truthful ____ always trustworthy.",
+          "options": ["is", "was", "are", "may"],
+          "answer": "are",
+          "explanation": "Adjectives preceded by 'the' acting as plural subject nouns take a plural verb."
+        },
+        {
+          "id": 6,
+          "question": "To cry ____ never the solution to any problems.",
+          "options": ["are", "were", "should", "is"],
+          "answer": "is",
+          "explanation": "An infinitive phrase acting as a subject takes a singular verb."
+        },
+        {
+          "id": 7,
+          "question": "A number of soldiers ____ injured during the war.",
+          "options": ["is", "were", "was", "might"],
+          "answer": "were",
+          "explanation": "'A number of' takes a plural verb, whereas 'The number of' takes a singular verb."
+        },
+        {
+          "id": 8,
+          "question": "The number of deceased soldiers ____ not stored in the record book.",
+          "options": ["were", "is", "are", "may"],
+          "answer": "is",
+          "explanation": "'The number of' specifies a single total count and requires a singular verb."
+        },
+        {
+          "id": 9,
+          "question": "Killing ____ not always considered a bad thing.",
+          "options": ["were", "are", "was", "would"],
+          "answer": "was",
+          "explanation": "A gerund used as a subject takes a singular verb."
+        },
+        {
+          "id": 10,
+          "question": "There ____ many difficulties regarding the situation.",
+          "options": ["should", "was", "were", "is"],
+          "answer": "were",
+          "explanation": "In sentences starting with 'There', the verb agrees with the subject following it ('difficulties')."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: towson.edu",
+      "title": "Towson University OWS Practice",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Emily and Greg ( comes, come ) to my house every Friday for lunch.",
+          "options": ["comes", "come"],
+          "answer": "come",
+          "explanation": "Compound subjects joined by 'and' take a plural verb."
+        },
+        {
+          "id": 2,
+          "question": "There ( is, are ) time to watch the movie.",
+          "options": ["is", "are"],
+          "answer": "is",
+          "explanation": "The subject 'time' is singular, so it takes 'is'."
+        },
+        {
+          "id": 3,
+          "question": "My friends who are in the band ( wants, want ) me to play a musical instrument.",
+          "options": ["wants", "want"],
+          "answer": "want",
+          "explanation": "The main subject 'friends' is plural, so it requires 'want'."
+        },
+        {
+          "id": 4,
+          "question": "My father or my brothers ( is, are ) coming with me to the ball game.",
+          "options": ["is", "are"],
+          "answer": "are",
+          "explanation": "With subjects connected by 'or', the verb agrees with the closer subject ('brothers')."
+        },
+        {
+          "id": 5,
+          "question": "Everyone ( needs, need ) time to relax.",
+          "options": ["needs", "need"],
+          "answer": "needs",
+          "explanation": "'Everyone' is an indefinite pronoun and takes a singular verb."
+        },
+        {
+          "id": 6,
+          "question": "That bag of oranges ( looks, look ) fresh.",
+          "options": ["looks", "look"],
+          "answer": "looks",
+          "explanation": "The subject is 'bag' (singular), not 'oranges'."
+        },
+        {
+          "id": 7,
+          "question": "The lacrosse team ( hopes, hope ) to win the tournament next week.",
+          "options": ["hopes", "hope"],
+          "answer": "hopes",
+          "explanation": "'Team' is a collective noun functioning as a single unit."
+        },
+        {
+          "id": 8,
+          "question": "Your trousers ( needs, need ) to be cleaned.",
+          "options": ["needs", "need"],
+          "answer": "need",
+          "explanation": "'Trousers' is a plural noun."
+        },
+        {
+          "id": 9,
+          "question": "Some of the books on the shelf ( is, are ) dusty.",
+          "options": ["is", "are"],
+          "answer": "are",
+          "explanation": "'Some' refers to 'books' (plural), requiring 'are'."
+        },
+        {
+          "id": 10,
+          "question": "Even though the students like the class, a few ( thinks, think ) that it is too complicated.",
+          "options": ["thinks", "think"],
+          "answer": "think",
+          "explanation": "'A few' refers to plural items/people and takes a plural verb."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: grammarbook.com",
+      "title": "GrammarBook Subject-Verb Agreement Quiz",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Every one of the shirts has a green collar.",
+            "Every one of the shirts have a green collar."
+          ],
+          "answer": "Every one of the shirts has a green collar.",
+          "explanation": "The singular subject 'Every one' takes the singular verb 'has'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "This singer, along with a few others, play the harmonica on stage.",
+            "This singer, along with a few others, plays the harmonica on stage."
+          ],
+          "answer": "This singer, along with a few others, plays the harmonica on stage.",
+          "explanation": "The phrase 'along with a few others' does not alter the singular subject 'singer'."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Sandals and towels are essential gear for a trip to the beach.",
+            "Sandals and towels is essential gear for a trip to the beach."
+          ],
+          "answer": "Sandals and towels are essential gear for a trip to the beach.",
+          "explanation": "Compound subjects joined by 'and' require a plural verb."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "The president or the vice president are speaking today.",
+            "The president or the vice president is speaking today."
+          ],
+          "answer": "The president or the vice president is speaking today.",
+          "explanation": "Two singular subjects connected by 'or' require a singular verb."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Either Cassie or Marie pays the employees this afternoon.",
+            "Either Cassie or Marie pay the employees this afternoon."
+          ],
+          "answer": "Either Cassie or Marie pays the employees this afternoon.",
+          "explanation": "Singular subjects joined by 'either...or' take a singular verb."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 4: englishgrammar.org",
+      "title": "EnglishGrammar.org Practice",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "Time and tide ________ for none.",
+          "options": ["wait", "waits"],
+          "answer": "waits",
+          "explanation": "The fixed phrase 'Time and tide' takes the singular verb 'waits'."
+        },
+        {
+          "id": 2,
+          "sentence": "The state of his affairs ________ sure to cause anxiety to his creditors.",
+          "options": ["was", "were"],
+          "answer": "was",
+          "explanation": "The head noun 'state' is singular, so 'was' is required."
+        },
+        {
+          "id": 3,
+          "sentence": "My father and I ________ soccer.",
+          "options": ["like", "likes"],
+          "answer": "like",
+          "explanation": "The compound subject 'My father and I' takes a plural verb."
+        },
+        {
+          "id": 4,
+          "sentence": "He or his friends ________ responsible for this.",
+          "options": ["is", "are"],
+          "answer": "are",
+          "explanation": "With 'or', the verb agrees with the closer subject 'friends' (plural)."
+        },
+        {
+          "id": 5,
+          "sentence": "Neither my friends nor I ________ interested in this offer.",
+          "options": ["am", "are", "is"],
+          "answer": "am",
+          "explanation": "With 'neither...nor', the verb agrees with the closest subject 'I' ('am')."
+        },
+        {
+          "id": 6,
+          "sentence": "Oil as well as gas ________ imported to India.",
+          "options": ["is", "are"],
+          "answer": "is",
+          "explanation": "The phrase 'as well as gas' does not make the subject plural."
+        },
+        {
+          "id": 7,
+          "sentence": "The mother along with her children ________ waiting in the lobby.",
+          "options": ["is", "are"],
+          "answer": "is",
+          "explanation": "The subject 'mother' is singular; 'along with her children' is parenthetical."
+        },
+        {
+          "id": 8,
+          "sentence": "Many a man ________ lost his life at sea.",
+          "options": ["has", "have"],
+          "answer": "has",
+          "explanation": "The expression 'Many a [noun]' always takes a singular verb."
+        },
+        {
+          "id": 9,
+          "sentence": "The Pickwick Papers ________ written by Charles Dickens.",
+          "options": ["was", "were"],
+          "answer": "was",
+          "explanation": "Book titles take singular verbs even if they end in 's'."
+        },
+        {
+          "id": 10,
+          "sentence": "More than 10,000 kilometers ________ India from Europe.",
+          "options": ["separate", "separates"],
+          "answer": "separates",
+          "explanation": "Distances are treated as a single unit/amount and take singular verbs."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 5: grammarbook.com (Difficult Quiz)",
+      "title": "Subject-Verb Agreement - Difficult Mastery",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Neither the doctor nor the nurses were able to explain the patient's sudden recovery.",
+            "Neither the doctor nor the nurses was able to explain the patient's sudden recovery."
+          ],
+          "answer": "Neither the doctor nor the nurses were able to explain the patient's sudden recovery.",
+          "explanation": "With 'neither...nor', the verb agrees with the subject closest to it. 'Nurses' is plural, so 'were' is correct."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "A majority of the committee members is in favor of the proposal.",
+            "A majority of the committee members are in favor of the proposal."
+          ],
+          "answer": "A majority of the committee members are in favor of the proposal.",
+          "explanation": "When 'a majority of' is followed by a plural countable noun ('members'), it takes a plural verb ('are')."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "The committee meets every Thursday to discuss community affairs.",
+            "The committee meet every Thursday to discuss community affairs."
+          ],
+          "answer": "The committee meets every Thursday to discuss community affairs.",
+          "explanation": "Collective nouns like 'committee' take singular verbs when the group acts as a single unified entity."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Three-fourths of the cake was eaten before the party even started.",
+            "Three-fourths of the cake were eaten before the party even started."
+          ],
+          "answer": "Three-fourths of the cake was eaten before the party even started.",
+          "explanation": "Fractions take a singular verb when referring to a singular noun or uncountable quantity ('cake')."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "There is a set of keys and a wallet on the kitchen table.",
+            "There are a set of keys and a wallet on the kitchen table."
+          ],
+          "answer": "There is a set of keys and a wallet on the kitchen table.",
+          "explanation": "The primary subject following 'there is' is 'a set' (singular collective unit), making 'is' correct."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 6: grammarbook.com (Advanced Quiz)",
+      "title": "Subject-Verb Agreement - Advanced Level",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Not only the director but also the actors was praised after the premiere.",
+            "Not only the director but also the actors were praised after the premiere."
+          ],
+          "answer": "Not only the director but also the actors were praised after the premiere.",
+          "explanation": "With correlative conjunctions like 'not only...but also', the verb agrees with the closer subject ('actors' -> 'were')."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Politics is a subject that generates intense debate among scholars.",
+            "Politics are a subject that generates intense debate among scholars."
+          ],
+          "answer": "Politics is a subject that generates intense debate among scholars.",
+          "explanation": "Nouns ending in '-ics' representing fields of study or single concepts (like 'politics' or 'mathematics') take singular verbs."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "One of my best friends who lives in Chicago is visiting this weekend.",
+            "One of my best friends who live in Chicago is visiting this weekend."
+          ],
+          "answer": "One of my best friends who live in Chicago is visiting this weekend.",
+          "explanation": "In relative clauses preceded by 'one of those [plural noun] who', the verb in the relative clause agrees with the plural noun ('friends who live'). The main sentence verb then agrees with 'one' ('is visiting')."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "Ten miles is a long distance to run without proper preparation.",
+            "Ten miles are a long distance to run without proper preparation."
+          ],
+          "answer": "Ten miles is a long distance to run without proper preparation.",
+          "explanation": "Expressions of specific measurement, distance, time, or monetary amounts function as a single unit and take a singular verb."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which the subject and verb agree.",
+          "options": [
+            "The team members, as well as the head coach, are celebrating their championship victory.",
+            "The team members, as well as the head coach, is celebrating their championship victory."
+          ],
+          "answer": "The team members, as well as the head coach, are celebrating their championship victory.",
+          "explanation": "Phrases starting with 'as well as' do not alter the main subject. The main subject 'team members' is plural, requiring 'are'."
+        }
+      ]
+    }
+  ]
+}

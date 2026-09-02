@@ -1,0 +1,372 @@
+{
+  "chapter": {
+    "id": "prepositions",
+    "title": "Prepositions",
+    "level": "Grammar & Mechanics",
+    "description": "Master prepositions of time, place, direction, compound prepositions, and mixed usages in English grammar."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Prepositions of Time (At, In, On)",
+      "explanation": "Use 'at' for specific times, clock times, and holiday periods (at 5 o'clock, at night, at Christmas). Use 'in' for months, years, centuries, seasons, and long periods (in July, in 2026, in the morning). Use 'on' for days and dates (on Monday, on July 4th, on my birthday).",
+      "example": "We meet at 8:00 AM on Monday in July."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Prepositions of Place (At, In, On)",
+      "explanation": "Use 'at' for specific points, addresses, or locations (at the bus stop, at the entrance). Use 'in' for enclosed spaces, areas, or geographic regions (in a room, in London, in a box). Use 'on' for surfaces, floors, and avenues/streets (on the table, on the 2nd floor, on Oxford Street).",
+      "example": "He is sitting at his desk, in his office, on the second floor."
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Compound Prepositions",
+      "explanation": "Compound prepositions are multi-word combinations functioning as a single preposition (e.g., 'according to', 'because of', 'in front of', 'instead of', 'in spite of', 'due to').",
+      "example": "We stayed indoors because of the severe rain storm."
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Dependent Prepositions and Fixed Expressions",
+      "explanation": "Certain verbs, adjectives, and nouns are followed by specific prepositions (e.g., 'depend on', 'interested in', 'good at', 'afraid of', 'belong to').",
+      "example": "She is very good at mathematics and interested in history."
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: englisch-hilfen.de (At, In, On Place)",
+      "title": "Prepositions of Place (at, in, on)",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "My brother lives ________ London.",
+          "options": ["at", "in", "on"],
+          "answer": "in",
+          "explanation": "Use 'in' for cities, countries, and large geographical areas."
+        },
+        {
+          "id": 2,
+          "sentence": "There is a beautiful painting ________ the wall.",
+          "options": ["at", "in", "on"],
+          "answer": "on",
+          "explanation": "Use 'on' for surfaces such as walls or tables."
+        },
+        {
+          "id": 3,
+          "sentence": "I'll meet you ________ the bus stop at 4 PM.",
+          "options": ["at", "in", "on"],
+          "answer": "at",
+          "explanation": "Use 'at' for specific points or meeting locations."
+        },
+        {
+          "id": 4,
+          "sentence": "He keeps his wallet ________ his pocket.",
+          "options": ["at", "in", "on"],
+          "answer": "in",
+          "explanation": "Use 'in' for enclosed spaces like pockets or bags."
+        },
+        {
+          "id": 5,
+          "sentence": "Our apartment is ________ the third floor.",
+          "options": ["at", "in", "on"],
+          "answer": "on",
+          "explanation": "Use 'on' when referring to floors of a building."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: englisch-hilfen.de (At, In, On Time)",
+      "title": "Prepositions of Time (at, in, on)",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "The train departs ________ 7:30 AM.",
+          "options": ["at", "in", "on"],
+          "answer": "at",
+          "explanation": "Use 'at' for precise clock times."
+        },
+        {
+          "id": 2,
+          "sentence": "Her birthday is ________ May 15th.",
+          "options": ["at", "in", "on"],
+          "answer": "on",
+          "explanation": "Use 'on' for specific dates and days of the week."
+        },
+        {
+          "id": 3,
+          "sentence": "It gets very cold here ________ winter.",
+          "options": ["at", "in", "on"],
+          "answer": "in",
+          "explanation": "Use 'in' for seasons, months, and years."
+        },
+        {
+          "id": 4,
+          "sentence": "We visit our grandparents ________ Christmas.",
+          "options": ["at", "in", "on"],
+          "answer": "at",
+          "explanation": "Use 'at' for holiday periods without the word 'day'."
+        },
+        {
+          "id": 5,
+          "sentence": "I usually go jogging ________ the morning.",
+          "options": ["at", "in", "on"],
+          "answer": "in",
+          "explanation": "Use 'in' for general times of day (in the morning/afternoon/evening, BUT at night)."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: englisch-hilfen.de (Compound Prepositions)",
+      "title": "Compound Prepositions Practice",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "The match was canceled ________ the heavy rain.",
+          "options": ["because of", "according to", "in front of"],
+          "answer": "because of",
+          "explanation": "'Because of' expresses a reason or cause."
+        },
+        {
+          "id": 2,
+          "sentence": "________ the weather forecast, it will snow tomorrow.",
+          "options": ["According to", "Instead of", "In spite of"],
+          "answer": "According to",
+          "explanation": "'According to' indicates a source of information."
+        },
+        {
+          "id": 3,
+          "sentence": "He parked his car right ________ the house.",
+          "options": ["in front of", "because of", "due to"],
+          "answer": "in front of",
+          "explanation": "'In front of' indicates spatial position."
+        },
+        {
+          "id": 4,
+          "sentence": "She went for a walk ________ the freezing cold temperature.",
+          "options": ["in spite of", "according to", "instead of"],
+          "answer": "in spite of",
+          "explanation": "'In spite of' shows contrast or concession."
+        },
+        {
+          "id": 5,
+          "sentence": "I ordered tea ________ coffee this morning.",
+          "options": ["instead of", "because of", "due to"],
+          "answer": "instead of",
+          "explanation": "'Instead of' means in place of something else."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 4: englisch-hilfen.de (Mixed Prepositions 1)",
+      "title": "Prepositions Mixed Exercise 1",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Are you interested ____ learning new languages?",
+          "options": ["in", "at", "about", "on"],
+          "answer": "in",
+          "explanation": "The adjective 'interested' is followed by the preposition 'in'."
+        },
+        {
+          "id": 2,
+          "question": "This book belongs ____ my sister.",
+          "options": ["to", "for", "with", "at"],
+          "answer": "to",
+          "explanation": "The verb 'belong' takes the preposition 'to'."
+        },
+        {
+          "id": 3,
+          "question": "She is very good ____ playing the piano.",
+          "options": ["at", "in", "on", "for"],
+          "answer": "at",
+          "explanation": "The adjective phrase 'good at' is used for abilities."
+        },
+        {
+          "id": 4,
+          "question": "We arrived ____ the airport two hours early.",
+          "options": ["at", "in", "to", "on"],
+          "answer": "at",
+          "explanation": "Arrive 'at' is used for specific buildings or facilities (airports, stations, points)."
+        },
+        {
+          "id": 5,
+          "question": "He travels to work ____ bus every day.",
+          "options": ["by", "with", "in", "on"],
+          "answer": "by",
+          "explanation": "Use 'by' for modes of transport (by bus, by train, by car)."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 5: englisch-hilfen.de (Mixed Prepositions 2)",
+      "title": "Prepositions Mixed Exercise 2",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "I am afraid ____ spiders.",
+          "options": ["of", "from", "at", "with"],
+          "answer": "of",
+          "explanation": "'Afraid' is followed by the preposition 'of'."
+        },
+        {
+          "id": 2,
+          "question": "We are looking forward ____ meeting you next week.",
+          "options": ["to", "at", "for", "on"],
+          "answer": "to",
+          "explanation": "The phrasal verb expression is 'look forward to'."
+        },
+        {
+          "id": 3,
+          "question": "They arrived ____ Paris late last night.",
+          "options": ["in", "at", "to", "on"],
+          "answer": "in",
+          "explanation": "Use arrive 'in' for cities and countries."
+        },
+        {
+          "id": 4,
+          "question": "He apologized ____ breaking the vase.",
+          "options": ["for", "about", "at", "to"],
+          "answer": "for",
+          "explanation": "You apologize 'for' an action or mistake."
+        },
+        {
+          "id": 5,
+          "question": "The exam depends ____ how much you study.",
+          "options": ["on", "of", "from", "at"],
+          "answer": "on",
+          "explanation": "'Depend' is always followed by 'on'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 6: englisch-hilfen.de (Mixed Prepositions 3)",
+      "title": "Prepositions Mixed Exercise 3",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "She has been working here ________ 2020.",
+          "options": ["since", "for", "from"],
+          "answer": "since",
+          "explanation": "'Since' specifies a starting point in time."
+        },
+        {
+          "id": 2,
+          "sentence": "We lived in Madrid ________ five years.",
+          "options": ["for", "since", "during"],
+          "answer": "for",
+          "explanation": "'For' indicates a duration of time."
+        },
+        {
+          "id": 3,
+          "sentence": "Please turn ________ the lights before you leave the room.",
+          "options": ["off", "out", "away"],
+          "answer": "off",
+          "explanation": "'Turn off' is used for electrical appliances or lights."
+        },
+        {
+          "id": 4,
+          "sentence": "He jumped ________ the swimming pool.",
+          "options": ["into", "in", "to"],
+          "answer": "into",
+          "explanation": "'Into' shows motion entering a space."
+        },
+        {
+          "id": 5,
+          "sentence": "She walked ________ the bridge to get to the other side of the river.",
+          "options": ["across", "through", "over"],
+          "answer": "across",
+          "explanation": "'Across' means moving from one side of a surface or bridge to another."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 7: englisch-hilfen.de (Mixed Prepositions 4)",
+      "title": "Prepositions Mixed Exercise 4",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "The cat is sleeping ________ the table.",
+          "options": ["under", "below", "down"],
+          "answer": "under",
+          "explanation": "'Under' indicates directly beneath a surface or object."
+        },
+        {
+          "id": 2,
+          "sentence": "Dividing the money ________ the three brothers was easy.",
+          "options": ["among", "between", "with"],
+          "answer": "among",
+          "explanation": "'Among' is used when distributing or referring to three or more people/things."
+        },
+        {
+          "id": 3,
+          "sentence": "The secret is ________ you and me.",
+          "options": ["between", "among", "with"],
+          "answer": "between",
+          "explanation": "'Between' is used when referring to two distinct individuals or entities."
+        },
+        {
+          "id": 4,
+          "sentence": "He walked ________ the tunnel in complete darkness.",
+          "options": ["through", "across", "along"],
+          "answer": "through",
+          "explanation": "'Through' implies movement within a 3D enclosed space or structure."
+        },
+        {
+          "id": 5,
+          "sentence": "They strolled ________ the path in the park.",
+          "options": ["along", "across", "through"],
+          "answer": "along",
+          "explanation": "'Along' means in a line following the length of a path or road."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 8: englisch-hilfen.de (Mixed Prepositions 5)",
+      "title": "Prepositions Mixed Exercise 5",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "He was accused ____ stealing the bicycle.",
+          "options": ["of", "for", "about", "with"],
+          "answer": "of",
+          "explanation": "'Accuse' is paired with the preposition 'of'."
+        },
+        {
+          "id": 2,
+          "question": "She insisted ____ paying for dinner.",
+          "options": ["on", "at", "for", "in"],
+          "answer": "on",
+          "explanation": "'Insist' is followed by 'on'."
+        },
+        {
+          "id": 3,
+          "question": "Are you satisfied ____ your test results?",
+          "options": ["with", "at", "about", "of"],
+          "answer": "with",
+          "explanation": "The adjective 'satisfied' takes 'with'."
+        },
+        {
+          "id": 4,
+          "question": "He suffers ____ severe migraines.",
+          "options": ["from", "of", "with", "by"],
+          "answer": "from",
+          "explanation": "'Suffer' takes the preposition 'from' when referring to illnesses."
+        },
+        {
+          "id": 5,
+          "question": "She succeeded ____ passing the difficult entrance exam.",
+          "options": ["in", "at", "on", "for"],
+          "answer": "in",
+          "explanation": "'Succeed' takes the preposition 'in' + gerund (-ing)."
+        }
+      ]
+    }
+  ]
+}

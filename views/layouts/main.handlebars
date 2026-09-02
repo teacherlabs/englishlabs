@@ -30,7 +30,15 @@
           <li><a href="/listening">Listening</a></li>
           <li><a href="/writing">Writing</a></li>
           <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
-          {{#if session.isLoggedIn}}<li><a href="/lobby">Enter Lobby</a></li>{{/if}}
+          {{#if session.isLoggedIn}}
+            <li class="game-room-nav">
+              <span>Game Room</span>
+              <div class="game-room-nav-options">
+                <a href="/lobby?mode=quicktype">Quicktype</a>
+                <a href="/lobby?mode=lobby">Lobby</a>
+              </div>
+            </li>
+          {{/if}}
         </ul>
         {{#if session.isLoggedIn}}
           <div id="menulogin" class="user-profile-menu">

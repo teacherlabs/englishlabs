@@ -1,0 +1,1248 @@
+{
+  "lists": [
+    {
+      "title": "List 1",
+      "chunks": [
+        {
+          "phrase": "as strong as",
+          "example": "Who in your life is as strong as a superhero, and why?"
+        },
+        {
+          "phrase": "be able to",
+          "example": "Who is able to do something impressive, and what is it?"
+        },
+        {
+          "phrase": "be a bit",
+          "example": "When do you think someone might say, 'Aren't you a bit too old (or too young) for that?'"
+        },
+        {
+          "phrase": "be a pain",
+          "example": "Studying for exams can sometimes be a pain. What strategies might help make it easier?"
+        },
+        {
+          "phrase": "these days",
+          "example": "Do people still repair holes in socks these days? Why/why not?"
+        },
+        {
+          "phrase": "be ready for",
+          "example": "What's something you are ready for and why?"
+        },
+        {
+          "phrase": "would you get",
+          "example": "Would you get excited, scared, or curious if you saw an alien? Why?"
+        },
+        {
+          "phrase": "flesh and blood",
+          "example": "Would you feel comfortable replacing any of your flesh and blood body parts with bionic ones? Why/why not?"
+        },
+        {
+          "phrase": "like the idea of",
+          "example": "Do you like the idea of replacing human teachers with Al robots in the classroom? Why/why not?"
+        }
+      ]
+    },
+    {
+      "title": "List 2",
+      "chunks": [
+        {
+          "phrase": "in the early days",
+          "example": "What do you think it was like in the early days of streaming compared to now?"
+        },
+        {
+          "phrase": "a lack of",
+          "example": "What happens when there's a lack of skilled players in a sport?"
+        },
+        {
+          "phrase": "on one's own",
+          "example": "Describe a time when you decided to handle a difficult task on your own. What did you learn from that experience?"
+        },
+        {
+          "phrase": "health issues",
+          "example": "What are common health issues people face as they get older?"
+        },
+        {
+          "phrase": "twice as",
+          "example": "How would you feel if your trip took twice as long as expected?"
+        },
+        {
+          "phrase": "ahead of one's time",
+          "example": "In what way do you think Greta Thunberg is ahead of her time?"
+        },
+        {
+          "phrase": "an early version of",
+          "example": "How do you think an early version of a phone compares to today's phones?"
+        },
+        {
+          "phrase": "later in life",
+          "example": "What is something you think people appreciate more later in life, and why?"
+        },
+        {
+          "phrase": "predict the weather",
+          "example": "Why is it important to predict the weather?"
+        },
+        {
+          "phrase": "be successful",
+          "example": "What does being successful mean to you?"
+        }
+      ]
+    },
+    {
+      "title": "List 3",
+      "chunks": [
+        {
+          "phrase": "may have been",
+          "example": "Who do you think may have been the greatest athlete of all time? Why that person?"
+        },
+        {
+          "phrase": "come up with",
+          "example": "Who came up with an idea or invention you admire?"
+        },
+        {
+          "phrase": "as simple as",
+          "example": "How can learning a new skill be made as simple as possible?"
+        },
+        {
+          "phrase": "as a means of",
+          "example": "How can mobile phones be used as a means of learning outside the classroom?"
+        },
+        {
+          "phrase": "carry out",
+          "example": "What is a project or task you would like to carry out in the future?"
+        },
+        {
+          "phrase": "set up",
+          "example": "Imagine you have to set up a new club at school. What steps would you take to make sure it is successful?"
+        },
+        {
+          "phrase": "in X years' time",
+          "example": "Where do you see yourself in five years' time?"
+        },
+        {
+          "phrase": "break down",
+          "example": "Have you ever had a bike or gadget break down at the worst possible time? What did you do?"
+        },
+        {
+          "phrase": "became more reliable",
+          "example": "When did WiFi become more reliable in your town?"
+        },
+        {
+          "phrase": "offer huge potential",
+          "example": "What invention offers huge potential to help the world? Explain why."
+        }
+      ]
+    },
+    {
+      "title": "List 4",
+      "chunks": [
+        {
+          "phrase": "be on a date",
+          "example": "Have you been on a date in the last month? How did it go? (You can make up an answer)"
+        },
+        {
+          "phrase": "spill the beans",
+          "example": "If you know a secret, do you sometimes spill the beans? Why/why not?"
+        },
+        {
+          "phrase": "feel at ease",
+          "example": "What can teachers do to help a new student feel at ease in the classroom?"
+        },
+        {
+          "phrase": "take up",
+          "example": "What new hobby or sport would you like to take up, and why?"
+        },
+        {
+          "phrase": "not mind",
+          "example": "What is one chore you don't mind doing that your friends usually dislike?"
+        },
+        {
+          "phrase": "go both ways",
+          "example": "Can you think of a situation where trust needs to go both ways for a relationship to work?"
+        },
+        {
+          "phrase": "it's hard to win",
+          "example": "Describe a time when you found it hard to win because every choice had a downside."
+        },
+        {
+          "phrase": "go along with",
+          "example": "When do you think it's better to go along with someone's idea?"
+        },
+        {
+          "phrase": "bring up",
+          "example": "What topics do you find hardest to bring up with your parents or teachers?"
+        },
+        {
+          "phrase": "give in",
+          "example": "Is it ever a good idea to give in during an argument? Explain your opinion."
+        }
+      ]
+    },
+    {
+      "title": "List 5",
+      "chunks": [
+        {
+          "phrase": "get together",
+          "example": "Who do you like to get together with after school, and what do you usually do?"
+        },
+        {
+          "phrase": "keep one's nerves in check",
+          "example": "How do you keep your nerves in check when you feel nervous?"
+        },
+        {
+          "phrase": "hang out",
+          "example": "Where do you usually hang out with your closest friends?"
+        },
+        {
+          "phrase": "make fun of",
+          "example": "How do you feel when someone makes fun of you?"
+        },
+        {
+          "phrase": "call someone out on",
+          "example": "When is it important to call someone out on bad behaviour?"
+        },
+        {
+          "phrase": "there's nothing to say",
+          "example": "When have you felt like there's nothing to say, and what happened next?"
+        },
+        {
+          "phrase": "chew one's fingernails",
+          "example": "What tips would you give someone to stop chewing their fingernails?"
+        },
+        {
+          "phrase": "drop into",
+          "example": "Have you ever dropped into a class or activity that wasn't yours?"
+        },
+        {
+          "phrase": "reach out to",
+          "example": "Who is someone you have reached out to for support?"
+        },
+        {
+          "phrase": "take a deep breath",
+          "example": "Can you describe a moment in your life where taking a deep breath helped you stay calm?"
+        }
+      ]
+    },
+    {
+      "title": "List 6",
+      "chunks": [
+        {
+          "phrase": "constantly evolve",
+          "example": "What causes technology to constantly evolve?"
+        },
+        {
+          "phrase": "bring with it",
+          "example": "What challenges can moving to a new country bring with it?"
+        },
+        {
+          "phrase": "pave the way for",
+          "example": "In what ways can education pave the way for a successful future?"
+        },
+        {
+          "phrase": "turn up at",
+          "example": "When is it okay to turn up at someone's house without an invitation, and when is it not?"
+        },
+        {
+          "phrase": "go in one direction",
+          "example": "Can you think of a time when trends or opinions went in one direction? What caused it?"
+        },
+        {
+          "phrase": "a strong influence on",
+          "example": "Who has been a strong influence on your musical tastes?"
+        },
+        {
+          "phrase": "slow things down",
+          "example": "If life is moving too fast what is a good way to slow things down?"
+        },
+        {
+          "phrase": "grow up with",
+          "example": "How have the traditions and values you grew up with shaped who you are?"
+        },
+        {
+          "phrase": "have a chance",
+          "example": "What do you think it takes to have a chance of achieving your dream?"
+        },
+        {
+          "phrase": "put together",
+          "example": "How do you put together the perfect playlist for a road trip?"
+        }
+      ]
+    },
+    {
+      "title": "List 7",
+      "chunks": [
+        {
+          "phrase": "make a decision",
+          "example": "Why is it sometimes difficult to make a decision?"
+        },
+        {
+          "phrase": "go back to",
+          "example": "What are some reasons why people might go back to their home country after living abroad?"
+        },
+        {
+          "phrase": "make up one's mind",
+          "example": "Why is it never easy to make up your mind about what to wear?"
+        },
+        {
+          "phrase": "ready and willing",
+          "example": "Are you usually ready and willing to speak in class? What helps you feel more confident?"
+        },
+        {
+          "phrase": "be keen",
+          "example": "What is something you're really keen on doing in the future? Why?"
+        },
+        {
+          "phrase": "have one's fair share of",
+          "example": "What does it mean when someone says they've had their fair share of something?"
+        },
+        {
+          "phrase": "take ages",
+          "example": "Is there anything you enjoy doing even if it takes ages? What makes it worth your time?"
+        },
+        {
+          "phrase": "crime rate",
+          "example": "If a place has a high crime rate, would that change your plans to go there? Why?"
+        },
+        {
+          "phrase": "to holiday",
+          "example": "If you could holiday anywhere in the world, where would you go and why?"
+        }
+      ]
+    },
+    {
+      "title": "List 8",
+      "chunks": [
+        {
+          "phrase": "fall in love",
+          "example": "Is it possible to fall in love with someone you have never met in person? Why or why not?"
+        },
+        {
+          "phrase": "declare war on",
+          "example": "What are some reasons why countries declare war on each other?"
+        },
+        {
+          "phrase": "good relations with",
+          "example": "Why is it important to have good relations with your neighbours?"
+        },
+        {
+          "phrase": "get on well with",
+          "example": "Why do you think some people get on well with others right away?"
+        },
+        {
+          "phrase": "be madly in love",
+          "example": "How can you tell that someone is madly in love?"
+        },
+        {
+          "phrase": "start an affair",
+          "example": "Why do you think people are often shocked when someone starts an affair?"
+        },
+        {
+          "phrase": "be held up as",
+          "example": "Can historical figures be held up as heroes even if they made mistakes? Why or why not?"
+        },
+        {
+          "phrase": "play by ear",
+          "example": "Is it better to learn an instrument by reading sheet music or by playing by ear? Why?"
+        },
+        {
+          "phrase": "mark the beginning",
+          "example": "What event in history marked the beginning of a big change?"
+        },
+        {
+          "phrase": "a world of difference",
+          "example": "What's something that can make a world of difference in someone's day?"
+        }
+      ]
+    },
+    {
+      "title": "List 9",
+      "chunks": [
+        {
+          "phrase": "catch the eye of",
+          "example": "What does it take to catch the eye of someone in a crowd?"
+        },
+        {
+          "phrase": "be allowed to",
+          "example": "Why are you not allowed to drive without a seatbelt?"
+        },
+        {
+          "phrase": "coin a term",
+          "example": "If you could coin a term to describe your generation, what would it be and why?"
+        },
+        {
+          "phrase": "get hold of",
+          "example": "Describe a time when you had to get hold of something quickly."
+        },
+        {
+          "phrase": "cheer someone up",
+          "example": "Your best friend Adel is sad. What can you do to cheer him up?"
+        },
+        {
+          "phrase": "burst into tears",
+          "example": "What kind of things can make people burst into tears?"
+        },
+        {
+          "phrase": "fall in love with",
+          "example": "When you are falling in love with someone, how does your life change?"
+        },
+        {
+          "phrase": "keep something a secret",
+          "example": "How do you decide whether it's okay to keep it a secret when someone tells you something private?"
+        },
+        {
+          "phrase": "lose one's life",
+          "example": "Why did many people lose their lives when the Titanic sank?"
+        },
+        {
+          "phrase": "draw one's final breath",
+          "example": "What thoughts or emotions do you think people might experience when they draw their final breath?"
+        }
+      ]
+    },
+    {
+      "title": "List 10",
+      "chunks": [
+        {
+          "phrase": "once the dust has settled",
+          "example": "Once the dust has settled and all the tests are over, what are your plans for the upcoming weeks?"
+        },
+        {
+          "phrase": "difficult conditions",
+          "example": "What do you need to survive in difficult conditions?"
+        },
+        {
+          "phrase": "sign a peace treaty",
+          "example": "What are some reasons countries might refuse to sign a peace treaty?"
+        },
+        {
+          "phrase": "with complete disregard (for)",
+          "example": "What should we do when students act with complete disregard for the school rules?"
+        },
+        {
+          "phrase": "take control of",
+          "example": "If you could take control of a sports team, which one would it be? Explain why."
+        },
+        {
+          "phrase": "growing economy",
+          "example": "What is the best way to achieve a growing economy?"
+        },
+        {
+          "phrase": "toughen one's stance",
+          "example": "What are the risks of always toughening your stance instead of listening or compromising?"
+        },
+        {
+          "phrase": "no one knows what the future will hold",
+          "example": "Do you find it exciting or scary that no one knows what the future will hold?"
+        },
+        {
+          "phrase": "bring benefits",
+          "example": "Do you think competition always brings benefits? Explain."
+        },
+        {
+          "phrase": "a hot topic",
+          "example": "What are the hot topics on your favourite social media?"
+        }
+      ]
+    },
+    {
+      "title": "List 11",
+      "chunks": [
+        {
+          "phrase": "Indigenous Peoples",
+          "example": "What problems do Indigenous Peoples around the world face?"
+        },
+        {
+          "phrase": "hard to come by",
+          "example": "Are good friends hard to come by where you live? Why/why not?"
+        },
+        {
+          "phrase": "from generation to generation",
+          "example": "What skills are passed from generation to generation?"
+        },
+        {
+          "phrase": "turn around",
+          "example": "How do people react when they turn around and see something unexpected?"
+        },
+        {
+          "phrase": "be deceived",
+          "example": "If you had been deceived, what would you do about it?"
+        },
+        {
+          "phrase": "catch someone's eye",
+          "example": "What style of clothing usually catches your eye?"
+        },
+        {
+          "phrase": "in great danger",
+          "example": "How can we help people who are in great danger?"
+        },
+        {
+          "phrase": "lose consciousness",
+          "example": "How can you help a person who has lost consciousness?"
+        },
+        {
+          "phrase": "stay afloat",
+          "example": "What different ways are there to stay afloat in the sea?"
+        },
+        {
+          "phrase": "turn into",
+          "example": "What would you turn into if you could choose any creature? Explain why."
+        }
+      ]
+    },
+    {
+      "title": "List 12",
+      "chunks": [
+        {
+          "phrase": "melting pot",
+          "example": "What makes a city like London a melting pot of cultures?"
+        },
+        {
+          "phrase": "in one's daily life",
+          "example": "What is something you couldn't live without in your daily life?"
+        },
+        {
+          "phrase": "in the neighborhood",
+          "example": "What facilities for young people are there in the neighborhood?"
+        },
+        {
+          "phrase": "the first step",
+          "example": "What is the first step to becoming an astronaut?"
+        },
+        {
+          "phrase": "significantly larger",
+          "example": "Which countries are significantly larger than Sweden?"
+        },
+        {
+          "phrase": "over time",
+          "example": "Do you think your handwriting will improve over time? Why/why not?"
+        },
+        {
+          "phrase": "be challenging",
+          "example": "Which school subjects can be challenging?"
+        },
+        {
+          "phrase": "mixed feelings",
+          "example": "Do you have mixed feelings about life after school? Explain your answer."
+        }
+      ]
+    },
+    {
+      "title": "List 13",
+      "chunks": [
+        {
+          "phrase": "go on a trip",
+          "example": "When you last went on a trip, where did you go and what did you do?"
+        },
+        {
+          "phrase": "take a stroll",
+          "example": "When was the last time you took a stroll in nature, and what did you see?"
+        },
+        {
+          "phrase": "burst out laughing",
+          "example": "What kind of jokes or situations make you burst out laughing?"
+        },
+        {
+          "phrase": "surprised to hear",
+          "example": "What's a fun fact you were surprised to hear?"
+        },
+        {
+          "phrase": "give away",
+          "example": "What is something that gives away a tourist?"
+        },
+        {
+          "phrase": "drag someone to",
+          "example": "Should parents drag their children to cultural events like museums and concerts? Why or why not?"
+        },
+        {
+          "phrase": "check out",
+          "example": "What is something new in your town that you think people should check out?"
+        },
+        {
+          "phrase": "wet oneself",
+          "example": "Can you describe a time when you laughed so hard that you almost wet yourself?"
+        },
+        {
+          "phrase": "change one's mind",
+          "example": "Describe a time when you changed your mind about something important."
+        },
+        {
+          "phrase": "adrenaline junkie",
+          "example": "What's the craziest thing an adrenaline junkie could do in your country?"
+        }
+      ]
+    },
+    {
+      "title": "List 14",
+      "chunks": [
+        {
+          "phrase": "declare independence",
+          "example": "Why do some countries or regions want to declare independence from others?"
+        },
+        {
+          "phrase": "traced back to",
+          "example": "Can you think of something you use today that can be traced back to another time and culture?"
+        },
+        {
+          "phrase": "to attract",
+          "example": "What do shops do to attract customers?"
+        },
+        {
+          "phrase": "home to",
+          "example": "What is your town or country home to? Think about special places, people, animals, or things."
+        },
+        {
+          "phrase": "fight for one's rights",
+          "example": "Can young people fight for their rights at school? How?"
+        },
+        {
+          "phrase": "be reflected in",
+          "example": "How can a person's feelings be reflected in their face or body language?"
+        },
+        {
+          "phrase": "by far",
+          "example": "What is by far the best movie you've seen? Why?"
+        },
+        {
+          "phrase": "the perfect spot",
+          "example": "What makes the perfect spot for studying or reading?"
+        }
+      ]
+    },
+    {
+      "title": "List 15",
+      "chunks": [
+        {
+          "phrase": "be popular with",
+          "example": "Why do you think some destinations are more popular with tourists than others?"
+        },
+        {
+          "phrase": "a must-see",
+          "example": "What is one place you consider a must-see, and why should others visit it?"
+        },
+        {
+          "phrase": "be looking to",
+          "example": "If someone visiting your hometown is looking to relax, where should they go and why?"
+        },
+        {
+          "phrase": "chill out",
+          "example": "What are the best ways to chill out after a stressful day?"
+        },
+        {
+          "phrase": "home to",
+          "example": "What does it mean for a place to be home to someone?"
+        },
+        {
+          "phrase": "be lucky enough",
+          "example": "What's something you'd love to be lucky enough to experience?"
+        },
+        {
+          "phrase": "one final thing",
+          "example": "What is one final thing you might say to make a presentation more memorable?"
+        },
+        {
+          "phrase": "thanks to",
+          "example": "What is something you've achieved thanks to another person's support?"
+        },
+        {
+          "phrase": "so much more than",
+          "example": "How can a hobby be so much more than just a way to pass time?"
+        },
+        {
+          "phrase": "a paradise for",
+          "example": "What do you think would make Sweden a paradise for tourists?"
+        }
+      ]
+    },
+    {
+      "title": "List 16",
+      "chunks": [
+        {
+          "phrase": "by word of mouth",
+          "example": "Why do you think urban legends are often shared by word of mouth?"
+        },
+        {
+          "phrase": "spread fear",
+          "example": "Why do you think some people share things online that spread fear?"
+        },
+        {
+          "phrase": "be hit by",
+          "example": "Has your town ever been hit by a snowstorm, flood, or power cut? What happened?"
+        },
+        {
+          "phrase": "come across",
+          "example": "Have you ever come across something funny or strange on social media? What was it?"
+        },
+        {
+          "phrase": "make conversation",
+          "example": "Why is it hard to make conversation with someone new?"
+        },
+        {
+          "phrase": "make one's way",
+          "example": "Have you ever had to make your way somewhere without a map or a phone? How did you manage?"
+        },
+        {
+          "phrase": "get rid of",
+          "example": "What are some ways to get rid of lice in your hair?"
+        },
+        {
+          "phrase": "feed on",
+          "example": "What animals feed on things that people throw away?"
+        }
+      ]
+    },
+    {
+      "title": "List 17",
+      "chunks": [
+        {
+          "phrase": "be the answer",
+          "example": "Why do people often believe that buying new products is the answer to their problems?"
+        },
+        {
+          "phrase": "feel a bit tired",
+          "example": "What might make you feel a bit tired during the day?"
+        },
+        {
+          "phrase": "an energy boost",
+          "example": "What are different ways to get an energy boost?"
+        },
+        {
+          "phrase": "you'd be surprised",
+          "example": "You'd be surprised how many people underestimate their abilities. Why do you think that happens?"
+        },
+        {
+          "phrase": "bend the truth",
+          "example": "Have you ever bent the truth to avoid hurting someone's feelings? How did it turn out?"
+        },
+        {
+          "phrase": "have no idea",
+          "example": "Why do you think people sometimes pretend to know things when they actually have no idea?"
+        },
+        {
+          "phrase": "go on TV",
+          "example": "If you had the chance to go on TV, what would you talk about?"
+        },
+        {
+          "phrase": "tons of",
+          "example": "What would you do if you suddenly had tons of free time?"
+        },
+        {
+          "phrase": "sounds awesome",
+          "example": "Why do you think people say 'sounds awesome' even when they are not completely sure?"
+        }
+      ]
+    },
+    {
+      "title": "List 18",
+      "chunks": [
+        {
+          "phrase": "campaign for",
+          "example": "What is something people today still campaign for?"
+        },
+        {
+          "phrase": "achieve equality",
+          "example": "Can laws alone help achieve equality? Explain your opinion."
+        },
+        {
+          "phrase": "a major victory",
+          "example": "What is a major victory for equality or justice?"
+        },
+        {
+          "phrase": "give up",
+          "example": "When should you give up your seat for someone else on public transport? Why?"
+        },
+        {
+          "phrase": "call for",
+          "example": "Why do people call for change? Can you give an example?"
+        },
+        {
+          "phrase": "discriminate against",
+          "example": "What does it mean to discriminate against someone?"
+        },
+        {
+          "phrase": "demand justice",
+          "example": "Why do some people demand justice while others stay silent?"
+        },
+        {
+          "phrase": "spark outrage",
+          "example": "What kinds of actions can spark outrage in a country?"
+        }
+      ]
+    },
+    {
+      "title": "List 19",
+      "chunks": [
+        {
+          "phrase": "head out",
+          "example": "Where are you heading out tonight?"
+        },
+        {
+          "phrase": "go exploring",
+          "example": "If you could go exploring anywhere in the world, where would you go and what would you hope to discover?"
+        },
+        {
+          "phrase": "take notes",
+          "example": "In what situations is it important to take notes, and how do good notes help you remember things better?"
+        },
+        {
+          "phrase": "stay safe",
+          "example": "What do you usually do to stay safe when you're riding your bike?"
+        },
+        {
+          "phrase": "make sense",
+          "example": "Does it make sense to buy expensive clothes? Why or why not?"
+        },
+        {
+          "phrase": "put something on",
+          "example": "Do you put sun lotion on before you go to the beach? Why or why not?"
+        },
+        {
+          "phrase": "stay warm",
+          "example": "Do you prefer staying warm or staying cool? Why?"
+        },
+        {
+          "phrase": "begin to wonder",
+          "example": "When you don't see your best friend at school, do you begin to wonder where they are? Why or why not?"
+        },
+        {
+          "phrase": "be worth it",
+          "example": "Do you think studying hard for a difficult test is worth it? Why or why not?"
+        },
+        {
+          "phrase": "a brilliant experience",
+          "example": "Would you describe school as a brilliant experience? Why or why not?"
+        }
+      ]
+    },
+    {
+      "title": "List 20",
+      "chunks": [
+        {
+          "phrase": "lay the foundation",
+          "example": "Who helped lay the foundation for who you are today? And how?"
+        },
+        {
+          "phrase": "do deeds",
+          "example": "What is one good deed that someone has done for you?"
+        },
+        {
+          "phrase": "be shipped off",
+          "example": "Some children are shipped off to boarding schools. What are the pros and cons of that?"
+        },
+        {
+          "phrase": "right-hand man",
+          "example": "Who would you want as your right-hand man in a group project, and why?"
+        },
+        {
+          "phrase": "make it one's mission",
+          "example": "If you could make one thing your mission this year, what would it be? Why?"
+        },
+        {
+          "phrase": "bring to stage/screen",
+          "example": "Can bringing a historical event to the screen help people learn about it? How?"
+        },
+        {
+          "phrase": "keep a secret",
+          "example": "What's harder: keeping a happy secret or a sad one? Why?"
+        }
+      ]
+    },
+    {
+      "title": "List 21",
+      "chunks": [
+        {
+          "phrase": "be fascinated by",
+          "example": "What is something you were fascinated by as a child, and why did it interest you so much?"
+        },
+        {
+          "phrase": "be determined to",
+          "example": "What's something you were determined to finish, even though it was hard?"
+        },
+        {
+          "phrase": "cut corners",
+          "example": "What dangers can cutting corners bring?"
+        },
+        {
+          "phrase": "set off from",
+          "example": "If you were to set off from your hometown for a road trip, what direction would you go, and what places would you visit?"
+        },
+        {
+          "phrase": "the world's first",
+          "example": "What invention would you want to create that could become the world's first of its kind?"
+        },
+        {
+          "phrase": "give the green light",
+          "example": "Can you think of a time when someone gave you the green light to do something you were excited about? What happened next?"
+        },
+        {
+          "phrase": "on one's way",
+          "example": "Imagine someone is on their way to becoming a world-famous athlete. What sacrifices do you think they might have to make?"
+        },
+        {
+          "phrase": "work feverishly",
+          "example": "Describe a time when you worked feverishly to get something done. What were you doing?"
+        }
+      ]
+    },
+    {
+      "title": "List 22",
+      "chunks": [
+        {
+          "phrase": "the whole picture",
+          "example": "Why is it important to see the whole picture before forming an opinion?"
+        },
+        {
+          "phrase": "fully understand",
+          "example": "Why can it be hard to fully understand a situation just by looking at one headline or one video clip?"
+        },
+        {
+          "phrase": "take control of",
+          "example": "Why would one country want to take control of another country's land or people?"
+        },
+        {
+          "phrase": "play a role in",
+          "example": "What role should the media play in helping people understand the truth?"
+        },
+        {
+          "phrase": "be eager to",
+          "example": "Why are some people so eager to believe or share stories quickly?"
+        },
+        {
+          "phrase": "keep up",
+          "example": "What challenges do journalists face when they try to keep up with fast news on social media?"
+        },
+        {
+          "phrase": "raise questions",
+          "example": "What headline or news story raised questions for you, and what made you doubt it?"
+        },
+        {
+          "phrase": "be responsible",
+          "example": "Who should be responsible for checking if news stories are true before they are shared?"
+        }
+      ]
+    },
+    {
+      "title": "List 23",
+      "chunks": [
+        {
+          "phrase": "inspired by",
+          "example": "Who have you been inspired by, and in what ways did they inspire you?"
+        },
+        {
+          "phrase": "against the wishes of",
+          "example": "Have you ever gone against the wishes of your parents or teachers? What happened?"
+        },
+        {
+          "phrase": "be struck by a storm",
+          "example": "What would you do if you were struck by a storm while camping or hiking?"
+        },
+        {
+          "phrase": "wash ashore",
+          "example": "What kind of things do you think are washed ashore after big storms?"
+        },
+        {
+          "phrase": "keep track of time",
+          "example": "Why can it be hard to keep track of time when you're doing something fun?"
+        },
+        {
+          "phrase": "keep someone company",
+          "example": "When is a good time to keep someone company?"
+        },
+        {
+          "phrase": "catch up",
+          "example": "Do you need speed, energy, or strategy to catch up with someone in a competition?"
+        },
+        {
+          "phrase": "fall to the ground",
+          "example": "How would you react if you fell to the ground in front of your classmates?"
+        },
+        {
+          "phrase": "make someone proud",
+          "example": "What's something you've done that made your parents proud?"
+        },
+        {
+          "phrase": "pass away",
+          "example": "How can you support a friend whose relative has passed away?"
+        }
+      ]
+    },
+    {
+      "title": "List 24",
+      "chunks": [
+        {
+          "phrase": "set out",
+          "example": "Why do people set out to explore new places?"
+        },
+        {
+          "phrase": "keep in mind",
+          "example": "What should you keep in mind before making a big decision?"
+        },
+        {
+          "phrase": "be left out",
+          "example": "How can we make sure no one is left out in class?"
+        },
+        {
+          "phrase": "make a journey",
+          "example": "What do you need to think about before making a journey?"
+        },
+        {
+          "phrase": "step ashore",
+          "example": "How do you think people feel when they step ashore in a new place?"
+        },
+        {
+          "phrase": "more accessible",
+          "example": "How can public transportation be made more accessible for elderly people?"
+        },
+        {
+          "phrase": "find a shortcut",
+          "example": "If you want to find a shortcut through a forest, what's the best way to do it?"
+        },
+        {
+          "phrase": "contribute to",
+          "example": "In what ways has Sweden contributed to the cultural world?"
+        },
+        {
+          "phrase": "greet someone",
+          "example": "How does the way you greet someone change depending on who it is?"
+        }
+      ]
+    },
+    {
+      "title": "List 25",
+      "chunks": [
+        {
+          "phrase": "at a young age",
+          "example": "What skills did you pick up at a young age?"
+        },
+        {
+          "phrase": "be common",
+          "example": "Why was it common for people to smoke 100 years ago?"
+        },
+        {
+          "phrase": "unskilled manual work",
+          "example": "What kind of jobs involve unskilled manual work?"
+        },
+        {
+          "phrase": "fair wage",
+          "example": "What do you think is a fair wage in Sweden?"
+        },
+        {
+          "phrase": "deliver a speech",
+          "example": "Are you able to deliver speeches? Why/why not?"
+        },
+        {
+          "phrase": "on behalf of",
+          "example": "How would you feel if you had to give a speech on behalf of your whole school?"
+        },
+        {
+          "phrase": "a media outcry",
+          "example": "Has there been a media outcry recently? About what?"
+        },
+        {
+          "phrase": "fall on deaf ears",
+          "example": "If your campaign for a skatepark fell on deaf ears, what could you do about it?"
+        },
+        {
+          "phrase": "be targeted",
+          "example": "Why might certain groups of people be targeted by advertising?"
+        },
+        {
+          "phrase": "live on",
+          "example": "What memories or experiences from your childhood still live on in your mind?"
+        }
+      ]
+    },
+    {
+      "title": "List 26",
+      "chunks": [
+        {
+          "phrase": "butterflies in one's stomach",
+          "example": "Is having butterflies in your stomach a good or a bad thing? Explain your answer."
+        },
+        {
+          "phrase": "come down to",
+          "example": "Do you think success mostly comes down to hard work or luck? Why?"
+        },
+        {
+          "phrase": "chemical substances",
+          "example": "What chemical substances are there in our food?"
+        },
+        {
+          "phrase": "cloud the senses",
+          "example": "How does excitement cloud the senses?"
+        },
+        {
+          "phrase": "get someone off one's mind",
+          "example": "Why do people struggle to get an ex off their mind?"
+        },
+        {
+          "phrase": "being infatuated",
+          "example": "Is being infatuated with someone a good feeling? Why/why not?"
+        },
+        {
+          "phrase": "share someone's feelings",
+          "example": "How can you show that you share someone's feelings?"
+        },
+        {
+          "phrase": "spend time with",
+          "example": "Why should you spend more time with your parents?"
+        },
+        {
+          "phrase": "have a crush",
+          "example": "How does it feel to have a crush on someone?"
+        },
+        {
+          "phrase": "pet an animal",
+          "example": "What are the benefits of petting an animal?"
+        },
+        {
+          "phrase": "kick in",
+          "example": "When does the effect of medicine usually kick in?"
+        }
+      ]
+    },
+    {
+      "title": "List 27",
+      "chunks": [
+        {
+          "phrase": "sort out",
+          "example": "When there is a big disagreement at school, what is the best way to sort out the problem?"
+        },
+        {
+          "phrase": "put an end to",
+          "example": "Why is it difficult to put an end to smoking once and for all?"
+        },
+        {
+          "phrase": "take action",
+          "example": "If someone attacked your friend, would you take action? Why or why not?"
+        },
+        {
+          "phrase": "carry on",
+          "example": "Could you carry on talking for hours and hours? Why or why not?"
+        },
+        {
+          "phrase": "round up",
+          "example": "How can coaches round up players after practice?"
+        },
+        {
+          "phrase": "benefit someone",
+          "example": "Do you think homework benefits students? Why or why not?"
+        },
+        {
+          "phrase": "carry out",
+          "example": "Surgeons can carry out organ transplants - which organs?"
+        },
+        {
+          "phrase": "a fraction of a second",
+          "example": "What things can you do in a fraction of a second?"
+        },
+        {
+          "phrase": "turn to",
+          "example": "Who do you usually turn to for advice?"
+        },
+        {
+          "phrase": "take matters into one's hands",
+          "example": "Have you ever had to take matters into your own hands? What happened?"
+        }
+      ]
+    },
+    {
+      "title": "List 28",
+      "chunks": [
+        {
+          "phrase": "a greater impact",
+          "example": "Which invention do you think had a greater impact on modern life: the internet or the mobile phone?"
+        },
+        {
+          "phrase": "in some respects",
+          "example": "Fame can seem glamorous, but in some respects, it also comes with serious drawbacks. Which are the most challenging?"
+        },
+        {
+          "phrase": "in one's heyday",
+          "example": "How has the music industry evolved since rock and roll was in its heyday during the 1950s and 1960s?"
+        },
+        {
+          "phrase": "what better way",
+          "example": "When preparing for an important exam, what better way than studying with a group?"
+        },
+        {
+          "phrase": "cut down on",
+          "example": "How can people cut down on their screen time without feeling disconnected from friends or family?"
+        },
+        {
+          "phrase": "be in use",
+          "example": "How long do you think electric cars will be in use before being replaced by newer technologies?"
+        },
+        { "phrase": "a few exceptions", "example": null },
+        { "phrase": "a smooth ride", "example": null }
+      ]
+    },
+    {
+      "title": "List 29",
+      "chunks": [
+        {
+          "phrase": "by nature",
+          "example": "Do you think people are kind or selfish by nature? Why or why not?"
+        },
+        {
+          "phrase": "feel lost",
+          "example": "What helps you when you feel lost, either in a place or in life?"
+        },
+        {
+          "phrase": "give up",
+          "example": "Do you often give up, or do you keep trying? Explain your answer."
+        },
+        {
+          "phrase": "find one's way",
+          "example": "How do you usually find your way to new places by phone, map, or asking people?"
+        },
+        {
+          "phrase": "agree to",
+          "example": "How can we agree to disagree without arguing?"
+        },
+        {
+          "phrase": "turn someone away",
+          "example": "If someone in need asked for help, what might make you decide to turn them away?"
+        },
+        {
+          "phrase": "advise someone to",
+          "example": "Would you ever advise someone to break a rule if it seemed unfair? Why or why not?"
+        },
+        {
+          "phrase": "make sacrifices",
+          "example": "What are some things people might have to make sacrifices for in life?"
+        },
+        { "phrase": "if only", "example": null },
+        { "phrase": "leave someone be", "example": null }
+      ]
+    },
+    {
+      "title": "List 30",
+      "chunks": [
+        {
+          "phrase": "send a strong message",
+          "example": "Who would you like to send a strong message to and why?"
+        },
+        {
+          "phrase": "strive to",
+          "example": "What is one thing you strive to do better this year, and why?"
+        },
+        {
+          "phrase": "put differences aside",
+          "example": "Have you ever had to put your differences aside to get along with someone? What was the reason?"
+        },
+        {
+          "phrase": "lay down arms",
+          "example": "Why do you think it is difficult for some people or countries to lay down arms and make peace?"
+        },
+        {
+          "phrase": "stand between",
+          "example": "What can stand between friends and make them stop talking?"
+        },
+        {
+          "phrase": "in every nook",
+          "example": "If a robot searched in every nook of your school, what do you think it would find?"
+        },
+        { "phrase": "the next generation", "example": null },
+        { "phrase": "be brave enough to", "example": null }
+      ]
+    }
+  ]
+}

@@ -1,528 +1,1532 @@
-[
-  {
-    "topic": {
-      "id": "reading-test-a2-cities",
-      "title": "A guide to famous cities",
-      "level": "A2 Pre-intermediate",
-      "category": "Travel & Reading Comprehension",
-      "description": "Read about three famous world cities to practice scanning for specific details, comparing facts, and answering comprehension questions."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Three Great Cities to Visit",
-        "text": "London\nLondon is the capital city of the United Kingdom. It is famous for its historical landmarks like Big Ben, the Tower of London, and Buckingham Palace. Millions of tourists visit every year to walk along the River Thames and visit famous museums, which are mostly free to enter.\n\nTokyo\nTokyo is the bustling capital of Japan. It blends modern technology, high-speed trains, and tall skyscrapers with traditional temples and peaceful gardens. The city is world-famous for its delicious sushi, ramen, and vibrant shopping districts like Shibuya.\n\nSydney\nSydney is the largest city in Australia. Situated on the coast, it is famous for its iconic Opera House and Harbour Bridge. Visitors love spending hot summer days at Bondi Beach, swimming in the ocean, or trying out surfing lessons."
+{
+  "level": 1,
+  "topics": [
+    {
+      "id": "7-tips-for-a-tidy-desk",
+      "title": "7 tips for a tidy desk",
+      "content": {
+        "type": "text",
+        "text": "Seven tips for a tidy desk\n\n1. Only keep things you really need on and near your desk.\nUse a tray for any papers you have to read. Have a jar for pens and pencils and have a bin near your desk.\n\n2. Don’t keep any drinks on your desk.\nGo to the kitchen when you want to have a drink or, if you prefer, keep a drink on a small table near your desk.\n\n3. Reduce the amount of paper that you use.\nTry to keep as much information as possible in folders on your computer. Before printing a document, ask yourself, ‘do I really need to read this on paper?’\n\n4. Scan your notes.\nIf you have a lot of paper (magazine articles, notes, worksheets, etc.), make digital versions of them.\n\n5. Use your smartphone to take photos of things you need to remember.\nFor example, take photos of notes to yourself, the name and address of a place you need to visit or diagrams you need to study for school.\n\n6. Get a noticeboard.\nIf you really do need to keep small bits of paper, use a noticeboard on the wall. Check it every day and throw old notes in the bin.\n\n7. Clean your desk at the end of every day.\nChoose a time to tidy your desk and do it! If you do it every day, it will only take five minutes and you can start each new day with a clean and tidy space."
       },
-      "vocabulary": [
-        { "word": "Landmarks", "definition": "Famous buildings or structures that are easily recognized." },
-        { "word": "Bustling", "definition": "Full of energetic activity, people, and noise." },
-        { "word": "Iconic", "definition": "Very famous and representative of a particular place or idea." }
+      "preparation": {
+        "type": "gap_fill_drag",
+        "instruction": "Complete the sentences with the correct word from the box.",
+        "word_box": [
+          "space",
+          "desk",
+          "noticeboard",
+          "tray",
+          "folders",
+          "bin",
+          "scanner",
+          "smartphone"
+        ],
+        "questions": [
+          {
+            "sentence": "Put your rubbish in the [].",
+            "answer": "bin"
+          },
+          {
+            "sentence": "Put things you want to read in a [].",
+            "answer": "tray"
+          },
+          {
+            "sentence": "Keep information on your computer in [].",
+            "answer": "folders"
+          },
+          {
+            "sentence": "Make digital versions of text with a [].",
+            "answer": "scanner"
+          },
+          {
+            "sentence": "Take a photo of important things with a [] or camera.",
+            "answer": "smartphone"
+          },
+          {
+            "sentence": "Put important notes on a [].",
+            "answer": "noticeboard"
+          },
+          {
+            "sentence": "Clean your [] every day.",
+            "answer": "desk"
+          },
+          {
+            "sentence": "Start each day with a tidy [].",
+            "answer": "space"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False based on the text.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "You should put everything you will possibly need on your desk.",
+              "answer": false
+            },
+            {
+              "statement": "You should only have one pen or pencil.",
+              "answer": false
+            },
+            {
+              "statement": "It's a good idea to have a bin close to your desk.",
+              "answer": true
+            },
+            {
+              "statement": "It's better to keep information on your computer than on paper if possible.",
+              "answer": true
+            },
+            {
+              "statement": "If you have written notes on paper you should type them into the computer.",
+              "answer": false
+            },
+            {
+              "statement": "The camera in your phone can help you remember things.",
+              "answer": true
+            },
+            {
+              "statement": "A noticeboard is a good way to organise bits of paper.",
+              "answer": true
+            },
+            {
+              "statement": "You should clean your desk once a week.",
+              "answer": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Dos and Don'ts",
+          "instruction": "Drag each statement to the correct column (Do or Don't).",
+          "type": "category_matching",
+          "categories": ["Do", "Don't"],
+          "items": [
+            {
+              "item": "take photos of things you want to remember",
+              "correct_category": "Do"
+            },
+            {
+              "item": "use a scanner to make PDFs of magazine pages",
+              "correct_category": "Do"
+            },
+            {
+              "item": "check your noticeboard every day",
+              "correct_category": "Do"
+            },
+            {
+              "item": "keep pens and pencils in a jar",
+              "correct_category": "Do"
+            },
+            {
+              "item": "leave your desk untidy at the end of the day",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "keep a drink on your desk",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "keep a lot of paper on your desk",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "print as much information as possible",
+              "correct_category": "Don't"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Scan the headings (city names) first before reading the entire text.",
-      "Look for keywords in the questions (like 'museums' or 'beach') and match them with the relevant section.",
-      "Pay attention to geographical adjectives (e.g., 'capital', 'coast', 'largest')."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "cities-mc",
-        "title": "Check your understanding: multiple choice",
-        "instruction": "Choose the correct city for each question based on the text.",
-        "questions": [
-          { "id": 1, "question": "Which city offers free entry to most of its museums?", "options": ["London", "Tokyo", "Sydney"], "answer": "London" },
-          { "id": 2, "question": "Which city is famous for Bondi Beach and surfing?", "options": ["London", "Tokyo", "Sydney"], "answer": "Sydney" },
-          { "id": 3, "question": "Which city combines high-speed trains with traditional temples?", "options": ["London", "Tokyo", "Sydney"], "answer": "Tokyo" }
+    {
+      "id": "a-restaurant-menu",
+      "title": "A restaurant menu",
+      "content": {
+        "type": "text",
+        "text": "The Boat Restaurant\n★★★★☆\n489 reviews\nLunch served 12:30 – 2:30 p.m.\nDinner served 6:00 – 9:00 p.m.\n\nStarters\nAll starters are served with bread and butter\nTomato soup - £2.00\nFrench onion soup - £2.50\nTomato salad - £2.90\nChicken Salad - £3.30\n\nSnacks (lunchtime only)\nAll snacks are served with salad and chips\nCheese omelette - £3.50\nVegetable omelette - £3.25\nCheese & tomato sandwich - £3.25\nBurger - £2.90\nCheese burger - £3.20\nChicken sandwich - £3.50\n\nMain courses\nGerman sausage and chips - £6.50\nGrilled fish and potatoes - £6.25\nItalian cheese & tomato pizza - £4.85\nThai chicken and rice - £5.95\nVegetable pasta - £4.85\nRoast chicken and potatoes - £5.95\n\nDesserts\nFruit salad and cream - £2.25\nIce cream (choose from chocolate, coffee or lemon) - £2.00\nLemon cake - £2.25\nChocolate cake - £2.25\nCheese and biscuits - £2.50\n\nDrinks\nMineral water - £1.00\nFresh orange juice - £1.25\nSoft drinks - £1.30\nEnglish tea - £0.90\nIrish cream coffee - £0.90"
+      },
+      "preparation": null,
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False based on the menu.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "Lunch is served for two hours only.",
+              "answer": true
+            },
+            {
+              "statement": "Dinner starts at 2:30 p.m.",
+              "answer": false
+            },
+            {
+              "statement": "Bread and butter comes free with the starters.",
+              "answer": true
+            },
+            {
+              "statement": "The snacks are available for lunch and dinner.",
+              "answer": false
+            },
+            {
+              "statement": "If you order a snack, the salad and chips cost extra.",
+              "answer": false
+            },
+            {
+              "statement": "There are three flavours of ice cream.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Complete the names of foods and drinks with the correct word from the box.",
+          "type": "gap_fill",
+          "word_box": [
+            "German",
+            "Thai",
+            "Irish",
+            "English",
+            "Italian",
+            "French"
+          ],
+          "questions": [
+            {
+              "sentence": "[] onion soup",
+              "answer": "French"
+            },
+            {
+              "sentence": "[] sausage and chips",
+              "answer": "German"
+            },
+            {
+              "sentence": "[] chicken and rice",
+              "answer": "Thai"
+            },
+            {
+              "sentence": "[] tea",
+              "answer": "English"
+            },
+            {
+              "sentence": "[] cream coffee",
+              "answer": "Irish"
+            },
+            {
+              "sentence": "[] cheese & tomato pizza",
+              "answer": "Italian"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Exercise 3: Recommendations",
+          "instruction": "Match each person's request to the best menu item recommendation.",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "'I'm a vegetarian and I want a starter but I don't like soup. What starter should I choose?'",
+              "definition": "Tomato salad"
+            },
+            {
+              "term": "'I want a main course but I only have £5 and I don't like cheese. What do you suggest?'",
+              "definition": "Vegetable pasta"
+            },
+            {
+              "term": "'I really love seafood. Which main course do you suggest?'",
+              "definition": "Grilled fish and potatoes"
+            },
+            {
+              "term": "'I want a dessert but I don't like sweet things. What can I choose?'",
+              "definition": "Cheese and biscuits"
+            },
+            {
+              "term": "'I don't like eggs or cheese and I only have £4. What snack can I have?'",
+              "definition": "Chicken sandwich"
+            },
+            {
+              "term": "'It's a really hot day and I need a cold drink. I only have £1, though. What can I have?'",
+              "definition": "Mineral water"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a-train-timetable",
+      "title": "A train timetable",
+      "content": {
+        "type": "image",
+        "image": "atraintimetable.avif"
+      },
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "arrive",
+            "definition": "To reach a place, especially at the end of a journey."
+          },
+          {
+            "term": "platform",
+            "definition": "The place in a train station to get on your train."
+          },
+          {
+            "term": "depart",
+            "definition": "To go away or leave, especially at the start of a journey."
+          },
+          {
+            "term": "duration",
+            "definition": "The time a journey takes from start to end."
+          }
         ]
       },
-      {
-        "type": "true_or_false",
-        "id": "cities-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements are True or False based on the text.",
-        "questions": [
-          { "id": 1, "statement": "Sydney is the capital city of Australia.", "correctAnswer": false },
-          { "id": 2, "statement": "Shibuya is a famous shopping district in Tokyo.", "correctAnswer": true },
-          { "id": 3, "statement": "Buckingham Palace is located in London.", "correctAnswer": true }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which of these three cities would you like to visit most, and why?"
-    }
-  },
-  {
-    "topic": {
-      "id": "finding-job",
-      "title": "Finding a job",
-      "level": "A2 Pre-intermediate",
-      "category": "Work & Careers",
-      "description": "Read four job advertisements to practice matching job requirements with candidate profiles."
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "The ticket is for trains to Oxford.",
+              "answer": false
+            },
+            {
+              "statement": "All trains leave from platform 1.",
+              "answer": true
+            },
+            {
+              "statement": "The first train leaves Oxford at 10:43.",
+              "answer": true
+            },
+            {
+              "statement": "The 10:43 train from Oxford takes 58 minutes to get to London.",
+              "answer": false
+            },
+            {
+              "statement": "You don't have to change trains if you take the 11:01 train.",
+              "answer": true
+            },
+            {
+              "statement": "The 11:16 train from Oxford arrives in London on platform 3.",
+              "answer": false
+            },
+            {
+              "statement": "The ticket is for a single journey only.",
+              "answer": false
+            },
+            {
+              "statement": "With this ticket you can go to any station in London.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Complete the sentences with the numbers or times from the timetable.",
+          "type": "gap_fill",
+          "word_box": ["11:16", "58", "1", "22.50", "22", "12:14"],
+          "questions": [
+            {
+              "sentence": "This ticket is for the []nd July only.",
+              "answer": "22"
+            },
+            {
+              "sentence": "The ticket costs £[].",
+              "answer": "22.50"
+            },
+            {
+              "sentence": "The 11:07 train from Oxford arrives in London at [].",
+              "answer": "12:14"
+            },
+            {
+              "sentence": "The 11:01 train from Oxford takes [] minutes.",
+              "answer": "58"
+            },
+            {
+              "sentence": "All trains from Oxford leave from platform [].",
+              "answer": "1"
+            },
+            {
+              "sentence": "The train at London Paddington platform 4 left Oxford at [].",
+              "answer": "11:16"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Exercise 3: Multiple Choice",
+          "instruction": "Choose the correct option for each question.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "The 10:43 train from Oxford takes _________.",
+              "options": [
+                "58 minutes",
+                "1 hour and 7 minutes",
+                "1 hour and 11 minutes"
+              ],
+              "correct_answer": "1 hour and 11 minutes"
+            },
+            {
+              "question": "The 10:43 train from Oxford is the _________ train.",
+              "options": ["slowest", "fastest"],
+              "correct_answer": "slowest"
+            },
+            {
+              "question": "The 11:01 train from Oxford arrives _________.",
+              "options": ["before midday", "after midday"],
+              "correct_answer": "before midday"
+            },
+            {
+              "question": "The 11:07 train from Oxford arrives at _________.",
+              "options": [
+                "platform 11",
+                "platform 2",
+                "platform 3",
+                "platform 4"
+              ],
+              "correct_answer": "platform 3"
+            },
+            {
+              "question": "The 11:01 train from Oxford is the _________.",
+              "options": ["slowest", "fastest"],
+              "correct_answer": "fastest"
+            },
+            {
+              "question": "The 11:16 train from Oxford takes _________.",
+              "options": ["under 1 hour", "exactly 1 hour", "over 1 hour"],
+              "correct_answer": "over 1 hour"
+            }
+          ]
+        }
+      ]
     },
-    "content": {
-      "readingPassage": {
-        "title": "Job Advertisements",
-        "text": "Job A: Babysitter wanted for two children (ages 4 and 6). Afternoons from 3:30 PM to 6:30 PM, Monday to Friday. Must love games and outdoor play.\n\nJob B: Newspaper delivery driver. Early mornings from 5:30 AM to 7:30 AM. Must have a valid driving license and reliable car.\n\nJob C: Cafe Assistant. Weekend shifts (Saturday & Sunday, 8:00 AM – 4:00 PM). Duties include making coffee, serving food, and operating the till. Experience required.\n\nJob D: Dog Walker. Flexible hours during weekdays. Must be energetic and comfortable with large dogs."
-      }
-    },
-    "tips": [
-      "Identify key criteria in job adverts: working hours, required experience, and necessary equipment/licenses.",
-      "Match candidate preferences directly to advert conditions."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "finding-job-mc",
-        "title": "Check your understanding: matching",
-        "instruction": "Match each candidate to the best job advert.",
-        "questions": [
-          { "id": 1, "question": "Which job requires a driving license and a car?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job B" },
-          { "id": 2, "question": "Which job is only for weekend work?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job C" },
-          { "id": 3, "question": "Which job involves taking care of young children after school?", "options": ["Job A", "Job B", "Job C", "Job D"], "answer": "Job A" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which of these four jobs would you prefer to apply for?"
-    }
-  },
-  {
-    "topic": {
-      "id": "films-entertainment",
-      "title": "Films and entertainment",
-      "level": "A2 Pre-intermediate",
-      "category": "Media & Reviews",
-      "description": "Read short movie reviews and listings to learn how to choose a movie based on interests."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Cinema Guide",
-        "text": "1. Galaxy Wars (Sci-Fi, 120 mins): An epic space battle across distant star systems with amazing CGI effects.\n2. Laugh Out Loud (Comedy, 90 mins): Two best friends accidentally enter a national talent contest. Hilarious for the whole family.\n3. Deep Blue Secret (Mystery/Thriller, 105 mins): A detective investigates a mysterious disappearance in a sleepy coastal town.\n4. Animal Kingdom (Documentary, 75 mins): Stunning footage of wildlife in African national parks."
-      }
-    },
-    "tips": [
-      "Pay attention to genre labels (Sci-Fi, Comedy, Mystery) to match viewer preferences.",
-      "Check running times if you have a tight schedule."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "films-mc",
-        "title": "Check your understanding: film selection",
-        "instruction": "Choose the best film for each person.",
-        "questions": [
-          { "id": 1, "question": "Which film should someone watch if they love nature and wildlife?", "options": ["Galaxy Wars", "Laugh Out Loud", "Deep Blue Secret", "Animal Kingdom"], "answer": "Animal Kingdom" },
-          { "id": 2, "question": "Which film is best for someone looking for a funny movie?", "options": ["Galaxy Wars", "Laugh Out Loud", "Deep Blue Secret", "Animal Kingdom"], "answer": "Laugh Out Loud" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What film genre is your favorite when you go to the cinema?"
-    }
-  },
-  {
-    "topic": {
-      "id": "are-you-good-digital-citizen",
+    {
+      "id": "are-you-a-good-digital-citizen",
       "title": "Are you a good digital citizen?",
-      "level": "A2 Pre-intermediate",
-      "category": "Technology & Ethics",
-      "description": "Read a quiz and guidance checklist about safe and responsible internet usage."
+      "content": {
+        "type": "text",
+        "text": "Are you a good digital citizen?\nTry the quiz and check your result at the end.\n\n1. Do you believe all the information you see on the internet?\nA. No! I always check that information is true.\nB. I don’t really think about the information being true or not.\nC. I believe everything I see online.\n\n2. Are you interested in modern technology?\nA. Yes, I love learning and reading about all kinds of modern technology.\nB. I’m interested in some modern technology but not everything.\nC. I’m not at all interested in modern technology.\n\n3. Are you nice to people online?\nA. Yes, I always think carefully about what I am saying and doing online.\nB. I think I am polite most of the time but I don’t always think before I write.\nC. I don’t think much about what I say and do online.\n\n4. Do you know how to stay safe online?\nA. Yes, I am very careful about things like my privacy settings and passwords.\nB. I think I am safe but I am not sure about things like privacy settings.\nC. I don’t think there are any dangers online so this doesn’t worry me.\n\n5. Do you think carefully before you share a photo?\nA. Yes, I always ask myself ‘Would I be happy to see this photo?’ If the answer is ‘yes’, I share it.\nB. I know that’s probably important but I don’t always stop to think.\nC. I just share photos without thinking. I don’t really worry about what people think.\n\n6. Are you confident that you always follow your country's laws online?\nA. Yes. I never download illegal files or copy other people’s work.\nB. I don’t know much about the law, but I know not to copy other people’s work.\nC. Hmm ... I don't think laws are important when you go online.\n\nMostly As\nCongratulations! You’re a good digital citizen. You know how to use technology in a safe and sensible way. You also know how to enjoy technology for study and play. Well done!\n\nMostly Bs\nYou aren’t a bad digital citizen but you could be better! Think carefully when you are online and ask questions if there are areas you don’t understand.\n\nMostly Cs\nOh dear. You need to work on being a good digital citizen. Learn as much as possible about how to behave online or you may find you get into trouble one day."
+      },
+      "preparation": null,
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Multiple Corrects",
+          "instruction": "Which advice is true about being a good digital citizen? Choose six answers.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "Choose all the true statements about being a good digital citizen:",
+              "options": [
+                "You believe most of what you see on the internet.",
+                "You are interested in modern technology.",
+                "You don’t worry about privacy settings.",
+                "You think about each photo before you share it.",
+                "You are polite to people online.",
+                "You share photos online every day.",
+                "You check information you read online.",
+                "You know there are dangers online.",
+                "You don't care about your country’s online rules.",
+                "You follow your country’s online rules."
+              ],
+              "correct_answers": [
+                "You are interested in modern technology.",
+                "You think about each photo before you share it.",
+                "You are polite to people online.",
+                "You check information you read online.",
+                "You know there are dangers online.",
+                "You follow your country’s online rules."
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Fill in the gaps based on the text.",
+          "type": "gap_fill",
+          "questions": [
+            {
+              "sentence": "The questions are to check whether you are a good [] citizen.",
+              "answer": "digital"
+            },
+            {
+              "sentence": "They ask if you believe everything you see on the [].",
+              "answer": "internet"
+            },
+            {
+              "sentence": "Other questions are about being kind and [] to people online.",
+              "answer": "polite"
+            },
+            {
+              "sentence": "You should check your privacy setting to make sure your information is private and you stay [].",
+              "answer": "safe"
+            },
+            {
+              "sentence": "Good digital citizens always think carefully before they [] a photo online.",
+              "answer": "share"
+            },
+            {
+              "sentence": "You should never [] illegal files or copy other people's work.",
+              "answer": "download"
+            }
+          ]
+        }
+      ]
     },
-    "content": {
-      "readingPassage": {
-        "title": "Digital Citizenship Checklist",
-        "text": "Being a good digital citizen means treating others with respect online.\n- Always ask permission before posting photos of your friends.\n- Never share personal information like your address or passwords.\n- Think before you comment: Is it kind? Is it true?\n- Report cyberbullying or mean behavior to a trusted adult or site moderator."
-      }
-    },
-    "tips": [
-      "Look for modal verbs of obligation and advice (e.g., 'always', 'never', 'must').",
-      "Understand safety imperatives for protecting personal data."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "digital-citizen-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements represent good digital citizenship.",
-        "questions": [
-          { "id": 1, "statement": "You should post photos of your friends without asking them first.", "correctAnswer": false },
-          { "id": 2, "statement": "It is safe to share your passwords with online friends.", "correctAnswer": false },
-          { "id": 3, "statement": "You should report cyberbullying to an adult.", "correctAnswer": true }
+    {
+      "id": "films-and-entertainment",
+      "title": "Films and entertainment",
+      "content": {
+        "type": "image",
+        "image": "filmsandentertainment.avif"
+      },
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with the definitions.",
+        "pairs": [
+          {
+            "term": "a celebrity",
+            "definition": "a famous person"
+          },
+          {
+            "term": "an actress",
+            "definition": "a woman who plays the part of a character in a film or play"
+          },
+          {
+            "term": "a model",
+            "definition": "a person whose job is to wear clothes, shoes, hairstyles, etc. for fashions shows and photographs"
+          },
+          {
+            "term": "an advertisement",
+            "definition": "a poster, picture, short film or song, etc. that helps to sell a product"
+          },
+          {
+            "term": "to nominate",
+            "definition": "to suggest someone for an award"
+          },
+          {
+            "term": "an award",
+            "definition": "a prize given to someone for something they have done"
+          },
+          {
+            "term": "an Oscar",
+            "definition": "one of the awards given every year for the best film, best actress, best actor, etc. in the film industry"
+          },
+          {
+            "term": "to star",
+            "definition": "to be the most important actor in a film, play, etc."
+          }
         ]
-      }
-    ],
-    "discussion": {
-      "question": "What rules do you follow to stay safe and polite online?"
-    }
-  },
-  {
-    "topic": {
-      "id": "about-earth",
-      "title": "About Earth",
-      "level": "A2 Pre-intermediate",
-      "category": "Science & Planet",
-      "description": "Read key scientific facts about Planet Earth, its oceans, atmosphere, and continents."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Timeline Ordering",
+          "instruction": "Put these sentences about Jennifer Lawrence's life in the correct order.",
+          "type": "ordering",
+          "items": [
+            "Jennifer was born in Kentucky.",
+            "At school she played basketball for a boys’ team.",
+            "She moved to New York.",
+            "She appeared on TV for the first time.",
+            "She moved to Los Angeles.",
+            "She was nominated for an Oscar.",
+            "She played Katniss Everdeen in The Hunger Games."
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "Jennifer is American.",
+              "answer": true
+            },
+            {
+              "statement": "Jennifer was born in July.",
+              "answer": false
+            },
+            {
+              "statement": "She has two brothers.",
+              "answer": true
+            },
+            {
+              "statement": "Jennifer took acting classes at school.",
+              "answer": false
+            },
+            {
+              "statement": "Jennifer has done some modelling.",
+              "answer": true
+            },
+            {
+              "statement": "Jennifer was nominated for an Oscar in 2010.",
+              "answer": true
+            },
+            {
+              "statement": "She likes playing the piano.",
+              "answer": false
+            },
+            {
+              "statement": "Jennifer's family supported her dreams to be an actress.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Exercise 3: Multiple Choice",
+          "instruction": "Choose all correct options for each question.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "What sports did Jennifer play at school?",
+              "options": ["basketball", "surfing", "hockey", "tennis"],
+              "correct_answers": ["basketball", "hockey"]
+            },
+            {
+              "question": "What films has Jennifer Lawrence starred in?",
+              "options": [
+                "Titanic",
+                "Transformers",
+                "Winter's Bone",
+                "The Hunger Games"
+              ],
+              "correct_answers": ["Winter's Bone", "The Hunger Games"]
+            },
+            {
+              "question": "What cities has she lived in?",
+              "options": ["London", "Los Angeles", "Miami", "New York"],
+              "correct_answers": ["Los Angeles", "New York"]
+            },
+            {
+              "question": "What jobs has she done?",
+              "options": ["actress", "model", "fashion designer", "waitress"],
+              "correct_answers": ["actress", "model"]
+            },
+            {
+              "question": "What does Jennifer do in her free time?",
+              "options": [
+                "play hockey",
+                "painting",
+                "surfing",
+                "play the guitar"
+              ],
+              "correct_answers": ["painting", "surfing", "play the guitar"]
+            },
+            {
+              "question": "What are her two brothers called?",
+              "options": ["Karen", "Ben", "Gary", "Blaine"],
+              "correct_answers": ["Ben", "Blaine"]
+            }
+          ]
+        }
+      ]
     },
-    "content": {
-      "readingPassage": {
-        "title": "Planet Earth Facts",
-        "text": "Earth is the third planet from the Sun and the only astronomical object known to harbor life. About 71% of Earth's surface is covered with water, mostly by oceans. The atmosphere consists mostly of nitrogen and oxygen, which protects living organisms from harmful solar radiation and keeps the planet warm through the greenhouse effect."
-      }
-    },
-    "tips": [
-      "Pay attention to numerical statistics and percentages.",
-      "Identify scientific cause-and-effect relationships."
-    ],
-    "exercises": [
-      {
-        "type": "gap_fill",
-        "id": "earth-gapfill",
-        "title": "Check your understanding: gap fill",
-        "instruction": "Fill in the missing facts about Earth.",
-        "questions": [
-          { "id": 1, "sentence": "Earth is the ________ planet from the Sun.", "answer": "third" },
-          { "id": 2, "sentence": "Water covers about ________% of Earth's surface.", "answer": "71" }
+    {
+      "id": "finding-a-job",
+      "title": "Finding a job",
+      "content": {
+        "type": "text",
+        "text": "Finding a job\n\nA\nBabysitter needed\nWe need a babysitter to look after our two boys aged 5 and 7 after school from 4 p.m. – 6 p.m., Mon – Fri.\n£40 a week.\nCall Mary on 678345211\n\nB\nNewspaper round before school\nWe need young people to deliver newspapers on Mon, Wed and Fri mornings. The paper round takes 30 minutes in the village of Clanbrook. Papers must be delivered before 8 a.m. and you must have your own bike.\nInterested? Ask for more info at Clanbrook post office.\n\nC\nCITY MUSEUM\nHoliday job\nDo you want to earn some extra money this summer? Do you speak another language?\nWe need French, Spanish or German speakers to work for us in the City Museum shop Tuesday – Saturday.\nSend your CV to citymuseum@shopjob.lkj\n\nD\nPART-TIME WORK\nMunchies Café\nWe are looking for breakfast and lunchtime staff to work in our café on Saturdays.\nCome in (8 a.m. – 4 p.m.) or call Bella on 612398745 (after 4 p.m.)"
+      },
+      "preparation": {
+        "type": "category_matching",
+        "instruction": "Match the job duties to the correct job title.",
+        "categories": [
+          "Babysitter",
+          "Shop assistant",
+          "Paper boy",
+          "Waiter / Waitress",
+          "Cleaner",
+          "Cashier"
+        ],
+        "items": [
+          {
+            "item": "read stories and play with the young children",
+            "correct_category": "Babysitter"
+          },
+          {
+            "item": "look after children",
+            "correct_category": "Babysitter"
+          },
+          {
+            "item": "display items on the shelf",
+            "correct_category": "Shop assistant"
+          },
+          {
+            "item": "help customers find items to buy",
+            "correct_category": "Shop assistant"
+          },
+          {
+            "item": "deliver newspaper",
+            "correct_category": "Paper boy"
+          },
+          {
+            "item": "wake up early",
+            "correct_category": "Paper boy"
+          },
+          {
+            "item": "serve food and drinks",
+            "correct_category": "Waiter / Waitress"
+          },
+          {
+            "item": "take customers' orders",
+            "correct_category": "Waiter / Waitress"
+          },
+          {
+            "item": "clean the floor",
+            "correct_category": "Cleaner"
+          },
+          {
+            "item": "make somewhere tidy",
+            "correct_category": "Cleaner"
+          },
+          {
+            "item": "give customers their change",
+            "correct_category": "Cashier"
+          },
+          {
+            "item": "sell shop's items",
+            "correct_category": "Cashier"
+          }
         ]
-      }
-    ],
-    "discussion": {
-      "question": "What action can we take to protect Earth's environment?"
-    }
-  },
-  {
-    "topic": {
-      "id": "train-timetable",
-      "title": "A train timetable",
-      "level": "A2 Pre-intermediate",
-      "category": "Travel & Schedules",
-      "description": "Read a train schedule table to practice finding arrival, departure, and platform information."
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Matching",
+          "instruction": "Match each advert with the kind of job it describes.",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "advert A",
+              "definition": "looking after children"
+            },
+            {
+              "term": "advert B",
+              "definition": "delivering newspaper"
+            },
+            {
+              "term": "advert C",
+              "definition": "working in a shop"
+            },
+            {
+              "term": "advert D",
+              "definition": "working in a small restaurant"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice & True/False",
+          "instruction": "Answer questions based on the adverts.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "In which job do you have to work after school?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert A"
+            },
+            {
+              "question": "In which job do you have to start work before 8 a.m.?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert B"
+            },
+            {
+              "question": "In which job do you only need to work on Saturdays?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert D"
+            },
+            {
+              "question": "In which job do you need a bicycle?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert B"
+            },
+            {
+              "question": "In which job do you need to speak a foreign language?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert C"
+            },
+            {
+              "question": "In which job do you only work during the summer holidays?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert C"
+            },
+            {
+              "question": "In which job do you have to work for 2 hours every day after school?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert A"
+            },
+            {
+              "question": "In which job do you need to work from Tuesday to Saturday?",
+              "options": ["advert A", "advert B", "advert C", "advert D"],
+              "correct_answer": "advert C"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Exercise 3: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "In advert A, the babysitter can get more than £40 a week.",
+              "answer": false
+            },
+            {
+              "statement": "In advert D, you don't need to work in the evenings.",
+              "answer": true
+            },
+            {
+              "statement": "In advert B, the paper round should take about half an hour.",
+              "answer": true
+            },
+            {
+              "statement": "In advert C, you have to work five days a week.",
+              "answer": true
+            },
+            {
+              "statement": "In advert D, you should call Bella in the morning.",
+              "answer": false
+            },
+            {
+              "statement": "In advert B, you should contact the newspaper delivery boy for more information.",
+              "answer": false
+            },
+            {
+              "statement": "In advert D, you need to work full-time.",
+              "answer": false
+            },
+            {
+              "statement": "In advert C, you need to contact the museum by telephone.",
+              "answer": false
+            }
+          ]
+        }
+      ]
     },
-    "content": {
-      "readingPassage": {
-        "title": "Morning Express Timetable (Station -> Central)",
-        "text": "Train 101 | Departs: 07:15 | Arrives: 07:45 | Platform 2 | Calling at: North Park, Eastgate\nTrain 103 | Departs: 07:35 | Arrives: 08:00 | Platform 1 | Direct (Express)\nTrain 105 | Departs: 08:05 | Arrives: 08:40 | Platform 3 | Calling at: North Park, Riverdale, Eastgate"
-      }
-    },
-    "tips": [
-      "Distinguish between departure times and arrival times.",
-      "Look for terms like 'Direct' or 'Express' vs. stopping trains ('Calling at')."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "timetable-mc",
-        "title": "Check your understanding: schedule lookup",
-        "instruction": "Select the correct train option.",
-        "questions": [
-          { "id": 1, "question": "Which train is the fastest direct route to Central?", "options": ["Train 101", "Train 103", "Train 105"], "answer": "Train 103" },
-          { "id": 2, "question": "What platform does Train 101 depart from?", "options": ["Platform 1", "Platform 2", "Platform 3"], "answer": "Platform 2" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "How often do you use train timetables or transit apps when traveling?"
-    }
-  },
-  {
-    "topic": {
-      "id": "restaurant-menu",
-      "title": "A restaurant menu",
-      "level": "A2 Pre-intermediate",
-      "category": "Food & Life Skills",
-      "description": "Read a restaurant menu to understand dish components, prices, and special dietary options."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Green Bistro Menu",
-        "text": "Starters:\n- Garlic Bread (£3.50)\n- Vegetable Soup (V) (£4.00)\n\nMains:\n- Grilled Chicken Burger with Fries (£8.50)\n- Spinach & Ricotta Pasta (V) (£7.95)\n- Fish and Chips (£9.00)\n\nDesserts:\n- Chocolate Brownie with Ice Cream (£4.50)\n- Fruit Salad (£3.50)\n\n(V) = Vegetarian option"
-      }
-    },
-    "tips": [
-      "Look for dietary symbols like '(V)' for vegetarian options.",
-      "Calculate total meal costs by summing starters, mains, and desserts."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "menu-mc",
-        "title": "Check your understanding: prices & options",
-        "instruction": "Choose the correct details based on the menu.",
-        "questions": [
-          { "id": 1, "question": "Which main course is vegetarian?", "options": ["Chicken Burger", "Spinach & Ricotta Pasta", "Fish and Chips"], "answer": "Spinach & Ricotta Pasta" },
-          { "id": 2, "question": "How much is the Garlic Bread starter?", "options": ["£3.50", "£4.00", "£4.50"], "answer": "£3.50" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What dish would you order from the Green Bistro menu?"
-    }
-  },
-  {
-    "topic": {
-      "id": "7-tips-tidy-desk",
-      "title": "7 tips for a tidy desk",
-      "level": "A2 Pre-intermediate",
-      "category": "Study Skills & Organization",
-      "description": "Read practical advice on maintaining a clean and organized study desk workspace."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Keep Your Desk Tidy!",
-        "text": "1. Only keep items you use every day on your desk.\n2. Use pen holders and small boxes for stationery.\n3. Keep papers in organized folders instead of piles.\n4. Clean your computer screen and keyboard once a week.\n5. Put your school bag next to your desk, not on it.\n6. Throw away old rubbish at the end of every day.\n7. Keep a water bottle nearby to stay hydrated."
-      }
-    },
-    "tips": [
-      "Use imperative verbs for organizational rules ('Keep', 'Clean', 'Throw away').",
-      "Recognize time frequency words ('every day', 'once a week')."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "tidy-desk-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the advice matches the text.",
-        "questions": [
-          { "id": 1, "statement": "You should leave all your papers in large piles on the desk.", "correctAnswer": false },
-          { "id": 2, "statement": "Rubbish should be thrown away at the end of each day.", "correctAnswer": true }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "How tidy is your study desk right now?"
-    }
-  },
-  {
-    "topic": {
-      "id": "shopping-signs-notices",
-      "title": "Shopping signs and notices",
-      "level": "A2 Pre-intermediate",
-      "category": "Shopping & Notices",
-      "description": "Read common store notices, sale signs, and store opening announcements."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Store Notices",
-        "text": "Notice 1: Summer Sale - Up to 50% off selected summer clothing! Today only.\nNotice 2: Fitting rooms closed for cleaning. Please ask staff for assistance.\nNotice 3: Buy 2 T-shirts, get 1 free!\nNotice 4: Please pay for items at the main cash desk near the exit."
-      }
-    },
-    "tips": [
-      "Understand common retail vocabulary ('sale', 'discount', 'fitting rooms', 'cash desk').",
-      "Match store signs with customer situations."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "signs-mc",
-        "title": "Check your understanding: sign meanings",
-        "instruction": "Select the correct meaning for each notice.",
-        "questions": [
-          { "id": 1, "question": "Which notice offers a special deal on buying multiple items?", "options": ["Notice 1", "Notice 2", "Notice 3", "Notice 4"], "answer": "Notice 3" },
-          { "id": 2, "question": "Where should customers take their clothing items to buy them?", "options": ["Fitting rooms", "Main cash desk", "Outside"], "answer": "Main cash desk" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What sign or deal catches your attention when shopping?"
-    }
-  },
-  {
-    "topic": {
-      "id": "online-safety-poster",
-      "title": "Online safety poster",
-      "level": "A2 Pre-intermediate",
-      "category": "Technology & Safety",
-      "description": "Read safety guidelines on protecting accounts, passwords, and personal information online."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Stay Safe Online!",
-        "text": "- Create strong passwords combining letters, numbers, and symbols.\n- Never share your passwords with friends or classmates.\n- Do not click on unknown links or download unexpected attachments.\n- Keep your social media accounts private.\n- Talk to a parent or teacher if something online makes you uncomfortable."
-      }
-    },
-    "tips": [
-      "Identify negative imperatives ('Do not click', 'Never share').",
-      "Remember password security rules."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "online-safety-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements represent safe online behavior.",
-        "questions": [
-          { "id": 1, "statement": "Strong passwords should include numbers and symbols.", "correctAnswer": true },
-          { "id": 2, "statement": "You should click on links sent by strangers.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "How often do you update or change your online passwords?"
-    }
-  },
-  {
-    "topic": {
-      "id": "internet",
-      "title": "The internet",
-      "level": "A2 Pre-intermediate",
-      "category": "Technology & History",
-      "description": "Read a short article explaining the history and everyday impact of the World Wide Web."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "How the Internet Changed the World",
-        "text": "The internet connects millions of computers worldwide. Invented in the late 20th century, it revolutionized how people communicate, work, and learn. Today, people use web browsers to access information, stream videos, play online games, and keep in touch with friends instantly across global distances."
-      }
-    },
-    "tips": [
-      "Understand general technological verbs ('connects', 'stream', 'access').",
-      "Summarize global impacts mentioned in informative texts."
-    ],
-    "exercises": [
-      {
-        "type": "gap_fill",
-        "id": "internet-gapfill",
-        "title": "Check your understanding: gap fill",
-        "instruction": "Complete the missing terms.",
-        "questions": [
-          { "id": 1, "sentence": "The internet connects millions of ________ worldwide.", "answer": "computers" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What is the most useful thing you use the internet for every day?"
-    }
-  },
-  {
-    "topic": {
-      "id": "my-town",
-      "title": "My town",
-      "level": "A2 Pre-intermediate",
-      "category": "Places & Environment",
-      "description": "Read a description of a small town, its local shops, parks, and community facilities."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Welcome to Oakwood",
-        "text": "Oakwood is a quiet town located near a large forest. It has a high street with small bakeries, a library, and a cozy cafe. In the center of town, there is a peaceful public park with a duck pond and playground. On Saturdays, local farmers sell fresh fruit and vegetables at the market square."
-      }
-    },
-    "tips": [
-      "Locate prepositions of place ('near', 'in the center of', 'at the market square').",
-      "Identify key amenities available in small towns."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "my-town-mc",
-        "title": "Check your understanding: location details",
-        "instruction": "Select the correct facility in Oakwood.",
-        "questions": [
-          { "id": 1, "question": "Where do farmers sell fresh produce on Saturdays?", "options": ["At the library", "At the market square", "In the forest"], "answer": "At the market square" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What is your favorite place in your hometown?"
-    }
-  },
-  {
-    "topic": {
-      "id": "my-city",
-      "title": "My city",
-      "level": "A2 Pre-intermediate",
-      "category": "Places & Urban Life",
-      "description": "Read a short essay describing a major metropolitan city's public transport and nightlife."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Living in Metroville",
-        "text": "Metroville is a fast-paced city with over two million residents. The public transportation system includes modern underground trains and electric buses that run 24 hours a day. The city skyline is filled with glass skyscrapers, art galleries, and bustling night markets."
-      }
-    },
-    "tips": [
-      "Notice vocabulary related to urban environments ('skyscrapers', 'underground trains', 'residents')."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "my-city-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements are True or False.",
-        "questions": [
-          { "id": 1, "statement": "Metroville has electric buses that operate 24 hours a day.", "correctAnswer": true },
-          { "id": 2, "statement": "Metroville is a quiet village with few residents.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Do you prefer living in a quiet small town or a bustling big city?"
-    }
-  },
-  {
-    "topic": {
-      "id": "mind-maps",
-      "title": "Using mind maps",
-      "level": "A2 Pre-intermediate",
-      "category": "Study Skills",
-      "description": "Read an educational article explaining how mind mapping helps revision and brain storming."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "How to Create a Mind Map",
-        "text": "A mind map is a visual diagram used to organize information. Start by drawing your main idea in the center of a blank page. Draw main branches connecting to sub-topics, using different colors and short key phrases. Adding small pictures or symbols helps your brain remember information much faster!"
-      }
-    },
-    "tips": [
-      "Follow step-by-step visual creation instructions.",
-      "Identify the core benefits of mind mapping for study recall."
-    ],
-    "exercises": [
-      {
-        "type": "gap_fill",
-        "id": "mind-maps-gapfill",
-        "title": "Check your understanding: gap fill",
-        "instruction": "Fill in the missing step.",
-        "questions": [
-          { "id": 1, "sentence": "Draw your main idea in the ________ of the page.", "answer": "center" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Have you ever created a mind map to prepare for an exam?"
-    }
-  },
-  {
-    "topic": {
+    {
       "id": "going-out",
       "title": "Going out",
-      "level": "A2 Pre-intermediate",
-      "category": "Social Life",
-      "description": "Read text messages between teenagers deciding where to go out on a Friday evening."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Friday Night Plans",
-        "text": "Liam: Hey guys, what are we doing tonight? Bowling or cinema?\nSophia: I'd prefer bowling! The new bowling alley near the mall has student discounts on Fridays.\nEthan: Bowling sounds great. What time?\nSophia: Let's meet at 6:30 PM so we can grab pizza first!"
-      }
-    },
-    "tips": [
-      "Pay attention to peer negotiations and activity choices.",
-      "Check specific meeting times and pre-activity plans (like eating pizza)."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "going-out-mc",
-        "title": "Check your understanding: social plans",
-        "instruction": "Select the correct arrangement details.",
-        "questions": [
-          { "id": 1, "question": "What activity do the friends choose for Friday night?", "options": ["Cinema", "Bowling", "Shopping"], "answer": "Bowling" },
-          { "id": 2, "question": "Why does Sophia choose the bowling alley?", "options": ["It has student discounts", "It is closer to her house", "It has movies"], "answer": "It has student discounts" }
+      "content": {
+        "type": "image",
+        "image": "goingout.avif"
+      },
+      "preparation": {
+        "type": "category_matching",
+        "instruction": "Put the actions under the correct places.",
+        "categories": [
+          "At the sports stadium",
+          "At the cinema",
+          "At the theatre",
+          "At the market",
+          "Competing in a sports event"
+        ],
+        "items": [
+          {
+            "item": "Watch your favourite sports team.",
+            "correct_category": "At the sports stadium"
+          },
+          {
+            "item": "Sing songs with other fans.",
+            "correct_category": "At the sports stadium"
+          },
+          {
+            "item": "Watch the latest blockbuster from Hollywood.",
+            "correct_category": "At the cinema"
+          },
+          {
+            "item": "See a film with your favourite actor/actress.",
+            "correct_category": "At the cinema"
+          },
+          {
+            "item": "See a play.",
+            "correct_category": "At the theatre"
+          },
+          {
+            "item": "Watch a musical.",
+            "correct_category": "At the theatre"
+          },
+          {
+            "item": "Try some local food.",
+            "correct_category": "At the market"
+          },
+          {
+            "item": "Buy some local crafts.",
+            "correct_category": "At the market"
+          },
+          {
+            "item": "Register before you enter.",
+            "correct_category": "Competing in a sports event"
+          },
+          {
+            "item": "Wear a special sports kit.",
+            "correct_category": "Competing in a sports event"
+          }
         ]
-      }
-    ],
-    "discussion": {
-      "question": "What is your favorite activity when going out with your friends?"
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Multiple Choice",
+          "instruction": "Choose the advert that matches each description.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "In which advert can you see actors and actresses performing on stage?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert C"
+            },
+            {
+              "question": "In which advert must you register online first?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert A"
+            },
+            {
+              "question": "In which advert does the event finish at midnight?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert B"
+            },
+            {
+              "question": "In which advert can you see two professional sports teams?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert D"
+            },
+            {
+              "question": "In which advert can you see the latest Hollywood movie?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert E"
+            },
+            {
+              "question": "In which advert can you learn about the culture and customs of people many years ago?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert F"
+            },
+            {
+              "question": "In which advert do you need a special kind of shoes?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert A"
+            },
+            {
+              "question": "In which advert do people over the age of 65 pay less to enter?",
+              "options": [
+                "advert A",
+                "advert B",
+                "advert C",
+                "advert D",
+                "advert E",
+                "advert F"
+              ],
+              "correct_answer": "advert B"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "The musical performance of 'Oliver!' starts in August.",
+              "answer": false
+            },
+            {
+              "statement": "The medieval market in Shepton town square is closed on Sunday.",
+              "answer": false
+            },
+            {
+              "statement": "The rugby match starts at 3:00 p.m.",
+              "answer": true
+            },
+            {
+              "statement": "You have to register for the inline skating marathon online.",
+              "answer": true
+            },
+            {
+              "statement": "The sci-fi festival runs for one day.",
+              "answer": true
+            },
+            {
+              "statement": "You can eat traditional food at the medieval market.",
+              "answer": true
+            },
+            {
+              "statement": "Tickets for the musical performance of 'Oliver!' can be booked by phone.",
+              "answer": false
+            },
+            {
+              "statement": "The sci-fi festival is on the same day as the new cinema opening.",
+              "answer": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mind-maps",
+      "title": "Mind maps",
+      "content": {
+        "type": "image",
+        "image": "mindmaps.avif"
+      },
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words or phrases with a similar meaning.",
+        "pairs": [
+          {
+            "term": "kinds",
+            "definition": "types"
+          },
+          {
+            "term": "vocabulary",
+            "definition": "words and phrases"
+          },
+          {
+            "term": "the middle",
+            "definition": "the centre"
+          },
+          {
+            "term": "to brainstorm",
+            "definition": "to think lots of answers to the same question"
+          },
+          {
+            "term": "the sea",
+            "definition": "the ocean"
+          },
+          {
+            "term": "parts",
+            "definition": "sections"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False based on the text.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "A mind map is a picture of useful information.",
+              "answer": true
+            },
+            {
+              "statement": "Mind maps are only for learning languages.",
+              "answer": false
+            },
+            {
+              "statement": "You start by drawing a circle.",
+              "answer": true
+            },
+            {
+              "statement": "Mind maps are so easy you don't have to think.",
+              "answer": false
+            },
+            {
+              "statement": "When you learn a new word, you should add it to your mind map.",
+              "answer": true
+            },
+            {
+              "statement": "It is better to make a simple mind map, with no colour.",
+              "answer": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Complete the sentences with the correct verb.",
+          "type": "gap_fill",
+          "word_box": ["show", "learn", "start", "brainstorm", "write", "add"],
+          "questions": [
+            {
+              "sentence": "Mind maps [] information as a picture.",
+              "answer": "show"
+            },
+            {
+              "sentence": "They can help you [] a new language.",
+              "answer": "learn"
+            },
+            {
+              "sentence": "You [] with a circle in the middle of the page.",
+              "answer": "start"
+            },
+            {
+              "sentence": "You [] groups of words.",
+              "answer": "brainstorm"
+            },
+            {
+              "sentence": "You [] the words on lines or inside circles.",
+              "answer": "write"
+            },
+            {
+              "sentence": "You can [] more words to the mind map as you learn them.",
+              "answer": "add"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "my-city",
+      "title": "My city",
+      "content": {
+        "type": "image",
+        "image": "mycity.avif"
+      },
+      "preparation": {
+        "type": "category_matching",
+        "instruction": "Categorise items you find in the city vs. in the countryside.",
+        "categories": ["In the city", "In the countryside"],
+        "items": [
+          {
+            "item": "a stadium",
+            "correct_category": "In the city"
+          },
+          {
+            "item": "a shopping centre",
+            "correct_category": "In the city"
+          },
+          {
+            "item": "an art gallery",
+            "correct_category": "In the city"
+          },
+          {
+            "item": "a museum",
+            "correct_category": "In the city"
+          },
+          {
+            "item": "a forest",
+            "correct_category": "In the countryside"
+          },
+          {
+            "item": "fields",
+            "correct_category": "In the countryside"
+          },
+          {
+            "item": "a farm",
+            "correct_category": "In the countryside"
+          },
+          {
+            "item": "animals",
+            "correct_category": "In the countryside"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Grouping",
+          "instruction": "Drag and drop the sentences to the correct Liverpool attraction.",
+          "type": "category_matching",
+          "categories": [
+            "The Beatles Story",
+            "Liverpool ONE Shopping Centre",
+            "Liverpool FC",
+            "Liverpool Museum"
+          ],
+          "items": [
+            {
+              "item": "Children have to pay £7 to enter.",
+              "correct_category": "The Beatles Story"
+            },
+            {
+              "item": "It opened in 2008.",
+              "correct_category": "Liverpool ONE Shopping Centre"
+            },
+            {
+              "item": "It's open every day except at Christmas.",
+              "correct_category": "Liverpool ONE Shopping Centre"
+            },
+            {
+              "item": "This is located in the centre of Liverpool.",
+              "correct_category": "Liverpool ONE Shopping Centre"
+            },
+            {
+              "item": "The price is the same for students and under-16s.",
+              "correct_category": "Liverpool FC"
+            },
+            {
+              "item": "You can tour the stadium.",
+              "correct_category": "Liverpool FC"
+            },
+            {
+              "item": "There is free entry for everybody.",
+              "correct_category": "Liverpool Museum"
+            },
+            {
+              "item": "It closes at 5 p.m.",
+              "correct_category": "Liverpool Museum"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "The Beatles were a famous rock group in the 1970s.",
+              "answer": false
+            },
+            {
+              "statement": "There are 2008 shops at Liverpool ONE.",
+              "answer": false
+            },
+            {
+              "statement": "It costs £15 for adults to tour Anfield stadium.",
+              "answer": true
+            },
+            {
+              "statement": "Liverpool FC play their games at Liverpool ONE stadium.",
+              "answer": false
+            },
+            {
+              "statement": "You don't have to pay at the Liverpool Museum.",
+              "answer": true
+            },
+            {
+              "statement": "Young children can go on the Anfield tour for free.",
+              "answer": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "my-town",
+      "title": "My town",
+      "content": {
+        "type": "text",
+        "text": "My Town – Newquay\nby Alex Howarth, 14\n\nI live in Newquay. It’s a small town on the Atlantic coast in the south of England. It has got great beaches and is the best place to surf in the UK. There are lots of surf schools where you can learn how to surf. I go surfing with my friends every weekend. My favourite place is Fistral Beach.\n\nI love Newquay because there are lots of other things to do as well as surfing. If you like water sports, you can go kayaking, water-skiing or coasteering. Coasteering is different because it is rock climbing, jumping into the sea and swimming in the same activity, but you should always go with a special instructor.\n\nIf you like animals you can also visit the Blue Reef Aquarium and see lots of different fish and even sharks. You can also go horse riding on the beach or visit Newquay Zoo. There are lots of other attractions too like mini golf and bowling. Come and see for yourself!"
+      },
+      "preparation": null,
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Multiple Choice",
+          "instruction": "Select the three topics Alex writes about.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "Which of these topics does Alex write about in the text?",
+              "options": [
+                "The weather in Newquay.",
+                "Places to visit in Newquay.",
+                "Things to do in Newquay.",
+                "Food in Newquay.",
+                "History of Newquay.",
+                "Where Newquay is located."
+              ],
+              "correct_answers": [
+                "Places to visit in Newquay.",
+                "Things to do in Newquay.",
+                "Where Newquay is located."
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "Newquay is in the north of England.",
+              "answer": false
+            },
+            {
+              "statement": "Newquay is near the coast.",
+              "answer": true
+            },
+            {
+              "statement": "Newquay is a good place to go surfing.",
+              "answer": true
+            },
+            {
+              "statement": "Alex loves to do outdoor activities.",
+              "answer": true
+            },
+            {
+              "statement": "Coasteering is similar to surfing.",
+              "answer": false
+            },
+            {
+              "statement": "There is a zoo in Newquay.",
+              "answer": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "on-the-internet",
+      "title": "On the internet",
+      "content": {
+        "type": "image",
+        "image": "ontheinternet.avif"
+      },
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "qualified teacher",
+            "definition": "A teacher who has completed many courses and exams."
+          },
+          {
+            "term": "activity monitor",
+            "definition": "Someone who watches and supervises younger students."
+          },
+          {
+            "term": "intensive",
+            "definition": "Involving a lot of work in a short time."
+          },
+          {
+            "term": "residential course",
+            "definition": "A course where you also live at the school or university where you are studying."
+          },
+          {
+            "term": "excursion",
+            "definition": "A short trip to another town or place."
+          },
+          {
+            "term": "abroad",
+            "definition": "In another country."
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False based on the advert.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "ACE schools teach languages.",
+              "answer": true
+            },
+            {
+              "statement": "ACE schools only have schools in the UK.",
+              "answer": false
+            },
+            {
+              "statement": "ACE schools teach mostly adults.",
+              "answer": false
+            },
+            {
+              "statement": "There are more than 12 students in each class.",
+              "answer": false
+            },
+            {
+              "statement": "Courses last between one week and two months.",
+              "answer": true
+            },
+            {
+              "statement": "Students have to stay in hotels when studying at ACE schools.",
+              "answer": false
+            },
+            {
+              "statement": "There is always a teacher or activity monitor to support the students.",
+              "answer": true
+            },
+            {
+              "statement": "There are many activities to do after the language classes.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Complete the sentences with the numbers from the box.",
+          "type": "gap_fill",
+          "word_box": ["2", "1", "12", "20", "8", "18"],
+          "questions": [
+            {
+              "sentence": "ACE schools teach young people from [] to [] years old.",
+              "answer": "8 ... 18"
+            },
+            {
+              "sentence": "There are no more than [] students in each class.",
+              "answer": "12"
+            },
+            {
+              "sentence": "Short courses last only [] week but the longer courses are for [] months.",
+              "answer": "1 ... 2"
+            },
+            {
+              "sentence": "Students must study for [] hours each week.",
+              "answer": "20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shopping-signs-and-notices",
+      "title": "Shopping signs and notices",
+      "content": {
+        "type": "text",
+        "text": "Shopping signs and notices\n\nA\nJR SPORTS\nSale on NOW\n30% 40% 50% off everything in store\nEverything must go!\nHurry, sale ends July 1st!\n\nB\nFOR SALE\nX-station video games console and 5 games. In box. Never been used. Like new. £80.\nEmail: jamie@com.uk.net\nMobile: 01795 4319765\n\nC\nTVs ’R’ US\nFree DVD player\nwith every new television\nSpecial offer – this week only\n\nD\nNEW department store\nJack and Jill’s\nOpens July 22nd\nFree parking for customers.\nOpening times:\n10 a.m. – 10 p.m."
+      },
+      "preparation": {
+        "type": "category_matching",
+        "instruction": "Classify the items into the correct shop.",
+        "categories": ["electrical shop", "sports shop"],
+        "items": [
+          {
+            "item": "swimsuit",
+            "correct_category": "sports shop"
+          },
+          {
+            "item": "DVD player",
+            "correct_category": "electrical shop"
+          },
+          {
+            "item": "computer game",
+            "correct_category": "electrical shop"
+          },
+          {
+            "item": "games console",
+            "correct_category": "electrical shop"
+          },
+          {
+            "item": "tennis racket",
+            "correct_category": "sports shop"
+          },
+          {
+            "item": "football boots",
+            "correct_category": "sports shop"
+          },
+          {
+            "item": "television",
+            "correct_category": "electrical shop"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Matching",
+          "instruction": "Match each notice with what it describes.",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "advert A",
+              "definition": "a sports shop"
+            },
+            {
+              "term": "advert B",
+              "definition": "a second-hand games console"
+            },
+            {
+              "term": "advert C",
+              "definition": "an electrical shop"
+            },
+            {
+              "term": "advert D",
+              "definition": "a new department store"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "The JR Sports sale starts in August.",
+              "answer": false
+            },
+            {
+              "statement": "The video console comes with five games.",
+              "answer": true
+            },
+            {
+              "statement": "The video console is in good condition.",
+              "answer": true
+            },
+            {
+              "statement": "You get a free DVD player if you buy a camera from Tellys’r’us.",
+              "answer": false
+            },
+            {
+              "statement": "You have to pay to use Jack and Jill’s car park.",
+              "answer": false
+            },
+            {
+              "statement": "Jack and Jill’s is open until late.",
+              "answer": true
+            }
+          ]
+        }
+      ]
     }
-  }
-]
+  ]
+}

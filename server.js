@@ -23,16 +23,75 @@ const nodemailer = require("nodemailer");
 // PORT
 //----------
 const port = Number(process.env.PORT || 8090);
+
+const loadRuleBasedGrammarChapter = (fileName, chapterNumber) => {
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "grammar", fileName), "utf8"),
+  );
+  return {
+    id: String(chapterNumber),
+    chapterNumber,
+    unit: data.chapter.title,
+    exercises: data.exercises.map((exercise, index) => ({
+      id: `ex${index + 1}`,
+      title: exercise.title,
+      type: "multiple-choice",
+      instructions: data.chapter.description,
+      questions: exercise.questions.map((question) => ({
+        id: question.id,
+        sentence: question.question ?? question.sentence,
+        options: question.options,
+        answer: question.answer,
+        explanation: question.explanation,
+      })),
+    })),
+  };
+};
+
+const loadThisOrThatGrammarChapter = (fileName, chapterNumber) => {
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "grammar", fileName), "utf8"),
+  );
+  return {
+    id: String(chapterNumber),
+    chapterNumber,
+    unit: data.chapter.title,
+    exercises: data.sections.map((section, index) => ({
+      id: `ex${index + 1}`,
+      title: section.title,
+      type: "multiple-choice",
+      instructions: section.explanation,
+      questions: section.exercises.map((question) => ({
+        id: question.id,
+        sentence: question.question,
+        options: question.options,
+        answer: question.answer,
+        explanation: question.explanation,
+      })),
+    })),
+  };
+};
+
 const practiceQuestionChapters = [
   {
     id: "1",
     chapterNumber: 1,
-    ...JSON.parse(
-      fs.readFileSync(
-        path.join(__dirname, "grammar", "Indefinite_articles_ch1.json"),
-        "utf8",
-      ),
-    ),
+    ...(() => {
+      const indefiniteArticles = JSON.parse(
+        fs.readFileSync(
+          path.join(__dirname, "grammar", "Indefinite_articles_ch1.json"),
+          "utf8",
+        ),
+      );
+      return {
+        ...indefiniteArticles,
+        exercises: indefiniteArticles.exercises.map((exercise) => ({
+          ...exercise,
+          instructions:
+            "Use 'a' before consonant sounds and 'an' before vowel sounds.",
+        })),
+      };
+    })(),
   },
   {
     id: "2",
@@ -50,6 +109,7 @@ const practiceQuestionChapters = [
           id: "ex1",
           title: articleQuiz.quizTitle,
           type: "multiple-choice",
+          instructions: articleQuiz.instructions,
           questions: articleQuiz.questions
             .filter((question) => question.correctAnswer !== "-")
             .map((question) => ({
@@ -150,6 +210,16 @@ const practiceQuestionChapters = [
       })(),
     ],
   },
+  loadRuleBasedGrammarChapter("subject_verb_agreement_ch4.json", 4),
+  loadRuleBasedGrammarChapter("apostrophes_ch5.json", 5),
+  loadRuleBasedGrammarChapter("contractions_ch6.json", 6),
+  loadRuleBasedGrammarChapter("there_their_they're_ch7.json", 7),
+  loadRuleBasedGrammarChapter("prepositions_ch8.json", 8),
+  loadRuleBasedGrammarChapter("phrasel_verb_ch9.json", 9),
+  loadRuleBasedGrammarChapter("adjectives_adverbs_ch10.json", 10),
+  loadRuleBasedGrammarChapter("capitalization_ch11.json", 11),
+  loadRuleBasedGrammarChapter("pronouns_ch12.json", 12),
+  loadThisOrThatGrammarChapter("this_or_that_ch13 (2).json", 13),
 ];
 const listeningTopics = [
   (() => {
@@ -449,17 +519,221 @@ const writingTopics = [
   exercises: entry.exercises.map(buildTopicExercise),
 }));
 
+const buildGapFillSegments = (template) => {
+  const segments = [];
+  const blankPattern = /\[(\d+)\]/g;
+  let lastIndex = 0;
+  let match = blankPattern.exec(template);
+  while (match) {
+    if (match.index > lastIndex) {
+      segments.push({ text: template.slice(lastIndex, match.index) });
+    }
+    segments.push({ blank: match[1] });
+    lastIndex = blankPattern.lastIndex;
+    match = blankPattern.exec(template);
+  }
+  if (lastIndex < template.length) {
+    segments.push({ text: template.slice(lastIndex) });
+  }
+  return segments;
+};
+
+const normalizeReadingV2Preparation = (preparation, imageBase) => {
+  if (!preparation) return null;
+  if (preparation.type === "matching") {
+    return { instruction: preparation.instruction, isWordList: true, pairs: preparation.pairs };
+  }
+  if (preparation.type === "image_matching" || preparation.type === "image_drag_and_drop") {
+    const items = preparation.items.map((item) => ({
+      word: item.word,
+      image: `${imageBase}/${item.image}`,
+    }));
+    return {
+      instruction: preparation.instruction,
+      isImageMatch: true,
+      items,
+      shuffledWords: shuffleArray(items.map((item) => item.word)),
+    };
+  }
+  if (preparation.type === "gap_fill_box") {
+    return {
+      instruction: preparation.instruction,
+      isGapFillBox: true,
+      wordBox: shuffleArray(preparation.word_box),
+      segments: buildGapFillSegments(preparation.template),
+      answers: preparation.answers,
+    };
+  }
+  return null;
+};
+
+const buildReadingV2Exercise = (exercise, index) => {
+  const base = {
+    id: `exercise-${index + 1}`,
+    number: index + 1,
+    title: exercise.title,
+    instruction: exercise.instruction,
+  };
+
+  if (exercise.type === "true_false") {
+    return {
+      ...base,
+      isTrueOrFalse: true,
+      questions: exercise.questions.map((question, questionIndex) => ({
+        number: questionIndex + 1,
+        statement: question.statement,
+        answer: String(question.answer),
+      })),
+    };
+  }
+
+  if (exercise.type === "multiple_choice") {
+    return {
+      ...base,
+      isMultipleChoice: true,
+      questions: exercise.questions.map((question, questionIndex) => {
+        const correctAnswers = question.correct_answers || [
+          question.correct_answer ?? question.answer,
+        ];
+        return {
+          number: questionIndex + 1,
+          question: question.question,
+          options: question.options,
+          isMultiAnswer: correctAnswers.length > 1,
+          answer: correctAnswers.join("||"),
+        };
+      }),
+    };
+  }
+
+  if (exercise.type === "matching") {
+    const allDefinitions = exercise.pairs.map((pair) => pair.definition);
+    return {
+      ...base,
+      isMultipleChoice: true,
+      questions: exercise.pairs.map((pair, pairIndex) => ({
+        number: pairIndex + 1,
+        question: pair.term,
+        options: shuffleArray(allDefinitions),
+        isMultiAnswer: false,
+        answer: pair.definition,
+      })),
+    };
+  }
+
+  if (exercise.type === "category_matching") {
+    return {
+      ...base,
+      isMultipleChoice: true,
+      questions: exercise.items.map((entry, itemIndex) => ({
+        number: itemIndex + 1,
+        question: entry.item,
+        options: exercise.categories,
+        isMultiAnswer: false,
+        answer: entry.correct_category,
+      })),
+    };
+  }
+
+  if (exercise.type === "gap_fill") {
+    const questions = exercise.questions.map((question, questionIndex) => ({
+      number: questionIndex + 1,
+      segments: buildGapFillSegments(question.sentence.replace("[]", `[${questionIndex + 1}]`)),
+      answer: String(question.answer),
+    }));
+    const answers = {};
+    questions.forEach((question) => {
+      answers[question.number] = question.answer;
+    });
+    return {
+      ...base,
+      isGapFill: true,
+      wordBox: exercise.word_box ? shuffleArray(exercise.word_box) : null,
+      questions,
+      answers,
+    };
+  }
+
+  if (exercise.type === "ordering") {
+    return {
+      ...base,
+      isMultipleChoice: true,
+      questions: exercise.items.map((item, itemIndex) => ({
+        number: itemIndex + 1,
+        question: `What happened at step ${itemIndex + 1}?`,
+        options: shuffleArray(exercise.items),
+        isMultiAnswer: false,
+        answer: item,
+      })),
+    };
+  }
+
+  return { ...base, questions: [] };
+};
+
+// category_matching / gap_fill_drag preparations reuse existing exercise UI instead of new preparation UI.
+const convertPreparationToExercise = (preparation) => {
+  if (!preparation) return null;
+  if (preparation.type === "category_matching") {
+    return {
+      title: "Before you read",
+      instruction: preparation.instruction,
+      type: "category_matching",
+      categories: preparation.categories,
+      items: preparation.items,
+    };
+  }
+  if (preparation.type === "gap_fill_drag") {
+    return {
+      title: "Before you read",
+      instruction: preparation.instruction,
+      type: "gap_fill",
+      word_box: preparation.word_box,
+      questions: preparation.questions,
+    };
+  }
+  return null;
+};
+
+const normalizeReadingV2Topic = (entry, imageBase) => {
+  const preparationExercise = convertPreparationToExercise(entry.preparation);
+  const exercises = preparationExercise
+    ? [preparationExercise, ...entry.exercises]
+    : entry.exercises;
+  return {
+    topic: {
+      id: entry.id,
+      title: entry.title,
+      category: "Reading practice",
+      description: "",
+    },
+    content:
+      entry.content.type === "image"
+        ? { image: `${imageBase}/${entry.content.image}` }
+        : { readingPassage: { text: entry.content.text } },
+    preparation: preparationExercise
+      ? null
+      : normalizeReadingV2Preparation(entry.preparation, imageBase),
+    tips: [],
+    exercises: exercises.map(buildReadingV2Exercise),
+    discussion: null,
+  };
+};
+
 const readingTopics = [
   ...JSON.parse(
     fs.readFileSync(path.join(__dirname, "reading1", "reading1.json"), "utf8"),
-  ).map((entry) => ({ ...entry, readingLevel: "1" })),
+  ).topics.map((entry) => ({
+    ...normalizeReadingV2Topic(entry, "/reading1"),
+    readingLevel: "1",
+  })),
   ...JSON.parse(
     fs.readFileSync(path.join(__dirname, "reading2", "reading2.json"), "utf8"),
-  ).map((entry) => ({ ...entry, readingLevel: "2" })),
-].map((entry) => ({
-  ...entry,
-  exercises: entry.exercises.map(buildTopicExercise),
-}));
+  ).topics.map((entry) => ({
+    ...normalizeReadingV2Topic(entry, "/reading2"),
+    readingLevel: "2",
+  })),
+];
 
 const topicExerciseCount = (topic) => topic.exercises.length;
 const decorateTopics = (topics, progress, activityType, levelKey) => {
@@ -472,7 +746,11 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
     )
     .forEach((item) => {
       const [, topicId, exerciseNumber] = item.difficulty_level.split(":");
-      if (topicId && exerciseNumber && !completions.has(`${topicId}:${exerciseNumber}`)) {
+      if (
+        topicId &&
+        exerciseNumber &&
+        !completions.has(`${topicId}:${exerciseNumber}`)
+      ) {
         completions.set(`${topicId}:${exerciseNumber}`, item);
       }
     });
@@ -487,10 +765,12 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
       };
     });
     return {
-    ...topic,
-    exercises,
-    completed: exercises.length > 0 && exercises.every((exercise) => exercise.completed),
-    [levelKey]: topic[levelKey],
+      ...topic,
+      exercises,
+      completed:
+        exercises.length > 0 &&
+        exercises.every((exercise) => exercise.completed),
+      [levelKey]: topic[levelKey],
     };
   });
 };
@@ -596,6 +876,32 @@ const profileUpload = multer({
   },
 });
 
+function getAccessibleTextColor(hexColor) {
+  const normalized = String(hexColor || "#edf4ff").trim();
+  const value = normalized.startsWith("#") ? normalized.slice(1) : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "#14213d";
+
+  const red = Number.parseInt(value.slice(0, 2), 16);
+  const green = Number.parseInt(value.slice(2, 4), 16);
+  const blue = Number.parseInt(value.slice(4, 6), 16);
+  const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+
+  return luminance > 0.72 ? "#14213d" : "#f8fafc";
+}
+
+function darkenHexColor(hexColor, amount) {
+  const normalized = String(hexColor || "#edf4ff").trim();
+  const value = normalized.startsWith("#") ? normalized.slice(1) : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "#365a82";
+
+  const darkenChannel = (channelHex) =>
+    Math.max(0, Math.round(Number.parseInt(channelHex, 16) * (1 - amount)))
+      .toString(16)
+      .padStart(2, "0");
+
+  return `#${darkenChannel(value.slice(0, 2))}${darkenChannel(value.slice(2, 4))}${darkenChannel(value.slice(4, 6))}`;
+}
+
 function vocabularyLevel(cefrLevel) {
   return cefrLevel === "A2" ? "easy" : "medium";
 }
@@ -615,210 +921,31 @@ function vocabularyLevelChoices(selectedLevel) {
   ];
 }
 
+const usefulChunkListsData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "vocabulary", "useful-chunks.json"), "utf8"),
+).lists;
+
+const usefulChunkExamples = new Map(
+  usefulChunkListsData.flatMap((list) =>
+    list.chunks
+      .filter((chunk) => chunk.example)
+      .map((chunk) => [chunk.phrase, chunk.example]),
+  ),
+);
+
 function usefulChunkExample(chunk) {
-  const examples = {
-    "as strong as": "Who in your life is as strong as a superhero, and why?",
-    "be able to": "Who is able to do something impressive, and what is it?",
-    "be a bit": "When might someone say, ‘Aren’t you a bit too old for that?’",
-    "be a pain":
-      "Studying for exams can sometimes be a pain. What might make it easier?",
-    "these days": "Do people still repair things these days? Why or why not?",
-    "be ready for": "What is something you are ready for, and why?",
-    "would you get":
-      "Would you get excited, scared, or curious if you saw an alien? Why?",
-    "flesh and blood":
-      "Would you replace any of your flesh and blood body parts with bionic ones? Why?",
-    "like the idea of":
-      "Do you like the idea of replacing human teachers with AI robots? Why or why not?",
-    "a lack of":
-      "What happens when there is a lack of skilled players in a sport?",
-    "on one's own":
-      "Describe a time when you handled a difficult task on your own.",
-    "twice as":
-      "How would you feel if your trip took twice as long as expected?",
-    "ahead of one's time": "In what way was Greta Thunberg ahead of her time?",
-    "later in life": "What do people appreciate more later in life, and why?",
-    "come up with": "Who came up with an idea or invention you admire?",
-    "as simple as":
-      "How can learning a new skill be made as simple as possible?",
-    "as a means of":
-      "How can mobile phones be used as a means of learning outside class?",
-    "carry out":
-      "What project or task would you like to carry out in the future?",
-    "set up": "How would you set up a new club at school?",
-    "break down": "Have you had a bike or gadget break down at the worst time?",
-    "be successful": "What does being successful mean to you?",
-    "feel at ease": "What can teachers do to help a new student feel at ease?",
-    "spill the beans":
-      "If you know a secret, do you sometimes spill the beans? Why?",
-    "take up": "What new hobby or sport would you like to take up, and why?",
-    "go both ways":
-      "Where does trust need to go both ways for a relationship to work?",
-    "go along with": "When is it better to go along with someone’s idea?",
-    "give in": "Is it ever a good idea to give in during an argument?",
-    "bring up":
-      "What topics are hardest to bring up with your parents or teachers?",
-    "hang out": "Where do you usually hang out with your closest friends?",
-    "make fun of": "How do you feel when someone makes fun of you?",
-    "reach out to": "Who have you reached out to for support?",
-    "take a deep breath": "When has taking a deep breath helped you stay calm?",
-    "be targeted":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "live on":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "pet an animal":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "kick in":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "turn to":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "take matters into one's hands":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "a few exceptions":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "a smooth ride":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "if only":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "leave someone be":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "the next generation":
-      "Student Prompt: Write your own discussion question using this phrase.",
-    "be brave enough to":
-      "Student Prompt: Write your own discussion question using this phrase.",
-  };
   return (
-    examples[chunk] ||
+    usefulChunkExamples.get(chunk) ||
     `What personal experience could you describe using “${chunk}”?`
   );
 }
 
-const usefulChunkLists = [
-  [
-    "Tech yes? Tech no?",
-    "as strong as|be able to|be a bit|be a pain|these days|be ready for|would you get|flesh and blood|like the idea of",
-  ],
-  [
-    "Language work",
-    "in the early days|a lack of|on one's own|health issues|twice as|ahead of one's time|an early version of|later in life|predict the weather|be successful",
-  ],
-  [
-    "Language work",
-    "may have been|come up with|as simple as|as a means of|carry out|set up|in X years' time|break down|became more reliable|offer huge potential",
-  ],
-  [
-    "Relationships & dialogue",
-    "be on a date|spill the beans|feel at ease|take up|not mind|go both ways|it's hard to win|go along with|bring up|give in",
-  ],
-  [
-    "Of love and...",
-    "get together|keep one's nerves in check|hang out|make fun of|call someone out on|there's nothing to say|chew one's fingernails|drop into|reach out to|take a deep breath",
-  ],
-  [
-    "Language work",
-    "constantly evolve|bring with it|pave the way for|turn up at|go in one direction|a strong influence on|slow things down|grow up with|have a chance|put together",
-  ],
-  [
-    "Choices & lifestyle",
-    "make a decision|go back to|make up one's mind|ready and willing|be keen|have one's fair share of|take ages|crime rate|to holiday",
-  ],
-  [
-    "Human relations",
-    "fall in love|declare war on|good relations with|get on well with|be madly in love|start an affair|be held up as|play by ear|mark the beginning|a world of difference",
-  ],
-  [
-    "Of love and... (Romeo & Juliet)",
-    "catch the eye of|be allowed to|coin a term|get hold of|cheer someone up|burst into tears|fall in love with|keep something a secret|lose one's life|draw one's final breath",
-  ],
-  [
-    "Society & current affairs",
-    "once the dust has settled|difficult conditions|sign a peace treaty|with complete disregard for|take control of|growing economy|toughen one's stance|no one knows what the future will hold|bring benefits|a hot topic",
-  ],
-  [
-    "Survival & heritage",
-    "Indigenous Peoples|hard to come by|from generation to generation|turn around|be deceived|catch someone's eye|in great danger|lose consciousness|stay afloat|turn into",
-  ],
-  [
-    "Culture & perspective",
-    "melting pot|in one's daily life|in the neighborhood|the first step|significantly larger|over time|be challenging|mixed feelings",
-  ],
-  [
-    "Travel & experiences",
-    "go on a trip|take a stroll|burst out laughing|surprised to hear|give away|drag someone to|check out|wet oneself|change one's mind|adrenaline junkie",
-  ],
-  [
-    "History & identity",
-    "declare independence|traced back to|to attract|home to|fight for one's rights|be reflected in|by far|the perfect spot",
-  ],
-  [
-    "Places & leisure",
-    "be popular with|a must-see|be looking to|chill out|home to|be lucky enough|one final thing|thanks to|so much more than|a paradise for",
-  ],
-  [
-    "News & media",
-    "by word of mouth|spread fear|be hit by|come across|make conversation|make one's way|get rid of|feed on",
-  ],
-  [
-    "Daily language",
-    "be the answer|feel a bit tired|an energy boost|you'd be surprised|bend the truth|have no idea|go on TV|tons of|sounds awesome",
-  ],
-  [
-    "Civil rights & justice",
-    "campaign for|achieve equality|a major victory|give up|call for|discriminate against|demand justice|spark outrage",
-  ],
-  [
-    "Adventures & everyday life",
-    "head out|go exploring|take notes|stay safe|make sense|put something on|stay warm|begin to wonder|be worth it|a brilliant experience",
-  ],
-  [
-    "History & accomplishments",
-    "lay the foundation|do deeds|be shipped off|right-hand man|make it one's mission|bring to stage/screen|keep a secret",
-  ],
-  [
-    "The road less traveled",
-    "be fascinated by|be determined to|cut corners|set off from|the world's first|give the green light|on one's way|work feverishly",
-  ],
-  [
-    "Media & critical thinking",
-    "the whole picture|fully understand|take control of|play a role in|be eager to|keep up|raise questions|be responsible",
-  ],
-  [
-    "Inspiration & resilience",
-    "inspired by|against the wishes of|be struck by a storm|wash ashore|keep track of time|keep someone company|catch up|fall to the ground|make someone proud|pass away",
-  ],
-  [
-    "Exploration & journey",
-    "set out|keep in mind|be left out|make a journey|step ashore|more accessible|find a shortcut|contribute to|greet someone",
-  ],
-  [
-    "Work & society",
-    "at a young age|be common|unskilled manual work|fair wage|deliver a speech|on behalf of|a media outcry|fall on deaf ears|be targeted|live on",
-  ],
-  [
-    "Feelings & psychology",
-    "butterflies in one's stomach|come down to|chemical substances|cloud the senses|get someone off one's mind|being infatuated|share someone's feelings|spend time with|have a crush|pet an animal|kick in",
-  ],
-  [
-    "Tech & action",
-    "sort out|put an end to|take action|carry on|round up|benefit someone|carry out|a fraction of a second|turn to|take matters into one's hands",
-  ],
-  [
-    "Technology & society",
-    "a greater impact|in some respects|in one's heyday|what better way|cut down on|be in use|a few exceptions|a smooth ride",
-  ],
-  [
-    "Human nature & choices",
-    "by nature|feel lost|give up|find one's way|agree to|turn someone away|advise someone to|make sacrifices|if only|leave someone be",
-  ],
-  [
-    "Unity, peace & poetry",
-    "send a strong message|strive to|put differences aside|lay down arms|stand between|in every nook|the next generation|be brave enough to",
-  ],
-].map(([title, chunks], index) => ({
+const usefulChunkLists = usefulChunkListsData.map((list, index) => ({
   number: index + 1,
-  title,
-  chunks: chunks.split("|"),
+  title: list.title,
+  chunks: list.chunks.map((chunk) => chunk.phrase),
 }));
+
 
 //----------
 // SESSIONS
@@ -852,6 +979,8 @@ app.use(
   "/uploads/profiles",
   express.static(path.join(dataDir, "uploads", "profiles")),
 );
+app.use("/reading1", express.static(path.join(__dirname, "reading1")));
+app.use("/reading2", express.static(path.join(__dirname, "reading2")));
 app.use((req, res, next) => {
   if (!req.session.name || req.session.isAdmin) return next();
   db.get(
@@ -951,53 +1080,11 @@ db.serialize(() => {
     () => {},
   );
   db.run("ALTER TABLE members ADD COLUMN goal TEXT DEFAULT ''", () => {});
+  db.run(
+    "ALTER TABLE members ADD COLUMN profile_background TEXT DEFAULT '#edf4ff'",
+    () => {},
+  );
   db.run("ALTER TABLE members ADD COLUMN avatar TEXT DEFAULT ''", () => {});
-  db.run(
-    `CREATE TABLE IF NOT EXISTS user_character (
-    user_id TEXT PRIMARY KEY,
-    character_hash TEXT NOT NULL,
-    character_layers TEXT NOT NULL DEFAULT '[]',
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES members(username)
-  )`,
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE user_character ADD COLUMN character_layers TEXT NOT NULL DEFAULT '[]'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_hair TEXT DEFAULT '#3b2416'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_skin TEXT DEFAULT '#f2c6a0'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_shirt TEXT DEFAULT '#8fb9d9'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_bottom TEXT DEFAULT '#263c68'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_shoes TEXT DEFAULT '#ffffff'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_eyes TEXT DEFAULT '#263c68'",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_hair_style INTEGER NOT NULL DEFAULT 1",
-    () => {},
-  );
-  db.run(
-    "ALTER TABLE members ADD COLUMN avatar_customized INTEGER NOT NULL DEFAULT 0",
-    () => {},
-  );
   db.run(`CREATE TABLE IF NOT EXISTS progress (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1059,6 +1146,7 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'lobby',
     status TEXT NOT NULL DEFAULT 'waiting',
     current_question INTEGER NOT NULL DEFAULT 0,
     question_started_at INTEGER,
@@ -1086,6 +1174,31 @@ db.serialize(() => {
     FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
   )`);
   db.run(
+    "ALTER TABLE lobby_rooms ADD COLUMN mode TEXT NOT NULL DEFAULT 'lobby'",
+    () => {},
+  );
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_quicktype_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id INTEGER NOT NULL,
+    question_order INTEGER NOT NULL,
+    prompt TEXT NOT NULL,
+    target_word TEXT NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_quicktype_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id INTEGER NOT NULL,
+    question_order INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    submitted_word TEXT NOT NULL,
+    is_correct INTEGER NOT NULL DEFAULT 0,
+    points INTEGER NOT NULL DEFAULT 0,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES lobby_rooms(id),
+    FOREIGN KEY (username) REFERENCES members(username),
+    UNIQUE (room_id, question_order, username)
+  )`);
+  db.run(
     "ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER",
     () => {},
   );
@@ -1094,7 +1207,14 @@ db.serialize(() => {
 //------------
 // VIEW ENGINE
 //------------
-app.engine("handlebars", engine());
+app.engine(
+  "handlebars",
+  engine({
+    helpers: {
+      json: (context) => JSON.stringify(context).replace(/'/g, "&#39;"),
+    },
+  }),
+);
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
@@ -1242,6 +1362,7 @@ app.get("/reading", requireAuthenticated, (req, res) => {
         })),
         topic: selectedTopic?.topic,
         content: selectedTopic?.content,
+        preparation: selectedTopic?.preparation,
         tips: selectedTopic?.tips,
         exercises: selectedTopic?.exercises,
         discussion: selectedTopic?.discussion,
@@ -1463,10 +1584,15 @@ app.get("/practice/questions", requireAuthenticated, (req, res) => {
   const requestedExercise = selectedChapter?.exercises.find(
     (exercise) => exercise.id === req.query.exercise,
   );
+  const requestedExerciseNumber =
+    selectedChapter?.exercises.findIndex(
+      (exercise) => exercise.id === requestedExercise?.id,
+    ) + 1;
   const selectedExercise = requestedExercise && {
     ...requestedExercise,
     isFillInBlanks: requestedExercise.type === "fill-in-the-blanks",
     isWrittenAnswer: requestedExercise.type === "write-answer",
+    exerciseNumber: requestedExerciseNumber,
     totalQuestions:
       requestedExercise.items?.length ||
       requestedExercise.questions?.length ||
@@ -1493,19 +1619,32 @@ app.get("/practice/questions", requireAuthenticated, (req, res) => {
     })),
   };
 
-  res.render("practice-questions.handlebars", {
-    pageTitle: "Chapters",
-    chapters: practiceQuestionChapters.map((chapter) => ({
-      ...chapter,
-      selected: chapter.id === selectedChapter?.id,
-      exercises: chapter.exercises.map((exercise) => ({
-        ...exercise,
-        selected: exercise.id === selectedExercise?.id,
-      })),
-    })),
-    selectedChapter,
-    selectedExercise,
-  });
+  db.all(
+    "SELECT difficulty_level FROM progress WHERE username = ? AND activity_type = 'questions'",
+    [req.session.name],
+    (progressError, progress) => {
+      const completedKeys = new Set(
+        progressError ? [] : progress.map((item) => item.difficulty_level),
+      );
+      const decoratedChapters = practiceQuestionChapters.map((chapter) => ({
+        ...chapter,
+        selected: chapter.id === selectedChapter?.id,
+        exercises: chapter.exercises.map((exercise, index) => ({
+          ...exercise,
+          selected: exercise.id === selectedExercise?.id,
+          completed: completedKeys.has(`questions:${chapter.id}:${index + 1}`),
+        })),
+      }));
+      res.render("practice-questions.handlebars", {
+        pageTitle: "Chapters",
+        chapters: decoratedChapters,
+        selectedChapter: decoratedChapters.find(
+          (chapter) => chapter.id === selectedChapter?.id,
+        ),
+        selectedExercise,
+      });
+    },
+  );
 });
 
 app.get("/practice/sentence-fixer", requireAuthenticated, (req, res) => {
@@ -1580,49 +1719,87 @@ app.get("/practice/find-errors", requireAuthenticated, (req, res) => {
 });
 
 app.get("/practice/final-test", requireAuthenticated, (req, res) => {
-  grammarDb.all(
-    `SELECT quiz_questions.*, chapters.title AS chapter_title
-     FROM quiz_questions
-     JOIN grammar_topics ON quiz_questions.topic_id = grammar_topics.id
-     JOIN chapters ON grammar_topics.chapter_id = chapters.id
-     ORDER BY quiz_questions.id`,
-    (error, grammarQuestions) => {
-      if (error) return res.status(500).send("Unable to load the final test.");
+  const shuffleQuestions = (items) => {
+    const list = [...items];
+    for (let index = list.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [list[index], list[randomIndex]] = [list[randomIndex], list[index]];
+    }
+    return list;
+  };
+
+  db.all(
+    `SELECT activity_type, points, total_points, percentage, completed_at
+     FROM progress
+      WHERE username = ? AND activity_type = 'final'
+     ORDER BY completed_at DESC
+      LIMIT 3`,
+    [req.session.name],
+    (progressError, recentProgress) => {
+      if (progressError) return res.status(500).send("Unable to load recent scores.");
+
+      const recentResults = recentProgress.map((item) => ({
+        ...item,
+        shortDate: new Date(item.completed_at).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+      }));
+
       grammarDb.all(
-        "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY id LIMIT 10",
-        (vocabularyError, words) => {
-          if (vocabularyError)
-            return res
-              .status(500)
-              .send("Unable to load vocabulary for the final test.");
-          const vocabularyQuestions = words.map((word, index) => {
-            const alternatives = words
-              .filter((candidate) => candidate.id !== word.id)
-              .slice(0, 3)
-              .map((candidate) => candidate.swedish_translation);
-            const options = [word.swedish_translation, ...alternatives];
-            return {
-              id: `vocabulary-${word.id}`,
-              chapter_title: "Vocabulary",
-              question_text: `What is the Swedish meaning of “${word.english_word}”?`,
-              option_a: options[0],
-              option_b: options[1],
-              option_c: options[2],
-              option_d: options[3],
-              correct_option: "a",
-              explanation: `The Swedish translation of “${word.english_word}” is “${word.swedish_translation}”.`,
-              question_number: grammarQuestions.length + index + 1,
-            };
-          });
-          const questions = [...grammarQuestions, ...vocabularyQuestions].map(
-            (question, index) => ({ ...question, question_number: index + 1 }),
+        `SELECT quiz_questions.*, chapters.title AS chapter_title
+         FROM quiz_questions
+         JOIN grammar_topics ON quiz_questions.topic_id = grammar_topics.id
+         JOIN chapters ON grammar_topics.chapter_id = chapters.id
+         ORDER BY quiz_questions.id`,
+        (error, grammarQuestions) => {
+          if (error) return res.status(500).send("Unable to load the final test.");
+          grammarDb.all(
+            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY id LIMIT 10",
+            (vocabularyError, words) => {
+              if (vocabularyError)
+                return res
+                  .status(500)
+                  .send("Unable to load vocabulary for the final test.");
+              const vocabularyQuestions = words.map((word, index) => {
+                const alternatives = words
+                  .filter((candidate) => candidate.id !== word.id)
+                  .slice(0, 3)
+                  .map((candidate) => candidate.swedish_translation);
+                const options = [word.swedish_translation, ...alternatives];
+                return {
+                  id: `vocabulary-${word.id}`,
+                  chapter_title: "Vocabulary",
+                  question_text: `What is the Swedish meaning of “${word.english_word}”?`,
+                  option_a: options[0],
+                  option_b: options[1],
+                  option_c: options[2],
+                  option_d: options[3],
+                  correct_option: "a",
+                  explanation: `The Swedish translation of “${word.english_word}” is “${word.swedish_translation}”.`,
+                };
+              });
+
+              const finalQuestionPool = shuffleQuestions([
+                ...grammarQuestions,
+                ...vocabularyQuestions,
+              ]);
+              const questions = finalQuestionPool.slice(0, 30).map((question, index) => ({
+                ...question,
+                question_number: index + 1,
+              }));
+
+              res.render("practice.handlebars", {
+                mode: "final",
+                pageTitle: "Final Test",
+                pageIntro: "Good luck!",
+                questions,
+                recentResults,
+                showFinalTestIntro: true,
+              });
+            },
           );
-          res.render("practice.handlebars", {
-            mode: "final",
-            pageTitle: "Final Test",
-            pageIntro: "Good luck!",
-            questions,
-          });
         },
       );
     },
@@ -1963,10 +2140,23 @@ app.get("/profile", requireLogin, (req, res) => {
     [req.session.name],
   );
   db.get(
-    "SELECT username, goal, avatar, avatar_hair, avatar_skin, avatar_shirt, avatar_bottom, avatar_shoes, avatar_eyes, avatar_hair_style, avatar_customized FROM members WHERE username = ?",
+    "SELECT username, goal, avatar, profile_background FROM members WHERE username = ?",
     [req.session.name],
     (error, student) => {
       if (error || !student) return res.status(404).send("Profile not found.");
+      const background = /^#[0-9a-fA-F]{6}$/.test(
+        student.profile_background || "",
+      )
+        ? student.profile_background
+        : "#edf4ff";
+      student.profile_background = background;
+      student.profile_text_color = getAccessibleTextColor(background);
+      student.profile_muted_color =
+        student.profile_text_color === "#14213d" ? "#475569" : "#dbeafe";
+      student.profile_button_color = darkenHexColor(background, 0.22);
+      student.profile_button_text_color = getAccessibleTextColor(
+        student.profile_button_color,
+      );
       student.avatar_initial = student.username.charAt(0).toUpperCase();
       db.all(
         "SELECT * FROM progress WHERE username = ? ORDER BY completed_at DESC",
@@ -2033,10 +2223,6 @@ app.get("/profile", requireLogin, (req, res) => {
                         unreadFeedbackCount: feedbackMessages.filter(
                           (message) => !message.feedback_seen,
                         ).length,
-                        hairStyles: Array.from(
-                          { length: 10 },
-                          (_, index) => index + 1,
-                        ),
                         query: req.query,
                       });
                     },
@@ -2051,44 +2237,86 @@ app.get("/profile", requireLogin, (req, res) => {
   );
 });
 
-app.get("/lobby", requireAuthenticated, (req, res) => {
+const QUESTION_DURATION_MS = 20000;
+
+// Lazily flips a running round to "leaderboard" once the timer expires or everyone has answered.
+const finalizeRoundIfNeeded = (room, callback) => {
+  if (!room || room.status !== "running") return callback(room);
+  const elapsed = Date.now() - (room.question_started_at || Date.now());
   db.get(
-    "SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1",
-    (roomError, room) => {
-      if (roomError) return res.status(500).send("Unable to load lobby.");
-      const renderLobby = (questions = [], participant = null) =>
-        res.render("lobby.handlebars", {
-          student: { username: req.session.name },
-          isAdmin: Boolean(req.session.isAdmin),
-          room,
-          questions,
-          participant,
-          leaderboard: [],
-          currentQuestion: room
-            ? questions.find(
-                (question) => question.question_order === room.current_question,
-              )
-            : null,
-          isWaiting: room?.status === "waiting",
-          isRunning: room?.status === "running",
-        });
-      if (!room) return renderLobby();
-      db.all(
-        "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order",
+    "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
+    [room.id],
+    (countError, counts) => {
+      const total = countError ? 0 : counts.total || 0;
+      const answered = countError ? 0 : counts.answered || 0;
+      const timeUp = elapsed >= QUESTION_DURATION_MS;
+      const allAnswered = total > 0 && answered >= total;
+      if (!timeUp && !allAnswered) return callback(room);
+      db.run(
+        "UPDATE lobby_rooms SET status = 'leaderboard' WHERE id = ? AND status = 'running'",
         [room.id],
-        (questionError, questions) => {
-          if (questionError)
-            return res.status(500).send("Unable to load lobby questions.");
+        () => {
           db.get(
-            "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
-            [room.id, req.session.name],
-            (participantError, participant) =>
-              participantError
-                ? res.status(500).send("Unable to load lobby participant.")
-                : renderLobby(questions, participant),
+            "SELECT * FROM lobby_rooms WHERE id = ?",
+            [room.id],
+            (refetchError, updatedRoom) =>
+              callback(refetchError || !updatedRoom ? room : updatedRoom),
           );
         },
       );
+    },
+  );
+};
+
+app.get("/lobby", requireAuthenticated, (req, res) => {
+  const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
+  const renderLobby = (room, questions = [], participant = null) =>
+    res.render("lobby.handlebars", {
+      student: { username: req.session.name },
+      isAdmin: Boolean(req.session.isAdmin),
+      room,
+      questions,
+      participant,
+      isQuicktype: room?.mode === "quicktype" || requestedMode === "quicktype",
+      leaderboard: [],
+      totalQuestions: questions.length,
+      currentQuestion: room
+        ? questions.find(
+            (question) => question.question_order === room.current_question,
+          )
+        : null,
+      isWaiting: room?.status === "waiting",
+      isRunning: room?.status === "running",
+      isLeaderboardPhase: room?.status === "leaderboard",
+      isFinished: room?.status === "finished",
+    });
+  db.get(
+    "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1",
+    [requestedMode],
+    (roomError, room) => {
+      if (roomError) return res.status(500).send("Unable to load lobby.");
+      if (!room) return renderLobby(null);
+      finalizeRoundIfNeeded(room, (updatedRoom) => {
+        const questionQuery = updatedRoom.mode === "quicktype"
+          ? "SELECT id, question_order, prompt AS question_text FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order"
+          : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
+        db.all(
+          questionQuery,
+          [updatedRoom.id],
+          (questionError, questions) => {
+            if (questionError)
+              return res.status(500).send("Unable to load lobby questions.");
+            db.get(
+              "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
+              [updatedRoom.id, req.session.name],
+              (participantError, participant) =>
+                participantError
+                  ? res.status(500).send("Unable to load lobby participant.")
+                  : renderLobby(updatedRoom, questions, participant),
+            );
+          },
+        );
+      });
     },
   );
 });
@@ -2098,9 +2326,10 @@ app.post("/lobby/rooms", requireAdmin, (req, res) => {
     .trim()
     .slice(0, 100);
   const code = String(Math.floor(1000 + Math.random() * 9000));
+  const mode = req.body.mode === "quicktype" ? "quicktype" : "lobby";
   db.run(
-    "INSERT INTO lobby_rooms (code, title) VALUES (?, ?)",
-    [code, title],
+    "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, ?)",
+    [code, title, mode],
     (error) =>
       error
         ? res.status(500).send("Unable to create room.")
@@ -2122,14 +2351,15 @@ app.post("/lobby/quit", requireAdmin, (req, res) => {
         (questionsError) => {
           if (questionsError)
             return res.status(500).send("Unable to close room.");
-          db.run(
-            "DELETE FROM lobby_rooms WHERE id = ?",
-            [roomId],
-            (roomError) =>
-              roomError
-                ? res.status(500).send("Unable to close room.")
-                : res.redirect("/lobby"),
-          );
+          db.run("DELETE FROM lobby_quicktype_submissions WHERE room_id = ?", [roomId], (submissionsError) => {
+            if (submissionsError) return res.status(500).send("Unable to close room.");
+            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [roomId], (quicktypeError) => {
+              if (quicktypeError) return res.status(500).send("Unable to close room.");
+              db.run("DELETE FROM lobby_rooms WHERE id = ?", [roomId], (roomError) =>
+                roomError ? res.status(500).send("Unable to close room.") : res.redirect("/lobby"),
+              );
+            });
+          });
         },
       );
     },
@@ -2168,6 +2398,30 @@ app.post("/lobby/questions", requireAdmin, (req, res) => {
   );
 });
 
+app.post("/lobby/quicktype/questions", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const prompt = String(req.body.prompt || "").trim();
+  const targetWord = String(req.body.targetWord || "").trim();
+  if (!roomId || !prompt || !targetWord) return res.status(400).redirect("/lobby?mode=quicktype");
+  db.get("SELECT mode, status FROM lobby_rooms WHERE id = ?", [roomId], (roomError, room) => {
+    if (roomError || !room || room.mode !== "quicktype" || room.status !== "waiting") return res.status(400).redirect("/lobby?mode=quicktype");
+    db.get(
+      "SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_quicktype_questions WHERE room_id = ?",
+      [roomId],
+      (orderError, result) => {
+        if (orderError) return res.status(500).send("Unable to add Quicktype prompt.");
+        db.run(
+          "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
+          [roomId, result.next_order, prompt, targetWord],
+          (error) => error
+            ? res.status(500).send("Unable to add Quicktype prompt.")
+            : res.redirect("/lobby?mode=quicktype"),
+        );
+      },
+    );
+  });
+});
+
 app.post("/lobby/join", requireLogin, (req, res) => {
   const code = String(req.body.code || "").trim();
   db.get(
@@ -2178,7 +2432,7 @@ app.post("/lobby/join", requireLogin, (req, res) => {
       db.run(
         "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
         [room.id, req.session.name],
-        () => res.redirect("/lobby"),
+        () => res.redirect(`/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`),
       );
     },
   );
@@ -2186,9 +2440,63 @@ app.post("/lobby/join", requireLogin, (req, res) => {
 
 app.post("/lobby/start", requireAdmin, (req, res) => {
   db.run(
-    "UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)",
-    [Date.now(), Number(req.body.roomId), Number(req.body.roomId)],
-    () => res.redirect("/lobby"),
+    "UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND ((mode = 'lobby' AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)) OR (mode = 'quicktype' AND EXISTS (SELECT 1 FROM lobby_quicktype_questions WHERE room_id = ?)))",
+    [Date.now(), Number(req.body.roomId), Number(req.body.roomId), Number(req.body.roomId)],
+    () => res.redirect(`/lobby?mode=${req.body.mode === "quicktype" ? "quicktype" : "lobby"}`),
+  );
+});
+
+app.post("/lobby/quicktype/submit", requireLogin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const submittedWord = String(req.body.word || "").trim();
+  const normalizedWord = submittedWord.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "");
+  if (!roomId || !submittedWord || !normalizedWord) return res.status(400).json({ error: "Enter a word." });
+  db.get(
+    "SELECT * FROM lobby_rooms WHERE id = ? AND mode = 'quicktype' AND status = 'running'",
+    [roomId],
+    (roomError, room) => {
+      if (roomError || !room) return res.status(400).json({ error: "Room is not running." });
+      db.get(
+        "SELECT target_word FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?",
+        [roomId, room.current_question],
+        (questionError, question) => {
+          if (questionError || !question) return res.status(400).json({ error: "Prompt is unavailable." });
+          const expectedWord = String(question.target_word).toLocaleLowerCase().replace(/[^a-z0-9]+/g, "");
+          const isCorrect = normalizedWord === expectedWord;
+          db.get(
+            "SELECT 1 FROM lobby_quicktype_submissions WHERE room_id = ? AND question_order = ? AND username = ?",
+            [roomId, room.current_question, req.session.name],
+            (existingError, existing) => {
+              if (existingError) return res.status(500).json({ error: "Unable to save answer." });
+              if (existing) return res.json({ correct: false, points: 0, answered: true });
+              db.get(
+                "SELECT COUNT(*) AS correct_count FROM lobby_quicktype_submissions WHERE room_id = ? AND question_order = ? AND is_correct = 1",
+                [roomId, room.current_question],
+                (countError, count) => {
+                  if (countError) return res.status(500).json({ error: "Unable to score answer." });
+                  const points = isCorrect ? (count.correct_count ? 1 : 2) : 0;
+                  db.run(
+                    "INSERT INTO lobby_quicktype_submissions (room_id, question_order, username, submitted_word, is_correct, points) VALUES (?, ?, ?, ?, ?, ?)",
+                    [roomId, room.current_question, req.session.name, submittedWord, isCorrect ? 1 : 0, points],
+                    (insertError) => {
+                      if (insertError) return res.status(500).json({ error: "Unable to save answer." });
+                      db.run(
+                        "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
+                        [submittedWord, points, roomId, req.session.name],
+                        () => {
+                          finalizeRoundIfNeeded(room, () => {});
+                          res.json({ correct: isCorrect, points, answered: true });
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
+    },
   );
 });
 
@@ -2196,7 +2504,7 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
   const roomId = Number(req.body.roomId);
   const answer = String(req.body.answer || "").toLowerCase();
   db.get(
-    "SELECT current_question FROM lobby_rooms WHERE id = ? AND status = 'running'",
+    "SELECT * FROM lobby_rooms WHERE id = ? AND status = 'running'",
     [roomId],
     (roomError, room) => {
       if (roomError || !room)
@@ -2211,20 +2519,19 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
             !["a", "b", "c", "d"].includes(answer)
           )
             return res.status(400).json({ error: "Invalid answer." });
-          const speedBonus =
-            answer === question.correct_answer
-              ? Math.max(
-                  0,
-                  50 -
-                    Math.floor(
-                      (Date.now() - (room.question_started_at || Date.now())) /
-                        1000,
-                    ) *
-                      5,
-                )
-              : 0;
-          const points =
-            answer === question.correct_answer ? 100 + speedBonus : 0;
+          const isCorrect = answer === question.correct_answer;
+          const speedBonus = isCorrect
+            ? Math.max(
+                0,
+                50 -
+                  Math.floor(
+                    (Date.now() - (room.question_started_at || Date.now())) /
+                      1000,
+                  ) *
+                    5,
+              )
+            : 0;
+          const points = isCorrect ? 100 + speedBonus : 0;
           db.run(
             "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
             [answer, points, roomId, req.session.name],
@@ -2233,8 +2540,9 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
                 return res
                   .status(500)
                   .json({ error: "Unable to save answer." });
+              finalizeRoundIfNeeded(room, () => {});
               res.json({
-                correct: this.changes === 1 && points === 1,
+                correct: this.changes === 1 && isCorrect,
                 answered: this.changes === 1,
               });
             },
@@ -2248,12 +2556,14 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
 app.post("/lobby/next", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
   db.get(
-    "SELECT current_question FROM lobby_rooms WHERE id = ?",
+    "SELECT current_question, mode FROM lobby_rooms WHERE id = ?",
     [roomId],
     (error, room) => {
       if (error || !room) return res.redirect("/lobby");
       db.get(
-        "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?",
+        room.mode === "quicktype"
+          ? "SELECT COUNT(*) AS total FROM lobby_quicktype_questions WHERE room_id = ?"
+          : "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?",
         [roomId],
         (countError, count) => {
           const next = room.current_question + 1;
@@ -2269,7 +2579,7 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
               db.run(
                 "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
                 [roomId],
-                () => res.redirect("/lobby"),
+                () => res.redirect(`/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`),
               );
             },
           );
@@ -2280,34 +2590,77 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
 });
 
 app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
+  const requestedRoomId = Number(req.query.roomId);
   db.get(
-    "SELECT * FROM lobby_rooms WHERE status != 'finished' ORDER BY id DESC LIMIT 1",
+    requestedRoomId
+      ? "SELECT * FROM lobby_rooms WHERE id = ?"
+      : "SELECT * FROM lobby_rooms ORDER BY id DESC LIMIT 1",
+    requestedRoomId ? [requestedRoomId] : [],
     (error, room) => {
       if (error || !room) return res.json({ room: null });
-      db.get(
-        "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?",
-        [room.id, room.current_question],
-        (questionError, question) => {
-          db.get(
-            "SELECT score, answer FROM lobby_participants WHERE room_id = ? AND username = ?",
-            [room.id, req.session.name],
-            (participantError, participant) => {
-              db.all(
-                "SELECT username, score FROM lobby_participants WHERE room_id = ? ORDER BY score DESC, username ASC",
-                [room.id],
-                (leaderboardError, leaderboard) => {
-                  res.json({
-                    room,
-                    question: questionError ? null : question,
-                    participant: participantError ? null : participant,
-                    leaderboard: leaderboardError ? [] : leaderboard,
-                  });
-                },
-              );
-            },
-          );
-        },
-      );
+      finalizeRoundIfNeeded(room, (updatedRoom) => {
+        const totalQuery = updatedRoom.mode === "quicktype"
+          ? "SELECT COUNT(*) AS total FROM lobby_quicktype_questions WHERE room_id = ?"
+          : "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?";
+        db.get(
+          totalQuery,
+          [updatedRoom.id],
+          (totalQuestionsError, totalQuestionsRow) => {
+            const questionQuery = updatedRoom.mode === "quicktype"
+              ? "SELECT id, question_order, prompt AS question_text FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?"
+              : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?";
+            db.get(
+              questionQuery,
+              [updatedRoom.id, updatedRoom.current_question],
+              (questionError, question) => {
+                db.get(
+                  "SELECT score, answer FROM lobby_participants WHERE room_id = ? AND username = ?",
+                  [updatedRoom.id, req.session.name],
+                  (participantError, participant) => {
+                    db.get(
+                      "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
+                      [updatedRoom.id],
+                      (countError, counts) => {
+                        db.all(
+                          "SELECT lobby_participants.username AS username, lobby_participants.score AS score, members.avatar AS avatar FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          [updatedRoom.id],
+                          (leaderboardError, leaderboard) => {
+                            const elapsed =
+                              updatedRoom.status === "running"
+                                ? Date.now() -
+                                  (updatedRoom.question_started_at || Date.now())
+                                : 0;
+                            res.json({
+                              room: updatedRoom,
+                              totalQuestions: totalQuestionsError
+                                ? 0
+                                : totalQuestionsRow.total,
+                              question: questionError ? null : question,
+                              participant: participantError ? null : participant,
+                              leaderboard: leaderboardError ? [] : leaderboard,
+                              timeRemaining:
+                                updatedRoom.status === "running"
+                                  ? Math.max(
+                                      0,
+                                      Math.ceil(
+                                        (QUESTION_DURATION_MS - elapsed) / 1000,
+                                      ),
+                                    )
+                                  : 0,
+                              answeredCount: countError ? 0 : counts.answered || 0,
+                              totalParticipants: countError ? 0 : counts.total || 0,
+                            });
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      });
     },
   );
 });
@@ -2323,136 +2676,18 @@ app.post("/profile/goal", requireLogin, (req, res) => {
   );
 });
 
-app.post("/api/profile/character", requireLogin, (req, res) => {
-  const submittedValue = String(req.body.characterHash || "").trim();
-  let characterHash = submittedValue;
-
-  try {
-    if (
-      submittedValue.startsWith("http://") ||
-      submittedValue.startsWith("https://")
-    ) {
-      characterHash = new URL(submittedValue).hash.slice(1);
-    }
-  } catch (error) {
-    return res.status(400).json({ error: "invalid characterHash format" });
-  }
-
-  if (characterHash.length > 2047 || !/^[\w=&%|.-]+$/.test(characterHash)) {
-    return res.status(400).json({ error: "invalid characterHash format" });
-  }
-
-  let characterLayers = [];
-  if (Array.isArray(req.body.layers)) {
-    characterLayers = req.body.layers
-      .filter(
-        (layer) =>
-          layer &&
-          typeof layer.spritePath === "string" &&
-          layer.spritePath.startsWith("spritesheets/") &&
-          Number.isFinite(Number(layer.zPos)) &&
-          Number.isFinite(Number(layer.yPos)),
-      )
-      .map((layer) => ({
-        spritePath: layer.spritePath,
-        zPos: Number(layer.zPos),
-        yPos: Number(layer.yPos),
-        recolors:
-          layer.recolors && typeof layer.recolors === "object"
-            ? Object.fromEntries(
-                Object.entries(layer.recolors)
-                  .filter(
-                    ([, mapping]) =>
-                      mapping &&
-                      Array.isArray(mapping.source) &&
-                      Array.isArray(mapping.target) &&
-                      mapping.source.length === mapping.target.length &&
-                      mapping.source.every(
-                        (color) => typeof color === "string",
-                      ) &&
-                      mapping.target.every(
-                        (color) => typeof color === "string",
-                      ),
-                  )
-                  .map(([type, mapping]) => [
-                    type,
-                    {
-                      source: mapping.source,
-                      target: mapping.target,
-                    },
-                  ]),
-              )
-            : {},
-      }));
+app.post("/profile/background", requireLogin, (req, res) => {
+  const backgroundColor = String(req.body.profileBackgroundColor || "").trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
+    return res.status(400).redirect("/profile?backgroundError=1");
   }
 
   db.run(
-    `INSERT INTO user_character (user_id, character_hash, character_layers)
-     VALUES (?, ?, ?)
-     ON CONFLICT(user_id) DO UPDATE SET
-       character_hash = excluded.character_hash,
-       character_layers = excluded.character_layers,
-       updated_at = CURRENT_TIMESTAMP`,
-    [req.session.name, characterHash, JSON.stringify(characterLayers)],
+    "UPDATE members SET profile_background = ? WHERE username = ?",
+    [backgroundColor.toLowerCase(), req.session.name],
     (error) => {
-      if (error)
-        return res.status(500).json({ error: "Unable to save character" });
-      res.json({ ok: true });
-    },
-  );
-});
-
-app.get("/api/profile/:userId/character", requireAuthenticated, (req, res) => {
-  if (req.params.userId !== req.session.name && !req.session.isAdmin) {
-    return res.status(403).json({ error: "Forbidden" });
-  }
-
-  db.get(
-    "SELECT character_hash, character_layers FROM user_character WHERE user_id = ?",
-    [req.params.userId],
-    (error, character) => {
-      if (error)
-        return res.status(500).json({ error: "Unable to load character" });
-      if (!character)
-        return res.status(404).json({ error: "no character saved" });
-      let layers = [];
-      try {
-        layers = JSON.parse(character.character_layers || "[]");
-      } catch (error) {
-        layers = [];
-      }
-      res.json({ characterHash: character.character_hash, layers });
-    },
-  );
-});
-
-app.post("/profile/avatar-style", requireLogin, (req, res) => {
-  const allowed = {
-    hair: ["#3b2416", "#111827", "#d97706", "#b91c1c"],
-    skin: ["#f6c7a8", "#e5a07f", "#c77b5b", "#a96845", "#84503c", "#5a3026"],
-    shirt: ["#8fb9d9", "#f3a6a6", "#a9d8b8", "#d9b3e6"],
-    bottom: ["#263c68", "#374151", "#7c3f58", "#334f3b"],
-    shoes: ["#ffffff", "#111827", "#d05a3a", "#f3d59a"],
-    eyes: ["#263c68", "#111827", "#236044", "#7c3f58"],
-  };
-  const value = (name, fallback) =>
-    allowed[name].includes(req.body[name]) ? req.body[name] : fallback;
-  const hairStyle = Math.min(10, Math.max(1, Number(req.body.hairStyle) || 1));
-  db.run(
-    "UPDATE members SET avatar_hair = ?, avatar_skin = ?, avatar_shirt = ?, avatar_bottom = ?, avatar_shoes = ?, avatar_eyes = ?, avatar_hair_style = ?, avatar_customized = 1 WHERE username = ?",
-    [
-      value("hair", allowed.hair[0]),
-      value("skin", allowed.skin[0]),
-      value("shirt", allowed.shirt[0]),
-      value("bottom", allowed.bottom[0]),
-      value("shoes", allowed.shoes[0]),
-      value("eyes", allowed.eyes[0]),
-      hairStyle,
-      req.session.name,
-    ],
-    (error) => {
-      if (error) return res.redirect("/profile?avatarError=1");
-      res.redirect("/profile?avatarSaved=1");
+      if (error) return res.status(500).redirect("/profile?backgroundError=1");
+      res.redirect("/profile?backgroundSaved=1");
     },
   );
 });
@@ -2608,6 +2843,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     [req.params.username],
     (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
+      student.avatar_initial = student.username.charAt(0).toUpperCase();
       db.all(
         "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
         [student.username],

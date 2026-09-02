@@ -1,0 +1,213 @@
+{
+  "chapter": {
+    "id": "there-their-theyre",
+    "title": "There, Their, and They're",
+    "level": "Grammar & Mechanics",
+    "description": "Master the differences between the homophones 'there', 'their', and 'they're' to ensure accurate word choice in writing."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "There (Location or Existence)",
+      "explanation": "Use 'there' to refer to a place or location, or to state that something exists (e.g., 'there is' or 'there are'). Think of the word 'here' inside 'there'.",
+      "example": "Please put the box over there. / There are three apples on the table."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Their (Possession)",
+      "explanation": "Use 'their' as a possessive pronoun showing that something belongs to two or more people or things. Think of the word 'heir' inside 'their'.",
+      "example": "The students finished their homework. / The trees lost their leaves."
+    },
+    {
+      "ruleNumber": 3,
+      "title": "They're (Contraction)",
+      "explanation": "Use 'they're' only as a contraction for 'they are'. If you cannot substitute 'they are' into the sentence, 'they're' is incorrect.",
+      "example": "They're going to the park. (= They are going to the park.)"
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: englisch-hilfen.de",
+      "title": "There, Their, or They're Practice",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "The children are playing with ________ toys in the garden.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "'Their' indicates that the toys belong to the children."
+        },
+        {
+          "id": 2,
+          "sentence": "Look over ________! Is that a rainbow?",
+          "options": ["there", "their", "they're"],
+          "answer": "there",
+          "explanation": "'There' refers to a specific place or location."
+        },
+        {
+          "id": 3,
+          "sentence": "________ going to be late for the flight if they don't hurry.",
+          "options": ["There", "Their", "They're"],
+          "answer": "They're",
+          "explanation": "'They're' is the contraction for 'they are' ('They are going to be late')."
+        },
+        {
+          "id": 4,
+          "sentence": "________ are many reasons why people love living in this city.",
+          "options": ["There", "Their", "They're"],
+          "answer": "There",
+          "explanation": "'There' is used to state existence ('There are many reasons')."
+        },
+        {
+          "id": 5,
+          "sentence": "The smiths parked ________ car in front of the driveway.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "'Their' is possessive, showing ownership of the car."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: grammarbook.com",
+      "title": "Their vs. There vs. They're Quiz",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence in which words are used correctly.",
+          "options": [
+            "They're going to pick up their suits over there.",
+            "Their going to pick up they're suits over there."
+          ],
+          "answer": "They're going to pick up their suits over there.",
+          "explanation": "'They're' = they are; 'their' = possessive suits; 'there' = location."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence in which words are used correctly.",
+          "options": [
+            "Is there any chance they're bringing their dog?",
+            "Is their any chance there bringing they're dog?"
+          ],
+          "answer": "Is there any chance they're bringing their dog?",
+          "explanation": "'There' indicates existence, 'they're' = they are, and 'their' shows dog ownership."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence in which words are used correctly.",
+          "options": [
+            "The house standing over there lost its roof during the storm.",
+            "The house standing over their lost it's roof during the storm."
+          ],
+          "answer": "The house standing over there lost its roof during the storm.",
+          "explanation": "'There' refers to the location of the house."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence in which words are used correctly.",
+          "options": [
+            "They're not sure if their tickets are valid for the event.",
+            "There not sure if they're tickets are valid for the event."
+          ],
+          "answer": "They're not sure if their tickets are valid for the event.",
+          "explanation": "'They're' = they are; 'their' shows possession of tickets."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which words are used correctly.",
+          "options": [
+            "There were three books lying on their desk.",
+            "They're were three books lying on there desk."
+          ],
+          "answer": "There were three books lying on their desk.",
+          "explanation": "'There' introduces existence; 'their' indicates ownership of the desk."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: englishclub.com",
+      "title": "EnglishClub Word Choice Quiz",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "The birds built ________ nest in the high oak tree.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "'Their' is the possessive pronoun referring to the birds."
+        },
+        {
+          "id": 2,
+          "sentence": "________ always friendly when we meet them in the hallway.",
+          "options": ["There", "Their", "They're"],
+          "answer": "They're",
+          "explanation": "'They're' stands for 'they are'."
+        },
+        {
+          "id": 3,
+          "sentence": "Wait ________ while I call a taxi.",
+          "options": ["there", "their", "they're"],
+          "answer": "there",
+          "explanation": "'There' refers to a location."
+        },
+        {
+          "id": 4,
+          "sentence": "Both students forgot ________ backpacks on the bus.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "'Their' is possessive."
+        },
+        {
+          "id": 5,
+          "sentence": "________ planning to visit France this summer.",
+          "options": ["There", "Their", "They're"],
+          "answer": "They're",
+          "explanation": "'They're' is the contraction for 'they are'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 4: chompchomp.com",
+      "title": "Word Choice Mastery - Homophones",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the correct option: The players held ____ trophies high in the air.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "'Their' shows possession of the trophies by the players."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct option: ____ isn't any milk left in the refrigerator.",
+          "options": ["There", "Their", "They're"],
+          "answer": "There",
+          "explanation": "'There' indicates the non-existence of milk."
+        },
+        {
+          "id": 3,
+          "question": "Choose the correct option: I hope ____ having a great time on vacation.",
+          "options": ["there", "their", "they're"],
+          "answer": "they're",
+          "explanation": "Contraction for 'they are'."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct option: Put the bags right ____ by the door.",
+          "options": ["there", "their", "they're"],
+          "answer": "there",
+          "explanation": "Refers to a specific place."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct option: The cats were washing ____ fur in the sun.",
+          "options": ["there", "their", "they're"],
+          "answer": "their",
+          "explanation": "Possessive form for plural animals."
+        }
+      ]
+    }
+  ]
+}

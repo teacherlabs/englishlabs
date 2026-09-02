@@ -17,8 +17,43 @@
     <div class="grammar-content">
       {{#if topic}}
         <div class="practice-heading"><p class="eyebrow">Reading / {{topic.category}}</p><h1>{{topic.title}}</h1><p>{{topic.description}}</p></div>
+        {{#if preparation}}
+          <section class="reading-preparation"><div class="reading-section-heading"><p class="eyebrow">Before you read</p><h2>{{preparation.instruction}}</h2></div>
+            {{#if preparation.isWordList}}
+              <div class="reading-vocabulary-list">{{#each preparation.pairs}}<div><strong>{{term}}</strong><span>{{definition}}</span></div>{{/each}}</div>
+            {{/if}}
+            {{#if preparation.isImageMatch}}
+              <div class="reading-drag-drop" data-drag-drop>
+                <div class="drag-drop-images">
+                  {{#each preparation.items}}
+                    <div class="drag-drop-target" data-drop-zone data-answer="{{word}}">
+                      <img src="{{image}}" alt="" loading="lazy" />
+                      <span class="drag-drop-slot" data-drop-slot>Drop the word here</span>
+                    </div>
+                  {{/each}}
+                </div>
+                <div class="drag-drop-word-bank" data-word-bank>
+                  {{#each preparation.shuffledWords}}
+                    <button type="button" class="drag-drop-chip" draggable="true" data-word="{{this}}">{{this}}</button>
+                  {{/each}}
+                </div>
+                <p class="drag-drop-feedback" data-drag-drop-feedback hidden></p>
+              </div>
+            {{/if}}
+            {{#if preparation.isGapFillBox}}
+              <form class="gap-fill-box" data-gap-fill-box data-answers='{{{json preparation.answers}}}'>
+                <p class="gap-fill-text">{{#each preparation.segments}}{{#if text}}{{text}}{{else}}<select data-gap-blank="{{blank}}"><option value="">choose…</option>{{#each ../preparation.wordBox}}<option value="{{this}}">{{this}}</option>{{/each}}</select>{{/if}}{{/each}}</p>
+                <button class="practice-button" type="button" data-gap-fill-check>Check answers</button>
+                <p class="drag-drop-feedback" data-gap-fill-feedback hidden></p>
+              </form>
+            {{/if}}
+          </section>
+        {{/if}}
         {{#if content.readingPassage}}
-          <section class="reading-content"><div class="reading-section-heading"><p class="eyebrow">Read</p><h2>{{content.readingPassage.title}}</h2></div><p class="writing-passage-text">{{content.readingPassage.text}}</p></section>
+          <section class="reading-content"><div class="reading-section-heading"><p class="eyebrow">Read</p>{{#if content.readingPassage.title}}<h2>{{content.readingPassage.title}}</h2>{{/if}}</div><p class="writing-passage-text">{{content.readingPassage.text}}</p></section>
+        {{/if}}
+        {{#if content.image}}
+          <section class="reading-content"><div class="reading-section-heading"><p class="eyebrow">Read</p></div><img class="reading-passage-image" src="{{content.image}}" alt="{{topic.title}}" loading="lazy" /></section>
         {{/if}}
         {{#if content.vocabulary}}
           <section class="listening-context"><p class="eyebrow">Vocabulary</p><div class="reading-vocabulary-list">{{#each content.vocabulary}}<div><strong>{{word}}</strong><span>{{definition}}</span></div>{{/each}}</div></section>
@@ -28,15 +63,27 @@
         {{/if}}
         <section class="reading-exercises"><div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
           {{#each exercises}}
-            <article class="reading-exercise" data-reading-exercise data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
+            <article class="reading-exercise{{#if isGapFill}} gap-fill-exercise{{/if}}"{{#unless isGapFill}} data-reading-exercise{{/unless}} data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
               <h3>{{title}}</h3><p>{{instruction}}</p>
-              {{#each questions}}
-                <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}><p class="question-progress">Question {{number}} of {{../questions.length}}</p><strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>
-                  {{#if ../isTrueOrFalse}}<div class="answer-options"><button type="button" value="true">True</button><button type="button" value="false">False</button></div>{{else if ../isMultipleChoice}}<div class="answer-options">{{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}</div>{{else}}<input class="written-answer" type="text" aria-label="Your answer" autocomplete="off"><button class="practice-button" type="button" data-reading-check>Check answer</button>{{/if}}
-                  <p class="answer-feedback" hidden></p>
-                </div>
-              {{/each}}
-              <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: {{#if completed}}{{savedPoints}}{{else}}0{{/if}} / {{#if completed}}{{savedTotal}}{{else}}{{questions.length}}{{/if}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button></div>
+              {{#if isGapFill}}
+                <form class="gap-fill-box" data-gap-fill-exercise data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}" data-answers='{{{json answers}}}'>
+                  {{#if wordBox}}<div class="drag-drop-word-bank">{{#each wordBox}}<span class="drag-drop-chip">{{this}}</span>{{/each}}</div>{{/if}}
+                  {{#each questions}}
+                    <p class="gap-fill-text">{{#each segments}}{{#if text}}{{text}}{{else}}<input type="text" class="gap-fill-input" data-gap-blank="{{blank}}" autocomplete="off">{{/if}}{{/each}}</p>
+                  {{/each}}
+                  <button class="practice-button" type="button" data-gap-fill-exercise-check>Check answers</button>
+                  <button class="practice-button" type="button" data-gap-fill-exercise-retry hidden>Try again</button>
+                  <p class="drag-drop-feedback" data-gap-fill-exercise-feedback hidden></p>
+                </form>
+              {{else}}
+                {{#each questions}}
+                  <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}><p class="question-progress">Question {{number}} of {{../questions.length}}</p><strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>
+                    {{#if ../isTrueOrFalse}}<div class="answer-options"><button type="button" value="true">True</button><button type="button" value="false">False</button></div>{{else if ../isMultipleChoice}}<div class="answer-options"{{#if isMultiAnswer}} data-multi-answer="true"{{/if}}>{{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}</div>{{#if isMultiAnswer}}<button class="practice-button" type="button" data-multi-submit>Check answer</button>{{/if}}{{else}}<input class="written-answer" type="text" aria-label="Your answer" autocomplete="off"><button class="practice-button" type="button" data-reading-check>Check answer</button>{{/if}}
+                    <p class="answer-feedback" hidden></p>
+                  </div>
+                {{/each}}
+                <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: {{#if completed}}{{savedPoints}}{{else}}0{{/if}} / {{#if completed}}{{savedTotal}}{{else}}{{questions.length}}{{/if}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button><button class="practice-button" type="button" data-reading-retry hidden>Try again</button></div>
+              {{/if}}
             </article>
           {{/each}}
         </section>
@@ -52,29 +99,39 @@
     const questions = [...exercise.querySelectorAll(".reading-question")];
     const score = exercise.querySelector("[data-reading-score]");
     const next = exercise.querySelector("[data-reading-next]");
+    const retry = exercise.querySelector("[data-reading-retry]");
     let current = 0;
     let points = 0;
-    if (exercise.dataset.completed === "true") {
-      questions.forEach((question) => { question.hidden = true; });
-      next.hidden = true;
-      score.textContent = `Completed: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
-      return;
-    }
     const answer = (question, value) => {
       if (question.dataset.answered) return;
       const correct = value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
+      finalize(question, correct, question.dataset.answer);
+    };
+    const finalize = (question, correct, correctAnswerText) => {
       question.dataset.answered = "true";
       if (correct) points += 1;
-      question.querySelectorAll("button, input").forEach((element) => element.disabled = true);
+      question.querySelectorAll("button, input, select").forEach((element) => element.disabled = true);
       const feedback = question.querySelector(".answer-feedback");
       feedback.hidden = false;
       feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
-      feedback.textContent = correct ? "Correct! +1 point." : `Not quite. The answer is “${question.dataset.answer}”.`;
+      feedback.textContent = correct ? "Correct! +1 point." : `Not quite. The answer is “${correctAnswerText}”.`;
       score.textContent = `Points: ${points} / ${questions.length}`;
       next.disabled = false;
       next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
     };
-    exercise.querySelectorAll(".answer-options button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
+    exercise.querySelectorAll(".answer-options:not([data-multi-answer]) button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
+    exercise.querySelectorAll(".answer-options[data-multi-answer] button").forEach((button) => button.addEventListener("click", () => {
+      if (button.disabled) return;
+      button.classList.toggle("selected");
+    }));
+    exercise.querySelectorAll("[data-multi-submit]").forEach((submitButton) => submitButton.addEventListener("click", () => {
+      const question = submitButton.closest(".reading-question");
+      if (question.dataset.answered) return;
+      const selected = [...question.querySelectorAll(".answer-options button.selected")].map((button) => button.value.trim().toLowerCase());
+      const correctOptions = question.dataset.answer.split("||").map((value) => value.trim().toLowerCase());
+      const correct = selected.length === correctOptions.length && correctOptions.every((value) => selected.includes(value));
+      finalize(question, correct, question.dataset.answer.split("||").join(", "));
+    }));
     exercise.querySelectorAll("[data-reading-check]").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.previousElementSibling.value)));
     next.addEventListener("click", () => {
       questions[current].hidden = true;
@@ -92,12 +149,42 @@
             totalPoints: questions.length,
           }),
         });
+        if (retry) retry.hidden = false;
         return;
       }
       questions[current].hidden = false;
       next.disabled = true;
       next.textContent = "Choose an answer";
     });
+    const startOver = () => {
+      current = 0;
+      points = 0;
+      questions.forEach((question, index) => {
+        delete question.dataset.answered;
+        question.hidden = index !== 0;
+        question.querySelectorAll("button, input, select").forEach((element) => {
+          element.disabled = false;
+          element.classList.remove("selected");
+          if ("value" in element && element.tagName !== "BUTTON") element.value = "";
+        });
+        const feedback = question.querySelector(".answer-feedback");
+        feedback.hidden = true;
+        feedback.textContent = "";
+        feedback.className = "answer-feedback";
+      });
+      next.hidden = false;
+      next.disabled = true;
+      next.textContent = "Choose an answer";
+      score.textContent = `Points: 0 / ${questions.length}`;
+      if (retry) retry.hidden = true;
+    };
+    if (exercise.dataset.completed === "true") {
+      questions.forEach((question) => { question.hidden = true; });
+      next.hidden = true;
+      score.textContent = `Completed: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
+      if (retry) retry.hidden = false;
+    }
+    if (retry) retry.addEventListener("click", startOver);
   });
   document.querySelectorAll("[data-reading-level-toggle]").forEach((button) => button.addEventListener("click", () => {
     const level = button.closest(".listening-level");
@@ -105,4 +192,140 @@
     document.querySelectorAll(".listening-level").forEach((item) => { item.classList.remove("is-open"); item.querySelector("[data-reading-level-toggle]").setAttribute("aria-expanded", "false"); });
     if (!isOpen) { level.classList.add("is-open"); button.setAttribute("aria-expanded", "true"); }
   }));
+
+  document.querySelectorAll("[data-drag-drop]").forEach((activity) => {
+    const feedback = activity.querySelector("[data-drag-drop-feedback]");
+    let selectedChip = null;
+
+    const checkComplete = () => {
+      const zones = [...activity.querySelectorAll("[data-drop-zone]")];
+      const allFilled = zones.every((zone) => zone.querySelector("[data-drop-slot]").dataset.filledWord);
+      if (!allFilled) return;
+      let correctCount = 0;
+      zones.forEach((zone) => {
+        const slot = zone.querySelector("[data-drop-slot]");
+        const correct = slot.dataset.filledWord === zone.dataset.answer;
+        zone.classList.toggle("correct", correct);
+        zone.classList.toggle("incorrect", !correct);
+        if (correct) correctCount += 1;
+      });
+      feedback.hidden = false;
+      feedback.className = `drag-drop-feedback ${correctCount === zones.length ? "correct" : "incorrect"}`;
+      feedback.textContent = `You matched ${correctCount} / ${zones.length} correctly.`;
+    };
+
+    const placeChip = (chip, zone) => {
+      const slot = zone.querySelector("[data-drop-slot]");
+      if (slot.dataset.filledWord) return;
+      slot.textContent = chip.dataset.word;
+      slot.dataset.filledWord = chip.dataset.word;
+      chip.remove();
+      checkComplete();
+    };
+
+    activity.querySelectorAll(".drag-drop-chip").forEach((chip) => {
+      chip.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", chip.dataset.word);
+        event.dataTransfer.effectAllowed = "move";
+      });
+      chip.addEventListener("click", () => {
+        activity.querySelectorAll(".drag-drop-chip").forEach((other) => other.classList.remove("selected"));
+        chip.classList.add("selected");
+        selectedChip = chip;
+      });
+    });
+
+    activity.querySelectorAll("[data-drop-zone]").forEach((zone) => {
+      zone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        zone.classList.add("drag-over");
+      });
+      zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+      zone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        zone.classList.remove("drag-over");
+        const word = event.dataTransfer.getData("text/plain");
+        const chip = [...activity.querySelectorAll(".drag-drop-chip")].find((item) => item.dataset.word === word);
+        if (chip) placeChip(chip, zone);
+      });
+      zone.addEventListener("click", () => {
+        if (selectedChip) {
+          placeChip(selectedChip, zone);
+          selectedChip = null;
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll("[data-gap-fill-box]").forEach((form) => {
+    const checkButton = form.querySelector("[data-gap-fill-check]");
+    const feedback = form.querySelector("[data-gap-fill-feedback]");
+    let answers = {};
+    try { answers = JSON.parse(form.dataset.answers || "{}"); } catch (error) { answers = {}; }
+    checkButton.addEventListener("click", () => {
+      const selects = [...form.querySelectorAll("select[data-gap-blank]")];
+      const correctCount = selects.filter((select) => select.value.trim().toLowerCase() === String(answers[select.dataset.gapBlank] || "").trim().toLowerCase()).length;
+      feedback.hidden = false;
+      feedback.className = `drag-drop-feedback ${correctCount === selects.length ? "correct" : "incorrect"}`;
+      feedback.textContent = `You got ${correctCount} / ${selects.length} correct.`;
+    });
+  });
+
+  document.querySelectorAll("[data-gap-fill-exercise]").forEach((form) => {
+    const checkButton = form.querySelector("[data-gap-fill-exercise-check]");
+    const retryButton = form.querySelector("[data-gap-fill-exercise-retry]");
+    const feedback = form.querySelector("[data-gap-fill-exercise-feedback]");
+    const inputs = [...form.querySelectorAll(".gap-fill-input")];
+    let answers = {};
+    try { answers = JSON.parse(form.dataset.answers || "{}"); } catch (error) { answers = {}; }
+    const check = () => {
+      if (form.dataset.answered) return;
+      form.dataset.answered = "true";
+      let correctCount = 0;
+      inputs.forEach((input) => {
+        const correct = input.value.trim().toLowerCase() === String(answers[input.dataset.gapBlank] || "").trim().toLowerCase();
+        input.classList.toggle("correct-blank", correct);
+        input.classList.toggle("incorrect-blank", !correct);
+        input.disabled = true;
+        if (correct) correctCount += 1;
+      });
+      feedback.hidden = false;
+      feedback.className = `drag-drop-feedback ${correctCount === inputs.length ? "correct" : "incorrect"}`;
+      feedback.textContent = `You got ${correctCount} / ${inputs.length} correct.`;
+      checkButton.hidden = true;
+      if (retryButton) retryButton.hidden = false;
+      fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityType: "reading",
+          difficultyLevel: `reading:${form.dataset.topicId}:${form.dataset.exerciseNumber}`,
+          points: correctCount,
+          totalPoints: inputs.length,
+        }),
+      });
+    };
+    const startOver = () => {
+      delete form.dataset.answered;
+      inputs.forEach((input) => {
+        input.value = "";
+        input.disabled = false;
+        input.classList.remove("correct-blank", "incorrect-blank");
+      });
+      feedback.hidden = true;
+      feedback.textContent = "";
+      checkButton.hidden = false;
+      if (retryButton) retryButton.hidden = true;
+    };
+    if (form.dataset.completed === "true") {
+      inputs.forEach((input) => { input.disabled = true; });
+      checkButton.hidden = true;
+      feedback.hidden = false;
+      feedback.className = "drag-drop-feedback correct";
+      feedback.textContent = `Completed: ${form.dataset.savedPoints} / ${form.dataset.savedTotal}`;
+      if (retryButton) retryButton.hidden = false;
+    }
+    checkButton.addEventListener("click", check);
+    if (retryButton) retryButton.addEventListener("click", startOver);
+  });
 </script>

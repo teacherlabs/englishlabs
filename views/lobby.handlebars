@@ -4,20 +4,20 @@
       <div class="lobby-admin-tools">
         <p class="eyebrow">Teacher control</p>
         {{#unless room}}
-          <h1>Create a quiz room</h1>
-          <form class="lobby-form" action="/lobby/rooms" method="post"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><button class="practice-button" type="submit">Create room</button></form>
+          <h1>Create a game room</h1>
+          <form class="lobby-form" action="/lobby/rooms" method="post"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><label for="room-mode">Game mode</label><select id="room-mode" name="mode"><option value="lobby">Lobby: multiple choice</option><option value="quicktype">Quicktype: word matching</option></select><button class="practice-button" type="submit">Create room</button></form>
         {{/unless}}
         {{#if room}}
           <h1>{{room.title}}</h1>
           <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
           <form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit room</button></form>
-          <h2>Questions</h2>
-          <ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{else}}<li>No questions yet.</li>{{/each}}</ol>
+          <h2>{{#if isQuicktype}}Prompts{{else}}Questions{{/if}}</h2>
+          <ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{else}}<li>No {{#if ../isQuicktype}}prompts{{else}}questions{{/if}} yet.</li>{{/each}}</ol>
           {{#if isWaiting}}
-            <form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>
-            {{#if questions}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/if}}
+            {{#if isQuicktype}}<form class="lobby-form" action="/lobby/quicktype/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="quicktype-prompt">Prompt for students</label><textarea id="quicktype-prompt" name="prompt" rows="2" placeholder="Type the word you hear" required></textarea><label for="quicktype-target">Target word</label><input id="quicktype-target" name="targetWord" placeholder="target word" required /><button class="notes-button" type="submit">Add prompt</button></form>{{else}}<form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
+            {{#if questions}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/if}}
           {{else}}
-            <p class="admin-live-note">The live question will appear in the lobby below.</p>
+            <p class="admin-live-note">The live game appears in the lobby below.</p>
           {{/if}}
         {{/if}}
       </div>
@@ -27,37 +27,225 @@
     {{/if}}
   </section>
   <section class="lobby-shell">
-    {{#if isAdmin}}{{#if isRunning}}<div class="lobby-stage-wrap">{{/if}}{{else}}<div class="lobby-stage-wrap">{{/if}}
-      {{#if isAdmin}}{{#if isRunning}}<section class="admin-live-quiz"><p class="eyebrow">Live quiz</p><h2>Question {{room.current_question}}</h2>{{#if currentQuestion}}<p class="admin-live-question">{{currentQuestion.question_text}}</p><div class="admin-live-answers"><span><b>A</b>{{currentQuestion.answer_a}}</span><span><b>B</b>{{currentQuestion.answer_b}}</span><span><b>C</b>{{currentQuestion.answer_c}}</span><span><b>D</b>{{currentQuestion.answer_d}}</span></div>{{/if}}<form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="notes-button" type="submit">Next question</button></form></section>{{/if}}{{else}}{{#if participant}}<div class="student-live-layout"><section data-live-quiz data-room-id="{{room.id}}"><p class="eyebrow">{{room.title}}</p><h1 data-quiz-status>Waiting for the teacher...</h1><div class="live-question" data-live-question hidden><h2 data-question-text></h2><div class="live-answer-grid"><button type="button" data-answer="a"></button><button type="button" data-answer="b"></button><button type="button" data-answer="c"></button><button type="button" data-answer="d"></button></div><p data-answer-feedback></p></div><p>Your score: <strong data-live-score>{{participant.score}}</strong></p></section><aside class="lobby-leaderboard"><p class="eyebrow">Leaderboard</p><h2>Fastest players</h2><ol data-leaderboard><li>Waiting for answers...</li></ol></aside></div>{{/if}}{{/if}}
-      <canvas id="lobby-canvas" data-user="{{student.username}}" width="960" height="540" aria-label="Playable English Labs practice plaza"></canvas>
-      <div id="lobby-loading" class="lobby-loading">Loading your character...</div>
-      <div class="lobby-hud"><span class="lobby-key">WASD</span><span>Move around the plaza</span><span id="lobby-position">Ready</span></div>
-    {{#if isAdmin}}{{#if isRunning}}</div>{{/if}}{{else}}</div>{{/if}}
+    {{#if isAdmin}}
+      {{#if room}}
+      <div class="lobby-stage-wrap">
+        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
+          <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
+            <p class="eyebrow">Teacher control</p>
+            <h2>Ready when you are</h2>
+            <p class="admin-live-note">Add questions on the left, then start the quiz.</p>
+          </section>
+          <section class="admin-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
+            <p class="eyebrow">Live quiz</p>
+            <h2>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2>
+            <p class="question-timer"><span data-question-timer>20</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
+            <p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>
+            {{#unless isQuicktype}}<div class="admin-live-answers">
+              <span><b>A</b><span data-answer-text="a">{{currentQuestion.answer_a}}</span></span>
+              <span><b>B</b><span data-answer-text="b">{{currentQuestion.answer_b}}</span></span>
+              <span><b>C</b><span data-answer-text="c">{{currentQuestion.answer_c}}</span></span>
+              <span><b>D</b><span data-answer-text="d">{{currentQuestion.answer_d}}</span></span>
+            </div>{{/unless}}
+          </section>
+          <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
+            <p class="eyebrow">Round results</p>
+            <h2>Standings</h2>
+            <ol class="round-leaderboard-list" data-round-leaderboard><li>Loading...</li></ol>
+            <form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Next question</button></form>
+          </section>
+          <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
+            <p class="eyebrow">Quiz complete</p>
+            <h2>Final results</h2>
+            <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
+          </section>
+        </div>
+        <aside class="lobby-leaderboard">
+          <p class="eyebrow">Players</p>
+          <h2>Who's here</h2>
+          <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
+        </aside>
+      </div>
+      {{/if}}
+    {{else}}
+      {{#if participant}}
+      <div class="lobby-stage-wrap">
+        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
+          <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
+            <p class="eyebrow">{{room.title}}</p>
+            <h1>Waiting for the teacher to start...</h1>
+          </section>
+          <section class="student-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
+            <p class="eyebrow">{{room.title}}</p>
+            <h1>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h1>
+            <p class="question-timer"><span data-question-timer>20</span>s left</p>
+            <div class="live-question">
+              <h2 data-question-text>{{currentQuestion.question_text}}</h2>
+              {{#if isQuicktype}}<form class="quicktype-answer-form" data-quicktype-form><input name="word" data-quicktype-input autocomplete="off" placeholder="Type the target word" required /><button class="practice-button" type="submit">Submit</button></form>{{else}}<div class="live-answer-grid">
+                <button type="button" data-answer="a">{{currentQuestion.answer_a}}</button>
+                <button type="button" data-answer="b">{{currentQuestion.answer_b}}</button>
+                <button type="button" data-answer="c">{{currentQuestion.answer_c}}</button>
+                <button type="button" data-answer="d">{{currentQuestion.answer_d}}</button>
+              </div>{{/if}}
+              <p data-answer-feedback></p>
+            </div>
+            <p>Your score: <strong data-live-score>{{participant.score}}</strong></p>
+          </section>
+          <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
+            <p class="eyebrow">Round results</p>
+            <h2>Standings</h2>
+            <ol class="round-leaderboard-list" data-round-leaderboard><li>Loading...</li></ol>
+            <p class="admin-live-note">Waiting for the teacher to continue...</p>
+          </section>
+          <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
+            <p class="eyebrow">Quiz complete</p>
+            <h2>Final results</h2>
+            <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
+          </section>
+        </div>
+        <aside class="lobby-leaderboard">
+          <p class="eyebrow">Players</p>
+          <h2>Who's here</h2>
+          <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
+        </aside>
+      </div>
+      {{/if}}
+    {{/if}}
   </section>
 </main>
-<script src="/js/lobby.js"></script>
-{{#unless isAdmin}}<script>
-  const liveQuiz = document.querySelector("[data-live-quiz]");
-  if (liveQuiz) {
-    const roomId = liveQuiz.dataset.roomId;
-    const status = liveQuiz.querySelector("[data-quiz-status]");
-    const questionBox = liveQuiz.querySelector("[data-live-question]");
-    const questionText = liveQuiz.querySelector("[data-question-text]");
-    const feedback = liveQuiz.querySelector("[data-answer-feedback]");
-    const score = liveQuiz.querySelector("[data-live-score]");
-    const leaderboard = liveQuiz.parentElement.querySelector("[data-leaderboard]");
-    let currentQuestion = 0;
-    const refresh = () => fetch("/api/lobby/state").then((response) => response.json()).then((state) => {
+<div id="lobby-exit-modal" class="lobby-exit-modal" hidden>
+  <div class="lobby-exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="lobby-exit-title">
+    <h2 id="lobby-exit-title">Are you sure you want to exit lobby?</h2>
+    <div class="lobby-exit-actions">
+      <button type="button" class="danger-button" data-lobby-exit-confirm>Yes</button>
+      <button type="button" class="notes-button" data-lobby-exit-cancel>No</button>
+    </div>
+  </div>
+</div>
+<script>
+  const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+
+  const lobbyPhase = document.querySelector("[data-lobby-phase]");
+  if (lobbyPhase) {
+    const roomId = lobbyPhase.dataset.roomId;
+    const role = lobbyPhase.dataset.role;
+    const mode = lobbyPhase.dataset.mode;
+    const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
+    const phaseRunning = lobbyPhase.querySelector("[data-phase-running]");
+    const phaseLeaderboard = lobbyPhase.querySelector("[data-phase-leaderboard]");
+    const phaseFinished = lobbyPhase.querySelector("[data-phase-finished]");
+    const questionNumberEl = phaseRunning.querySelector("[data-question-number]");
+    const questionTimerEl = phaseRunning.querySelector("[data-question-timer]");
+    const answeredCountEl = phaseRunning.querySelector("[data-answered-count]");
+    const totalParticipantsEl = phaseRunning.querySelector("[data-total-participants]");
+    const questionTextEl = phaseRunning.querySelector("[data-question-text]");
+    const feedback = phaseRunning.querySelector("[data-answer-feedback]");
+    const score = phaseRunning.querySelector("[data-live-score]");
+    const roundLeaderboardList = phaseLeaderboard.querySelector("[data-round-leaderboard]");
+    const finalResultsList = phaseFinished.querySelector("[data-final-results]");
+    const playersGrid = document.querySelector("[data-lobby-players]");
+    let currentQuestionNumber = Number(questionNumberEl.textContent) || 0;
+
+    const renderLeaderboardList = (target, players) => {
+      target.innerHTML = players?.length
+        ? players.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
+        : "<li>No scores yet.</li>";
+    };
+
+    const renderFinalResults = (players) => {
+      if (!players?.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
+      finalResultsList.innerHTML = players.map((player, index) => {
+        const avatar = player.avatar
+          ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
+          : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
+        return `<li class="final-results-row${index === 0 ? " final-results-winner" : ""}"><div class="final-results-avatar">${avatar}</div><span class="final-results-name">${index + 1}. ${escapeHtml(player.username)}</span><strong class="final-results-score">${player.score}</strong></li>`;
+      }).join("");
+    };
+
+    const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
-      score.textContent = state.participant?.score || 0;
-      leaderboard.innerHTML = state.leaderboard?.length
-        ? state.leaderboard.map((player, index) => `<li><span>${index + 1}. ${player.username}</span><strong>${player.score}</strong></li>`).join("")
-        : "<li>Waiting for answers...</li>";
-      if (state.room.status !== "running" || !state.question) { status.textContent = "Waiting for the teacher..."; questionBox.hidden = true; return; }
-      if (currentQuestion !== state.room.current_question) { currentQuestion = state.room.current_question; questionText.textContent = state.question.question_text; [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => { const button = questionBox.querySelector(`[data-answer="${key}"]`); button.textContent = state.question[field]; button.disabled = false; }); feedback.textContent = ""; }
-      status.textContent = `Question ${state.room.current_question}`; questionBox.hidden = false;
+      if (score) score.textContent = state.participant?.score || 0;
+
+      playersGrid.innerHTML = state.leaderboard?.length
+        ? state.leaderboard.map((player) => {
+            const avatar = player.avatar
+              ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
+              : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
+            return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
+          }).join("")
+        : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
+
+      phaseWaiting.hidden = state.room.status !== "waiting";
+      phaseRunning.hidden = state.room.status !== "running";
+      phaseLeaderboard.hidden = state.room.status !== "leaderboard";
+      phaseFinished.hidden = state.room.status !== "finished";
+
+      if (state.room.status === "running" && state.question) {
+        questionNumberEl.textContent = state.room.current_question;
+        questionTimerEl.textContent = state.timeRemaining;
+        if (answeredCountEl) answeredCountEl.textContent = state.answeredCount;
+        if (totalParticipantsEl) totalParticipantsEl.textContent = state.totalParticipants;
+        const isNewQuestion = currentQuestionNumber !== state.room.current_question;
+        if (isNewQuestion) {
+          currentQuestionNumber = state.room.current_question;
+          if (questionTextEl) questionTextEl.textContent = state.question.question_text;
+          const quicktypeInput = phaseRunning.querySelector("[data-quicktype-input]");
+          if (quicktypeInput) { quicktypeInput.value = ""; quicktypeInput.disabled = false; }
+          [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => {
+            const answerEl = phaseRunning.querySelector(`[data-answer="${key}"], [data-answer-text="${key}"]`);
+            if (answerEl) { answerEl.textContent = state.question[field]; answerEl.disabled = false; }
+          });
+          if (feedback) feedback.textContent = "";
+        }
+      }
+      if (state.room.status === "leaderboard") renderLeaderboardList(roundLeaderboardList, state.leaderboard);
+      if (state.room.status === "finished") renderFinalResults(state.leaderboard);
     });
-    liveQuiz.querySelectorAll("[data-answer]").forEach((button) => button.addEventListener("click", () => { liveQuiz.querySelectorAll("[data-answer]").forEach((item) => item.disabled = true); fetch("/lobby/answer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, answer: button.dataset.answer }) }).then((response) => response.json()).then((result) => { feedback.textContent = result.correct ? "Correct!" : "Not quite."; refresh(); }); }));
-    refresh(); setInterval(refresh, 1500);
+
+    if (role === "student") {
+      const quicktypeForm = phaseRunning.querySelector("[data-quicktype-form]");
+      if (mode === "quicktype" && quicktypeForm) quicktypeForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = quicktypeForm.querySelector("[data-quicktype-input]");
+        if (!input.value.trim()) return;
+        input.disabled = true;
+        quicktypeForm.querySelector("button").disabled = true;
+        fetch("/lobby/quicktype/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, word: input.value }) })
+          .then((response) => response.json())
+          .then((result) => { if (feedback) feedback.textContent = result.correct ? `Correct! +${result.points}` : (result.answered ? "Not quite." : result.error || "Unable to submit."); refresh(); });
+      });
+      phaseRunning.querySelectorAll("[data-answer]").forEach((button) => button.addEventListener("click", () => {
+        phaseRunning.querySelectorAll("[data-answer]").forEach((item) => item.disabled = true);
+        fetch("/lobby/answer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, answer: button.dataset.answer }) })
+          .then((response) => response.json())
+          .then((result) => { if (feedback) feedback.textContent = result.correct ? "Correct!" : "Not quite."; refresh(); });
+      }));
+    }
+
+    refresh();
+    setInterval(refresh, 1000);
   }
-</script>{{/unless}}
+
+  const exitModal = document.getElementById("lobby-exit-modal");
+  if (exitModal && lobbyPhase) {
+    let pendingHref = null;
+    const showExitModal = (href) => { pendingHref = href; exitModal.hidden = false; };
+    const hideExitModal = () => { pendingHref = null; exitModal.hidden = true; };
+    document.addEventListener("click", (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const anchor = event.target.closest("a[href]");
+      if (!anchor || exitModal.contains(anchor)) return;
+      if (anchor.target && anchor.target !== "_self") return;
+      const href = anchor.getAttribute("href");
+      if (!href || href.startsWith("#") || href.startsWith("/lobby")) return;
+      event.preventDefault();
+      showExitModal(anchor.href);
+    });
+    exitModal.querySelector("[data-lobby-exit-confirm]").addEventListener("click", () => {
+      if (pendingHref) window.location.href = pendingHref;
+    });
+    exitModal.querySelector("[data-lobby-exit-cancel]").addEventListener("click", hideExitModal);
+    exitModal.addEventListener("click", (event) => { if (event.target === exitModal) hideExitModal(); });
+  }
+</script>
+

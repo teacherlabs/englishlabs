@@ -32,17 +32,19 @@
         <a class="exercise-card{{#if selected}} selected{{/if}}" href="/practice/questions?chapter={{../selectedChapter.id}}&exercise={{id}}">
           <span>{{type}}</span>
           <strong>{{title}}</strong>
+          {{#if completed}}<span class="exercise-completed-badge">&#10003; Completed</span>{{/if}}
         </a>
       {{/each}}
     </section>
   {{/if}}
 
   {{#if selectedExercise}}
-    <section class="json-exercise" data-json-exercise data-exercise-type="{{selectedExercise.type}}">
+    <section class="json-exercise" data-json-exercise data-exercise-type="{{selectedExercise.type}}" data-chapter-id="{{selectedChapter.id}}" data-exercise-number="{{selectedExercise.exerciseNumber}}">
       <div class="exercise-heading">
         <p class="eyebrow">{{selectedChapter.unit}}</p>
         <h2>{{selectedExercise.title}}</h2>
       </div>
+      {{#if selectedExercise.instructions}}<p class="exercise-instructions">{{selectedExercise.instructions}}</p>{{/if}}
 
       {{#if selectedExercise.isFillInBlanks}}
         {{#each selectedExercise.paragraphs}}
@@ -53,7 +55,6 @@
         {{/each}}
         <button class="practice-button" type="button" data-check-blanks>Check answers</button>
       {{else if selectedExercise.isWrittenAnswer}}
-        <p class="exercise-instructions">{{selectedExercise.instructions}}</p>
         <div class="json-question-list">
           {{#each selectedExercise.questions}}
             <article class="json-question" data-answer="{{answer}}" data-explanation="{{explanation}}"{{#unless @first}} hidden{{/unless}}>
@@ -117,6 +118,19 @@
     let currentQuestion = 0;
     let points = 0;
 
+    const saveProgress = (earnedPoints, totalPoints) => {
+      fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityType: "questions",
+          difficultyLevel: `questions:${exercise.dataset.chapterId}:${exercise.dataset.exerciseNumber}`,
+          points: earnedPoints,
+          totalPoints,
+        }),
+      });
+    };
+
     questions.forEach((question, index) => {
       question.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
         if (!button.matches(".answer-options button")) return;
@@ -163,6 +177,7 @@
       if (currentQuestion >= questions.length) {
         score.textContent = `Final score: ${points} / ${questions.length}`;
         nextQuestion.hidden = true;
+        saveProgress(points, questions.length);
         return;
       }
       questions[currentQuestion].hidden = false;
@@ -180,6 +195,7 @@
       });
       score.textContent = `Score: ${correct} / ${inputs.length}`;
       event.currentTarget.textContent = "Check answers again";
+      saveProgress(correct, inputs.length);
     });
   }
 </script>

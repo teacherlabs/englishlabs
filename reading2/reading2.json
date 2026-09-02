@@ -1,428 +1,1206 @@
-[
-  {
-    "topic": {
-      "id": "olympic-blog",
-      "title": "An Olympic blog",
-      "level": "B1 Intermediate",
-      "category": "Sports & Events",
-      "description": "Read a blog post written during the Olympic Games to learn about sports, venues, and spectator experiences."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "My Olympic Games Experience",
-        "text": "Day 4 of the Games has been incredible! I woke up early to catch the train to the Olympic Park. The atmosphere here is electric, with fans from all over the world wearing their national team colors.\n\nFirst, we watched the gymnastics finals. The athletic ability of the athletes was mind-blowing, especially on the high bar. In the afternoon, we headed to the aquatics center for the 100m freestyle swimming. The crowd went wild when the home athlete won silver by just 0.05 seconds!\n\nTonight, we're taking the tube to the main stadium to watch the athletics track events. It’s been a dream come true to experience the Games live."
-      },
-      "vocabulary": [
-        { "word": "Atmosphere", "definition": "The mood or feeling in a place or situation." },
-        { "word": "Aquatics center", "definition": "A facility specifically designed for water sports like swimming and diving." },
-        { "word": "Silver", "definition": "The medal awarded for finishing in second place in a competition." }
-      ]
-    },
-    "tips": [
-      "Pay attention to chronological order markers ('First', 'In the afternoon', 'Tonight').",
-      "Look for emotional and descriptive adjectives ('electric', 'mind-blowing', 'wild') to understand spectator tone."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "olympic-blog-mc",
-        "title": "Check your understanding: multiple choice",
-        "instruction": "Select the correct answer based on the blog post.",
-        "questions": [
-          { "id": 1, "question": "What sport did the blogger watch in the morning?", "options": ["Swimming", "Gymnastics", "Track events"], "answer": "Gymnastics" },
-          { "id": 2, "question": "What medal did the home country athlete win in swimming?", "options": ["Gold", "Silver", "Bronze"], "answer": "Silver" }
-        ]
-      },
-      {
-        "type": "true_or_false",
-        "id": "olympic-blog-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements are True or False.",
-        "questions": [
-          { "id": 1, "statement": "The blogger is going to watch athletics at the main stadium tonight.", "correctAnswer": true },
-          { "id": 2, "statement": "The blogger travelled to the Olympic Park by bicycle.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which Olympic sport would you most like to watch live in a stadium?"
-    }
-  },
-  {
-    "topic": {
+{
+  "topics": [
+    {
       "id": "adventure-travel",
       "title": "Adventure travel",
-      "level": "B1 Intermediate",
-      "category": "Travel & Exploration",
-      "description": "Read an adventure travel brochure offering extreme sports trips and wilderness expeditions."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Extreme Outdoor Expeditions",
-        "text": "Trip A: White-Water Rafting in Patagonia\nNavigate thrilling rapids through stunning glacier valleys. Suitable for brave beginners with strong swimming skills. All safety gear provided. (Duration: 5 days)\n\nTrip B: Trekking the Inca Trail\nHike through high-altitude cloud forests to reach ancient ruins. Requires high physical fitness and endurance. Tents and guides included. (Duration: 7 days)\n\nTrip C: Desert Safari & Sandboarding\nDrive 4x4 vehicles across giant sand dunes and experience sandboarding under the stars. Includes camping in traditional Bedouin tents. (Duration: 3 days)"
+      "content": {
+        "type": "text",
+        "text": "Time for an adventure?\nAre you a bit bored with your nine-to-five routine? Have a look at our exciting range of holidays and decide what type of adventure you’d like.\n\nActivity holidays\nOur activity holidays are for everyone, people who love danger or who just like sports. We have a huge variety of water, snow or desert holidays. We’ll take you SCUBA diving in the Red Sea or kayaking and white water rafting in Canada. If you prefer snow, you can try skiing or snowboarding in the Alps or even igloo-building. For those who like warmer weather, we also have sandboarding (the desert version of skateboarding) or camel safaris.\n\nPolar expeditions\nTake a cruise to Antarctica or the northern Arctic; explore a land of white natural beauty and wonderful wildlife. Our experts will explain everything about the two poles as you watch the penguins in Antarctica or whales and polar bears in the Arctic. There's no greater adventure than travelling to the ends of the earth. A once-in-a-lifetime experience!\n\nCultural journeys\nOur cultural journeys will help you discover ancient civilisations: India, Thailand, Egypt and many more. Visit temples, palaces and ancient ruins – just remember to bring your camera! Get to know local ways of life by exploring markets, trying exotic foods and meeting local people.\n\nTrekking tours\nWe have trekking holidays to famous places such as Machu Picchu or the Everest Base Camp Trek, as well as some nearer to home in the Highlands of Scotland. You don’t need to be very sporty, just fairly fit. You’ll have a great time enjoying nature with a group of new friends. Some of the holidays include camping, but we’ll transport the tents for you!\n\nWildlife holidays\nWe organise small-group tours to get closer to nature in Africa, Asia or South America. Go on safari in Africa and watch lions and giraffes. Meet the famous turtles of the Galapagos Islands. Look for tigers in India, or take an elephant safari in Sri Lanka. We use local guides and stay in a range of accommodation, from tents to tree houses."
       },
-      "vocabulary": [
-        { "word": "Rapids", "definition": "Fast-flowing, turbulent parts of a river." },
-        { "word": "Endurance", "definition": "The ability to withstand sustained hardship or physical stress." },
-        { "word": "High-altitude", "definition": "Situated at a great height above sea level." }
+      "preparation": {
+        "type": "image_drag_and_drop",
+        "instruction": "Drag the correct word to the matching adventure photo.",
+        "items": [
+          { "word": "Kayaking", "image": "kayaking.avif" },
+          { "word": "White water rafting", "image": "whitewaterrafting.avif" },
+          { "word": "Desert", "image": "desert.avif" },
+          { "word": "Snowboarding", "image": "snowboarding.avif" },
+          { "word": "Ancient ruins", "image": "ancientruins.avif" },
+          { "word": "Trekking", "image": "trekking.avif" }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Categorisation",
+          "instruction": "Put the activities under the correct holiday category.",
+          "type": "category_matching",
+          "categories": [
+            "Activity holidays",
+            "Polar expeditions",
+            "Cultural journeys",
+            "Trekking tours",
+            "Wildlife holidays"
+          ],
+          "items": [
+            { "item": "go kayaking", "correct_category": "Activity holidays" },
+            {
+              "item": "try different sports",
+              "correct_category": "Activity holidays"
+            },
+            {
+              "item": "visit the South Pole",
+              "correct_category": "Polar expeditions"
+            },
+            { "item": "see whales", "correct_category": "Polar expeditions" },
+            {
+              "item": "learn about foreign cultures",
+              "correct_category": "Cultural journeys"
+            },
+            {
+              "item": "try different local food",
+              "correct_category": "Cultural journeys"
+            },
+            { "item": "climb mountains", "correct_category": "Trekking tours" },
+            { "item": "visit Scotland", "correct_category": "Trekking tours" },
+            { "item": "see lion", "correct_category": "Wildlife holidays" },
+            {
+              "item": "follow a local guide",
+              "correct_category": "Wildlife holidays"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice",
+          "instruction": "Select the holiday(s) that match each statement based on the text.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "On which holiday(s) can you see animals?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": ["Polar expeditions", "Wildlife holidays"]
+            },
+            {
+              "question": "On which holiday(s) do you need to be reasonably fit?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": ["Trekking tours"]
+            },
+            {
+              "question": "On which holiday(s) can you meet local people?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": ["Cultural journeys"]
+            },
+            {
+              "question": "On which holiday(s) can you go camping?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": ["Trekking tours", "Wildlife holidays"]
+            },
+            {
+              "question": "On which holiday(s) might you go up a mountain?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": ["Activity holidays", "Trekking tours"]
+            },
+            {
+              "question": "On which holiday(s) might you need special clothes or shoes?",
+              "options": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Cultural journeys",
+                "Trekking tours",
+                "Wildlife holidays"
+              ],
+              "correct_answers": [
+                "Activity holidays",
+                "Polar expeditions",
+                "Trekking tours"
+              ]
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Compare requirements like fitness level, equipment provided, and duration across trips.",
-      "Identify key action verbs and activity types to match traveler preferences."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "adventure-mc",
-        "title": "Check your understanding: trip selection",
-        "instruction": "Choose the best adventure trip for each person.",
-        "questions": [
-          { "id": 1, "question": "Which trip is shortest in duration?", "options": ["Trip A", "Trip B", "Trip C"], "answer": "Trip C" },
-          { "id": 2, "question": "Which trip requires high physical fitness for mountain hiking?", "options": ["Trip A", "Trip B", "Trip C"], "answer": "Trip B" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which of these three extreme adventure trips would you choose to go on?"
-    }
-  },
-  {
-    "topic": {
-      "id": "food-restaurants",
-      "title": "Food and restaurants review",
-      "level": "B1 Intermediate",
-      "category": "Food & Dining",
-      "description": "Read reviews of four popular city restaurants specializing in different international cuisines."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "City Dining Guide",
-        "text": "1. Spice Garden (Indian): Authentic street food and rich curries. Great vegan options and affordable prices, but booking is essential as tables fill quickly.\n2. La Trattoria (Italian): Cozy family restaurant serving wood-fired pizzas and homemade pasta. Excellent house wine and warm service.\n3. Sakura Sushi (Japanese): Sleek, modern dining with fresh sashimi and bento boxes. Slightly expensive, but perfect for a special celebration.\n4. El Tapeo (Spanish): Vibrant tapas bar with live flamenco guitar. Great for sharing small plates with large groups of friends."
+    {
+      "id": "an-olympic-blog",
+      "title": "An Olympic blog",
+      "content": {
+        "type": "text",
+        "text": "What an Olympics!\nPosted by Helen Nolan on 10 September, 2012 at 21:25\n\nIt’s all over! I’ve been writing my blog from London every day during the Olympics and the Paralympics and this is my final post to look back on a wonderful couple of months. Here are some of the things that were the most memorable for me:\n\nThe Opening Ceremony\nThis set the scene for the Games with an amazing show featuring music, dancing, historical figures, fireworks and British humour. A huge number of volunteers practised for months to make everything perfect. The best moment was when the old lady in Buckingham Palace turned round and showed that she was neither a lookalike nor an actor but Her Majesty the Queen. The next best bit was when she jumped out of a helicopter with James Bond (although I think that actually was an actor!).\n\nTeam GB\nI was very proud of our team as we kept on winning medals and finished in third position in the medal table, which is truly a great result for Great Britain. There were so many incredible sportsmen and women. The ones that stand out for me are Mo Farah, the Somalian-born Londoner who won the 10,000 and 5,000 metres with the whole stadium going crazy, Jessica Ennis, the popular super-athlete from Sheffield who won the heptathlon, and Nicola Adams who won the first female boxing medal in Olympic history for Britain.\n\nThe Olympic Stadium crowd\nAlthough the crowd cheered on the British, there was lots of support for athletes of other nationalities too like the wonderful Usain Bolt, from Jamaica, who won the 100 and 200 metres sprint to become the fastest man alive. There was also Oscar Pistorius of South Africa who was the first disabled person to compete in the Olympics. He went on to win two gold medals and a silver in the Paralympics.\n\nNew sports\nI have really enjoyed being able to watch sports which are not normally shown on television. Before the Olympics I didn’t expect to love watching judo or find myself screaming at the television during a game of wheelchair tennis, but I really got into them. I didn’t know anything about goalball before the Paralympics but it became one of my favourite sports.\n\nThe organisation and the atmosphere\nIt took seven years of planning and 70,000 volunteers to make everything go well. Many people have said that the organisation was not as perfect as that of the Beijing Games, but there was a much better atmosphere which spread out through the whole city. The volunteers were always friendly and helpful and Londoners even began talking to each other, and visitors, on the underground trains!"
       },
-      "vocabulary": [
-        { "word": "Authentic", "definition": "Made or done in a traditional, genuine way." },
-        { "word": "Sleek", "definition": "Smooth, elegant, and modern in appearance." },
-        { "word": "Tapas", "definition": "Small savory Spanish dishes served with drinks." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "The Olympic Games",
+            "definition": "an international sports competition which is held every four years"
+          },
+          {
+            "term": "The Paralympic Games",
+            "definition": "an international sports competition for athletes with physical disabilities"
+          },
+          {
+            "term": "a volunteer",
+            "definition": "a person who does work without being paid for it"
+          },
+          {
+            "term": "a medal",
+            "definition": "a piece of gold, silver or bronze which is given to a competition winner"
+          },
+          {
+            "term": "a ceremony",
+            "definition": "a formal and public event"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Matching",
+          "instruction": "Match the sportsperson with their sporting achievement.",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "Mo Farah",
+              "definition": "won gold in the 5,000 and 10,000 metres."
+            },
+            {
+              "term": "Jessica Ennis",
+              "definition": "won a gold medal in the heptathlon."
+            },
+            {
+              "term": "Nicola Adams",
+              "definition": "became the first British woman to win boxing medal in the Olympics."
+            },
+            {
+              "term": "Usain Bolt",
+              "definition": "won both the 100 and 200 metres sprint."
+            },
+            {
+              "term": "Oscar Pistorius",
+              "definition": "became the first disabled person to compete in the Olympics."
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice",
+          "instruction": "Choose the best answer for each question based on the text.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "How long did the Olympics and Paralympics last?",
+              "options": ["a couple of months", "two weeks", "seven years"],
+              "correct_answer": "a couple of months"
+            },
+            {
+              "question": "What does the blogger think was the best thing during the opening ceremony?",
+              "options": [
+                "the British humour",
+                "the volunteers",
+                "the Queen's appearance"
+              ],
+              "correct_answer": "the Queen's appearance"
+            },
+            {
+              "question": "How does the blogger feel about the British athletes' performance?",
+              "options": ["disappointed", "surprised", "proud"],
+              "correct_answer": "proud"
+            },
+            {
+              "question": "Which of these British athletes was born in a foreign country?",
+              "options": ["Jessica Ennis", "Mo Farah", "Nicola Adams"],
+              "correct_answer": "Mo Farah"
+            },
+            {
+              "question": "Which athlete competed in both the Olympics and Paralympics?",
+              "options": ["Usain Bolt", "Oscar Pistorius", "Mo Farah"],
+              "correct_answer": "Oscar Pistorius"
+            },
+            {
+              "question": "Which sport was completely new to the blogger?",
+              "options": ["wheelchair tennis", "goalball", "judo"],
+              "correct_answer": "goalball"
+            },
+            {
+              "question": "How did the London Olympics compare to the Beijing Olympics, according to the blogger?",
+              "options": [
+                "It was better organised, but the atmosphere wasn't as good.",
+                "It was very similar.",
+                "It was not as well organised, but there was a better atmosphere."
+              ],
+              "correct_answer": "It was not as well organised, but there was a better atmosphere."
+            },
+            {
+              "question": "What did the blogger say changed about Londoners during the Olympics?",
+              "options": [
+                "They volunteered.",
+                "They watched new sports.",
+                "They talked to each other on the trains."
+              ],
+              "correct_answer": "They talked to each other on the trains."
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Scan for price indicators ('affordable', 'expensive') and dietary notes ('vegan options').",
-      "Match group sizes and dining occasions to restaurant atmospheres."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "food-review-mc",
-        "title": "Check your understanding: matching",
-        "instruction": "Match each dining situation to the appropriate restaurant.",
-        "questions": [
-          { "id": 1, "question": "Where should a large group go if they want to share small dishes?", "options": ["Spice Garden", "La Trattoria", "Sakura Sushi", "El Tapeo"], "answer": "El Tapeo" },
-          { "id": 2, "question": "Which restaurant is best for a special occasion despite higher prices?", "options": ["Spice Garden", "La Trattoria", "Sakura Sushi", "El Tapeo"], "answer": "Sakura Sushi" }
+    {
+      "id": "food-and-restaurants",
+      "title": "Food and restaurants",
+      "content": {
+        "type": "text",
+        "text": "Are you looking for somewhere special to go this weekend? Do you want to try something new? Check out one of these hot new restaurants.\n\nLast Days of the Raj\nA centrally located Indian restaurant, perfect for eating before or after the cinema or a show. In summer enjoy your meal in the beautiful garden. The most popular dishes are lamb and chicken cooked with mild, medium or hot spices. For brave customers there is extra hot!\n\nA Taste of Tuscany\nWhether you’d like a great value-for-money lunch or a relaxed evening meal in stylish surroundings, this is the place for you. The chefs have all been trained in Italy and they make both traditional and contemporary dishes. We recommend the pasta and seafood.\n\nYour Local Caff\nRemember when cafés served full English breakfasts – sausages, beans, fried bread, bacon and eggs – with a strong cup of tea? Well, this place still does and you can have your breakfast at any time you like during the day while you listen to your favourite tunes from the 1980s.\n\nThe Lemon Tree\nThis pretty restaurant serves healthy food that’s tasty too. Come in for a vegetarian snack at lunchtime or a great fruit smoothie or a cappuccino and a delicious piece of cake in the afternoon. Food is bought from local producers whenever possible.\n\nCheesy Bites\nA restaurant that only serves cheese, but hundreds of cheeses from many countries and in lots of different forms. They serve reasonably priced lunches but dinner can be expensive. Lovely food and a very elegant dining room, looking onto an amazing flower garden.\n\nFast Best\nFast food doesn’t have to be junk food, as this café proves. Do you fancy a really good hamburger made with the best ingredients, or old-fashioned fish and chips fried to perfection, all on the table in super-quick time? Speed and quality are important here, and the prices aren’t bad either.\n\nThe Chocolate Box\nThe owner of this small café used to cook all kinds of food, but then she realised she preferred desserts to anything else. If you want meat or fish, don’t come here. They only do desserts! Lots of different kinds of sweets. Chocolate lovers will be excited by the range of chocolate cakes.\n\nMusical Chairs\nHave you noticed how music improves the taste of your food? This new restaurant has different types of live music every night except Sundays, and excellent food to go with it. Great fish dishes, steak and pizza. Monday is classic rock night, so see you there!"
+      },
+      "preparation": {
+        "type": "image_matching",
+        "instruction": "Match the words with the pictures.",
+        "items": [
+          { "word": "pizza", "image": "pizza.avif" },
+          { "word": "cappuccino", "image": "cappuccino.avif" },
+          { "word": "fruit smoothie", "image": "fruitsmoothie.avif" },
+          { "word": "English breakfast", "image": "englishbreakfast.avif" },
+          { "word": "fish", "image": "fish.avif" },
+          { "word": "hamburger", "image": "hamburger.avif" },
+          { "word": "pasta", "image": "pasta.avif" },
+          { "word": "steak", "image": "steak.avif" }
         ]
-      }
-    ],
-    "discussion": {
-      "question": "What type of international cuisine is your absolute favorite when dining out?"
-    }
-  },
-  {
-    "topic": {
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Matching",
+          "instruction": "Match the people with the best restaurant for them.",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "'My girlfriend and I are vegetarian. Could you recommend a suitable restaurant for us?' Tom, aged 18",
+              "definition": "The Lemon Tree"
+            },
+            {
+              "term": "'My friend has a sweet tooth and I want to take her somewhere special this weekend.' Lucy, aged 16",
+              "definition": "The Chocolate Box"
+            },
+            {
+              "term": "'My mates and I all love spicy food. Can you recommend somewhere good for us to go tonight?' Dino, aged 21",
+              "definition": "Last Days of the Raj"
+            },
+            {
+              "term": "'I only get 30 minutes off for lunch and I'm in a hurry. Where can I get something quick to eat?' Melissa, aged 27",
+              "definition": "Fast Best"
+            },
+            {
+              "term": "'Breakfast is the most important meal of the day in my opinion. Do you know anywhere that serves a good brekkie?' Micky, aged 38",
+              "definition": "Your Local Caff"
+            },
+            {
+              "term": "'We love Italian food, especially pasta. Everyone loves Italian, don't they? Any good Italians near here?' Momo, aged 22",
+              "definition": "A Taste of Tuscany"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice",
+          "instruction": "Choose the restaurant that matches each description.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "Which restaurant serves hot and spicy food?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answer": "Last Days of the Raj"
+            },
+            {
+              "question": "Which restaurant only has desserts and sweets?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answer": "The Chocolate Box"
+            },
+            {
+              "question": "In which two restaurants can you listen to some great music?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answers": ["Your Local Caff", "Musical Chairs"]
+            },
+            {
+              "question": "Which restaurant is good for people who don't eat meat?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answer": "The Lemon Tree"
+            },
+            {
+              "question": "Which restaurant employs staff trained in Europe?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answer": "A Taste of Tuscany"
+            },
+            {
+              "question": "Which restaurant serves an all-day breakfast including sausages, bacon and eggs?",
+              "options": [
+                "Last Days of the Raj",
+                "A Taste of Tuscany",
+                "Your Local Caff",
+                "The Lemon Tree",
+                "Cheesy Bites",
+                "Fast Best",
+                "The Chocolate Box",
+                "Musical Chairs"
+              ],
+              "correct_answer": "Your Local Caff"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "foreign-exchange-emails",
-      "title": "Foreign exchange student emails",
-      "level": "B1 Intermediate",
-      "category": "Intercultural Exchange",
-      "description": "Read emails between a foreign exchange host family and an incoming international student."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Exchange Visit Preparation",
-        "text": "Dear Anna,\n\nWe are so excited to welcome you to London next month for your exchange stay! My name is Mrs. Davies, and I live with my husband and our 15-year-old daughter, Sophie.\n\nYour room is upstairs and has a desk where you can study. Sophie loves playing volleyball and baking, and she can't wait to show you around her school. Please let us know if you have any dietary allergies or preferences so we can prepare meals accordingly.\n\nSafe travels!\nBest regards,\nMrs. Davies"
+      "title": "Foreign exchange emails",
+      "content": {
+        "type": "text",
+        "text": "From: Simon Allen\nTo: Fran Romero\nSubject: How's it going?\nHey Fran\nI haven't heard from you since you arrived in Edinburgh. How are you getting on? Is the family you're staying with OK? What are your English classes like?\nWrite soon!\nSimon\n\nFrom: Fran Romero\nTo: Simon Allen\nSubject: Re: How's it going?\nHi Simon\nSorry I haven't written till now. Since I got here I've been really busy with the course and making new friends. I'm speaking English all the time and going out in the evenings with my classmates. We're a real mix of nationalities: Chinese, Russian, Thai, Italian, Spanish, Brazilian … We all talk in English but I'm learning loads about other languages and countries too.\nMy host family are really nice. The parents, Susan and Paul, are very friendly and kind. The children are called Lewis and Amy. They're both in primary school and are very sweet but they can be a bit annoying too. If I have to watch the film Frozen with them one more time, I'm going to go crazy! I know all the songs by heart now. Ahhhh!\nWe live pretty near the school so I walk there every day. It's only a short bus ride from Edinburgh city centre, and there are loads of shops and cafés there. There's an ancient castle too and we're going there on a school trip next week. Edinburgh is a really interesting place to be and there's a festival on at the moment. It's awesome but a bit expensive for us students, so we've been hanging out in the streets watching the free street performances from actors and musicians. Yesterday I saw a magician doing card tricks – it was so much fun!\nI'll send some photos of Edinburgh Castle next time. Take care and let me know how you are doing.\nFran"
       },
-      "vocabulary": [
-        { "word": "Exchange stay", "definition": "A visit where a student lives with a host family in another country." },
-        { "word": "Dietary preferences", "definition": "Specific choices regarding food, such as being vegetarian or dairy-free." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "a foreign exchange student",
+            "definition": "a student who goes to another country to study for a short time"
+          },
+          {
+            "term": "a host family",
+            "definition": "a family which lets a foreign student stay in their home and live and eat together with them"
+          },
+          {
+            "term": "a school trip",
+            "definition": "a visit by students to a place to learn something about it"
+          },
+          {
+            "term": "a festival",
+            "definition": "a special time or event when people celebrate something"
+          },
+          {
+            "term": "a classmate",
+            "definition": "somebody who studies with you in the same class"
+          },
+          {
+            "term": "a street performance",
+            "definition": "a show by an actor, musician or other performer in a public place"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False based on the text.",
+          "type": "true_false",
+          "questions": [
+            { "statement": "Fran is in Edinburgh now.", "answer": true },
+            {
+              "statement": "Fran is staying at Simon’s house.",
+              "answer": false
+            },
+            {
+              "statement": "Fran has been busy since he arrived.",
+              "answer": true
+            },
+            {
+              "statement": "Fran strongly dislikes the host family’s children.",
+              "answer": false
+            },
+            {
+              "statement": "Fran has been to Edinburgh Castle.",
+              "answer": false
+            },
+            {
+              "statement": "Fran thinks the street performances are expensive.",
+              "answer": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Synonyms and Phrases",
+          "instruction": "Match the words and phrases which have the same meaning.",
+          "type": "matching",
+          "pairs": [
+            { "term": "Dear ...", "definition": "Hi... / Hey ..." },
+            { "term": "How are you?", "definition": "How's it going?" },
+            { "term": "lots of", "definition": "loads of" },
+            { "term": "quite", "definition": "pretty" },
+            { "term": "slightly", "definition": "a bit" },
+            { "term": "pleasant", "definition": "nice" },
+            { "term": "spend time with friends", "definition": "hang out" },
+            { "term": "all right", "definition": "OK" }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Distinguish between formal host-family greetings and student responses.",
-      "Identify logistical details regarding accommodation and meal requirements."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "exchange-email-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements are True or False based on the host's email.",
-        "questions": [
-          { "id": 1, "statement": "Sophie is Mrs. Davies' 15-year-old daughter.", "correctAnswer": true },
-          { "id": 2, "statement": "Anna is asked to bring her own desk.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Would you like to participate in a student exchange program in another country?"
-    }
-  },
-  {
-    "topic": {
+    {
       "id": "friendship-quiz",
-      "title": "A friendship quiz",
-      "level": "B1 Intermediate",
-      "category": "Relationships & Personality",
-      "description": "Read a magazine-style personality quiz to evaluate friendship traits and loyalty."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "What Kind of Friend Are You?",
-        "text": "Question 1: Your best friend is upset about a bad exam result. What do you do?\nA) Listen patiently and help them study for the retake.\nB) Tell them not to worry and distract them with a fun activity.\nC) Give them space until they feel better.\n\nQuestion 2: Your friend invites you out, but you are very tired. What do you do?\nA) Go anyway because you don't want to let them down.\nB) Explain honestly that you are tired and suggest meeting tomorrow instead.\nC) Make up an excuse and stay home."
+      "title": "Friendship Quiz",
+      "content": {
+        "type": "text",
+        "text": "Are you a good friend?\nYou might think you are the perfect friend, but are you really? What do your mates think of you? Take this short test to find out.\n\n1. You are at home on a Saturday afternoon when your friend phones you and says he/she is in the town centre and has spent all his/her money and feels really ill. His/her family is away for the day. You …\na. go as quickly as you can to help your friend, even though it will take a long time on the bus to get into town.\nb. tell your friend to find a taxi and come to your house. You think your parents will probably pay, but it might be very hard to find a taxi.\nc. recommend that your friend walks home. The fresh air will make your friend feel better.\n\n2. Your friend has been having lots of problems with maths, but you find it easy. In a couple of weeks you have some important maths tests and your friend has asked you for some help. You …\na. sit down with your friend and organise some times for extra maths classes together, even though this will mean you have less time to study.\nb. show your friend some online videos which explain the important points and some questions with answers.\nc. tell your friend that he/she can copy from you in the maths test; you'll make sure he/she can see your paper.\n\n3. You and your friend are both interested in going out with the same person. You know your friend has really liked this person for a long time, but he/she seems to prefer you. You …\na. invite the person out with a group of people, then make sure your friend has a chance to talk a lot to him/her.\nb. tell your friend that if he/she doesn't invite the person out, you will, even though you know he/she is too shy to make a move.\nc. ask the person out and don't tell your friend. All's fair in love and war!\n\n4. Your friend has just completely changed his/her image: a new hairstyle in blue and red and new clothes in terrible colours. Now he/she wants you to go with him/her to get some tattoos and piercings done. You …\na. suggest that he/she thinks carefully before having a tattoo or piercing done – tattoos are very hard to remove if you change your mind.\nb. say that you'll go along with him/her for a laugh, but you don't want anything done yourself.\nc. tell him/her what you think of his/her new look (that it's awful), and that he/she should get professional advice before doing anything else.\n\nAnswers\nMostly As – you are a great friend, but don't let your mates take advantage of you.\nMostly Bs – you're a pretty good friend, but not reliable in a real emergency.\nMostly Cs – with friends like you, who needs enemies? You need to treat your friends the way you'd like them to treat you."
       },
-      "vocabulary": [
-        { "word": "Distract", "definition": "To divert someone's attention away from something troubling." },
-        { "word": "Let down", "definition": "To fail to support or satisfy someone who relies on you." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          { "term": "mates", "definition": "friends." },
+          { "term": "be away", "definition": "be on a trip, not at home." },
+          { "term": "coming up", "definition": "happening soon." },
+          {
+            "term": "shy",
+            "definition": "timid, nervous or embarrassed when with other people."
+          },
+          {
+            "term": "take advantage of someone",
+            "definition": "use someone unfairly, especially if they are trying to be nice or help you."
+          },
+          {
+            "term": "treat someone (well/badly/etc.)",
+            "definition": "behave (in a certain way) towards someone."
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "You can do this quiz to find out if you are a good friend.",
+              "answer": true
+            },
+            {
+              "statement": "In question 1, your friend can easily get a bus or taxi.",
+              "answer": false
+            },
+            {
+              "statement": "In question 2, you can give your friend maths classes without causing difficulties for yourself.",
+              "answer": false
+            },
+            {
+              "statement": "In question 3, you think the person you like would prefer to go out with your friend.",
+              "answer": false
+            },
+            {
+              "statement": "In question 4, your friend is thinking about a permanent change to his/her body.",
+              "answer": true
+            },
+            {
+              "statement": "If you answer mostly Cs, you are not a good friend.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice",
+          "instruction": "Choose the best answer for each question.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "In question 1, which answer is the most helpful for your friend?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "a"
+            },
+            {
+              "question": "Which answer in question 1 sounds good but probably won't work?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "b"
+            },
+            {
+              "question": "In question 2, which answer involves the biggest risk for you?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "c"
+            },
+            {
+              "question": "Which answer in question 2 takes the least amount of your time?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "c"
+            },
+            {
+              "question": "In question 3, which answer has an expression that says it's OK to behave badly if you are in love?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "c"
+            },
+            {
+              "question": "Which answer in question 3 is the best for your friend?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "a"
+            },
+            {
+              "question": "In question 4, which answer is the most honest?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "c"
+            },
+            {
+              "question": "Which answer in question 4 is the least responsible?",
+              "options": ["a", "b", "c"],
+              "correct_answer": "b"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Analyze scenario options for emotional and practical responses.",
-      "Understand idiomatic expressions related to personal relationships."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "friendship-quiz-mc",
-        "title": "Check your understanding: quiz scenario",
-        "instruction": "Select the option representing honest communication.",
-        "questions": [
-          { "id": 1, "question": "In Question 2, which option represents honest communication about being tired?", "options": ["Option A", "Option B", "Option C"], "answer": "Option B" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What quality do you value most in a close friend?"
-    }
-  },
-  {
-    "topic": {
-      "id": "how-be-safe-smart-searcher",
+    {
+      "id": "how-to-be-a-safe-and-smart-searcher",
       "title": "How to be a safe and smart searcher",
-      "level": "B1 Intermediate",
-      "category": "Digital Literacy",
-      "description": "Read an instructional guide on evaluating search engine results, online sources, and digital credibility."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Smart Online Research Guide",
-        "text": "1. Use precise keywords: Instead of searching 'history of cars', try 'electric car technological history 21st century'.\n2. Check the domain extension: Educational (.edu) and government (.gov) websites are generally more reliable than commercial (.com) blogs.\n3. Cross-check facts: Always verify news or facts across at least two independent reliable sources.\n4. Look for the author and publication date to ensure information is current."
+      "content": {
+        "type": "text",
+        "text": "Several keywords will help to find better results. Use more than one keyword when you are doing a search. If you want to find out about seagulls, for example, search for 'bird seagull' and not just 'seagull' – because seagull might also be the name of just about anything else, from a hotel to a documentary film.\n\nExact references can help you find what you're looking for. If you are looking for an exact phrase or sentence, e.g. \"seagulls are very clever\", type it between inverted commas (\"\") and only exact matches will be shown. This is useful when you want to find something you've already seen but lost.\n\nAvoid common words like 'a' or 'the' in a search. These aren't always helpful and are usually unnecessary.\n\nRemove unwanted results by adding a minus symbol (-). For example, 'seagull -hotel -film' would leave out all references to hotels and films.\n\nCheck your spelling. Make sure that you spell every word in the search box correctly. The smallest typing mistakes can bring unwanted results – especially when the mistyped word exists.\n\nHave a filter. It's a good idea to filter your online searches, especially when you are searching for pictures. Ask an adult to help you add a filtering system. There are lots of filtering software options available.\n\nExperiment with different search engines until you find the one that's best for you. Some search engines personalise the results, so check out the option of using a search engine that doesn't do this and you will get different results.\n\nReliability is very important when you are searching on the internet. Always ask yourself, 'Is this reliable?' Don't make the mistake of believing everything you see. Some websites are unreliable and some information is false. Check your information on other websites before accepting it."
       },
-      "vocabulary": [
-        { "word": "Domain extension", "definition": "The ending of a web address (e.g., .edu, .org, .com) indicating the site type." },
-        { "word": "Cross-check", "definition": "To verify information by comparing different sources." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "keyword",
+            "definition": "a word that is important for or 'key' to the topic you are researching"
+          },
+          {
+            "term": "to mistype",
+            "definition": "to make a mistake when writing something on a keyboard"
+          },
+          { "term": "to narrow", "definition": "to make more limited" },
+          {
+            "term": "unreliable",
+            "definition": "not to be trusted or believed"
+          },
+          {
+            "term": "a filter",
+            "definition": "software for sorting and blocking unwanted online content"
+          },
+          {
+            "term": "a search engine",
+            "definition": "a computer program that is used to look for information on the internet"
+          },
+          {
+            "term": "inverted commas",
+            "definition": "punctuation marks that look like this: \"\""
+          },
+          {
+            "term": "several",
+            "definition": "more than two or three but not many"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "You should only use one keyword in a single search.",
+              "answer": false
+            },
+            {
+              "statement": "Inverted commas are useful to find something you’ve already seen.",
+              "answer": true
+            },
+            {
+              "statement": "Words like ‘an’ are unhelpful in a search.",
+              "answer": true
+            },
+            {
+              "statement": "If your keyword could refer to a lot of different things, you can't avoid getting a long list of results.",
+              "answer": false
+            },
+            {
+              "statement": "Small spelling mistakes aren’t important.",
+              "answer": false
+            },
+            {
+              "statement": "Filter software is especially important for image searches.",
+              "answer": true
+            },
+            {
+              "statement": "Some search engines give different results to different people.",
+              "answer": true
+            },
+            {
+              "statement": "Some websites contain false information.",
+              "answer": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Dos and Don'ts",
+          "instruction": "Categorise the search tips into Do or Don't.",
+          "type": "category_matching",
+          "categories": ["Do", "Don't"],
+          "items": [
+            {
+              "item": "check the spelling of every word",
+              "correct_category": "Do"
+            },
+            {
+              "item": "use a filter for a picture search",
+              "correct_category": "Do"
+            },
+            {
+              "item": "use inverted commas in a search",
+              "correct_category": "Do"
+            },
+            {
+              "item": "use a minus symbol to avoid unwanted references",
+              "correct_category": "Do"
+            },
+            {
+              "item": "always use the same search engine without considering alternatives",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "always use a single keyword",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "use words like 'a' or 'the' in a search",
+              "correct_category": "Don't"
+            },
+            {
+              "item": "believe all the information you see on the internet",
+              "correct_category": "Don't"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Pay attention to research terminology like 'keywords', 'domain extensions', and 'cross-checking'.",
-      "Identify criteria used to determine web credibility."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "searcher-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements represent smart search strategies.",
-        "questions": [
-          { "id": 1, "statement": "Educational domains (.edu) are often more reliable than personal blogs.", "correctAnswer": true },
-          { "id": 2, "statement": "You should rely on the first search result without checking other sources.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "How do you check if news or information you read online is real or fake?"
-    }
-  },
-  {
-    "topic": {
+    {
       "id": "job-adverts",
-      "title": "Job advertisements",
-      "level": "B1 Intermediate",
-      "category": "Careers & Employment",
-      "description": "Read formal intermediate job listings to understand job requirements, responsibilities, and application steps."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Career Opportunities",
-        "text": "Role 1: IT Support Specialist\nResponsibilities: Troubleshoot network issues, install hardware, and provide tech support to staff.\nQualifications: Degree in Computer Science or 2 years equivalent technical experience. Good problem-solving skills.\n\nRole 2: Social Media Manager\nResponsibilities: Create engaging visual content, write promotional posts, and monitor brand analytics.\nQualifications: Excellent written communication skills and experience with digital design tools."
+      "title": "Job adverts",
+      "content": {
+        "type": "image",
+        "image": "jobadverts.avif"
       },
-      "vocabulary": [
-        { "word": "Troubleshoot", "definition": "To analyze and solve technical problems." },
-        { "word": "Analytics", "definition": "Data and statistics used to measure performance." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          { "term": "cash", "definition": "an informal word for money." },
+          {
+            "term": "a trainee",
+            "definition": "a person who is being trained to do a job."
+          },
+          { "term": "chatty", "definition": "talkative." },
+          { "term": "valuable", "definition": "very useful or important." },
+          {
+            "term": "a career",
+            "definition": "a person's chosen job and life work."
+          },
+          {
+            "term": "skilled",
+            "definition": "having a special ability or training."
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: Matching",
+          "instruction": "Which job would be the best for each person?",
+          "type": "matching",
+          "pairs": [
+            {
+              "term": "Nina is studying English and has her own blog. She is a very sociable person, and is interested in music and fashion.",
+              "definition": "C: Wowee Magazine writer"
+            },
+            {
+              "term": "Dave has just finished school and is looking for a full-time job. He is sociable, likes working with his hands and cares about his appearance.",
+              "definition": "B: Trainee hairdresser"
+            },
+            {
+              "term": "Dewei enjoys helping people. He wants to make a difference to other people's lives. He is looking for opportunities to learn new things that will help him in his career.",
+              "definition": "A: Support Worker"
+            },
+            {
+              "term": "Sarah is a student and she is looking for flexible, part-time work. She doesn't want to work in a restaurant or shop. She is tall, beautiful and has her own unique look.",
+              "definition": "D: Model"
+            },
+            {
+              "term": "Sam is friendly and sociable. He has experience working in a restaurant and wants a job with more responsibility. He is studying part-time so he needs flexible working hours.",
+              "definition": "E: Coffee Beans café worker"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Fill the gaps with the correct letter (A, B, C, D, or E).",
+          "type": "gap_fill",
+          "questions": [
+            {
+              "sentence": "You never have to wear your own clothes for job [].",
+              "answer": "A"
+            },
+            {
+              "sentence": "Job [] offers possibilities for children under 16 years old.",
+              "answer": "D"
+            },
+            {
+              "sentence": "Your pay for job [] depends on how successful you are at the job.",
+              "answer": "C"
+            },
+            {
+              "sentence": "Job [] requires physical contact with customers.",
+              "answer": "B"
+            },
+            {
+              "sentence": "Job [] offers management opportunities.",
+              "answer": "E"
+            },
+            {
+              "sentence": "You might get some 'freebies' if you do job [].",
+              "answer": "C"
+            },
+            {
+              "sentence": "You need to work closely with your team for job [].",
+              "answer": "E"
+            },
+            {
+              "sentence": "Job [] is for someone who likes working with older people.",
+              "answer": "A"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Distinguish between 'Responsibilities' (what you will do) and 'Qualifications' (what you need to apply).",
-      "Match specific skills to technical role descriptions."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "b1-job-mc",
-        "title": "Check your understanding: job matching",
-        "instruction": "Select the correct role for each skill set.",
-        "questions": [
-          { "id": 1, "question": "Which role requires experience with digital design and writing promotional posts?", "options": ["IT Support Specialist", "Social Media Manager"], "answer": "Social Media Manager" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Would you prefer a technical IT job or a creative marketing role?"
-    }
-  },
-  {
-    "topic": {
-      "id": "skills-21st-century-workplace",
+    {
+      "id": "skills-for-the-21st-century-workplace",
       "title": "Skills for the 21st-century workplace",
-      "level": "B1 Intermediate",
-      "category": "Work & Professional Growth",
-      "description": "Read an educational article discussing adaptability, collaboration, critical thinking, and digital intelligence in modern careers."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Essential Workplace Skills",
-        "text": "In today's rapidly changing economy, hard technical skills alone are not enough. Employers increasingly seek soft skills:\n- Adaptability: The ability to learn new tools and adjust to changing environments.\n- Critical Thinking: Analyzing information objectively rather than accepting it without evidence.\n- Collaboration: Working productively across diverse remote and international teams.\n- Emotional Intelligence: Understanding and managing your emotions and communicating empathetically."
+      "content": {
+        "type": "text",
+        "text": "Skills for the 21st-century workplace\nHave you got the skills you need for the 21st-century workplace?\nWe need to develop all kinds of skills to survive in the 21st century. Some, like ICT skills and knowledge of the digital world, are taught explicitly in schools in the UK. Here are five less obvious ones for you to think about. These are the sorts of skills that employers may ask you questions about in interviews, so it’s a good idea to think about how good you are in these areas. What are your strengths and weaknesses?\n\nImagination\nIn the age of technology that we are living in now, it is no longer enough to keep on making the same products. Employers need people who can imagine new approaches and new ideas.\nThink: Think of an object or gadget you use every day. How could it be improved? Can you think of three improvements?\n\nProblem solving\nEmployers will value workers who are able to see problems before they happen and come up with creative solutions.\nThink: Imagine you are organising an end-of-term social event at school. Think of some problems that you could face. Can you think of any solutions?\n\nCommunication skills\nWorkers will have to be good communicators. They will have to be able to negotiate and discuss key issues and also write in a clear way without using too many words.\nThink: How do people communicate with each other in the 21st century?\n\nCritical analysis\nEmployers want workers who are able to recognise the difference between information that can be believed and false information.\nThink: Use the internet to find out three facts about a celebrity or famous figure. Can you verify the information by checking other websites?\n\nDecision making\nIndividual workers have a growing amount of responsibility. It is important to be able to evaluate a situation and be confident in making a decision.\nThink: Which three things could you do to (a) be healthier (b) do better at school and (c) help others? Make a decision now to do at least one of these things. Then … just do it!"
       },
-      "vocabulary": [
-        { "word": "Adaptability", "definition": "The capacity to adjust easily to new conditions or changes." },
-        { "word": "Collaboration", "definition": "Working jointly with others toward a shared goal." }
+      "preparation": {
+        "type": "gap_fill_box",
+        "instruction": "Fill the gaps with the correct phrase from the box.",
+        "word_box": [
+          "age of technology",
+          "problem solving",
+          "good at making decisions",
+          "communicate well",
+          "analyse information",
+          "the 21st century"
+        ],
+        "template": "We are living in [1]. Some people call it the [2]. We need to learn skills such as [3] and we need to be able to [4] with other people around the world. Employers are looking for people who can [5] well, people who are able to recognise whether information is reliable or not. They also like people who are [6] without asking for help.",
+        "answers": {
+          "1": "the 21st century",
+          "2": "age of technology",
+          "3": "problem solving",
+          "4": "communicate well",
+          "5": "analyse information",
+          "6": "good at making decisions"
+        }
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "21st-century skills are not taught in schools in the UK.",
+              "answer": false
+            },
+            {
+              "statement": "Employers like workers to be imaginative.",
+              "answer": true
+            },
+            {
+              "statement": "Employers want workers to think about possible problems.",
+              "answer": true
+            },
+            {
+              "statement": "Employers like workers to be original when solving problems.",
+              "answer": true
+            },
+            {
+              "statement": "Future workers will need to be able to write concisely.",
+              "answer": true
+            },
+            {
+              "statement": "People communicate with each other less in the 21st century.",
+              "answer": false
+            },
+            {
+              "statement": "Employers believe it is useful to know a lot of information about celebrities.",
+              "answer": false
+            },
+            {
+              "statement": "Employers don’t want workers to make decisions without asking them.",
+              "answer": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Gap Fill",
+          "instruction": "Complete the sentences with the correct verb.",
+          "type": "gap_fill",
+          "word_box": [
+            "solve",
+            "teach",
+            "have",
+            "differentiate",
+            "discuss",
+            "value",
+            "make",
+            "develop"
+          ],
+          "questions": [
+            {
+              "sentence": "UK schools and colleges [] ICT skills.",
+              "answer": "teach"
+            },
+            {
+              "sentence": "Employers [] people with ideas for new approaches.",
+              "answer": "value"
+            },
+            {
+              "sentence": "Employers like workers who can [] problems.",
+              "answer": "solve"
+            },
+            {
+              "sentence": "Workers need to be able to [] their work with their team.",
+              "answer": "discuss"
+            },
+            {
+              "sentence": "Workers need to [] their writing skills.",
+              "answer": "develop"
+            },
+            {
+              "sentence": "It is important that workers can [] between truth and lies.",
+              "answer": "differentiate"
+            },
+            {
+              "sentence": "Employees in the 21st century [] more responsibility.",
+              "answer": "have"
+            },
+            {
+              "sentence": "Employers like their workers to [] decisions.",
+              "answer": "make"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Understand the difference between 'hard skills' (technical knowledge) and 'soft skills' (interpersonal abilities).",
-      "Learn key abstract nouns used in career articles."
-    ],
-    "exercises": [
-      {
-        "type": "gap_fill",
-        "id": "skills-gapfill",
-        "title": "Check your understanding: gap fill",
-        "instruction": "Fill in the missing workplace skill terms.",
-        "questions": [
-          { "id": 1, "sentence": "The skill of analyzing information objectively is called ________ thinking.", "answer": "critical" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which soft skill do you think is most important for future jobs?"
-    }
-  },
-  {
-    "topic": {
-      "id": "noticeboard",
-      "title": "A community noticeboard",
-      "level": "B1 Intermediate",
-      "category": "Community Life",
-      "description": "Read local community notices regarding lost pets, volunteer groups, club announcements, and local sales."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Town Community Board",
-        "text": "Notice A: Volunteer Park Clean-Up! Join us this Saturday at 10 AM to remove litter and plant wildflowers. Gloves and bags provided.\nNotice B: Lost Tabby Cat! Named Whiskers. Last seen near Green Street. Please call 555-0192 if found.\nNotice C: Second-Hand Guitar Sale. Acoustic guitar in excellent condition. Includes padded case. £85 or best offer."
+    {
+      "id": "the-noticeboard",
+      "title": "The noticeboard",
+      "content": {
+        "type": "image",
+        "image": "thenoticeboard.avif"
       },
-      "vocabulary": [
-        { "word": "Volunteer", "definition": "A person who offers to do work without being paid." },
-        { "word": "Acoustic", "definition": "An instrument that produces sound naturally without electrical amplification." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the jobs with their definitions.",
+        "pairs": [
+          {
+            "term": "babysitter",
+            "definition": "someone who is employed to look after children when the parents are out"
+          },
+          {
+            "term": "IT engineer",
+            "definition": "someone who can build computer networks and fix computer problems"
+          },
+          {
+            "term": "drummer",
+            "definition": "someone who plays the drums in a band"
+          },
+          {
+            "term": "store manager",
+            "definition": "someone who manages and oversees the daily operations of a shop"
+          },
+          {
+            "term": "shelf-stacker",
+            "definition": "someone who displays products for sale on the shelves inside a shop"
+          },
+          {
+            "term": "student",
+            "definition": "someone who is in full-time education at a university or college"
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "The band is looking for a drummer to play classical music.",
+              "answer": false
+            },
+            {
+              "statement": "The babysitter will be required to work on weekends only.",
+              "answer": false
+            },
+            {
+              "statement": "There are no Zumba classes on Friday.",
+              "answer": true
+            },
+            { "statement": "The room to let is unfurnished.", "answer": false },
+            {
+              "statement": "The job at the supermarket requires some experience.",
+              "answer": false
+            },
+            {
+              "statement": "You can book places on a Zumba course any time in September or October.",
+              "answer": false
+            },
+            {
+              "statement": "The lost cat is scared of some other animals and people.",
+              "answer": true
+            },
+            {
+              "statement": "The computer doctor only fixes PCs.",
+              "answer": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Exercise 2: Multiple Choice",
+          "instruction": "Choose the correct notice for each question.",
+          "type": "multiple_choice",
+          "questions": [
+            {
+              "question": "In which notice can you earn just under £5.00 an hour?",
+              "options": ["notice A", "notice B", "notice C"],
+              "correct_answer": "notice C"
+            },
+            {
+              "question": "In which notice can you find somewhere to live?",
+              "options": ["notice B", "notice C", "notice F"],
+              "correct_answer": "notice F"
+            },
+            {
+              "question": "In which notice can you get help installing some new software?",
+              "options": ["notice A", "notice E", "notice G"],
+              "correct_answer": "notice A"
+            },
+            {
+              "question": "In which notice can you get fit?",
+              "options": ["notice D", "notice E", "notice F"],
+              "correct_answer": "notice E"
+            },
+            {
+              "question": "In which notice can you find part-time work on Saturday, Sunday and some weekday evenings?",
+              "options": ["notice E", "notice F", "notice G"],
+              "correct_answer": "notice G"
+            },
+            {
+              "question": "In which notice should you reserve a place before the end of September?",
+              "options": ["notice D", "notice E", "notice F"],
+              "correct_answer": "notice E"
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Identify the main purpose of each notice (event invitation, lost item alert, item for sale).",
-      "Locate contact details and event schedules quickly."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "noticeboard-mc",
-        "title": "Check your understanding: matching",
-        "instruction": "Match the situation to the correct notice.",
-        "questions": [
-          { "id": 1, "question": "Which notice asks for unpaid community help?", "options": ["Notice A", "Notice B", "Notice C"], "answer": "Notice A" }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Have you ever participated in a local volunteer event or park clean-up?"
-    }
-  },
-  {
-    "topic": {
-      "id": "tips-being-super-organised-student",
+    {
+      "id": "tips-for-being-a-super-organised-student",
       "title": "Tips for being a super-organised student",
-      "level": "B1 Intermediate",
-      "category": "Study Habits",
-      "description": "Read advice on time blocking, workspace management, digital archiving, and study-life balance."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Master Your Study Schedule",
-        "text": "Becoming an organized student isn't about studying 10 hours a day—it's about smart planning.\n1. Time Blocking: Divide your afternoon into fixed blocks for study, exercise, and hobbies.\n2. Digital Backups: Save all assignment drafts to a cloud storage folder to avoid losing work.\n3. The 2-Minute Rule: If a small task takes less than two minutes (like replying to an email or filing a sheet), do it immediately instead of putting it off."
+      "content": {
+        "type": "text",
+        "text": "posted 2 hours ago by Amy\nI have always admired students who hand their homework in on time and never forget to do it. Me, on the other hand, … OK, I admit. I’m terrible at getting myself organised!\nBut lately I’ve started keeping a small study diary. I write down everything I need to do and when it needs to be done by. Then I write a reminder a few days before the date just in case. It’s helping.\nSo I was wondering, what are your tips for getting organised? Post a comment below. I’m hoping we can all share some tips to teach us all better study skills.\n\nComments\nHana\nGood question, Amy. I always spend about five minutes at the end of the day tidying up the desktop on my computer. I make a backup of important documents. I delete things I don’t need any more and put everything into the correct folder.\n\nAmy\nNice tip, Hana. I think it’s a good idea to do a little bit of tidying up every day. Then it becomes a habit and your desktop is always organised.\n\nGloria\nThe most important thing is to start studying a few weeks before the exams and not leave it until the night before! That’s just common sense, I think.\n\nAmy\nThanks, Gloria! I agree.\n\nLou\nHi, Amy. My tip is to have a big noticeboard in your bedroom, divided into different sections. I’ve got one. It’s a whiteboard. I’ve got a section for each school subject and another one for other stuff. I use board pens to write reminders and I make sure I look at it every day. The best part is when I remove something from the board!\n\nAmy\nGreat tip, Lou. I’ve got a cork board with pins. I use it in the same way."
       },
-      "vocabulary": [
-        { "word": "Time Blocking", "definition": "A scheduling method where time is divided into specific blocks for different tasks." },
-        { "word": "Cloud storage", "definition": "Online file storage accessible from any device over the internet." }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the word with a similar meaning.",
+        "pairs": [
+          { "term": "terrible", "definition": "awful" },
+          { "term": "skill", "definition": "ability" },
+          { "term": "a reminder", "definition": "a prompt" },
+          { "term": "to delete", "definition": "to remove" },
+          { "term": "a habit", "definition": "a custom" },
+          { "term": "common sense", "definition": "good judgement" },
+          { "term": "to divide", "definition": "to split" },
+          { "term": "a backup", "definition": "a copy" }
+        ]
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "Amy is very good at handing in her homework on time.",
+              "answer": false
+            },
+            {
+              "statement": "Amy writes down the date she has to hand in her homework.",
+              "answer": true
+            },
+            {
+              "statement": "Hana tidies her computer desktop twice a day.",
+              "answer": false
+            },
+            { "statement": "Amy thinks Hana’s tip is good.", "answer": true },
+            {
+              "statement": "Gloria thinks the date you start studying is important.",
+              "answer": true
+            },
+            {
+              "statement": "Lou thinks the best thing about having a noticeboard is using board pens.",
+              "answer": false
+            }
+          ]
+        }
       ]
     },
-    "tips": [
-      "Recognize actionable study productivity techniques.",
-      "Understand time-management idioms and guidelines."
-    ],
-    "exercises": [
-      {
-        "type": "true_or_false",
-        "id": "organised-student-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the advice matches the organizing tips.",
-        "questions": [
-          { "id": 1, "statement": "According to the 2-Minute Rule, small quick tasks should be done immediately.", "correctAnswer": true },
-          { "id": 2, "statement": "You should save your homework only on a single USB stick.", "correctAnswer": false }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "Which of these productivity tips would help you most with your schoolwork?"
-    }
-  },
-  {
-    "topic": {
+    {
       "id": "travel-guide",
-      "title": "A travel guide to Costa Rica",
-      "level": "B1 Intermediate",
-      "category": "Travel & Geography",
-      "description": "Read a travel guide highlighting rainforest wildlife, volcano tours, and eco-tourism activities in Costa Rica."
-    },
-    "content": {
-      "readingPassage": {
-        "title": "Discover Costa Rica",
-        "text": "Costa Rica is a tropical paradise in Central America known for its incredible biodiversity and eco-friendly tourism. \n\nTop Highlights:\n- Monteverde Cloud Forest: Walk across hanging bridges surrounded by misty trees, sloths, and exotic birds.\n- Arenal Volcano: Hike near an active volcano and relax in natural geothermal hot springs afterwards.\n- Pacific Coast Beaches: Perfect for surfing, turtle watching, and enjoying gorgeous sunsets."
+      "title": "Travel guide",
+      "content": {
+        "type": "image",
+        "image": "travelguide.avif"
       },
-      "vocabulary": [
-        { "word": "Biodiversity", "definition": "The variety of plant and animal life in a particular habitat." },
-        { "word": "Geothermal", "definition": "Relating to or produced by the internal heat of the Earth." }
-      ]
-    },
-    "tips": [
-      "Identify tourist regions and their specific nature highlights.",
-      "Understand geographical vocabulary describing tropical and volcanic environments."
-    ],
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "travel-guide-mc",
-        "title": "Check your understanding: travel facts",
-        "instruction": "Select the correct destination based on the guide.",
-        "questions": [
-          { "id": 1, "question": "Where can visitors relax in natural hot springs?", "options": ["Monteverde Cloud Forest", "Arenal Volcano", "Pacific Coast Beaches"], "answer": "Arenal Volcano" }
+      "preparation": {
+        "type": "matching",
+        "instruction": "Match the words with their definitions.",
+        "pairs": [
+          {
+            "term": "a prison",
+            "definition": "a building where people have to live as a punishment for a crime"
+          },
+          {
+            "term": "a pier",
+            "definition": "a structure that goes into water for people to walk on, often to take a boat"
+          },
+          {
+            "term": "a suspension bridge",
+            "definition": "a bridge that is suspended from cables that are attached to towers"
+          },
+          {
+            "term": "a rollercoaster",
+            "definition": "a type of ride at an amusement park, like a fast train on tracks that curve, and go from very high to very low"
+          },
+          {
+            "term": "a gym",
+            "definition": "a health club or a large room with exercise machines"
+          },
+          {
+            "term": "rides",
+            "definition": "mechanical attractions at an amusement park, for example a rollercoaster or big wheel"
+          }
         ]
-      }
-    ],
-    "discussion": {
-      "question": "Would you enjoy an eco-tourism holiday in a rainforest environment?"
+      },
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Exercise 1: True or False",
+          "instruction": "Decide if each statement is True or False.",
+          "type": "true_false",
+          "questions": [
+            {
+              "statement": "Fisherman’s Wharf, Ghirardelli Square and Pier 39 are all in San Francisco.",
+              "answer": true
+            },
+            {
+              "statement": "The Golden Gate Bridge is the shortest suspension bridge in the world.",
+              "answer": false
+            },
+            {
+              "statement": "Alcatraz is still a prison today.",
+              "answer": false
+            },
+            {
+              "statement": "You can see a surfboard damaged in a shark attack in the museum in Santa Cruz.",
+              "answer": true
+            },
+            {
+              "statement": "Ice skating is a popular activity on Venice Beach.",
+              "answer": false
+            },
+            {
+              "statement": "You can meet real film stars at Madame Tussauds in Hollywood.",
+              "answer": false
+            },
+            {
+              "statement": "The Grammy Museum in Los Angeles is dedicated to music and dance.",
+              "answer": true
+            },
+            {
+              "statement": "Space Mountain is the name of one of the hotels in Disneyland.",
+              "answer": false
+            }
+          ]
+        }
+      ]
     }
-  }
-]
+  ]
+}

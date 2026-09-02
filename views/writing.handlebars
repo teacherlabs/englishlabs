@@ -79,6 +79,7 @@
                 {{/each}}
               </div>
               <p class="json-score" data-sports-feedback aria-live="polite"></p>
+              <button class="practice-button" type="button" data-sports-retry hidden>Try again</button>
             {{else}}
             {{#each questions}}
               <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}>
@@ -88,7 +89,7 @@
                 <p class="answer-feedback" hidden></p>
               </div>
             {{/each}}
-            <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: {{#if completed}}{{savedPoints}}{{else}}0{{/if}} / {{#if completed}}{{savedTotal}}{{else}}{{questions.length}}{{/if}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button></div>
+            <div class="quiz-footer"><strong class="score-result" data-reading-score>Points: {{#if completed}}{{savedPoints}}{{else}}0{{/if}} / {{#if completed}}{{savedTotal}}{{else}}{{questions.length}}{{/if}}</strong><button class="practice-button" type="button" data-reading-next disabled>Choose an answer</button><button class="practice-button" type="button" data-reading-retry hidden>Try again</button></div>
             {{/if}}
           </article>
         {{/each}}
@@ -111,14 +112,9 @@
     const questions = [...exercise.querySelectorAll(".reading-question")];
     const score = exercise.querySelector("[data-reading-score]");
     const next = exercise.querySelector("[data-reading-next]");
+    const retry = exercise.querySelector("[data-reading-retry]");
     let current = 0;
     let points = 0;
-    if (exercise.dataset.completed === "true") {
-      questions.forEach((question) => { question.hidden = true; });
-      next.hidden = true;
-      score.textContent = `Completed: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
-      return;
-    }
     const saveCompletion = () => {
       fetch("/api/progress", {
         method: "POST",
@@ -150,24 +146,56 @@
     next.addEventListener("click", () => {
       questions[current].hidden = true;
       current += 1;
-      if (current === questions.length) { next.hidden = true; score.textContent = `Final score: ${points} / ${questions.length}`; saveCompletion(); return; }
+      if (current === questions.length) {
+        next.hidden = true;
+        score.textContent = `Final score: ${points} / ${questions.length}`;
+        saveCompletion();
+        if (retry) retry.hidden = false;
+        return;
+      }
       questions[current].hidden = false;
       next.disabled = true;
       next.textContent = "Choose an answer";
     });
+    const startOver = () => {
+      current = 0;
+      points = 0;
+      questions.forEach((question, index) => {
+        delete question.dataset.answered;
+        question.hidden = index !== 0;
+        question.querySelectorAll("button, input").forEach((element) => {
+          element.disabled = false;
+          element.value === undefined && (element.value = "");
+        });
+        const feedback = question.querySelector(".answer-feedback");
+        feedback.hidden = true;
+        feedback.textContent = "";
+        feedback.className = "answer-feedback";
+        const input = question.querySelector(".written-answer");
+        if (input) input.value = "";
+      });
+      next.hidden = false;
+      next.disabled = true;
+      next.textContent = "Choose an answer";
+      score.textContent = `Points: 0 / ${questions.length}`;
+      if (retry) retry.hidden = true;
+    };
+    if (exercise.dataset.completed === "true") {
+      questions.forEach((question) => { question.hidden = true; });
+      next.hidden = true;
+      score.textContent = `Completed: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
+      if (retry) retry.hidden = false;
+    }
+    if (retry) retry.addEventListener("click", startOver);
   });
 
   document.querySelectorAll(".sports-grouping-exercise").forEach((exercise) => {
     const remaining = exercise.querySelector("[data-sports-remaining]");
     const feedback = exercise.querySelector("[data-sports-feedback]");
+    const itemsContainer = exercise.querySelector("[data-sports-items]");
+    const retry = exercise.querySelector("[data-sports-retry]");
     let draggedItem;
     let points = 0;
-    if (exercise.dataset.completed === "true") {
-      remaining.textContent = "Completed";
-      feedback.textContent = `Final score: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
-      exercise.querySelectorAll(".sport-item").forEach((item) => { item.disabled = true; item.draggable = false; });
-      return;
-    }
 
     const updateRemaining = () => {
       remaining.textContent = `${exercise.querySelectorAll(".sport-item").length} items remaining`;
@@ -184,7 +212,9 @@
       feedback.textContent = correct ? "Correct!" : "Not quite. Try to remember this group.";
       updateRemaining();
       if (!exercise.querySelectorAll(".sport-item:not(:disabled)").length) {
-        feedback.textContent = `Final score: ${points} / ${exercise.querySelectorAll(".sport-item").length}`;
+        const total = exercise.querySelectorAll(".sport-item").length;
+        feedback.textContent = `Final score: ${points} / ${total}`;
+        if (retry) retry.hidden = false;
         fetch("/api/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -192,11 +222,32 @@
             activityType: "writing",
             difficultyLevel: `writing:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
             points,
-            totalPoints: exercise.querySelectorAll(".sport-item").length,
+            totalPoints: total,
           }),
         });
       }
     };
+    const startOver = () => {
+      points = 0;
+      feedback.textContent = "";
+      exercise.querySelectorAll(".sport-item").forEach((item) => {
+        item.disabled = false;
+        item.draggable = true;
+        item.classList.remove("correct-sport", "incorrect-sport");
+        itemsContainer.append(item);
+      });
+      updateRemaining();
+      if (retry) retry.hidden = true;
+    };
+    if (exercise.dataset.completed === "true") {
+      remaining.textContent = "Completed";
+      feedback.textContent = `Final score: ${exercise.dataset.savedPoints} / ${exercise.dataset.savedTotal}`;
+      exercise.querySelectorAll(".sport-item").forEach((item) => { item.disabled = true; item.draggable = false; });
+      if (retry) retry.hidden = false;
+    } else {
+      updateRemaining();
+    }
+    if (retry) retry.addEventListener("click", startOver);
     exercise.querySelectorAll(".sport-item").forEach((item) => {
       item.addEventListener("dragstart", () => { draggedItem = item; });
       item.addEventListener("click", () => {

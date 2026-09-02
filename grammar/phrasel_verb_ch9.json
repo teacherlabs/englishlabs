@@ -1,0 +1,204 @@
+{
+  "chapter": {
+    "id": "phrasal-verbs",
+    "title": "Phrasal Verbs",
+    "level": "Grammar & Vocabulary",
+    "description": "Learn common English phrasal verbs formed by combining verbs with prepositions or adverbs, focusing on general sentence usage and specific verbs like 'look', 'come', and 'get'."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "What is a Phrasal Verb?",
+      "explanation": "A phrasal verb is a combination of a verb and a particle (a preposition or adverb) that creates a new meaning different from the original verb itself (e.g., 'look after' means 'to take care of').",
+      "example": "Please look after my dog while I am away."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Separable vs. Inseparable Phrasal Verbs",
+      "explanation": "Some phrasal verbs can be separated by the object (e.g., 'turn the lights off' or 'turn off the lights'). If the object is a pronoun, it MUST go between the verb and particle (e.g., 'turn it off'). Inseparable phrasal verbs keep the verb and particle together (e.g., 'look for something').",
+      "example": "Turn off the TV. / Turn it off. (NOT: Turn off it.)"
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Phrasal Verbs with 'Look'",
+      "explanation": "Common phrasal verbs with 'look' include: 'look for' (search), 'look after' (care for), 'look forward to' (anticipate with pleasure), 'look up' (search for information), and 'look out' (be careful).",
+      "example": "I am looking for my keys. / Look out! A car is coming."
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Phrasal Verbs with 'Come' and 'Get'",
+      "explanation": "'Come across' (find by chance), 'come up with' (invent/suggest an idea), 'get on/along with' (have a good relationship), 'get over' (recover from), and 'get away' (escape).",
+      "example": "She came across an old photo. / They get on well together."
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: englisch-hilfen.de (Phrasal Verbs Sentences)",
+      "title": "Phrasal Verbs in Sentences",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Can you ____ the lights when you leave the room?",
+          "options": ["turn off", "give up", "look for", "put on"],
+          "answer": "turn off",
+          "explanation": "'Turn off' means to stop an electrical device or light from operating."
+        },
+        {
+          "id": 2,
+          "question": "Don't ____! I know you can solve this puzzle if you keep trying.",
+          "options": ["give up", "take off", "call off", "put off"],
+          "answer": "give up",
+          "explanation": "'Give up' means to stop trying or surrender."
+        },
+        {
+          "id": 3,
+          "question": "The plane will ____ in about ten minutes.",
+          "options": ["take off", "turn on", "get off", "look up"],
+          "answer": "take off",
+          "explanation": "'Take off' means to leave the ground and begin to fly."
+        },
+        {
+          "id": 4,
+          "question": "They had to ____ the outdoor concert because of the heavy rain.",
+          "options": ["call off", "put on", "fill in", "bring up"],
+          "answer": "call off",
+          "explanation": "'Call off' means to cancel an event."
+        },
+        {
+          "id": 5,
+          "question": "Please ____ this application form with your personal details.",
+          "options": ["fill in", "take off", "give away", "break down"],
+          "answer": "fill in",
+          "explanation": "'Fill in' means to complete a form or document by adding information."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: englisch-hilfen.de (Phrasal Verbs with Look)",
+      "title": "Phrasal Verbs with 'Look'",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "I need to ________ my lost wallet. Have you seen it?",
+          "options": ["look for", "look after", "look up"],
+          "answer": "look for",
+          "explanation": "'Look for' means to search for something."
+        },
+        {
+          "id": 2,
+          "sentence": "Could you ________ my cat while I am on vacation?",
+          "options": ["look after", "look for", "look out"],
+          "answer": "look after",
+          "explanation": "'Look after' means to take care of someone or something."
+        },
+        {
+          "id": 3,
+          "sentence": "I am really ________ seeing you at the weekend party!",
+          "options": ["looking forward to", "looking up", "looking for"],
+          "answer": "looking forward to",
+          "explanation": "'Look forward to' means to feel excited about something that is going to happen."
+        },
+        {
+          "id": 4,
+          "sentence": "If you don't know the meaning of the word, ________ it in the dictionary.",
+          "options": ["look up", "look for", "look after"],
+          "answer": "look up",
+          "explanation": "'Look up' means to search for information in a reference book or online."
+        },
+        {
+          "id": 5,
+          "sentence": "________! There's ice on the sidewalk.",
+          "options": ["Look out", "Look for", "Look after"],
+          "answer": "Look out",
+          "explanation": "'Look out' is used as a warning to be careful."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: englisch-hilfen.de (Phrasal Verbs with Come)",
+      "title": "Phrasal Verbs with 'Come'",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "I ________ an old childhood photograph while cleaning my room.",
+          "options": ["came across", "came back", "came in"],
+          "answer": "came across",
+          "explanation": "'Come across' means to find something by chance."
+        },
+        {
+          "id": 2,
+          "sentence": "She ________ a great idea for our science project.",
+          "options": ["came up with", "came across", "came out"],
+          "answer": "came up with",
+          "explanation": "'Come up with' means to think of or produce an idea/plan."
+        },
+        {
+          "id": 3,
+          "sentence": "What time will you ________ home tonight?",
+          "options": ["come back", "come across", "come up"],
+          "answer": "come back",
+          "explanation": "'Come back' means to return to a place."
+        },
+        {
+          "id": 4,
+          "sentence": "The new album will ________ next month.",
+          "options": ["come out", "come in", "come along"],
+          "answer": "come out",
+          "explanation": "'Come out' means to be published, released, or made available to the public."
+        },
+        {
+          "id": 5,
+          "sentence": "Please ________ and take a seat; the door is open.",
+          "options": ["come in", "come across", "come up"],
+          "answer": "come in",
+          "explanation": "'Come in' means to enter a room or building."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 4: englisch-hilfen.de (Phrasal Verbs with Get)",
+      "title": "Phrasal Verbs with 'Get'",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Do you ____ well with your new neighbors?",
+          "options": ["get along", "get over", "get up", "get away"],
+          "answer": "get along",
+          "explanation": "'Get along' (or 'get on') means to have a good relationship with someone."
+        },
+        {
+          "id": 2,
+          "question": "It took him a long time to ____ the flu.",
+          "options": ["get over", "get on", "get away", "get in"],
+          "answer": "get over",
+          "explanation": "'Get over' means to recover from an illness or emotional disappointment."
+        },
+        {
+          "id": 3,
+          "question": "What time do you usually ____ in the morning?",
+          "options": ["get up", "get off", "get over", "get by"],
+          "answer": "get up",
+          "explanation": "'Get up' means to rise from bed after sleeping."
+        },
+        {
+          "id": 4,
+          "question": "We need to ____ at the next bus stop.",
+          "options": ["get off", "get up", "get over", "get across"],
+          "answer": "get off",
+          "explanation": "'Get off' means to leave a bus, train, aircraft, or boat."
+        },
+        {
+          "id": 5,
+          "question": "They want to ____ for the weekend and go to the beach.",
+          "options": ["get away", "get over", "get up", "get along"],
+          "answer": "get away",
+          "explanation": "'Get away' means to go on vacation or escape daily routines."
+        }
+      ]
+    }
+  ]
+}

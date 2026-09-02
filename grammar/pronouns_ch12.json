@@ -1,0 +1,156 @@
+{
+  "chapter": {
+    "id": "pronouns",
+    "title": "Pronouns",
+    "level": "Grammar & Mechanics",
+    "description": "Master subject, object, possessive, and reflexive pronouns, pronoun-antecedent agreement, and proper usage in compound constructions."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Subject vs. Object Pronouns",
+      "explanation": "Use subject pronouns (I, he, she, we, they, who) when the pronoun performs the action. Use object pronouns (me, him, her, us, them, whom) when the pronoun receives the action or follows a preposition.",
+      "example": "She and I went to the store. / The manager spoke to him and me."
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Pronouns in Compound Structures",
+      "explanation": "To choose the correct pronoun in a compound structure (e.g., 'Bob and [I/me]'), mentally remove the other person to test the sentence.",
+      "example": "Sarah and I saw the movie. (Remove 'Sarah': 'I saw the movie.')"
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Pronouns Following 'Than' or 'As'",
+      "explanation": "In comparisons using 'than' or 'as', choose the pronoun that completes the implied clause.",
+      "example": "She is taller than I [am]. / He likes chocolate more than [he likes] me."
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Possessive Pronouns and Gerunds",
+      "explanation": "Use a possessive pronoun (my, his, her, your, our, their) before a gerund (-ing verb acting as a noun).",
+      "example": "We appreciated your coming to the meeting on short notice."
+    },
+    {
+      "ruleNumber": 5,
+      "title": "Who vs. Whom",
+      "explanation": "Use 'who' as a subject pronoun (substitute 'he/she') and 'whom' as an object pronoun (substitute 'him/her').",
+      "example": "Who wrote the letter? (He wrote it.) / Whom did you invite? (You invited him.)"
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: grammarbook.com",
+      "title": "Pronouns Practice - Quiz 1",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "Her and I went to the shopping mall yesterday.",
+            "She and I went to the shopping mall yesterday."
+          ],
+          "answer": "She and I went to the shopping mall yesterday.",
+          "explanation": "Both subjects require subject pronouns ('She' and 'I')."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "The teacher divided the project work between John and me.",
+            "The teacher divided the project work between John and I."
+          ],
+          "answer": "The teacher divided the project work between John and me.",
+          "explanation": "'Between' is a preposition and requires object pronouns ('me')."
+        },
+        {
+          "id": 3,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "Who did you invite to the dinner party?",
+            "Whom did you invite to the dinner party?"
+          ],
+          "answer": "Whom did you invite to the dinner party?",
+          "explanation": "'Whom' is the object of the verb 'invite' (You invited him)."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "My sister plays tennis much better than I.",
+            "My sister plays tennis much better than me."
+          ],
+          "answer": "My sister plays tennis much better than I.",
+          "explanation": "'Than I' completes the implied clause 'than I [play]'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "We were surprised by his attending the conference.",
+            "We were surprised by him attending the conference."
+          ],
+          "answer": "We were surprised by his attending the conference.",
+          "explanation": "Use a possessive pronoun ('his') before the gerund 'attending'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: grammarbook.com",
+      "title": "Pronouns Mastery - Quiz 2",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the sentence in which pronouns are used correctly.",
+          "options": [
+            "Give the package to whoever answers the front door.",
+            "Give the package to whomever answers the front door."
+          ],
+          "answer": "Give the package to whoever answers the front door.",
+          "explanation": "'Whoever' serves as the subject of the clause 'whoever answers the front door'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence in which pronouns are used correctly.",
+          "options": [
+            "The manager asked David and myself to prepare the financial report.",
+            "The manager asked David and me to prepare the financial report."
+          ],
+          "answer": "The manager asked David and me to prepare the financial report.",
+          "explanation": "Reflexive pronouns ('myself') are only used when the subject and object are the same person. Use object pronoun 'me' here."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence in which pronouns are used correctly.",
+          "options": [
+            "It was she who called you earlier this afternoon.",
+            "It was her who called you earlier this afternoon."
+          ],
+          "answer": "It was she who called you earlier this afternoon.",
+          "explanation": "Use subject pronouns following a predicate nominative link verb ('It was she')."
+        },
+        {
+          "id": 4,
+          "question": "Choose the sentence in which pronouns are used correctly.",
+          "options": [
+            "Every student must turn in their assignment by Friday.",
+            "Every student must turn in his or her assignment by Friday."
+          ],
+          "answer": "Every student must turn in his or her assignment by Friday.",
+          "explanation": "Traditional formal grammar matches singular antecedent 'student' with singular possessives 'his or her'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which pronouns are used correctly.",
+          "options": [
+            "The awards were given to the scientists, including Dr. Evans and him.",
+            "The awards were given to the scientists, including Dr. Evans and he."
+          ],
+          "answer": "The awards were given to the scientists, including Dr. Evans and him.",
+          "explanation": "'Including' functions prepositionally and takes object pronoun 'him'."
+        }
+      ]
+    }
+  ]
+}

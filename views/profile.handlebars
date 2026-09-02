@@ -1,5 +1,8 @@
 <main class="account-page">
-  <div class="profile-layout">
+  <div
+    class="profile-layout"
+    style="--profile-card-bg: {{student.profile_background}}; --profile-card-text: {{student.profile_text_color}}; --profile-card-muted: {{student.profile_muted_color}}; --profile-card-button-bg: {{student.profile_button_color}}; --profile-card-button-text: {{student.profile_button_text_color}}; --profile-progress-fill: {{student.profile_button_color}};"
+  >
     <aside class="profile-messages-panel">
       <div class="profile-messages-heading"><p class="eyebrow">Messages</p><h2>Teacher feedback{{#if unreadFeedbackCount}} <span class="profile-message-badge">{{unreadFeedbackCount}}</span>{{/if}}</h2></div>
       {{#each feedbackMessages}}
@@ -13,7 +16,10 @@
         <p class="empty-state">No teacher feedback yet.</p>
       {{/each}}
     </aside>
-    <section class="profile-card">
+    <section
+      class="profile-card"
+      style="--profile-card-bg: {{student.profile_background}}; --profile-card-text: {{student.profile_text_color}}; --profile-card-muted: {{student.profile_muted_color}}; --profile-card-button-bg: {{student.profile_button_color}}; --profile-card-button-text: {{student.profile_button_text_color}}; --profile-progress-fill: {{student.profile_button_color}};"
+    >
       <div class="profile-heading">
         <div class="profile-identity">
           <div class="profile-avatar-wrap">
@@ -86,10 +92,39 @@
           type="submit"
         >Save goal</button></form>
       {{#if query.goalSaved}}<p class="upload-success">Learning goal saved.</p>{{/if}}
-      <div class="character-actions">
-        <button id="open-character-editor" class="notes-button" type="button">Customize live</button>
-        <a id="character-lobby-link" class="notes-button" href="/lobby">Enter lobby</a>
+      <div class="profile-color-panel" data-profile-color-panel>
+        <button
+          class="profile-color-toggle"
+          type="button"
+          data-profile-color-toggle
+          aria-expanded="false"
+          aria-controls="profileBackgroundPanel"
+        >
+          <span>Profile background</span>
+          <span class="profile-color-toggle-arrow" aria-hidden="true">›</span>
+        </button>
+        <form
+          class="profile-color-form"
+          id="profileBackgroundPanel"
+          action="/profile/background"
+          method="post"
+          hidden
+        >
+          <label for="profileBackgroundColor">Choose a colour</label>
+          <div class="profile-color-controls">
+            <input
+              id="profileBackgroundColor"
+              name="profileBackgroundColor"
+              type="color"
+              value="{{student.profile_background}}"
+              aria-label="Choose your profile background colour"
+            />
+            <button class="notes-button" type="submit">Save colour</button>
+          </div>
+        </form>
       </div>
+      {{#if query.backgroundSaved}}<p class="upload-success">Profile background saved.</p>{{/if}}
+      {{#if query.backgroundError}}<p class="account-error">Please choose a valid hex colour.</p>{{/if}}
       <h2>Progress overview</h2>
       <div class="profile-area-progress">
         {{#each areaProgress}}
@@ -99,74 +134,86 @@
     </section>
   </div>
 </main>
-<div id="character-editor-modal" class="character-editor-modal" hidden>
-  <div class="character-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="character-editor-title">
-    <div class="character-editor-heading">
-      <div><p class="eyebrow">Live character</p><h2 id="character-editor-title">Customize your explorer</h2></div>
-      <button id="close-character-editor" class="modal-close" type="button" aria-label="Close character editor">&times;</button>
-    </div>
-    <iframe id="character-editor-frame" title="Live character editor"></iframe>
-    <div class="editor-footer">
-      <p id="editor-save-status" class="editor-save-note">Changes save automatically.</p>
-      <button id="save-close-character-editor" class="notes-button" type="button">Save and close</button>
-    </div>
-  </div>
-</div>
 <script>
-  const editorModal = document.getElementById("character-editor-modal");
-  const editorFrame = document.getElementById("character-editor-frame");
-  const editorSaveStatus = document.getElementById("editor-save-status");
-  const editorBase = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-    ? "http://127.0.0.1:5173/"
-    : "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/";
-  let characterHash = "#sex=male";
-
-  const saveCharacterHash = async (hash, layers = []) => {
-    const response = await fetch("/api/profile/character", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ characterHash: hash, layers }),
+  const goalEditButton = document.querySelector("[data-goal-edit]");
+  if (goalEditButton) {
+    goalEditButton.addEventListener("click", () => {
+      const settings = document.querySelector("[data-goal-settings]");
+      if (settings) {
+        settings.hidden = !settings.hidden;
+      }
     });
-    if (!response.ok) throw new Error("Unable to save character");
-  };
+  }
 
-  fetch(`/api/profile/{{student.username}}/character`)
-    .then((response) => response.ok ? response.json() : null)
-    .then((character) => {
-      if (!character) return;
-      characterHash = `#${character.characterHash}`;
+  const profileColorToggle = document.querySelector("[data-profile-color-toggle]");
+  const profileBackgroundPanel = document.getElementById("profileBackgroundPanel");
+  const profileColorArrow = document.querySelector(".profile-color-toggle-arrow");
+
+  if (profileColorToggle && profileBackgroundPanel) {
+    profileBackgroundPanel.hidden = true;
+    profileColorToggle.setAttribute("aria-expanded", "false");
+    profileColorToggle.addEventListener("click", () => {
+      const willOpen = profileBackgroundPanel.hidden;
+      profileBackgroundPanel.hidden = !willOpen;
+      profileColorToggle.setAttribute("aria-expanded", String(willOpen));
+      if (profileColorArrow) {
+        profileColorArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
+      }
     });
+  }
 
-  document.getElementById("open-character-editor").addEventListener("click", () => {
-    editorFrame.src = `${editorBase}${characterHash}`;
-    editorSaveStatus.textContent = "Changes save automatically.";
-    editorModal.hidden = false;
-  });
-  const closeCharacterEditor = () => {
-    editorModal.hidden = true;
-    editorFrame.src = "about:blank";
-  };
-  document.getElementById("close-character-editor").addEventListener("click", () => {
-    closeCharacterEditor();
-  });
-  document.getElementById("save-close-character-editor").addEventListener("click", () => {
-    closeCharacterEditor();
-  });
-  editorModal.addEventListener("click", (event) => {
-    if (event.target === editorModal) closeCharacterEditor();
-  });
-  window.addEventListener("message", async (event) => {
-    if (event.origin !== new URL(editorBase).origin || !["lpc-character-hash", "lpc-character-state"].includes(event.data?.type)) return;
-    try {
-      await saveCharacterHash(event.data.hash, event.data.layers || []);
-      characterHash = `#${event.data.hash}`;
-      editorSaveStatus.textContent = "Saved to your profile.";
-    } catch (error) {
-      editorSaveStatus.textContent = "Could not save your character.";
+  const profileColorInput = document.getElementById("profileBackgroundColor");
+  const profileCard = document.querySelector(".profile-card");
+
+  const setAccessibleProfileTheme = (hexColor) => {
+    const safeColor = /^#[0-9a-fA-F]{6}$/.test(hexColor) ? hexColor : "#edf4ff";
+    const value = safeColor.replace("#", "");
+    const red = Number.parseInt(value.slice(0, 2), 16);
+    const green = Number.parseInt(value.slice(2, 4), 16);
+    const blue = Number.parseInt(value.slice(4, 6), 16);
+    const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+    const isLight = luminance > 0.72;
+
+    const darken = (channel) =>
+      Math.max(0, Math.round(channel * 0.78));
+    const buttonColor = `#${darken(red).toString(16).padStart(2, "0")}${darken(green).toString(16).padStart(2, "0")}${darken(blue).toString(16).padStart(2, "0")}`;
+    const progressFillColor = `#${darken(red).toString(16).padStart(2, "0")}${darken(green).toString(16).padStart(2, "0")}${darken(blue).toString(16).padStart(2, "0")}`;
+    const buttonValue = buttonColor.replace("#", "");
+    const buttonRed = Number.parseInt(buttonValue.slice(0, 2), 16);
+    const buttonGreen = Number.parseInt(buttonValue.slice(2, 4), 16);
+    const buttonBlue = Number.parseInt(buttonValue.slice(4, 6), 16);
+    const buttonLuminance = (0.2126 * buttonRed + 0.7152 * buttonGreen + 0.0722 * buttonBlue) / 255;
+
+    const textColor = isLight ? "#14213d" : "#f8fafc";
+    const mutedColor = isLight ? "#475569" : "#dbeafe";
+    const buttonTextColor = buttonLuminance > 0.72 ? "#14213d" : "#f8fafc";
+
+    if (profileCard) {
+      profileCard.style.setProperty("--profile-card-bg", safeColor);
+      profileCard.style.setProperty("--profile-card-text", textColor);
+      profileCard.style.setProperty("--profile-card-muted", mutedColor);
+      profileCard.style.setProperty("--profile-card-button-bg", buttonColor);
+      profileCard.style.setProperty("--profile-card-button-text", buttonTextColor);
+      profileCard.style.setProperty("--profile-progress-fill", progressFillColor);
     }
-  });
 
-  document.querySelector("[data-goal-edit]").addEventListener("click", () => {
-  const settings = document.querySelector("[data-goal-settings]");
-  settings.hidden = !settings.hidden; });
+    document.documentElement.style.setProperty("--profile-card-bg", safeColor);
+    document.documentElement.style.setProperty("--profile-card-text", textColor);
+    document.documentElement.style.setProperty("--profile-card-muted", mutedColor);
+    document.documentElement.style.setProperty("--profile-card-button-bg", buttonColor);
+    document.documentElement.style.setProperty("--profile-card-button-text", buttonTextColor);
+    document.documentElement.style.setProperty("--profile-progress-fill", progressFillColor);
+    document.documentElement.style.setProperty("--profile-nav-fill", safeColor);
+    document.documentElement.style.setProperty("--profile-nav-text", textColor);
+  };
+
+  if (profileColorInput) {
+    profileColorInput.addEventListener("input", (event) => {
+      setAccessibleProfileTheme(event.target.value);
+    });
+  }
+
+  if (profileColorInput) {
+    setAccessibleProfileTheme(profileColorInput.value);
+  }
 </script>

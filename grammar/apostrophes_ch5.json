@@ -1,0 +1,255 @@
+{
+  "chapter": {
+    "id": "apostrophes",
+    "title": "Apostrophes",
+    "level": "Grammar & Mechanics",
+    "description": "Master the rules for using apostrophes correctly to show possession, form contractions, and avoid common errors like confusing possessive pronouns with contractions."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Possession with Singular Nouns",
+      "explanation": "Add an apostrophe and an 's' ('s) to singular nouns to show possession, even if the noun ends in 's' (e.g., Charles's book, boss's desk).",
+      "example": "The dog's bone / Chris's car"
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Possession with Plural Nouns",
+      "explanation": "Add only an apostrophe (') to plural nouns that end in 's'. For irregular plural nouns that do not end in 's', add an apostrophe and an 's' ('s).",
+      "example": "The dogs' bones / The children's toys"
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Contractions",
+      "explanation": "Use an apostrophe to indicate omitted letters in a contraction.",
+      "example": "do not -> don't / it is -> it's / who is -> who's"
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Possessive Pronouns vs. Contractions",
+      "explanation": "Possessive pronouns (its, whose, your, their) NEVER take an apostrophe. Apostrophes in these words indicate a contraction (it's = it is, who's = who is, you're = you are, they're = they are).",
+      "example": "The cat licked its paw. / It's time to go."
+    },
+    {
+      "ruleNumber": 5,
+      "title": "Joint vs. Separate Possession",
+      "explanation": "When two or more people own something jointly, add an apostrophe only to the last owner. If they own items separately, add an apostrophe to each owner.",
+      "example": "Ben and Jerry's ice cream (joint) / Mark's and Sarah's cars (separate)"
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: chompchomp.com",
+      "title": "Apostrophe Practice - Identifying Correct Forms",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "The dog licked its paw after the long walk.",
+            "The dog licked it's paw after the long walk."
+          ],
+          "answer": "The dog licked its paw after the long walk.",
+          "explanation": "'Its' is a possessive pronoun and does not use an apostrophe. 'It's' means 'it is'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "All of the students' grades improved this semester.",
+            "All of the student's grades improved this semester."
+          ],
+          "answer": "All of the students' grades improved this semester.",
+          "explanation": "Since 'students' is a plural noun ending in 's', the apostrophe goes after the 's' to show plural possession."
+        },
+        {
+          "id": 3,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "The women's locker room was renovated last week.",
+            "The womens' locker room was renovated last week."
+          ],
+          "answer": "The women's locker room was renovated last week.",
+          "explanation": "'Women' is an irregular plural noun that does not end in 's', so you add ''s' to show possession."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "Who's jacket is this left on the chair?",
+            "Whose jacket is this left on the chair?"
+          ],
+          "answer": "Whose jacket is this left on the chair?",
+          "explanation": "'Whose' indicates possession. 'Who's' is a contraction meaning 'who is' or 'who has'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "You're going to love the new restaurant in town.",
+            "Your going to love the new restaurant in town."
+          ],
+          "answer": "You're going to love the new restaurant in town.",
+          "explanation": "'You're' is the contraction for 'you are'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: grammarbook.com",
+      "title": "Apostrophes Quiz - Possessives & Contractions",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "The girls' coats were hung in the closet.",
+            "The girl's coats were hung in the closet."
+          ],
+          "answer": "The girls' coats were hung in the closet.",
+          "explanation": "Plural possession for regular nouns ending in 's' requires the apostrophe after the 's'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "It's a long way to the top if you wanna rock 'n' roll.",
+            "Its a long way to the top if you wanna rock 'n' roll."
+          ],
+          "answer": "It's a long way to the top if you wanna rock 'n' roll.",
+          "explanation": "'It's' stands for 'it is'."
+        },
+        {
+          "id": 3,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "My boss's office is at the end of the hall.",
+            "My boss' office is at the end of the hall."
+          ],
+          "answer": "My boss's office is at the end of the hall.",
+          "explanation": "Singular common nouns ending in 's' take ''s' to form the possessive."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "We saw the Smith's at the grocery store.",
+            "We saw the Smiths at the grocery store."
+          ],
+          "answer": "We saw the Smiths at the grocery store.",
+          "explanation": "Simple plurals of proper names do not require an apostrophe."
+        },
+        {
+          "id": 5,
+          "question": "Choose the sentence in which apostrophes are used correctly.",
+          "options": [
+            "The team's bus arrived early, but the players' equipment was late.",
+            "The teams bus arrived early, but the player's equipment was late."
+          ],
+          "answer": "The team's bus arrived early, but the players' equipment was late.",
+          "explanation": "'Team' is singular ('team's bus') and 'players' is plural ('players' equipment')."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: syntaxis.com",
+      "title": "Syntaxis Apostrophe Quiz",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Choose the correct usage of the apostrophe.",
+          "options": [
+            "The company revised its policy on remote work.",
+            "The company revised it's policy on remote work."
+          ],
+          "answer": "The company revised its policy on remote work.",
+          "explanation": "'Its' is the possessive form of 'it'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the sentence with correct possessive punctuation.",
+          "options": [
+            "Jack and Jill's pail was filled with water.",
+            "Jack's and Jill's pail was filled with water."
+          ],
+          "answer": "Jack and Jill's pail was filled with water.",
+          "explanation": "When two people share joint ownership of a single object, the apostrophe goes only on the second name."
+        },
+        {
+          "id": 3,
+          "question": "Choose the sentence with correct possessive punctuation.",
+          "options": [
+            "Tom's and Jerry's ideas were completely different.",
+            "Tom and Jerry's ideas were completely different."
+          ],
+          "answer": "Tom's and Jerry's ideas were completely different.",
+          "explanation": "When two individuals have separate, individual ideas (separate ownership), both nouns take an apostrophe."
+        },
+        {
+          "id": 4,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "The 1980s were famous for neon fashion.",
+            "The 1980's were famous for neon fashion."
+          ],
+          "answer": "The 1980s were famous for neon fashion.",
+          "explanation": "Plural decades do not require an apostrophe before the 's'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "She earned straight A's on her report card.",
+            "She earned straight As on her report card."
+          ],
+          "answer": "She earned straight A's on her report card.",
+          "explanation": "Apostrophes are used to form the plural of single letters to avoid confusion (e.g., 'A's' vs 'As')."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 4: englisch-hilfen.de",
+      "title": "English-Hilfen Apostrophe 's Practice",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "This is ________ (Peter) bicycle.",
+          "options": ["Peter's", "Peters'", "Peters"],
+          "answer": "Peter's",
+          "explanation": "Add ''s' to a singular person's name to show possession."
+        },
+        {
+          "id": 2,
+          "sentence": "Where are the ________ (children) toys?",
+          "options": ["children's", "childrens'", "childrens"],
+          "answer": "children's",
+          "explanation": "'Children' is an irregular plural, so add ''s' for possession."
+        },
+        {
+          "id": 3,
+          "sentence": "The ________ (teachers) room is at the end of the corridor.",
+          "options": ["teachers'", "teacher's", "teachers"],
+          "answer": "teachers'",
+          "explanation": "If referring to the room used by multiple teachers, put the apostrophe after the plural 's'."
+        },
+        {
+          "id": 4,
+          "sentence": "My ________ (sister) friend is staying with us.",
+          "options": ["sister's", "sisters'", "sisters"],
+          "answer": "sister's",
+          "explanation": "Referring to one sister requires 'sister's'."
+        },
+        {
+          "id": 5,
+          "sentence": "These are my ________ (parents) car keys.",
+          "options": ["parents'", "parent's", "parents"],
+          "answer": "parents'",
+          "explanation": "'Parents' is a plural noun ending in 's', so the apostrophe follows the 's'."
+        }
+      ]
+    }
+  ]
+}

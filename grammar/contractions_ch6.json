@@ -1,0 +1,165 @@
+{
+  "chapter": {
+    "id": "contractions",
+    "title": "Contractions",
+    "level": "Grammar & Mechanics",
+    "description": "Learn how contractions combine two words by shortening them and replacing omitted letters with an apostrophe in informal and standard English."
+  },
+  "rules": [
+    {
+      "ruleNumber": 1,
+      "title": "Pronoun + Verb Contractions",
+      "explanation": "Combine a pronoun with verbs like 'be', 'have', or 'will' by dropping initial letters and replacing them with an apostrophe.",
+      "example": "I am -> I'm / she is -> she's / they have -> they've / we will -> we'll"
+    },
+    {
+      "ruleNumber": 2,
+      "title": "Negative Contractions",
+      "explanation": "Combine a verb with 'not' by joining them into one word and replacing the 'o' in 'not' with an apostrophe.",
+      "example": "do not -> don't / is not -> isn't / cannot -> can't / will not -> won't"
+    },
+    {
+      "ruleNumber": 3,
+      "title": "Question Word Contractions",
+      "explanation": "Question words can contract with verbs like 'is', 'has', or 'did'.",
+      "example": "what is -> what's / where is -> where's / who is -> who's"
+    },
+    {
+      "ruleNumber": 4,
+      "title": "Apostrophe Placement",
+      "explanation": "The apostrophe must always be placed where letters were removed, not where the two words join together.",
+      "example": "does not -> doesn't (NOT does'nt)"
+    }
+  ],
+  "exercises": [
+    {
+      "source": "Exercise 1: EnglishMaven.org Practice",
+      "title": "Basic Contractions Practice",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "________ (I am) going to the store later today.",
+          "options": ["I'm", "Im", "I am't"],
+          "answer": "I'm",
+          "explanation": "'I'm' is the contraction for 'I am'."
+        },
+        {
+          "id": 2,
+          "sentence": "She ________ (does not) like spicy food.",
+          "options": ["does'nt", "doesn't", "dosent"],
+          "answer": "doesn't",
+          "explanation": "The apostrophe replaces the omitted 'o' in 'not' ('doesn't')."
+        },
+        {
+          "id": 3,
+          "sentence": "________ (They are) planning a surprise party for Sarah.",
+          "options": ["They're", "Their", "There's"],
+          "answer": "They're",
+          "explanation": "'They're' is the contraction for 'they are'."
+        },
+        {
+          "id": 4,
+          "sentence": "We ________ (cannot) attend the meeting tomorrow morning.",
+          "options": ["can't", "cant", "ca'nt"],
+          "answer": "can't",
+          "explanation": "'Can't' shortens 'cannot' by dropping 'no'."
+        },
+        {
+          "id": 5,
+          "sentence": "________ (What is) the matter with the car engine?",
+          "options": ["What's", "Whats", "Whos"],
+          "answer": "What's",
+          "explanation": "'What's' is the contracted form of 'what is'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 2: ESL Lounge Elementary Practice",
+      "title": "Elementary Contractions Gap-Fill",
+      "type": "gap_fill",
+      "questions": [
+        {
+          "id": 1,
+          "sentence": "He ________ (is not) at home right now.",
+          "options": ["isn't", "isnt", "is'not"],
+          "answer": "isn't",
+          "explanation": "'Isn't' is the negative contraction of 'is not'."
+        },
+        {
+          "id": 2,
+          "sentence": "I ________ (have not) finished my homework yet.",
+          "options": ["haven't", "havent", "have'nt"],
+          "answer": "haven't",
+          "explanation": "'Haven't' combines 'have' and 'not'."
+        },
+        {
+          "id": 3,
+          "sentence": "________ (We will) call you as soon as we arrive.",
+          "options": ["We'll", "Well", "We'll've"],
+          "answer": "We'll",
+          "explanation": "'We'll' is the contraction for 'we will'."
+        },
+        {
+          "id": 4,
+          "sentence": "It ________ (was not) raining when we left the house.",
+          "options": ["wasn't", "wasnt", "was'nt"],
+          "answer": "wasn't",
+          "explanation": "'Wasn't' replaces the 'o' in 'not' with an apostrophe."
+        },
+        {
+          "id": 5,
+          "sentence": "You ________ (must not) touch the hot stove.",
+          "options": ["mustn't", "mustnt", "must'not"],
+          "answer": "mustn't",
+          "explanation": "'Mustn't' is the negative contraction for 'must not'."
+        }
+      ]
+    },
+    {
+      "source": "Exercise 3: GrammarBank Practice",
+      "title": "GrammarBank Contractions Review",
+      "type": "multiple_choice",
+      "questions": [
+        {
+          "id": 1,
+          "question": "What is the correct contraction for 'will not'?",
+          "options": ["willn't", "won't", "win't", "wont"],
+          "answer": "won't",
+          "explanation": "'Will not' is an irregular contraction and becomes 'won't'."
+        },
+        {
+          "id": 2,
+          "question": "Choose the correct sentence.",
+          "options": [
+            "Who's coming to the party tonight?",
+            "Whose coming to the party tonight?"
+          ],
+          "answer": "Who's coming to the party tonight?",
+          "explanation": "'Who's' is the contraction for 'who is'."
+        },
+        {
+          "id": 3,
+          "question": "Select the option that correctlyContracts 'let us'.",
+          "options": ["lets'", "let's", "lets"],
+          "answer": "let's",
+          "explanation": "'Let's' is the shortened contraction for 'let us'."
+        },
+        {
+          "id": 4,
+          "question": "What does 'they'd' stand for in: 'They'd already left when I called'?",
+          "options": ["they would", "they had", "they did"],
+          "answer": "they had",
+          "explanation": "Before a past participle ('left'), 'they'd' stands for 'they had'."
+        },
+        {
+          "id": 5,
+          "question": "Choose the correct contracted form for 'should have'.",
+          "options": ["should've", "should'of", "shouldve"],
+          "answer": "should've",
+          "explanation": "'Should've' contracts 'should have'. (Never write 'should of')."
+        }
+      ]
+    }
+  ]
+}
