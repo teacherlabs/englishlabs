@@ -506,6 +506,8 @@
     const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const pressedKeys = new Set();
     const remoteImages = new Map();
+    const remotePositions = new Map();
+    const LERP_FACTOR = 0.18;
     let pointerPosition = null;
     let lastSyncAt = 0;
     let lastSyncedState = "";
@@ -597,6 +599,19 @@
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remotePlayer.spritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
+        const targetX = Number(remotePlayer.x) || 160;
+        const targetY = Number(remotePlayer.y) || 190;
+        const previousPosition = remotePositions.get(remoteKey);
+        const remotePosition = previousPosition || { x: targetX, y: targetY };
+        remotePosition.targetX = targetX;
+        remotePosition.targetY = targetY;
+        remotePosition.x += (remotePosition.targetX - remotePosition.x) * LERP_FACTOR;
+        remotePosition.y += (remotePosition.targetY - remotePosition.y) * LERP_FACTOR;
+        if (Math.hypot(remotePosition.targetX - remotePosition.x, remotePosition.targetY - remotePosition.y) < 0.5) {
+          remotePosition.x = remotePosition.targetX;
+          remotePosition.y = remotePosition.targetY;
+        }
+        remotePositions.set(remoteKey, remotePosition);
         const cachedRemote = remoteImages.get(remoteKey);
         let remoteImage = cachedRemote?.key === remotePlayer.spritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
@@ -604,12 +619,12 @@
           remoteImage.src = `/uploads/profiles/${remotePlayer.spritesheet}?t=${encodeURIComponent(remotePlayer.spritesheet)}`;
           remoteImages.set(remoteKey, { key: remotePlayer.spritesheet, image: remoteImage });
         }
-        drawSprite(remoteImage, Number(remotePlayer.x) || 160, Number(remotePlayer.y) || 190, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
+        drawSprite(remoteImage, remotePosition.x, remotePosition.y, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
       const syncState = `${player.x},${player.y},${player.direction},${player.frame.toFixed(2)}`;
-      if (playerMode === "quicktype" && player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 100) {
+      if (playerMode === "quicktype" && player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
         lastSyncAt = timestampNow();
         lastSyncedState = syncState;
         fetch("/api/lobby/player-state", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame }) }).catch(() => {});
