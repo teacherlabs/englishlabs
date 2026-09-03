@@ -1,21 +1,32 @@
-<main class="lobby-page">
+<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}">
   <section class="lobby-quiz-panel">
     {{#if isAdmin}}
       <div class="lobby-admin-tools">
         <p class="eyebrow">Teacher control</p>
         {{#unless room}}
-          <h1>Create a game room</h1>
-          <form class="lobby-form" action="/lobby/rooms" method="post"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><label for="room-mode">Game mode</label><select id="room-mode" name="mode"><option value="lobby">Lobby: multiple choice</option><option value="quicktype">Quicktype: word matching</option></select><button class="practice-button" type="submit">Create room</button></form>
+          <h1>Create a {{#if isQuicktype}}QuickType{{else}}Question Game{{/if}} room</h1>
+          <form class="lobby-form" action="/lobby/rooms" method="post" data-room-create data-room-mode="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><input type="hidden" name="mode" value="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}" /><button class="practice-button" type="submit">Create room</button></form>
         {{/unless}}
         {{#if room}}
           <h1>{{room.title}}</h1>
           <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
-          <form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit room</button></form>
-          <h2>{{#if isQuicktype}}Prompts{{else}}Questions{{/if}}</h2>
-          <ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{else}}<li>No {{#if ../isQuicktype}}prompts{{else}}questions{{/if}} yet.</li>{{/each}}</ol>
+          {{#unless isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit room</button></form>{{/unless}}
+          {{#unless isQuicktype}}{{#if questions}}<h2>Questions</h2><ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{/each}}</ol>{{/if}}{{/unless}}
           {{#if isWaiting}}
-            {{#if isQuicktype}}<form class="lobby-form" action="/lobby/quicktype/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="quicktype-prompt">Prompt for students</label><textarea id="quicktype-prompt" name="prompt" rows="2" placeholder="Type the word you hear" required></textarea><label for="quicktype-target">Target word</label><input id="quicktype-target" name="targetWord" placeholder="target word" required /><button class="notes-button" type="submit">Add prompt</button></form>{{else}}<form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
-            {{#if questions}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/if}}
+            {{#if isQuicktype}}
+              {{#unless questions}}
+              <form class="lobby-form quicktype-setup-form" action="/lobby/quicktype/create" method="post" data-quicktype-setup>
+                <input type="hidden" name="roomId" value="{{room.id}}" />
+                <label for="quicktype-word-search">Select words from the active vocabulary</label>
+                <input id="quicktype-word-search" type="search" placeholder="Filter words..." data-word-search />
+                <div class="quicktype-word-picker">{{#each vocabularyWords}}<button type="button" class="word-card" data-word-option data-word-id="{{id}}" aria-pressed="false"><span>{{english_word}}</span><small>{{swedish_translation}}</small></button>{{/each}}</div>
+                <p class="admin-live-note"><span data-selected-count>0</span> words selected. Drag selected words below to order them.</p>
+                <ol class="quicktype-order-list" data-word-order></ol>
+                <button class="practice-button" type="submit" data-create-game disabled>Create game</button>
+              </form>
+              {{/unless}}
+            {{else}}<form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
+            {{#if questions}}{{#unless isQuicktype}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/unless}}{{/if}}
           {{else}}
             <p class="admin-live-note">The live game appears in the lobby below.</p>
           {{/if}}
@@ -29,18 +40,27 @@
   <section class="lobby-shell">
     {{#if isAdmin}}
       {{#if room}}
-      <div class="lobby-stage-wrap">
-        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
+      <div class="lobby-stage-wrap teacher-lobby-stage-wrap">
+        <div class="lobby-character-stage">
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+        </div>
+       <aside class="teacher-control-sidebar">
+       <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
+         {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">Teacher control</p>
-            <h2>Ready when you are</h2>
-            <p class="admin-live-note">Add questions on the left, then start the quiz.</p>
+            {{#if isQuicktype}}<h2>Word <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2><p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p><button type="button" class="practice-button" data-activate-word{{#unless questions}} disabled{{/unless}}>Activate word</button>{{else}}<h2>Ready when you are</h2><p class="admin-live-note">Add questions on the left, then start the quiz.</p>{{/if}}
+          </section>
+          <section class="admin-live-quiz" data-phase-countdown hidden>
+            <p class="eyebrow">Get ready</p><h2>Starting in <span data-countdown>3</span></h2>
+            <p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p>
           </section>
           <section class="admin-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
             <p class="eyebrow">Live quiz</p>
             <h2>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2>
-            <p class="question-timer"><span data-question-timer>20</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
+            <p class="question-timer"><span data-question-timer>15</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
             <p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>
+            {{#if isQuicktype}}<button type="button" class="practice-button" data-next-word hidden>Next word</button>{{/if}}
             {{#unless isQuicktype}}<div class="admin-live-answers">
               <span><b>A</b><span data-answer-text="a">{{currentQuestion.answer_a}}</span></span>
               <span><b>B</b><span data-answer-text="b">{{currentQuestion.answer_b}}</span></span>
@@ -50,35 +70,42 @@
           </section>
           <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">Round results</p>
-            <h2>Standings</h2>
+            {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
             <ol class="round-leaderboard-list" data-round-leaderboard><li>Loading...</li></ol>
-            <form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Next question</button></form>
+            <form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit" data-next-word>{{#if isQuicktype}}Next word{{else}}Next question{{/if}}</button></form>
           </section>
           <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
             <p class="eyebrow">Quiz complete</p>
             <h2>Final results</h2>
             <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
+            <form class="lobby-inline-form finished-end-game-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>
           </section>
         </div>
-        <aside class="lobby-leaderboard">
+        <div class="lobby-leaderboard">
           <p class="eyebrow">Players</p>
           <h2>Who's here</h2>
           <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
+        </div>
         </aside>
       </div>
       {{/if}}
     {{else}}
       {{#if participant}}
       <div class="lobby-stage-wrap">
-        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
+        <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
+          {{#if student.spritesheet}}<div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>{{/if}}
+          <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Waiting for the teacher to start...</h1>
           </section>
+          <section class="student-live-quiz" data-phase-countdown hidden>
+            <p class="eyebrow">{{room.title}}</p><h1>Get ready: <span data-countdown>3</span></h1>
+          </section>
           <section class="student-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h1>
-            <p class="question-timer"><span data-question-timer>20</span>s left</p>
+            <p class="question-timer"><span data-question-timer>15</span>s left</p>
             <div class="live-question">
               <h2 data-question-text>{{currentQuestion.question_text}}</h2>
               {{#if isQuicktype}}<form class="quicktype-answer-form" data-quicktype-form><input name="word" data-quicktype-input autocomplete="off" placeholder="Type the target word" required /><button class="practice-button" type="submit">Submit</button></form>{{else}}<div class="live-answer-grid">
@@ -102,12 +129,8 @@
             <h2>Final results</h2>
             <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
           </section>
+          </div>
         </div>
-        <aside class="lobby-leaderboard">
-          <p class="eyebrow">Players</p>
-          <h2>Who's here</h2>
-          <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
-        </aside>
       </div>
       {{/if}}
     {{/if}}
@@ -124,6 +147,38 @@
 </div>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const enterSessionMode = () => {
+    document.body.classList.add("in-session-mode");
+    document.querySelector(".lobby-page")?.classList.add("lobby-active-session");
+  };
+  document.querySelectorAll('form[action="/lobby/start"], form[action="/lobby/quicktype/activate"]').forEach((form) => {
+    form.addEventListener("submit", enterSessionMode);
+  });
+  const roomCreateForm = document.querySelector("[data-room-create]");
+  if (roomCreateForm) {
+    roomCreateForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const button = roomCreateForm.querySelector("button[type='submit']");
+      if (button) button.disabled = true;
+      const roomMode = roomCreateForm.dataset.roomMode === "quicktype" ? "quicktype" : "lobby";
+      const body = new URLSearchParams(new FormData(roomCreateForm));
+      body.set("mode", roomMode);
+      fetch(roomCreateForm.action, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+      }).then((response) => {
+        if (!response.ok) throw new Error("Unable to create the game room.");
+        window.location.assign(response.url);
+      }).catch((error) => {
+        if (button) button.disabled = false;
+        const message = document.createElement("p");
+        message.className = "account-error";
+        message.textContent = error.message;
+        roomCreateForm.appendChild(message);
+      });
+    });
+  }
 
   const lobbyPhase = document.querySelector("[data-lobby-phase]");
   if (lobbyPhase) {
@@ -132,6 +187,7 @@
     const mode = lobbyPhase.dataset.mode;
     const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
     const phaseRunning = lobbyPhase.querySelector("[data-phase-running]");
+    const phaseCountdown = lobbyPhase.querySelector("[data-phase-countdown]");
     const phaseLeaderboard = lobbyPhase.querySelector("[data-phase-leaderboard]");
     const phaseFinished = lobbyPhase.querySelector("[data-phase-finished]");
     const questionNumberEl = phaseRunning.querySelector("[data-question-number]");
@@ -143,18 +199,22 @@
     const score = phaseRunning.querySelector("[data-live-score]");
     const roundLeaderboardList = phaseLeaderboard.querySelector("[data-round-leaderboard]");
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
+    const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
     const playersGrid = document.querySelector("[data-lobby-players]");
     let currentQuestionNumber = Number(questionNumberEl.textContent) || 0;
+    let lastEvent = null;
 
     const renderLeaderboardList = (target, players) => {
-      target.innerHTML = players?.length
-        ? players.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
+      const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
+      target.innerHTML = students.length
+        ? students.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
         : "<li>No scores yet.</li>";
     };
 
     const renderFinalResults = (players) => {
-      if (!players?.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
-      finalResultsList.innerHTML = players.map((player, index) => {
+      const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
+      if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
+      finalResultsList.innerHTML = students.map((player, index) => {
         const avatar = player.avatar
           ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
           : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
@@ -164,22 +224,52 @@
 
     const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
+      if (state.event === "NEXT_WORD_PREPARED" && state.event !== lastEvent) {
+        lastEvent = state.event;
+        const input = lobbyPhase.querySelector("[data-quicktype-input]");
+        if (input) { input.value = ""; input.disabled = true; }
+        const submit = lobbyPhase.querySelector("[data-quicktype-form] button");
+        if (submit) submit.disabled = true;
+        if (feedback) feedback.textContent = "";
+      }
+      if (state.event !== "NEXT_WORD_PREPARED") lastEvent = state.event;
+      window.lobbyPlayers = state.leaderboard || [];
       if (score) score.textContent = state.participant?.score || 0;
 
-      playersGrid.innerHTML = state.leaderboard?.length
-        ? state.leaderboard.map((player) => {
-            const avatar = player.avatar
-              ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
-              : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
-            return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
-          }).join("")
-        : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
+      if (playersGrid) {
+        playersGrid.innerHTML = state.leaderboard?.length
+          ? state.leaderboard.map((player) => {
+              const avatar = player.avatar
+                ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
+                : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
+              return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
+            }).join("")
+          : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
+      }
 
       phaseWaiting.hidden = state.room.status !== "waiting";
       phaseRunning.hidden = state.room.status !== "running";
+      if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
       phaseLeaderboard.hidden = state.room.status !== "leaderboard";
-      phaseFinished.hidden = state.room.status !== "finished";
+      const gameFinished =
+        state.room.status === "finished" &&
+        Number(state.totalQuestions) > 0 &&
+        Number(state.room.current_question) > Number(state.totalQuestions);
+      phaseFinished.hidden = !gameFinished;
+      if (activateButton) activateButton.disabled = role !== "admin" || state.room.status !== "waiting" || !state.question;
+      const nextWordButton = lobbyPhase.querySelector("[data-next-word]");
+      if (nextWordButton && state.room.status === "leaderboard") {
+        nextWordButton.textContent = state.room.current_question >= state.totalQuestions ? "Finish Game" : "Next Word";
+      }
 
+      if (state.room.status === "countdown") {
+        lobbyPhase.querySelectorAll("[data-countdown]").forEach((element) => { element.textContent = state.countdownRemaining; });
+      }
+      if (state.room.status === "waiting" && state.question) {
+        lobbyPhase.querySelectorAll("[data-question-number]").forEach((element) => { element.textContent = state.room.current_question; });
+        const targetWordEl = lobbyPhase.querySelector("[data-target-word]");
+        if (targetWordEl && state.question.target_word) targetWordEl.textContent = state.question.target_word;
+      }
       if (state.room.status === "running" && state.question) {
         questionNumberEl.textContent = state.room.current_question;
         questionTimerEl.textContent = state.timeRemaining;
@@ -189,6 +279,8 @@
         if (isNewQuestion) {
           currentQuestionNumber = state.room.current_question;
           if (questionTextEl) questionTextEl.textContent = state.question.question_text;
+          const targetWordEl = phaseRunning.querySelector("[data-target-word]");
+          if (targetWordEl && state.question.target_word) targetWordEl.textContent = state.question.target_word;
           const quicktypeInput = phaseRunning.querySelector("[data-quicktype-input]");
           if (quicktypeInput) { quicktypeInput.value = ""; quicktypeInput.disabled = false; }
           [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => {
@@ -198,8 +290,28 @@
           if (feedback) feedback.textContent = "";
         }
       }
-      if (state.room.status === "leaderboard") renderLeaderboardList(roundLeaderboardList, state.leaderboard);
-      if (state.room.status === "finished") renderFinalResults(state.leaderboard);
+      if (state.room.status === "waiting") {
+        const input = lobbyPhase.querySelector("[data-quicktype-input]");
+        if (input) input.disabled = true;
+        const submit = lobbyPhase.querySelector("[data-quicktype-form] button");
+        if (submit) submit.disabled = true;
+      }
+      if (state.room.status === "leaderboard") {
+        renderLeaderboardList(roundLeaderboardList, state.leaderboard);
+        if (correctWordEl) correctWordEl.textContent = state.correctWord || "";
+      }
+      if (gameFinished) renderFinalResults(state.leaderboard);
+    });
+
+    const activateButton = lobbyPhase.querySelector("[data-activate-word]");
+    if (role === "admin" && activateButton) activateButton.addEventListener("click", () => {
+      enterSessionMode();
+      activateButton.disabled = true;
+      fetch("/lobby/quicktype/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId }),
+      }).then(() => refresh());
     });
 
     if (role === "student") {
@@ -226,6 +338,220 @@
     setInterval(refresh, 1000);
   }
 
+  const setupForm = document.querySelector("[data-quicktype-setup]");
+  if (setupForm) {
+    const picker = setupForm.querySelector(".quicktype-word-picker");
+    const orderList = setupForm.querySelector("[data-word-order]");
+    const count = setupForm.querySelector("[data-selected-count]");
+    const createButton = setupForm.querySelector("[data-create-game]");
+    const search = setupForm.querySelector("[data-word-search]");
+    let savedUsedWordIds = [];
+    try {
+      savedUsedWordIds = JSON.parse(localStorage.getItem("quicktypeUsedWordIds") || "[]");
+    } catch (error) {
+      savedUsedWordIds = [];
+    }
+    const usedWordIds = new Set(Array.isArray(savedUsedWordIds) ? savedUsedWordIds.map(String) : []);
+    picker.querySelectorAll("[data-word-option]").forEach((card) => {
+      if (usedWordIds.has(card.dataset.wordId)) card.classList.add("previously-used");
+    });
+    const renderOrder = () => {
+      const selected = [...setupForm.querySelectorAll(".word-card.selected")];
+      orderList.innerHTML = selected.map((checkbox) => {
+        return `<li draggable="true" data-order-id="${checkbox.dataset.wordId}">${escapeHtml(checkbox.querySelector("span").textContent)}</li>`;
+      }).join("");
+      count.textContent = selected.length;
+      createButton.disabled = selected.length === 0;
+      orderList.querySelectorAll("li").forEach((item) => item.addEventListener("dragstart", (event) => event.dataTransfer.setData("text/plain", item.dataset.orderId)));
+    };
+    picker.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-word-option]");
+      if (!card) return;
+      card.classList.toggle("selected");
+      card.setAttribute("aria-pressed", card.classList.contains("selected"));
+      renderOrder();
+    });
+    orderList.addEventListener("dragover", (event) => event.preventDefault());
+    orderList.addEventListener("drop", (event) => {
+      event.preventDefault();
+      const dragged = orderList.querySelector(`[data-order-id="${event.dataTransfer.getData("text/plain")}"]`);
+      const target = event.target.closest("li");
+      if (dragged && target && dragged !== target) orderList.insertBefore(dragged, target);
+    });
+    search.addEventListener("input", () => {
+      const term = search.value.toLocaleLowerCase();
+      picker.querySelectorAll("[data-word-option]").forEach((option) => { option.hidden = !option.textContent.toLocaleLowerCase().includes(term); });
+    });
+    setupForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      setupForm.querySelectorAll("input[name='wordIds']").forEach((input) => input.remove());
+      orderList.querySelectorAll("[data-order-id]").forEach((item) => {
+        const input = document.createElement("input");
+        input.type = "hidden"; input.name = "wordIds"; input.value = item.dataset.orderId;
+        setupForm.appendChild(input);
+        usedWordIds.add(item.dataset.orderId);
+      });
+      localStorage.setItem("quicktypeUsedWordIds", JSON.stringify([...usedWordIds]));
+      setupForm.submit();
+    });
+  }
+
+  const playerCanvas = document.querySelector("[data-player-canvas]");
+  if (playerCanvas) {
+    const playerContext = playerCanvas.getContext("2d");
+    playerContext.imageSmoothingEnabled = false;
+    const playerMode = playerCanvas.dataset.mode;
+    const frameCanvas = document.createElement("canvas");
+    frameCanvas.width = playerCanvas.width;
+    frameCanvas.height = playerCanvas.height;
+    const frameContext = frameCanvas.getContext("2d");
+    const RENDER_WIDTH = 40;
+    const RENDER_HEIGHT = 40;
+    playerContext.imageSmoothingEnabled = false;
+    frameContext.imageSmoothingEnabled = false;
+    const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false };
+    const pressedKeys = new Set();
+    const remoteImages = new Map();
+    let pointerPosition = null;
+    let lastSyncAt = 0;
+    let lastSyncedState = "";
+    const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
+    const drawPlayer = () => {
+      player.isMoving = pressedKeys.size > 0;
+      if (player.isMoving) {
+        const activeKey = [...pressedKeys][pressedKeys.size - 1];
+        player.direction = directionByKey[activeKey];
+        player.frame = (player.frame + 0.2) % 9;
+        const movement = [...pressedKeys].reduce((result, key) => {
+          if (key === "ArrowUp" || key === "w") result.y -= 1;
+          if (key === "ArrowDown" || key === "s") result.y += 1;
+          if (key === "ArrowLeft" || key === "a") result.x -= 1;
+          if (key === "ArrowRight" || key === "d") result.x += 1;
+          return result;
+        }, { x: 0, y: 0 });
+        const length = Math.hypot(movement.x, movement.y) || 1;
+        player.x = Math.max(RENDER_WIDTH / 2, Math.min(playerCanvas.width - RENDER_WIDTH / 2, player.x + movement.x / length * player.speed));
+        player.y = Math.max(RENDER_HEIGHT, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
+      } else {
+        player.frame = 0;
+      }
+
+      frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+      const drawSprite = (image, x, y, direction, frame, username, isAdmin) => {
+        if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
+        const drawX = Math.floor(x - (RENDER_WIDTH / 2));
+        const drawY = Math.floor(y - RENDER_HEIGHT);
+        frameContext.drawImage(
+          image,
+          Math.floor(frame) * 64,
+          direction * 64,
+          64,
+          64,
+          drawX,
+          drawY,
+          RENDER_WIDTH,
+          RENDER_HEIGHT,
+        );
+        if (isAdmin) {
+          frameContext.font = "700 9px sans-serif";
+          frameContext.textAlign = "center";
+          frameContext.textBaseline = "bottom";
+          const badge = "Teacher";
+          const badgeWidth = frameContext.measureText(badge).width + 8;
+          const badgeY = drawY - 4;
+          frameContext.fillStyle = "#7b2cbf";
+          frameContext.fillRect(Math.floor(x - badgeWidth / 2), badgeY - 13, badgeWidth, 14);
+          frameContext.fillStyle = "#ffffff";
+          frameContext.fillText(badge, Math.floor(x), badgeY - 2);
+        }
+        const isHovered = pointerPosition && pointerPosition.x >= x - RENDER_WIDTH / 2 && pointerPosition.x <= x + RENDER_WIDTH / 2 && pointerPosition.y >= y - RENDER_HEIGHT && pointerPosition.y <= y;
+        if (username && isHovered) {
+          frameContext.font = "700 8px Teachers, sans-serif";
+          frameContext.textAlign = "center";
+          frameContext.textBaseline = "bottom";
+          const label = String(username).slice(0, 18);
+          const labelX = Math.floor(x);
+          const labelY = drawY - 3;
+          const labelWidth = frameContext.measureText(label).width + 6;
+          frameContext.fillStyle = "rgba(20, 33, 61, 0.88)";
+          frameContext.fillRect(labelX - labelWidth / 2, labelY - 11, labelWidth, 13);
+          frameContext.fillStyle = "#ffffff";
+          frameContext.shadowColor = "rgba(0, 0, 0, 0.8)";
+          frameContext.shadowBlur = 2;
+          frameContext.fillText(label, labelX, labelY);
+          frameContext.shadowBlur = 0;
+        }
+      };
+      const resizeCanvas = () => {
+        const stage = playerCanvas.closest(".lobby-character-stage");
+        if (!stage) return;
+        const width = Math.max(310, Math.floor(stage.clientWidth));
+        if (playerCanvas.width === width) return;
+        const previousWidth = playerCanvas.width;
+        playerCanvas.width = width;
+        playerCanvas.height = 210;
+        if (previousWidth > 0 && previousWidth !== width) {
+          player.x = Math.max(RENDER_WIDTH / 2, Math.min(width - RENDER_WIDTH / 2, player.x * width / previousWidth));
+        }
+      };
+      resizeCanvas();
+      if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
+      if (player.isLoaded) drawSprite(player.image, player.x, player.y, player.direction, player.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
+      (window.lobbyPlayers || []).forEach((remotePlayer) => {
+        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remotePlayer.spritesheet) return;
+        const cachedRemote = remoteImages.get(remotePlayer.username);
+        let remoteImage = cachedRemote?.key === remotePlayer.spritesheet ? cachedRemote.image : null;
+        if (!remoteImage) {
+          remoteImage = new Image();
+          remoteImage.src = `/uploads/profiles/${remotePlayer.spritesheet}?t=${encodeURIComponent(remotePlayer.spritesheet)}`;
+          remoteImages.set(remotePlayer.username, { key: remotePlayer.spritesheet, image: remoteImage });
+        }
+        drawSprite(remoteImage, Number(remotePlayer.x) || 160, Number(remotePlayer.y) || 190, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
+      });
+      playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+      playerContext.drawImage(frameCanvas, 0, 0);
+      const syncState = `${player.x},${player.y},${player.direction},${player.frame.toFixed(2)}`;
+      if (playerMode === "quicktype" && player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 100) {
+        lastSyncAt = timestampNow();
+        lastSyncedState = syncState;
+        fetch("/api/lobby/player-state", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame }) }).catch(() => {});
+      }
+      window.requestAnimationFrame(drawPlayer);
+    };
+
+    const timestampNow = () => performance.now();
+
+    window.addEventListener("keydown", (event) => {
+      if (!(event.key in directionByKey)) return;
+      event.preventDefault();
+      pressedKeys.add(event.key);
+    });
+    window.addEventListener("keyup", (event) => pressedKeys.delete(event.key));
+    window.addEventListener("blur", () => pressedKeys.clear());
+    playerCanvas.addEventListener("mousemove", (event) => {
+      const bounds = playerCanvas.getBoundingClientRect();
+      pointerPosition = {
+        x: (event.clientX - bounds.left) * playerCanvas.width / bounds.width,
+        y: (event.clientY - bounds.top) * playerCanvas.height / bounds.height,
+      };
+    });
+    playerCanvas.addEventListener("mouseleave", () => { pointerPosition = null; });
+    const loadPlayerImage = (source) => {
+      const updatedImage = new Image();
+      updatedImage.onload = () => { player.image = updatedImage; player.isLoaded = true; };
+      updatedImage.src = `${source}${source.startsWith("data:") ? "" : `?t=${Date.now()}`}`;
+    };
+    loadPlayerImage(localStorage.getItem("userSpritesheet") || playerCanvas.dataset.spritesheetImage);
+    window.addEventListener("message", (event) => {
+      if (event.origin !== "http://localhost:5173" || event.data?.type !== "SAVE_LPC_CHARACTER") return;
+      const newSpritesheet = event.data.payload?.spritesheetImage || event.data.payload?.image;
+      if (!newSpritesheet) return;
+      localStorage.setItem("userSpritesheet", newSpritesheet);
+      loadPlayerImage(newSpritesheet);
+    });
+    window.requestAnimationFrame(drawPlayer);
+  }
+
   const exitModal = document.getElementById("lobby-exit-modal");
   if (exitModal && lobbyPhase) {
     let pendingHref = null;
@@ -248,4 +574,3 @@
     exitModal.addEventListener("click", (event) => { if (event.target === exitModal) hideExitModal(); });
   }
 </script>
-

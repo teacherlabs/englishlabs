@@ -541,9 +541,16 @@ const buildGapFillSegments = (template) => {
 const normalizeReadingV2Preparation = (preparation, imageBase) => {
   if (!preparation) return null;
   if (preparation.type === "matching") {
-    return { instruction: preparation.instruction, isWordList: true, pairs: preparation.pairs };
+    return {
+      instruction: preparation.instruction,
+      isWordList: true,
+      pairs: preparation.pairs,
+    };
   }
-  if (preparation.type === "image_matching" || preparation.type === "image_drag_and_drop") {
+  if (
+    preparation.type === "image_matching" ||
+    preparation.type === "image_drag_and_drop"
+  ) {
     const items = preparation.items.map((item) => ({
       word: item.word,
       image: `${imageBase}/${item.image}`,
@@ -638,7 +645,9 @@ const buildReadingV2Exercise = (exercise, index) => {
   if (exercise.type === "gap_fill") {
     const questions = exercise.questions.map((question, questionIndex) => ({
       number: questionIndex + 1,
-      segments: buildGapFillSegments(question.sentence.replace("[]", `[${questionIndex + 1}]`)),
+      segments: buildGapFillSegments(
+        question.sentence.replace("[]", `[${questionIndex + 1}]`),
+      ),
       answer: String(question.answer),
     }));
     const answers = {};
@@ -922,7 +931,10 @@ function vocabularyLevelChoices(selectedLevel) {
 }
 
 const usefulChunkListsData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "vocabulary", "useful-chunks.json"), "utf8"),
+  fs.readFileSync(
+    path.join(__dirname, "vocabulary", "useful-chunks.json"),
+    "utf8",
+  ),
 ).lists;
 
 const usefulChunkExamples = new Map(
@@ -946,7 +958,6 @@ const usefulChunkLists = usefulChunkListsData.map((list, index) => ({
   chunks: list.chunks.map((chunk) => chunk.phrase),
 }));
 
-
 //----------
 // SESSIONS
 //----------
@@ -961,7 +972,6 @@ app.use(
   }),
 );
 app.use(function (req, res, next) {
-  console.log("Session passed to respone locals...");
   if (req.session.name && !req.session.avatar_initial) {
     req.session.avatar_initial = req.session.name.charAt(0).toUpperCase();
   }
@@ -973,7 +983,7 @@ app.use(function (req, res, next) {
 // MIDDLEWARES
 //-------------
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: "8mb" }));
 app.use(express.static("public"));
 app.use(
   "/uploads/profiles",
@@ -1085,6 +1095,14 @@ db.serialize(() => {
     () => {},
   );
   db.run("ALTER TABLE members ADD COLUMN avatar TEXT DEFAULT ''", () => {});
+  db.run(
+    "ALTER TABLE members ADD COLUMN spritesheet TEXT DEFAULT ''",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE members ADD COLUMN character_config TEXT DEFAULT ''",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS progress (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1174,6 +1192,22 @@ db.serialize(() => {
     FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
   )`);
   db.run(
+    "ALTER TABLE lobby_participants ADD COLUMN x REAL NOT NULL DEFAULT 160",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE lobby_participants ADD COLUMN y REAL NOT NULL DEFAULT 190",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE lobby_participants ADD COLUMN direction INTEGER NOT NULL DEFAULT 2",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE lobby_participants ADD COLUMN frame REAL NOT NULL DEFAULT 0",
+    () => {},
+  );
+  db.run(
     "ALTER TABLE lobby_rooms ADD COLUMN mode TEXT NOT NULL DEFAULT 'lobby'",
     () => {},
   );
@@ -1202,6 +1236,10 @@ db.serialize(() => {
     "ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER",
     () => {},
   );
+  db.run(
+    "ALTER TABLE lobby_rooms ADD COLUMN last_event TEXT",
+    () => {},
+  );
 });
 
 //------------
@@ -1226,6 +1264,30 @@ app.get("/", (req, res) => {
     return res.render("auth.handlebars");
   }
   res.redirect("/practice/questions?chapter=1");
+});
+
+app.get("/character-generator", requireLogin, (req, res) => {
+  res.render("character-generator.handlebars", { layout: false });
+});
+
+app.get("/api/profile/character", requireLogin, (req, res) => {
+  db.get(
+    "SELECT character_config FROM members WHERE username = ?",
+    [req.session.name],
+    (error, member) => {
+      if (error || !member)
+        return res.status(500).json({ error: "Unable to load character." });
+      let config = {};
+      try {
+        config = member.character_config
+          ? JSON.parse(member.character_config)
+          : {};
+      } catch (parseError) {
+        config = {};
+      }
+      res.json({ config });
+    },
+  );
 });
 
 app.get("/vocabulary", requireAuthenticated, (req, res) => {
@@ -1736,7 +1798,8 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
       LIMIT 3`,
     [req.session.name],
     (progressError, recentProgress) => {
-      if (progressError) return res.status(500).send("Unable to load recent scores.");
+      if (progressError)
+        return res.status(500).send("Unable to load recent scores.");
 
       const recentResults = recentProgress.map((item) => ({
         ...item,
@@ -1754,7 +1817,8 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
          JOIN chapters ON grammar_topics.chapter_id = chapters.id
          ORDER BY quiz_questions.id`,
         (error, grammarQuestions) => {
-          if (error) return res.status(500).send("Unable to load the final test.");
+          if (error)
+            return res.status(500).send("Unable to load the final test.");
           grammarDb.all(
             "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY id LIMIT 10",
             (vocabularyError, words) => {
@@ -1785,10 +1849,12 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
                 ...grammarQuestions,
                 ...vocabularyQuestions,
               ]);
-              const questions = finalQuestionPool.slice(0, 30).map((question, index) => ({
-                ...question,
-                question_number: index + 1,
-              }));
+              const questions = finalQuestionPool
+                .slice(0, 30)
+                .map((question, index) => ({
+                  ...question,
+                  question_number: index + 1,
+                }));
 
               res.render("practice.handlebars", {
                 mode: "final",
@@ -2127,20 +2193,25 @@ function requireAuthenticated(req, res, next) {
   next();
 }
 
+function requireProfileUser(req, res, next) {
+  if (!req.session.isLoggedIn) return res.redirect("/login");
+  next();
+}
+
 function requireAdmin(req, res, next) {
   if (!req.session.isAdmin)
     return res.status(403).send("Teacher access required.");
   next();
 }
 
-app.get("/profile", requireLogin, (req, res) => {
+app.get("/profile", requireProfileUser, (req, res) => {
   res.locals.unreadFeedbackCount = 0;
   db.run(
     "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
     [req.session.name],
   );
   db.get(
-    "SELECT username, goal, avatar, profile_background FROM members WHERE username = ?",
+    "SELECT username, goal, avatar, character_config, profile_background FROM members WHERE username = ?",
     [req.session.name],
     (error, student) => {
       if (error || !student) return res.status(404).send("Profile not found.");
@@ -2215,6 +2286,7 @@ app.get("/profile", requireLogin, (req, res) => {
                         return res.status(500).send("Unable to load messages.");
                       res.render("profile.handlebars", {
                         student,
+                        isAdmin: Boolean(req.session.isAdmin),
                         progress,
                         stats,
                         areaProgress: buildAreaProgress(progress),
@@ -2238,10 +2310,27 @@ app.get("/profile", requireLogin, (req, res) => {
 });
 
 const QUESTION_DURATION_MS = 20000;
+const QUICKTYPE_COUNTDOWN_MS = 3000;
+const QUICKTYPE_DURATION_MS = 15000;
 
 // Lazily flips a running round to "leaderboard" once the timer expires or everyone has answered.
 const finalizeRoundIfNeeded = (room, callback) => {
+  if (room && room.status === "countdown") {
+    if (Date.now() - (room.question_started_at || Date.now()) < QUICKTYPE_COUNTDOWN_MS) {
+      return callback(room);
+    }
+    return db.run(
+      "UPDATE lobby_rooms SET status = 'running', question_started_at = ? WHERE id = ? AND status = 'countdown'",
+      [Date.now(), room.id],
+      () => db.get(
+        "SELECT * FROM lobby_rooms WHERE id = ?",
+        [room.id],
+        (error, updatedRoom) => callback(error || !updatedRoom ? room : updatedRoom),
+      ),
+    );
+  }
   if (!room || room.status !== "running") return callback(room);
+  const duration = room.mode === "quicktype" ? QUICKTYPE_DURATION_MS : QUESTION_DURATION_MS;
   const elapsed = Date.now() - (room.question_started_at || Date.now());
   db.get(
     "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
@@ -2249,7 +2338,7 @@ const finalizeRoundIfNeeded = (room, callback) => {
     (countError, counts) => {
       const total = countError ? 0 : counts.total || 0;
       const answered = countError ? 0 : counts.answered || 0;
-      const timeUp = elapsed >= QUESTION_DURATION_MS;
+      const timeUp = elapsed >= duration;
       const allAnswered = total > 0 && answered >= total;
       if (!timeUp && !allAnswered) return callback(room);
       db.run(
@@ -2270,53 +2359,151 @@ const finalizeRoundIfNeeded = (room, callback) => {
 
 app.get("/lobby", requireAuthenticated, (req, res) => {
   const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
-  const renderLobby = (room, questions = [], participant = null) =>
-    res.render("lobby.handlebars", {
-      student: { username: req.session.name },
-      isAdmin: Boolean(req.session.isAdmin),
-      room,
-      questions,
-      participant,
-      isQuicktype: room?.mode === "quicktype" || requestedMode === "quicktype",
-      leaderboard: [],
-      totalQuestions: questions.length,
-      currentQuestion: room
-        ? questions.find(
-            (question) => question.question_order === room.current_question,
-          )
-        : null,
-      isWaiting: room?.status === "waiting",
-      isRunning: room?.status === "running",
-      isLeaderboardPhase: room?.status === "leaderboard",
-      isFinished: room?.status === "finished",
-    });
+  const renderLobby = (room, questions = [], participant = null) => {
+    db.get(
+      "SELECT avatar, character_config FROM members WHERE username = ?",
+      [req.session.name],
+      (memberError, member) => {
+        let characterConfig = {
+          skin: "#f6c89f",
+          hair: "#2b1b16",
+          shirt: "#e85d4a",
+          accessory: "none",
+        };
+        try {
+          characterConfig = member?.character_config
+            ? JSON.parse(member.character_config)
+            : {};
+        } catch (parseError) {
+          characterConfig = {};
+        }
+        characterConfig = {
+          skin: "#f6c89f",
+          hair: "#2b1b16",
+          shirt: "#e85d4a",
+          accessory: "none",
+          ...characterConfig,
+        };
+        const renderData = {
+          student: {
+            username: req.session.name,
+            avatar: member?.avatar || "",
+            spritesheet: member?.spritesheet || member?.avatar || "",
+            characterConfig,
+          },
+          isAdmin: Boolean(req.session.isAdmin),
+          room,
+          questions,
+          participant,
+          isQuicktype:
+            room?.mode === "quicktype" || requestedMode === "quicktype",
+          leaderboard: [],
+          totalQuestions: questions.length,
+          currentQuestion: room
+            ? questions.find(
+                (question) => question.question_order === room.current_question,
+              )
+            : null,
+          isWaiting: room?.status === "waiting",
+          isRunning: room?.status === "running",
+          isLeaderboardPhase: room?.status === "leaderboard",
+          isFinished:
+            room?.status === "finished" &&
+            questions.length > 0 &&
+            room.current_question > questions.length,
+          isActiveSession:
+            questions.length > 0 &&
+            ["countdown", "running", "leaderboard", "finished"].includes(
+              room?.status,
+            ),
+        };
+        if (renderData.isAdmin && renderData.isQuicktype && renderData.isWaiting) {
+          grammarDb.all(
+            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
+            (vocabularyError, vocabularyWords) => {
+              if (vocabularyError) return res.status(500).send("Unable to load vocabulary.");
+              res.render("lobby.handlebars", { ...renderData, vocabularyWords });
+            },
+          );
+        } else {
+          res.render("lobby.handlebars", renderData);
+        }
+      },
+    );
+  };
+  if (!req.session.isAdmin && !req.query.roomId) return renderLobby(null);
+  const roomQuery = req.session.isAdmin
+    ? "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1"
+    : "SELECT * FROM lobby_rooms WHERE id = ? AND mode = ?";
+  const roomParams = req.session.isAdmin
+    ? [requestedMode]
+    : [Number(req.query.roomId), requestedMode];
   db.get(
-    "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1",
-    [requestedMode],
+    roomQuery,
+    roomParams,
     (roomError, room) => {
       if (roomError) return res.status(500).send("Unable to load lobby.");
       if (!room) return renderLobby(null);
       finalizeRoundIfNeeded(room, (updatedRoom) => {
-        const questionQuery = updatedRoom.mode === "quicktype"
-          ? "SELECT id, question_order, prompt AS question_text FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order"
-          : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
-        db.all(
-          questionQuery,
-          [updatedRoom.id],
-          (questionError, questions) => {
-            if (questionError)
-              return res.status(500).send("Unable to load lobby questions.");
-            db.get(
-              "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
-              [updatedRoom.id, req.session.name],
-              (participantError, participant) =>
-                participantError
-                  ? res.status(500).send("Unable to load lobby participant.")
-                  : renderLobby(updatedRoom, questions, participant),
-            );
-          },
-        );
+        const questionQuery =
+          updatedRoom.mode === "quicktype"
+            ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
+            : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
+        db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
+          if (questionError)
+            return res.status(500).send("Unable to load lobby questions.");
+          db.get(
+            "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
+            [updatedRoom.id, req.session.name],
+            (participantError, participant) =>
+              participantError
+                ? res.status(500).send("Unable to load lobby participant.")
+                : renderLobby(updatedRoom, questions, participant),
+          );
+        });
       });
+    },
+  );
+});
+
+app.get("/quicktype", requireAuthenticated, (req, res) => {
+  if (!req.session.isAdmin) return res.redirect("/lobby?mode=quicktype");
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const title = "QuickType";
+  db.run(
+    "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, 'quicktype')",
+    [code, title],
+    function (error) {
+      if (error) return res.status(500).send("Unable to create QuickType room.");
+      db.run(
+        "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
+        [this.lastID, req.session.name],
+        (participantError) =>
+          participantError
+            ? res.status(500).send("Unable to join QuickType room.")
+            : res.redirect("/lobby?mode=quicktype"),
+      );
+    },
+  );
+});
+
+app.get("/question-game", requireAuthenticated, (req, res) => {
+  if (!req.session.isAdmin) return res.redirect("/lobby?mode=lobby");
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const title = "Question Game";
+  db.run(
+    "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, 'lobby')",
+    [code, title],
+    function (error) {
+      if (error) return res.status(500).send("Unable to create Question Game room.");
+      db.run(
+        "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
+        [this.lastID, req.session.name],
+        (participantError) =>
+          participantError
+            ? res.status(500).send("Unable to join Question Game room.")
+            : res.redirect("/lobby?mode=lobby"),
+      );
     },
   );
 });
@@ -2330,10 +2517,17 @@ app.post("/lobby/rooms", requireAdmin, (req, res) => {
   db.run(
     "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, ?)",
     [code, title, mode],
-    (error) =>
-      error
-        ? res.status(500).send("Unable to create room.")
-        : res.redirect("/lobby"),
+    function (error) {
+      if (error) return res.status(500).send("Unable to create room.");
+      db.run(
+        "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
+        [this.lastID, req.session.name],
+        (participantError) =>
+          participantError
+            ? res.status(500).send("Unable to join teacher to room.")
+            : res.redirect(`/lobby?mode=${mode === "quicktype" ? "quicktype" : "lobby"}`),
+      );
+    },
   );
 });
 
@@ -2351,15 +2545,30 @@ app.post("/lobby/quit", requireAdmin, (req, res) => {
         (questionsError) => {
           if (questionsError)
             return res.status(500).send("Unable to close room.");
-          db.run("DELETE FROM lobby_quicktype_submissions WHERE room_id = ?", [roomId], (submissionsError) => {
-            if (submissionsError) return res.status(500).send("Unable to close room.");
-            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [roomId], (quicktypeError) => {
-              if (quicktypeError) return res.status(500).send("Unable to close room.");
-              db.run("DELETE FROM lobby_rooms WHERE id = ?", [roomId], (roomError) =>
-                roomError ? res.status(500).send("Unable to close room.") : res.redirect("/lobby"),
+          db.run(
+            "DELETE FROM lobby_quicktype_submissions WHERE room_id = ?",
+            [roomId],
+            (submissionsError) => {
+              if (submissionsError)
+                return res.status(500).send("Unable to close room.");
+              db.run(
+                "DELETE FROM lobby_quicktype_questions WHERE room_id = ?",
+                [roomId],
+                (quicktypeError) => {
+                  if (quicktypeError)
+                    return res.status(500).send("Unable to close room.");
+                  db.run(
+                    "DELETE FROM lobby_rooms WHERE id = ?",
+                    [roomId],
+                    (roomError) =>
+                      roomError
+                        ? res.status(500).send("Unable to close room.")
+                        : res.redirect("/lobby"),
+                  );
+                },
               );
-            });
-          });
+            },
+          );
         },
       );
     },
@@ -2402,24 +2611,101 @@ app.post("/lobby/quicktype/questions", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
   const prompt = String(req.body.prompt || "").trim();
   const targetWord = String(req.body.targetWord || "").trim();
-  if (!roomId || !prompt || !targetWord) return res.status(400).redirect("/lobby?mode=quicktype");
-  db.get("SELECT mode, status FROM lobby_rooms WHERE id = ?", [roomId], (roomError, room) => {
-    if (roomError || !room || room.mode !== "quicktype" || room.status !== "waiting") return res.status(400).redirect("/lobby?mode=quicktype");
-    db.get(
-      "SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_quicktype_questions WHERE room_id = ?",
-      [roomId],
-      (orderError, result) => {
-        if (orderError) return res.status(500).send("Unable to add Quicktype prompt.");
-        db.run(
-          "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
-          [roomId, result.next_order, prompt, targetWord],
-          (error) => error
-            ? res.status(500).send("Unable to add Quicktype prompt.")
-            : res.redirect("/lobby?mode=quicktype"),
-        );
-      },
-    );
-  });
+  if (!roomId || !prompt || !targetWord)
+    return res.status(400).redirect("/lobby?mode=quicktype");
+  db.get(
+    "SELECT mode, status FROM lobby_rooms WHERE id = ?",
+    [roomId],
+    (roomError, room) => {
+      if (
+        roomError ||
+        !room ||
+        room.mode !== "quicktype" ||
+        room.status !== "waiting"
+      )
+        return res.status(400).redirect("/lobby?mode=quicktype");
+      db.get(
+        "SELECT COALESCE(MAX(question_order), 0) + 1 AS next_order FROM lobby_quicktype_questions WHERE room_id = ?",
+        [roomId],
+        (orderError, result) => {
+          if (orderError)
+            return res.status(500).send("Unable to add Quicktype prompt.");
+          db.run(
+            "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
+            [roomId, result.next_order, prompt, targetWord],
+            (error) =>
+              error
+                ? res.status(500).send("Unable to add Quicktype prompt.")
+                : res.redirect("/lobby?mode=quicktype"),
+          );
+        },
+      );
+    },
+  );
+});
+
+app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const rawWordIds = Array.isArray(req.body.wordIds)
+    ? req.body.wordIds
+    : req.body.wordIds
+      ? [req.body.wordIds]
+      : [];
+  const wordIds = [...new Set(rawWordIds.map(Number).filter(Number.isInteger))];
+  if (!roomId || !wordIds.length)
+    return res.status(400).redirect("/lobby?mode=quicktype");
+  db.get(
+    "SELECT mode, status FROM lobby_rooms WHERE id = ?",
+    [roomId],
+    (roomError, room) => {
+      if (roomError || !room || room.mode !== "quicktype" || room.status !== "waiting")
+        return res.status(400).redirect("/lobby?mode=quicktype");
+      const placeholders = wordIds.map(() => "?").join(",");
+      grammarDb.all(
+        `SELECT id, english_word FROM vocabulary WHERE id IN (${placeholders})`,
+        wordIds,
+        (vocabularyError, words) => {
+          if (vocabularyError || words.length !== wordIds.length)
+            return res.status(400).redirect("/lobby?mode=quicktype");
+          const byId = new Map(words.map((word) => [word.id, word]));
+          db.serialize(() => {
+            db.run("DELETE FROM lobby_quicktype_submissions WHERE room_id = ?", [roomId]);
+            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [roomId]);
+            const insert = db.prepare(
+              "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
+            );
+            wordIds.forEach((wordId, index) => {
+              const word = byId.get(wordId);
+              insert.run(roomId, index + 1, "Type the word you hear.", word.english_word);
+            });
+            insert.finalize((insertError) => {
+              if (insertError) return res.status(500).send("Unable to create Quicktype game.");
+              db.run(
+                "UPDATE lobby_rooms SET current_question = 1, status = 'waiting', question_started_at = NULL WHERE id = ?",
+                [roomId],
+                (updateError) =>
+                  updateError
+                    ? res.status(500).send("Unable to initialize Quicktype game.")
+                    : res.redirect("/lobby?mode=quicktype"),
+              );
+            });
+          });
+        },
+      );
+    },
+  );
+});
+
+app.post("/lobby/quicktype/activate", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  db.run(
+    "UPDATE lobby_rooms SET status = 'countdown', current_question = COALESCE(NULLIF(current_question, 0), 1), question_started_at = ?, last_event = NULL WHERE id = ? AND mode = 'quicktype' AND status = 'waiting' AND EXISTS (SELECT 1 FROM lobby_quicktype_questions WHERE room_id = ?)",
+    [Date.now(), roomId, roomId],
+    function (error) {
+      if (error) return res.status(500).json({ error: "Unable to activate word." });
+      res.json({ activated: this.changes === 1 });
+    },
+  );
 });
 
 app.post("/lobby/join", requireLogin, (req, res) => {
@@ -2432,8 +2718,31 @@ app.post("/lobby/join", requireLogin, (req, res) => {
       db.run(
         "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
         [room.id, req.session.name],
-        () => res.redirect(`/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`),
+        () =>
+          res.redirect(
+            `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
+          ),
       );
+    },
+  );
+});
+
+app.post("/api/lobby/player-state", requireProfileUser, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const x = Math.max(0, Math.min(310, Number(req.body.x) || 0));
+  const y = Math.max(60, Math.min(210, Number(req.body.y) || 60));
+  const direction = [0, 1, 2, 3].includes(Number(req.body.direction))
+    ? Number(req.body.direction)
+    : 2;
+  const frame = Math.max(0, Math.min(8.99, Number(req.body.frame) || 0));
+  if (!roomId) return res.status(400).json({ error: "Room is required." });
+  db.run(
+    "UPDATE lobby_participants SET x = ?, y = ?, direction = ?, frame = ? WHERE room_id = ? AND username = ?",
+    [x, y, direction, frame, roomId, req.session.name],
+    function (error) {
+      if (error)
+        return res.status(500).json({ error: "Unable to sync player." });
+      res.json({ saved: this.changes === 1 });
     },
   );
 });
@@ -2441,51 +2750,92 @@ app.post("/lobby/join", requireLogin, (req, res) => {
 app.post("/lobby/start", requireAdmin, (req, res) => {
   db.run(
     "UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND ((mode = 'lobby' AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)) OR (mode = 'quicktype' AND EXISTS (SELECT 1 FROM lobby_quicktype_questions WHERE room_id = ?)))",
-    [Date.now(), Number(req.body.roomId), Number(req.body.roomId), Number(req.body.roomId)],
-    () => res.redirect(`/lobby?mode=${req.body.mode === "quicktype" ? "quicktype" : "lobby"}`),
+    [
+      Date.now(),
+      Number(req.body.roomId),
+      Number(req.body.roomId),
+      Number(req.body.roomId),
+    ],
+    () =>
+      res.redirect(
+        `/lobby?mode=${req.body.mode === "quicktype" ? "quicktype" : "lobby"}`,
+      ),
   );
 });
 
 app.post("/lobby/quicktype/submit", requireLogin, (req, res) => {
   const roomId = Number(req.body.roomId);
   const submittedWord = String(req.body.word || "").trim();
-  const normalizedWord = submittedWord.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "");
-  if (!roomId || !submittedWord || !normalizedWord) return res.status(400).json({ error: "Enter a word." });
+  const normalizedWord = submittedWord
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+  if (!roomId || !submittedWord || !normalizedWord)
+    return res.status(400).json({ error: "Enter a word." });
   db.get(
     "SELECT * FROM lobby_rooms WHERE id = ? AND mode = 'quicktype' AND status = 'running'",
     [roomId],
     (roomError, room) => {
-      if (roomError || !room) return res.status(400).json({ error: "Room is not running." });
+      if (roomError || !room)
+        return res.status(400).json({ error: "Room is not running." });
       db.get(
         "SELECT target_word FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?",
         [roomId, room.current_question],
         (questionError, question) => {
-          if (questionError || !question) return res.status(400).json({ error: "Prompt is unavailable." });
-          const expectedWord = String(question.target_word).toLocaleLowerCase().replace(/[^a-z0-9]+/g, "");
+          if (questionError || !question)
+            return res.status(400).json({ error: "Prompt is unavailable." });
+          if (Date.now() - (room.question_started_at || Date.now()) >= QUICKTYPE_DURATION_MS) {
+            return finalizeRoundIfNeeded(room, () =>
+              res.status(400).json({ error: "This round has ended." }),
+            );
+          }
+          const expectedWord = String(question.target_word)
+            .toLocaleLowerCase()
+            .replace(/[^a-z0-9]+/g, "");
           const isCorrect = normalizedWord === expectedWord;
           db.get(
             "SELECT 1 FROM lobby_quicktype_submissions WHERE room_id = ? AND question_order = ? AND username = ?",
             [roomId, room.current_question, req.session.name],
             (existingError, existing) => {
-              if (existingError) return res.status(500).json({ error: "Unable to save answer." });
-              if (existing) return res.json({ correct: false, points: 0, answered: true });
+              if (existingError)
+                return res
+                  .status(500)
+                  .json({ error: "Unable to save answer." });
+              if (existing)
+                return res.json({ correct: false, points: 0, answered: true });
               db.get(
                 "SELECT COUNT(*) AS correct_count FROM lobby_quicktype_submissions WHERE room_id = ? AND question_order = ? AND is_correct = 1",
                 [roomId, room.current_question],
                 (countError, count) => {
-                  if (countError) return res.status(500).json({ error: "Unable to score answer." });
+                  if (countError)
+                    return res
+                      .status(500)
+                      .json({ error: "Unable to score answer." });
                   const points = isCorrect ? (count.correct_count ? 1 : 2) : 0;
                   db.run(
                     "INSERT INTO lobby_quicktype_submissions (room_id, question_order, username, submitted_word, is_correct, points) VALUES (?, ?, ?, ?, ?, ?)",
-                    [roomId, room.current_question, req.session.name, submittedWord, isCorrect ? 1 : 0, points],
+                    [
+                      roomId,
+                      room.current_question,
+                      req.session.name,
+                      submittedWord,
+                      isCorrect ? 1 : 0,
+                      points,
+                    ],
                     (insertError) => {
-                      if (insertError) return res.status(500).json({ error: "Unable to save answer." });
+                      if (insertError)
+                        return res
+                          .status(500)
+                          .json({ error: "Unable to save answer." });
                       db.run(
                         "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
                         [submittedWord, points, roomId, req.session.name],
                         () => {
                           finalizeRoundIfNeeded(room, () => {});
-                          res.json({ correct: isCorrect, points, answered: true });
+                          res.json({
+                            correct: isCorrect,
+                            points,
+                            answered: true,
+                          });
                         },
                       );
                     },
@@ -2568,18 +2918,22 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
         (countError, count) => {
           const next = room.current_question + 1;
           db.run(
-            "UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ? WHERE id = ?",
+            "UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ?, last_event = ? WHERE id = ?",
             [
               next,
-              next > count.total ? "finished" : "running",
-              next > count.total ? null : Date.now(),
+              next > count.total ? "finished" : room.mode === "quicktype" ? "waiting" : "running",
+              next > count.total ? null : room.mode === "quicktype" ? null : Date.now(),
+              next > count.total ? null : room.mode === "quicktype" ? "NEXT_WORD_PREPARED" : null,
               roomId,
             ],
             () => {
               db.run(
                 "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
                 [roomId],
-                () => res.redirect(`/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`),
+                () =>
+                  res.redirect(
+                    `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`,
+                  ),
               );
             },
           );
@@ -2599,16 +2953,18 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
     (error, room) => {
       if (error || !room) return res.json({ room: null });
       finalizeRoundIfNeeded(room, (updatedRoom) => {
-        const totalQuery = updatedRoom.mode === "quicktype"
-          ? "SELECT COUNT(*) AS total FROM lobby_quicktype_questions WHERE room_id = ?"
-          : "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?";
+        const totalQuery =
+          updatedRoom.mode === "quicktype"
+            ? "SELECT COUNT(*) AS total FROM lobby_quicktype_questions WHERE room_id = ?"
+            : "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?";
         db.get(
           totalQuery,
           [updatedRoom.id],
           (totalQuestionsError, totalQuestionsRow) => {
-            const questionQuery = updatedRoom.mode === "quicktype"
-              ? "SELECT id, question_order, prompt AS question_text FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?"
-              : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?";
+            const questionQuery =
+              updatedRoom.mode === "quicktype"
+                ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?`
+                : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? AND question_order = ?";
             db.get(
               questionQuery,
               [updatedRoom.id, updatedRoom.current_question],
@@ -2622,34 +2978,53 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS username, lobby_participants.score AS score, members.avatar AS avatar FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          "SELECT lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
                           [updatedRoom.id],
                           (leaderboardError, leaderboard) => {
                             const elapsed =
                               updatedRoom.status === "running"
-                                ? Date.now() -
-                                  (updatedRoom.question_started_at || Date.now())
+                                ? Date.now() - (updatedRoom.question_started_at || Date.now())
                                 : 0;
-                            res.json({
+                            const duration = updatedRoom.mode === "quicktype"
+                              ? QUICKTYPE_DURATION_MS
+                              : QUESTION_DURATION_MS;
+                            const sendState = (correctWord = null) => res.json({
                               room: updatedRoom,
+                              event: updatedRoom.last_event || null,
                               totalQuestions: totalQuestionsError
                                 ? 0
                                 : totalQuestionsRow.total,
                               question: questionError ? null : question,
-                              participant: participantError ? null : participant,
+                              participant: participantError
+                                ? null
+                                : participant,
                               leaderboard: leaderboardError ? [] : leaderboard,
-                              timeRemaining:
-                                updatedRoom.status === "running"
-                                  ? Math.max(
-                                      0,
-                                      Math.ceil(
-                                        (QUESTION_DURATION_MS - elapsed) / 1000,
-                                      ),
-                                    )
-                                  : 0,
-                              answeredCount: countError ? 0 : counts.answered || 0,
-                              totalParticipants: countError ? 0 : counts.total || 0,
+                              countdownRemaining: updatedRoom.status === "countdown"
+                                ? Math.max(0, Math.ceil((QUICKTYPE_COUNTDOWN_MS - (Date.now() - (updatedRoom.question_started_at || Date.now()))) / 1000))
+                                : 0,
+                              timeRemaining: updatedRoom.status === "running"
+                                ? Math.max(0, Math.ceil((duration - elapsed) / 1000))
+                                : 0,
+                              correctWord,
+                              answeredCount: countError
+                                ? 0
+                                : counts.answered || 0,
+                              totalParticipants: countError
+                                ? 0
+                                : counts.total || 0,
                             });
+                            if (
+                              updatedRoom.mode === "quicktype" &&
+                              ["leaderboard", "finished"].includes(updatedRoom.status)
+                            ) {
+                              db.get(
+                                "SELECT target_word FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?",
+                                [updatedRoom.id, updatedRoom.current_question],
+                                (wordError, result) => sendState(wordError ? null : result?.target_word || null),
+                              );
+                            } else {
+                              sendState();
+                            }
                           },
                         );
                       },
@@ -2665,7 +3040,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
   );
 });
 
-app.post("/profile/goal", requireLogin, (req, res) => {
+app.post("/profile/goal", requireProfileUser, (req, res) => {
   db.run(
     "UPDATE members SET goal = ? WHERE username = ?",
     [String(req.body.goal || "").trim(), req.session.name],
@@ -2676,7 +3051,7 @@ app.post("/profile/goal", requireLogin, (req, res) => {
   );
 });
 
-app.post("/profile/background", requireLogin, (req, res) => {
+app.post("/profile/background", requireProfileUser, (req, res) => {
   const backgroundColor = String(req.body.profileBackgroundColor || "").trim();
   if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
     return res.status(400).redirect("/profile?backgroundError=1");
@@ -2692,7 +3067,7 @@ app.post("/profile/background", requireLogin, (req, res) => {
   );
 });
 
-app.post("/profile/avatar", requireLogin, (req, res) => {
+app.post("/profile/avatar", requireProfileUser, (req, res) => {
   profileUpload.single("profilePicture")(req, res, (uploadError) => {
     if (uploadError || !req.file) {
       return res.status(400).redirect("/profile?avatarError=1");
@@ -2707,6 +3082,91 @@ app.post("/profile/avatar", requireLogin, (req, res) => {
       },
     );
   });
+});
+
+app.post("/api/profile/character", requireProfileUser, (req, res) => {
+  const previewImage = String(
+    req.body.previewImage || req.body.image || req.body.spritesheetImage || "",
+  );
+  const spritesheetImage = String(
+    req.body.spritesheetImage || req.body.image || "",
+  );
+  const config =
+    req.body.config && typeof req.body.config === "object"
+      ? req.body.config
+      : {};
+  const previewMatch = previewImage
+    .trim()
+    .match(
+      /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i,
+    );
+  const spritesheetMatch = spritesheetImage
+    .trim()
+    .match(
+      /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i,
+    );
+  if (!previewMatch || !spritesheetMatch)
+    return res.status(400).json({ error: "Invalid character data." });
+
+  const previewBuffer = Buffer.from(
+    previewMatch[2].replace(/[\r\n\s]/g, ""),
+    "base64",
+  );
+  const spritesheetBuffer = Buffer.from(
+    spritesheetMatch[2].replace(/[\r\n\s]/g, ""),
+    "base64",
+  );
+  if (
+    !previewBuffer.length ||
+    !spritesheetBuffer.length ||
+    previewBuffer.length > 2 * 1024 * 1024 ||
+    spritesheetBuffer.length > 8 * 1024 * 1024
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Character image must be under 2 MB." });
+  }
+  const extension = (type) => (type === "jpeg" ? "jpg" : type);
+  const avatarFilename = `character-preview-${crypto.randomUUID()}.${extension(previewMatch[1])}`;
+  const spritesheetFilename = `character-sheet-${crypto.randomUUID()}.${extension(spritesheetMatch[1])}`;
+  const profileDirectory = path.join(dataDir, "uploads", "profiles");
+  fs.writeFile(
+    path.join(profileDirectory, avatarFilename),
+    previewBuffer,
+    (previewWriteError) => {
+      if (previewWriteError)
+        return res.status(500).json({ error: "Unable to save character." });
+      fs.writeFile(
+        path.join(profileDirectory, spritesheetFilename),
+        spritesheetBuffer,
+        (spritesheetWriteError) => {
+          if (spritesheetWriteError)
+            return res.status(500).json({ error: "Unable to save character." });
+          db.run(
+            "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
+            [
+              avatarFilename,
+              spritesheetFilename,
+              JSON.stringify(config),
+              req.session.name,
+            ],
+            (error) => {
+              if (error)
+                return res
+                  .status(500)
+                  .json({ error: "Unable to save character." });
+              req.session.avatar = avatarFilename;
+              res.json({
+                saved: true,
+                avatar: avatarFilename,
+                spritesheet: spritesheetFilename,
+              });
+            },
+          );
+        },
+      );
+    },
+  );
 });
 
 app.post("/api/progress", requireLogin, (req, res) => {

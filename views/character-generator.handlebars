@@ -1,0 +1,159 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Character creator</title>
+    <style>
+      :root {
+        font-family: "Trebuchet MS", sans-serif;
+        color: #14213d;
+        background: #fff9eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 18px;
+      }
+      .creator {
+        display: grid;
+        grid-template-columns: minmax(120px, 180px) 1fr;
+        gap: 20px;
+        align-items: start;
+        max-width: 620px;
+      }
+      canvas {
+        width: 100%;
+        max-width: 180px;
+        aspect-ratio: 1;
+        border: 3px solid #14213d;
+        border-radius: 12px;
+        background: #dff1ff;
+        image-rendering: pixelated;
+      }
+      .controls {
+        display: grid;
+        gap: 10px;
+      }
+      label {
+        display: grid;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      select,
+      button {
+        min-height: 38px;
+        padding: 7px 10px;
+        border: 2px solid #14213d;
+        border-radius: 6px;
+        font: inherit;
+      }
+      select {
+        background: #fff;
+      }
+      button {
+        background: #2f855a;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #236044;
+      }
+      @media (max-width: 480px) {
+        .creator {
+          grid-template-columns: 1fr;
+        }
+        canvas {
+          justify-self: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="creator" aria-label="Character creator">
+      <canvas
+        id="characterCanvas"
+        width="180"
+        height="180"
+        aria-label="Character preview"
+      ></canvas>
+      <div class="controls">
+        <label>Skin tone
+          <select data-part="skin"><option value="#f6c89f">Warm</option><option
+              value="#a96845"
+            >Cocoa</option><option value="#f0b27a">Golden</option><option
+              value="#70452f"
+            >Deep</option></select></label>
+        <label>Hair
+          <select data-part="hair"><option value="#2b1b16">Dark</option><option
+              value="#c8873d"
+            >Copper</option><option value="#d9d9d9">Silver</option><option
+              value="#352a75"
+            >Purple</option></select></label>
+        <label>Top
+          <select data-part="shirt"><option
+              value="#e85d4a"
+            >Coral</option><option value="#2f855a">Green</option><option
+              value="#3478b9"
+            >Blue</option><option value="#e0a928">Gold</option></select></label>
+        <label>Accessory
+          <select data-part="accessory"><option
+              value="none"
+            >None</option><option value="glasses">Glasses</option><option
+              value="headphones"
+            >Headphones</option></select></label>
+        <button type="button" id="saveCharacter">Save character</button>
+      </div>
+    </main>
+    <script>
+      const canvas = document.getElementById("characterCanvas"); const context =
+      canvas.getContext("2d"); const parts =
+      Object.fromEntries([...document.querySelectorAll("[data-part]")].map((select)
+      => [select.dataset.part, select])); const drawCharacter = () => { const
+      config = Object.fromEntries(Object.entries(parts).map(([key, select]) =>
+      [key, select.value])); context.clearRect(0, 0, 180, 180);
+      context.fillStyle = "#dff1ff"; context.fillRect(0, 0, 180, 180);
+      context.fillStyle = config.shirt; context.beginPath(); context.ellipse(90,
+      157, 58, 38, 0, 0, Math.PI * 2); context.fill(); context.fillStyle =
+      config.skin; context.beginPath(); context.arc(90, 86, 42, 0, Math.PI * 2);
+      context.fill(); context.fillStyle = config.hair; context.beginPath();
+      context.arc(90, 69, 43, Math.PI, Math.PI * 2); context.fill();
+      context.fillRect(48, 68, 12, 28); context.fillRect(120, 68, 12, 28);
+      context.fillStyle = "#14213d"; context.beginPath(); context.arc(75, 87, 4,
+      0, Math.PI * 2); context.arc(105, 87, 4, 0, Math.PI * 2); context.fill();
+      context.strokeStyle = "#14213d"; context.lineWidth = 3;
+      context.beginPath(); context.arc(90, 96, 13, 0, Math.PI);
+      context.stroke(); if (config.accessory === "glasses") {
+      context.strokeStyle = "#14213d"; context.lineWidth = 3;
+      context.strokeRect(61, 78, 25, 18); context.strokeRect(94, 78, 25, 18);
+      context.beginPath(); context.moveTo(86, 86); context.lineTo(94, 86);
+      context.stroke(); } if (config.accessory === "headphones") {
+      context.strokeStyle = "#e0a928"; context.lineWidth = 6;
+      context.beginPath(); context.arc(90, 80, 49, Math.PI, Math.PI * 2);
+      context.stroke(); context.fillStyle = "#e0a928"; context.fillRect(39, 78,
+      10, 25); context.fillRect(131, 78, 10, 25); } };
+      Object.values(parts).forEach((select) => select.addEventListener("change",
+      drawCharacter)); window.addEventListener("message", (event) => { if
+      (event.origin !== window.location.origin || event.data?.type !==
+      "LOAD_LPC_CHARACTER") return; Object.entries(event.data.payload ||
+      {}).forEach(([key, value]) => { if (parts[key] &&
+      [...parts[key].options].some((option) => option.value === value))
+      parts[key].value = value; }); drawCharacter(); });
+      document.getElementById("saveCharacter").addEventListener("click", () => {
+      const config = Object.fromEntries(Object.entries(parts).map(([key,
+      select]) => [key, select.value])); const image =
+      canvas.toDataURL("image/png"); window.parent.postMessage({ type:
+      "SAVE_LPC_CHARACTER", payload: { previewImage: image, spritesheetImage:
+      image, config } }, window.location.origin); });
+      fetch("/api/profile/character") .then((response) => response.ok ?
+      response.json() : { config: {} }) .then(({ config }) => {
+      Object.entries(config || {}).forEach(([key, value]) => { if (parts[key] &&
+      [...parts[key].options].some((option) => option.value === value))
+      parts[key].value = value; }); drawCharacter(); }) .catch(() =>
+      drawCharacter());
+    </script>
+  </body>
+</html>

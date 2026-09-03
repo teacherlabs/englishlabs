@@ -72,6 +72,26 @@
         </form>
         {{#if student.avatar}}{{/if}}
       </div>
+      <section class="character-settings" aria-labelledby="character-heading">
+        <div>
+          <p class="eyebrow">{{#if isAdmin}}Your teacher lobby identity{{else}}Your lobby identity{{/if}}</p>
+          <h2 id="character-heading">{{#if isAdmin}}Create your teacher character{{else}}Create your character{{/if}}</h2>
+          <p class="character-description">Choose a character to represent you when you join a lobby.</p>
+        </div>
+        <button class="practice-button character-customize-button" type="button" data-character-open>Customize character</button>
+        <p class="upload-success" data-character-saved hidden>Character saved to your profile.</p>
+        <p class="account-error" data-character-error hidden></p>
+      </section>
+      <dialog class="character-dialog" data-character-dialog>
+        <button class="close-dialog" type="button" data-character-close aria-label="Close character creator">&#215;</button>
+        <iframe
+          class="character-generator-frame"
+          id="character-creator-iframe"
+          src="http://localhost:5173"
+          title="Character creator"
+          loading="lazy"
+        ></iframe>
+      </dialog>
       {{#if query.avatarSaved}}<p class="upload-success">Profile picture
           updated.</p>{{/if}}
       {{#if query.avatarError}}<p class="account-error">Please choose a valid
@@ -216,4 +236,68 @@
   if (profileColorInput) {
     setAccessibleProfileTheme(profileColorInput.value);
   }
+
+  const characterFrame = document.querySelector(".character-generator-frame");
+  const characterDialog = document.querySelector("[data-character-dialog]");
+  const characterOpen = document.querySelector("[data-character-open]");
+  const characterClose = document.querySelector("[data-character-close]");
+  const characterSaved = document.querySelector("[data-character-saved]");
+  const characterError = document.querySelector("[data-character-error]");
+  characterFrame?.addEventListener("load", () => {
+    const savedConfig = localStorage.getItem("userCharacterConfig");
+    if (!savedConfig || !characterFrame.contentWindow) return;
+    try {
+      characterFrame.contentWindow.postMessage(
+        { type: "LOAD_LPC_CHARACTER", payload: JSON.parse(savedConfig) },
+        "http://localhost:5173",
+      );
+    } catch (error) {
+      localStorage.removeItem("userCharacterConfig");
+    }
+  });
+  characterOpen?.addEventListener("click", () => characterDialog?.showModal());
+  characterClose?.addEventListener("click", () => characterDialog?.close());
+  characterDialog?.addEventListener("click", (event) => {
+    if (event.target === characterDialog) characterDialog.close();
+  });
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "http://localhost:5173" || event.source !== characterFrame?.contentWindow) return;
+    if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
+    const previewImage = event.data.payload?.previewImage || event.data.payload?.image || event.data.payload?.spritesheetImage;
+    const spritesheetImage = event.data.payload?.spritesheetImage || event.data.payload?.image;
+    if (!previewImage || !spritesheetImage) {
+      if (characterError) { characterError.textContent = "The character generator did not send the character images."; characterError.hidden = false; }
+      return;
+    }
+    fetch("/api/profile/character", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...event.data.payload, previewImage, spritesheetImage }),
+    })
+      .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
+      .then(({ ok, result }) => {
+        if (!ok) throw new Error(result.error || "Unable to save character.");
+        localStorage.setItem("userProfilePic", previewImage);
+        localStorage.setItem("userSpritesheet", spritesheetImage);
+        localStorage.setItem("userCharacterConfig", JSON.stringify(event.data.payload?.config || {}));
+        const avatarUrl = `/uploads/profiles/${result.avatar}?t=${Date.now()}`;
+        document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
+          if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;
+          else {
+            const image = document.createElement("img");
+            image.className = profileAvatar.classList.contains("nav-avatar") ? "nav-avatar" : "profile-avatar";
+            image.src = avatarUrl;
+            image.alt = "Profile picture";
+            profileAvatar.replaceWith(image);
+          }
+        });
+        if (characterSaved) characterSaved.hidden = false;
+        if (characterError) characterError.hidden = true;
+        characterDialog?.close();
+      })
+      .catch((error) => {
+        if (characterError) { characterError.textContent = error.message; characterError.hidden = false; }
+        if (characterSaved) characterSaved.hidden = true;
+      });
+  });
 </script>
