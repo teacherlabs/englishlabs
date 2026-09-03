@@ -1,6 +1,7 @@
 <main class="account-page">
   <div
     class="profile-layout"
+    data-user-id="{{student.id}}"
     style="--profile-card-bg: {{student.profile_background}}; --profile-card-text: {{student.profile_text_color}}; --profile-card-muted: {{student.profile_muted_color}}; --profile-card-button-bg: {{student.profile_button_color}}; --profile-card-button-text: {{student.profile_button_text_color}}; --profile-progress-fill: {{student.profile_button_color}};"
   >
     <aside class="profile-messages-panel">
@@ -243,8 +244,10 @@
   const characterClose = document.querySelector("[data-character-close]");
   const characterSaved = document.querySelector("[data-character-saved]");
   const characterError = document.querySelector("[data-character-error]");
+  const profileUserId = document.querySelector(".profile-layout")?.dataset.userId || "unknown";
+  const scopedCharacterKey = (name) => `${name}_${profileUserId}`;
   characterFrame?.addEventListener("load", () => {
-    const savedConfig = localStorage.getItem("userCharacterConfig");
+    const savedConfig = localStorage.getItem(scopedCharacterKey("userCharacterConfig"));
     if (!savedConfig || !characterFrame.contentWindow) return;
     try {
       characterFrame.contentWindow.postMessage(
@@ -252,7 +255,7 @@
         "http://localhost:5173",
       );
     } catch (error) {
-      localStorage.removeItem("userCharacterConfig");
+      localStorage.removeItem(scopedCharacterKey("userCharacterConfig"));
     }
   });
   characterOpen?.addEventListener("click", () => characterDialog?.showModal());
@@ -277,9 +280,9 @@
       .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
       .then(({ ok, result }) => {
         if (!ok) throw new Error(result.error || "Unable to save character.");
-        localStorage.setItem("userProfilePic", previewImage);
-        localStorage.setItem("userSpritesheet", spritesheetImage);
-        localStorage.setItem("userCharacterConfig", JSON.stringify(event.data.payload?.config || {}));
+        localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
+        localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
+        localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(event.data.payload?.config || {}));
         const avatarUrl = `/uploads/profiles/${result.avatar}?t=${Date.now()}`;
         document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
           if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;

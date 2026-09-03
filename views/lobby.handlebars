@@ -42,9 +42,11 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
        <aside class="teacher-control-sidebar">
+       {{#if isQuicktype}}<button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>{{/if}}
+       <button class="practice-button character-customize-button" type="button" data-lobby-character-open>Customize character</button>
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
          {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
@@ -88,12 +90,22 @@
         </div>
         </aside>
       </div>
+      <dialog class="character-dialog" data-lobby-character-dialog>
+         <button class="close-dialog" type="button" data-lobby-character-close aria-label="Close character creator">&#215;</button>
+         <iframe
+         class="character-generator-frame"
+         src="http://localhost:5173"
+         title="Character creator"
+         loading="lazy"
+         ></iframe>
+      </dialog>
       {{/if}}
     {{else}}
       {{#if participant}}
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
-          {{#if student.spritesheet}}<div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>{{/if}}
+          <button class="notes-button lobby-sound-enable" type="button" data-lobby-sound-enable hidden>Enable lobby sound</button>
+          {{#if student.spritesheet}}<div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>{{/if}}
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
@@ -136,6 +148,8 @@
     {{/if}}
   </section>
 </main>
+<div class="teacher-entrance-toast" data-teacher-entrance-toast role="status" aria-live="polite" hidden></div>
+<audio data-teacher-entrance-audio preload="auto" src="/audio1/ElevenLabs_Evil_sinister_laugh_echoing_through_a_haunted_house_at_midnight.mp3"></audio>
 <div id="lobby-exit-modal" class="lobby-exit-modal" hidden>
   <div class="lobby-exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="lobby-exit-title">
     <h2 id="lobby-exit-title">Are you sure you want to exit lobby?</h2>
@@ -201,8 +215,40 @@
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
     const playersGrid = document.querySelector("[data-lobby-players]");
+    const entranceButton = document.querySelector("[data-teacher-entrance]");
+    const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
+    const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
+    const soundEnableButton = document.querySelector("[data-lobby-sound-enable]");
+    if (!teacherEntranceSound) return;
+    teacherEntranceSound.preload = "auto";
+    teacherEntranceSound.load();
+    let entranceAudioUnlocked = false;
+    let pendingEntranceSound = false;
+    const unlockEntranceAudio = () => {
+      teacherEntranceSound.play().then(() => {
+        entranceAudioUnlocked = true;
+        teacherEntranceSound.pause();
+        teacherEntranceSound.currentTime = 0;
+        if (pendingEntranceSound) {
+          pendingEntranceSound = false;
+          teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
+        }
+        if (soundEnableButton) soundEnableButton.hidden = true;
+        window.removeEventListener("click", unlockEntranceAudio);
+        window.removeEventListener("keydown", unlockEntranceAudio);
+      }).catch(() => {});
+    };
+    if (role !== "admin") {
+      window.addEventListener("click", unlockEntranceAudio);
+      window.addEventListener("keydown", unlockEntranceAudio);
+      if (soundEnableButton) {
+        soundEnableButton.hidden = false;
+        soundEnableButton.addEventListener("click", unlockEntranceAudio);
+      }
+    }
     let currentQuestionNumber = Number(questionNumberEl.textContent) || 0;
     let lastEvent = null;
+    let lastEntranceEvent = null;
 
     const renderLeaderboardList = (target, players) => {
       const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
@@ -224,6 +270,36 @@
 
     const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
+      const teacherPresent = Number(state.room.teacher_present) === 1;
+      document.querySelectorAll("[data-player-canvas]").forEach((canvas) => {
+        canvas.dataset.teacherPresent = teacherPresent ? "1" : "0";
+      });
+      window.lobbySetTeacherPresent?.(teacherPresent);
+      window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
+      if (entranceButton) {
+        entranceButton.textContent = teacherPresent ? "Exit Lobby Canvas" : "Enter Lobby";
+        entranceButton.dataset.entering = teacherPresent ? "false" : "true";
+      }
+      if (state.event?.startsWith("TEACHER_ENTRANCE:") && state.event !== lastEntranceEvent) {
+        lastEntranceEvent = state.event;
+        if (entranceToast) {
+          entranceToast.textContent = "Uh oh... Teacher has entered the arena! Quick, act natural!";
+          entranceToast.hidden = false;
+          entranceToast.classList.remove("is-leaving");
+          window.setTimeout(() => {
+            entranceToast.classList.add("is-leaving");
+            window.setTimeout(() => { entranceToast.hidden = true; }, 350);
+          }, 3650);
+        }
+        if (role !== "admin") {
+          teacherEntranceSound.currentTime = 0;
+          if (entranceAudioUnlocked) {
+            teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
+          } else {
+            pendingEntranceSound = true;
+          }
+        }
+      }
       if (state.event === "NEXT_WORD_PREPARED" && state.event !== lastEvent) {
         lastEvent = state.event;
         const input = lobbyPhase.querySelector("[data-quicktype-input]");
@@ -246,6 +322,23 @@
             }).join("")
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
       }
+
+      document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        fetch("/api/lobby/teacher-entrance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: document.querySelector("[data-lobby-phase]")?.dataset.roomId, entering: button.dataset.entering === "true" }),
+        })
+          .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
+          .then(({ ok, result }) => {
+            if (!ok) throw new Error(result.error || "Unable to update lobby entrance.");
+            window.lobbySetTeacherPresent?.(result.teacherPresent);
+          })
+          .catch((error) => console.error(error))
+          .finally(() => { button.disabled = false; });
+      });
 
       phaseWaiting.hidden = state.room.status !== "waiting";
       phaseRunning.hidden = state.room.status !== "running";
@@ -405,11 +498,10 @@
     frameCanvas.width = playerCanvas.width;
     frameCanvas.height = playerCanvas.height;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_WIDTH = 40;
-    const RENDER_HEIGHT = 40;
+    const RENDER_SIZE = 48;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false };
+    const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const pressedKeys = new Set();
     const remoteImages = new Map();
     let pointerPosition = null;
@@ -430,8 +522,8 @@
           return result;
         }, { x: 0, y: 0 });
         const length = Math.hypot(movement.x, movement.y) || 1;
-        player.x = Math.max(RENDER_WIDTH / 2, Math.min(playerCanvas.width - RENDER_WIDTH / 2, player.x + movement.x / length * player.speed));
-        player.y = Math.max(RENDER_HEIGHT, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
+        player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
+        player.y = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
       } else {
         player.frame = 0;
       }
@@ -439,8 +531,8 @@
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
       const drawSprite = (image, x, y, direction, frame, username, isAdmin) => {
         if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
-        const drawX = Math.floor(x - (RENDER_WIDTH / 2));
-        const drawY = Math.floor(y - RENDER_HEIGHT);
+        const drawX = Math.floor(x - (RENDER_SIZE / 2));
+        const drawY = Math.floor(y - RENDER_SIZE);
         frameContext.drawImage(
           image,
           Math.floor(frame) * 64,
@@ -449,8 +541,8 @@
           64,
           drawX,
           drawY,
-          RENDER_WIDTH,
-          RENDER_HEIGHT,
+          RENDER_SIZE,
+          RENDER_SIZE,
         );
         if (isAdmin) {
           frameContext.font = "700 9px sans-serif";
@@ -464,7 +556,7 @@
           frameContext.fillStyle = "#ffffff";
           frameContext.fillText(badge, Math.floor(x), badgeY - 2);
         }
-        const isHovered = pointerPosition && pointerPosition.x >= x - RENDER_WIDTH / 2 && pointerPosition.x <= x + RENDER_WIDTH / 2 && pointerPosition.y >= y - RENDER_HEIGHT && pointerPosition.y <= y;
+        const isHovered = pointerPosition && pointerPosition.x >= x - RENDER_SIZE / 2 && pointerPosition.x <= x + RENDER_SIZE / 2 && pointerPosition.y >= y - RENDER_SIZE && pointerPosition.y <= y;
         if (username && isHovered) {
           frameContext.font = "700 8px Teachers, sans-serif";
           frameContext.textAlign = "center";
@@ -485,26 +577,30 @@
       const resizeCanvas = () => {
         const stage = playerCanvas.closest(".lobby-character-stage");
         if (!stage) return;
-        const width = Math.max(310, Math.floor(stage.clientWidth));
-        if (playerCanvas.width === width) return;
+        const width = Math.max(310, Math.floor(playerCanvas.clientWidth || stage.clientWidth));
+        const height = Math.max(210, Math.floor(playerCanvas.clientHeight || stage.clientHeight));
+        if (playerCanvas.width === width && playerCanvas.height === height) return;
         const previousWidth = playerCanvas.width;
         playerCanvas.width = width;
-        playerCanvas.height = 210;
+        playerCanvas.height = height;
+        frameCanvas.width = width;
+        frameCanvas.height = height;
         if (previousWidth > 0 && previousWidth !== width) {
-          player.x = Math.max(RENDER_WIDTH / 2, Math.min(width - RENDER_WIDTH / 2, player.x * width / previousWidth));
+          player.x = Math.max(RENDER_SIZE / 2, Math.min(width - RENDER_SIZE / 2, player.x * width / previousWidth));
         }
       };
       resizeCanvas();
       if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
-      if (player.isLoaded) drawSprite(player.image, player.x, player.y, player.direction, player.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
+      if (player.isLoaded && player.isPresent) drawSprite(player.image, player.x, player.y, player.direction, player.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
-        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remotePlayer.spritesheet) return;
-        const cachedRemote = remoteImages.get(remotePlayer.username);
+        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remotePlayer.spritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
+        const remoteKey = String(remotePlayer.userId || remotePlayer.username);
+        const cachedRemote = remoteImages.get(remoteKey);
         let remoteImage = cachedRemote?.key === remotePlayer.spritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
           remoteImage = new Image();
           remoteImage.src = `/uploads/profiles/${remotePlayer.spritesheet}?t=${encodeURIComponent(remotePlayer.spritesheet)}`;
-          remoteImages.set(remotePlayer.username, { key: remotePlayer.spritesheet, image: remoteImage });
+          remoteImages.set(remoteKey, { key: remotePlayer.spritesheet, image: remoteImage });
         }
         drawSprite(remoteImage, Number(remotePlayer.x) || 160, Number(remotePlayer.y) || 190, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
       });
@@ -541,16 +637,66 @@
       updatedImage.onload = () => { player.image = updatedImage; player.isLoaded = true; };
       updatedImage.src = `${source}${source.startsWith("data:") ? "" : `?t=${Date.now()}`}`;
     };
-    loadPlayerImage(localStorage.getItem("userSpritesheet") || playerCanvas.dataset.spritesheetImage);
+    window.lobbyLoadPlayerImage = loadPlayerImage;
+    window.lobbySetTeacherPresent = (present) => { player.isPresent = present; window.lobbyTeacherPresent = present ? 1 : 0; };
+    const scopedSpritesheetKey = `userSpritesheet_${playerCanvas.dataset.playerUserId || playerCanvas.dataset.playerUsername}`;
+    loadPlayerImage(localStorage.getItem(scopedSpritesheetKey) || playerCanvas.dataset.spritesheetImage);
     window.addEventListener("message", (event) => {
       if (event.origin !== "http://localhost:5173" || event.data?.type !== "SAVE_LPC_CHARACTER") return;
       const newSpritesheet = event.data.payload?.spritesheetImage || event.data.payload?.image;
       if (!newSpritesheet) return;
-      localStorage.setItem("userSpritesheet", newSpritesheet);
+      localStorage.setItem(scopedSpritesheetKey, newSpritesheet);
       loadPlayerImage(newSpritesheet);
     });
     window.requestAnimationFrame(drawPlayer);
   }
+
+  const lobbyCharacterDialog = document.querySelector("[data-lobby-character-dialog]");
+  const lobbyCharacterFrame = lobbyCharacterDialog?.querySelector(".character-generator-frame");
+  const lobbyCharacterUserId = document.querySelector("[data-player-user-id]")?.dataset.playerUserId || "admin";
+  const lobbyCharacterKey = (name) => `${name}_${lobbyCharacterUserId}`;
+  document.querySelector("[data-lobby-character-open]")?.addEventListener("click", () => lobbyCharacterDialog?.showModal());
+  document.querySelector("[data-lobby-character-close]")?.addEventListener("click", () => lobbyCharacterDialog?.close());
+  lobbyCharacterDialog?.addEventListener("click", (event) => {
+    if (event.target === lobbyCharacterDialog) lobbyCharacterDialog.close();
+  });
+  lobbyCharacterFrame?.addEventListener("load", () => {
+    const savedConfig = localStorage.getItem(lobbyCharacterKey("userCharacterConfig"));
+    if (!savedConfig || !lobbyCharacterFrame.contentWindow) return;
+    try {
+      lobbyCharacterFrame.contentWindow.postMessage(
+        { type: "LOAD_LPC_CHARACTER", payload: JSON.parse(savedConfig) },
+        "http://localhost:5173",
+      );
+    } catch (error) {
+      localStorage.removeItem(lobbyCharacterKey("userCharacterConfig"));
+    }
+  });
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "http://localhost:5173" || event.source !== lobbyCharacterFrame?.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
+    const payload = event.data.payload || {};
+    const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
+    const spritesheetImage = payload.spritesheetImage || payload.image;
+    if (!previewImage || !spritesheetImage) return;
+    fetch("/api/profile/character", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, previewImage, spritesheetImage }),
+    })
+      .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
+      .then(({ ok, result }) => {
+        if (!ok) throw new Error(result.error || "Unable to save character.");
+        localStorage.setItem(lobbyCharacterKey("userProfilePic"), previewImage);
+        localStorage.setItem(lobbyCharacterKey("userSpritesheet"), spritesheetImage);
+        localStorage.setItem(lobbyCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
+        if (playerCanvas) {
+          playerCanvas.dataset.spritesheetImage = `/uploads/profiles/${result.avatar}`;
+          window.lobbyLoadPlayerImage?.(spritesheetImage);
+        }
+        lobbyCharacterDialog?.close();
+      })
+      .catch((error) => console.error("Unable to save teacher character:", error));
+  });
 
   const exitModal = document.getElementById("lobby-exit-modal");
   if (exitModal && lobbyPhase) {

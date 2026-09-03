@@ -243,14 +243,14 @@ body.in-session-mode .lobby-quiz-panel {
   box-shadow: 12px 12px 0 rgba(20, 33, 61, 0.12);
 }
 .teacher-lobby-stage-wrap {
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 420px;
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
 .lobby-page:has(.teacher-lobby-stage-wrap) {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 420px;
   grid-template-rows: auto minmax(0, 1fr);
   column-gap: 18px;
   align-items: stretch;
@@ -282,7 +282,7 @@ body.in-session-mode .lobby-quiz-panel {
 .teacher-control-sidebar {
   grid-column: 2;
   grid-row: 1 / span 2;
-  width: 360px;
+  width: 420px;
   min-width: 0;
   height: 100%;
   overflow-y: auto;
@@ -302,7 +302,7 @@ body.in-session-mode .lobby-quiz-panel {
     grid-template-columns: minmax(0, 1fr);
   }
   .teacher-lobby-stage-wrap {
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: minmax(0, 1fr) 420px;
   }
   .teacher-lobby-stage-wrap .teacher-control-sidebar,
   .teacher-lobby-stage-wrap .lobby-phase-stack,
@@ -571,6 +571,7 @@ body.in-session-mode .lobby-quiz-panel {
   width: 100%;
   height: auto;
   aspect-ratio: 310 / 210;
+  object-fit: contain;
   outline: 0;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -2397,6 +2398,40 @@ nav ul li a:hover {
 
 .character-customize-button {
   justify-self: start;
+}
+
+.teacher-entrance-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 3000;
+  padding: 14px 22px;
+  color: #fff;
+  background: #7b2cbf;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.3);
+  transform: translateX(-50%);
+  animation: teacher-entrance-toast-in 0.35s ease-out;
+}
+
+.lobby-sound-enable {
+  position: relative;
+  z-index: 20;
+  margin: 0 0 12px;
+}
+
+.teacher-entrance-toast.is-leaving {
+  animation: teacher-entrance-toast-out 0.35s ease-in forwards;
+}
+
+@keyframes teacher-entrance-toast-in {
+  from { opacity: 0; transform: translate(-50%, -12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes teacher-entrance-toast-out {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -12px); }
 }
 
 .character-dialog {

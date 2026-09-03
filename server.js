@@ -985,6 +985,7 @@ app.use(function (req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "8mb" }));
 app.use(express.static("public"));
+app.use("/audio1", express.static(path.join(__dirname, "audio1")));
 app.use(
   "/uploads/profiles",
   express.static(path.join(dataDir, "uploads", "profiles")),
@@ -1238,6 +1239,10 @@ db.serialize(() => {
   );
   db.run(
     "ALTER TABLE lobby_rooms ADD COLUMN last_event TEXT",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE lobby_rooms ADD COLUMN teacher_present INTEGER NOT NULL DEFAULT 0",
     () => {},
   );
 });
@@ -2211,7 +2216,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
     [req.session.name],
   );
   db.get(
-    "SELECT username, goal, avatar, character_config, profile_background FROM members WHERE username = ?",
+    "SELECT id, username, goal, avatar, character_config, profile_background FROM members WHERE username = ?",
     [req.session.name],
     (error, student) => {
       if (error || !student) return res.status(404).send("Profile not found.");
@@ -2361,7 +2366,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
   const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
   const renderLobby = (room, questions = [], participant = null) => {
     db.get(
-      "SELECT avatar, character_config FROM members WHERE username = ?",
+      "SELECT id, avatar, spritesheet, character_config FROM members WHERE username = ?",
       [req.session.name],
       (memberError, member) => {
         let characterConfig = {
@@ -2387,6 +2392,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         const renderData = {
           student: {
             username: req.session.name,
+            id: member?.id || req.session.name,
             avatar: member?.avatar || "",
             spritesheet: member?.spritesheet || member?.avatar || "",
             characterConfig,
@@ -2747,6 +2753,21 @@ app.post("/api/lobby/player-state", requireProfileUser, (req, res) => {
   );
 });
 
+app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const entering = req.body.entering === true || req.body.entering === "true";
+  if (!roomId) return res.status(400).json({ error: "Room is required." });
+  db.run(
+    "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+    [entering ? 1 : 0, entering ? `TEACHER_ENTRANCE:${Date.now()}` : `TEACHER_EXIT:${Date.now()}`, roomId],
+    function (error) {
+      if (error) return res.status(500).json({ error: "Unable to update teacher entrance." });
+      if (!this.changes) return res.status(404).json({ error: "QuickType room not found." });
+      res.json({ teacherPresent: entering });
+    },
+  );
+});
+
 app.post("/lobby/start", requireAdmin, (req, res) => {
   db.run(
     "UPDATE lobby_rooms SET status = 'running', current_question = 1, question_started_at = ? WHERE id = ? AND ((mode = 'lobby' AND EXISTS (SELECT 1 FROM lobby_questions WHERE room_id = ?)) OR (mode = 'quicktype' AND EXISTS (SELECT 1 FROM lobby_quicktype_questions WHERE room_id = ?)))",
@@ -2978,7 +2999,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          "SELECT members.id AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
                           [updatedRoom.id],
                           (leaderboardError, leaderboard) => {
                             const elapsed =
