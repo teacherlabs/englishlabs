@@ -219,12 +219,14 @@
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
     const soundEnableButton = document.querySelector("[data-lobby-sound-enable]");
-    if (!teacherEntranceSound) return;
-    teacherEntranceSound.preload = "auto";
-    teacherEntranceSound.load();
+    if (teacherEntranceSound) {
+      teacherEntranceSound.preload = "auto";
+      teacherEntranceSound.load();
+    }
     let entranceAudioUnlocked = false;
     let pendingEntranceSound = false;
     const unlockEntranceAudio = () => {
+      if (!teacherEntranceSound) return;
       teacherEntranceSound.play().then(() => {
         entranceAudioUnlocked = true;
         teacherEntranceSound.pause();
@@ -498,7 +500,7 @@
     frameCanvas.width = playerCanvas.width;
     frameCanvas.height = playerCanvas.height;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_SIZE = 48;
+    const RENDER_SIZE = 52;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
@@ -655,10 +657,21 @@
   const lobbyCharacterFrame = lobbyCharacterDialog?.querySelector(".character-generator-frame");
   const lobbyCharacterUserId = document.querySelector("[data-player-user-id]")?.dataset.playerUserId || "admin";
   const lobbyCharacterKey = (name) => `${name}_${lobbyCharacterUserId}`;
-  document.querySelector("[data-lobby-character-open]")?.addEventListener("click", () => lobbyCharacterDialog?.showModal());
-  document.querySelector("[data-lobby-character-close]")?.addEventListener("click", () => lobbyCharacterDialog?.close());
+  document.querySelector("[data-lobby-character-open]")?.addEventListener("click", () => {
+    if (!lobbyCharacterDialog) return;
+    if (typeof lobbyCharacterDialog.showModal === "function") lobbyCharacterDialog.showModal();
+    else lobbyCharacterDialog.setAttribute("open", "");
+  });
+  document.querySelector("[data-lobby-character-close]")?.addEventListener("click", () => {
+    if (!lobbyCharacterDialog) return;
+    if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
+    else lobbyCharacterDialog.removeAttribute("open");
+  });
   lobbyCharacterDialog?.addEventListener("click", (event) => {
-    if (event.target === lobbyCharacterDialog) lobbyCharacterDialog.close();
+    if (event.target === lobbyCharacterDialog) {
+      if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
+      else lobbyCharacterDialog.removeAttribute("open");
+    }
   });
   lobbyCharacterFrame?.addEventListener("load", () => {
     const savedConfig = localStorage.getItem(lobbyCharacterKey("userCharacterConfig"));
@@ -693,7 +706,10 @@
           playerCanvas.dataset.spritesheetImage = `/uploads/profiles/${result.avatar}`;
           window.lobbyLoadPlayerImage?.(spritesheetImage);
         }
-        lobbyCharacterDialog?.close();
+        if (lobbyCharacterDialog) {
+          if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
+          else lobbyCharacterDialog.removeAttribute("open");
+        }
       })
       .catch((error) => console.error("Unable to save teacher character:", error));
   });
