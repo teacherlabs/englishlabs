@@ -4,8 +4,6 @@
       <p class="exercise-overview-title">Grammar overview</p>
       <nav aria-label="Practice pages">
         <a href="/practice/questions"><strong>Chapters</strong></a>
-        <a href="/practice/sentence-fixer"><strong>Sentence Fixer</strong></a>
-        <a href="/practice/find-errors"><strong>Find Errors</strong></a>
         <a href="/practice/final-test"><strong>Final Test</strong></a>
       </nav>
     </aside>
@@ -44,7 +42,7 @@
         <p class="eyebrow">{{selectedChapter.unit}}</p>
         <h2>{{selectedExercise.title}}</h2>
       </div>
-      {{#if selectedExercise.instructions}}<p class="exercise-instructions">{{selectedExercise.instructions}}</p>{{/if}}
+      {{#if selectedExercise.instructions}}<aside class="exercise-instructions" aria-label="Chapter tip"><strong>Tip</strong><p>{{selectedExercise.instructions}}</p></aside>{{/if}}
 
       {{#if selectedExercise.isFillInBlanks}}
         {{#each selectedExercise.paragraphs}}
@@ -171,6 +169,14 @@
       });
     });
 
+    exercise.querySelectorAll(".written-answer").forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        input.closest(".json-question")?.querySelector("[data-check-written]")?.click();
+      });
+    });
+
     nextQuestion?.addEventListener("click", () => {
       questions[currentQuestion].hidden = true;
       currentQuestion += 1;
@@ -185,7 +191,8 @@
       nextQuestion.textContent = "Choose an answer";
     });
 
-    exercise.querySelector("[data-check-blanks]")?.addEventListener("click", (event) => {
+    const checkBlanks = exercise.querySelector("[data-check-blanks]");
+    checkBlanks?.addEventListener("click", (event) => {
       const inputs = [...exercise.querySelectorAll("input[data-answer]")];
       const correct = inputs.filter((input) => input.value.trim().toLowerCase() === input.dataset.answer).length;
       inputs.forEach((input) => {
@@ -196,6 +203,14 @@
       score.textContent = `Score: ${correct} / ${inputs.length}`;
       event.currentTarget.textContent = "Check answers again";
       saveProgress(correct, inputs.length);
+    });
+
+    exercise.querySelectorAll("input[data-answer]").forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        checkBlanks?.click();
+      });
     });
   }
 </script>

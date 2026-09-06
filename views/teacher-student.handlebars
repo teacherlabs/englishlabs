@@ -24,8 +24,6 @@
 
       <nav class="student-subtabs" data-student-subtabs="activity-section" aria-label="Grammar progress views"{{#unless profileIsGrammar}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="grammar-chapters-panel" aria-selected="true">Chapters</button>
-        <button class="student-subsection-link" type="button" data-student-subsection="sentence-fixer-panel" aria-selected="false">Sentence Fixer</button>
-        <button class="student-subsection-link" type="button" data-student-subsection="find-errors-panel" aria-selected="false">Find Errors</button>
         <button class="student-subsection-link" type="button" data-student-subsection="final-test-panel" aria-selected="false">Final Test</button>
       </nav>
       <nav class="student-subtabs" data-student-subtabs="flip-section" aria-label="Vocabulary progress views"{{#unless profileIsVocabulary}} hidden{{/unless}}>
@@ -72,16 +70,6 @@
                 <p class="empty-state">No grammar chapters recorded yet.</p>
               {{/each}}
             </div>
-          </div>
-
-          <div class="student-subsection-panel" id="sentence-fixer-panel" data-student-subpanel hidden>
-            <h2>Sentence Fixer</h2>
-            <p class="empty-state">No sentence-fixer progress recorded yet.</p>
-          </div>
-
-          <div class="student-subsection-panel" id="find-errors-panel" data-student-subpanel hidden>
-            <h2>Find Errors</h2>
-            <p class="empty-state">No find-errors progress recorded yet.</p>
           </div>
 
           <div class="student-subsection-panel" id="final-test-panel" data-student-subpanel hidden>

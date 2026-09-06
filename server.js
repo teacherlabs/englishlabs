@@ -85,47 +85,43 @@ const practiceQuestionChapters = [
       );
       return {
         ...indefiniteArticles,
-        exercises: indefiniteArticles.exercises.map((exercise) => ({
-          ...exercise,
-          instructions:
-            "Use 'a' before consonant sounds and 'an' before vowel sounds.",
-        })),
+        unit: "Articles: A, An, Some & The",
+        exercises: [
+          ...indefiniteArticles.exercises.map((exercise) => ({
+            ...exercise,
+            instructions:
+              "Use 'a' before consonant sounds and 'an' before vowel sounds.",
+          })),
+          (() => {
+            const articleQuiz = JSON.parse(
+              fs.readFileSync(
+                path.join(__dirname, "grammar", "articles_ch2.json"),
+                "utf8",
+              ),
+            );
+            return {
+              id: `ex${indefiniteArticles.exercises.length + 1}`,
+              title: articleQuiz.quizTitle,
+              type: "multiple-choice",
+              instructions: articleQuiz.instructions,
+              questions: articleQuiz.questions
+                .filter((question) => question.correctAnswer !== "-")
+                .map((question) => ({
+                  id: question.id,
+                  sentence: question.question,
+                  options: question.options.filter((option) => option !== "-"),
+                  answer: question.correctAnswer,
+                  explanation: "Choose the correct article to fill the gap.",
+                })),
+            };
+          })(),
+        ],
       };
     })(),
   },
   {
     id: "2",
     chapterNumber: 2,
-    unit: "Articles: A, An & The",
-    exercises: [
-      (() => {
-        const articleQuiz = JSON.parse(
-          fs.readFileSync(
-            path.join(__dirname, "grammar", "articles_ch2.json"),
-            "utf8",
-          ),
-        );
-        return {
-          id: "ex1",
-          title: articleQuiz.quizTitle,
-          type: "multiple-choice",
-          instructions: articleQuiz.instructions,
-          questions: articleQuiz.questions
-            .filter((question) => question.correctAnswer !== "-")
-            .map((question) => ({
-              id: question.id,
-              sentence: question.question,
-              options: question.options.filter((option) => option !== "-"),
-              answer: question.correctAnswer,
-              explanation: "Choose the correct article to fill the gap.",
-            })),
-        };
-      })(),
-    ],
-  },
-  {
-    id: "3",
-    chapterNumber: 3,
     unit: "Irregular Verbs",
     exercises: [
       (() => {
@@ -210,16 +206,16 @@ const practiceQuestionChapters = [
       })(),
     ],
   },
-  loadRuleBasedGrammarChapter("subject_verb_agreement_ch4.json", 4),
-  loadRuleBasedGrammarChapter("apostrophes_ch5.json", 5),
-  loadRuleBasedGrammarChapter("contractions_ch6.json", 6),
-  loadRuleBasedGrammarChapter("there_their_they're_ch7.json", 7),
-  loadRuleBasedGrammarChapter("prepositions_ch8.json", 8),
-  loadRuleBasedGrammarChapter("phrasel_verb_ch9.json", 9),
-  loadRuleBasedGrammarChapter("adjectives_adverbs_ch10.json", 10),
-  loadRuleBasedGrammarChapter("capitalization_ch11.json", 11),
-  loadRuleBasedGrammarChapter("pronouns_ch12.json", 12),
-  loadThisOrThatGrammarChapter("this_or_that_ch13 (2).json", 13),
+  loadRuleBasedGrammarChapter("subject_verb_agreement_ch4.json", 3),
+  loadRuleBasedGrammarChapter("apostrophes_ch5.json", 4),
+  loadRuleBasedGrammarChapter("contractions_ch6.json", 5),
+  loadRuleBasedGrammarChapter("there_their_they're_ch7.json", 6),
+  loadRuleBasedGrammarChapter("prepositions_ch8.json", 7),
+  loadRuleBasedGrammarChapter("phrasel_verb_ch9.json", 8),
+  loadRuleBasedGrammarChapter("adjectives_adverbs_ch10.json", 9),
+  loadRuleBasedGrammarChapter("capitalization_ch11.json", 10),
+  loadRuleBasedGrammarChapter("pronouns_ch12.json", 11),
+  loadThisOrThatGrammarChapter("this_or_that_ch13 (2).json", 12),
 ];
 const listeningTopics = [
   (() => {
@@ -1104,6 +1100,11 @@ db.serialize(() => {
     "ALTER TABLE members ADD COLUMN character_config TEXT DEFAULT ''",
     () => {},
   );
+  db.run(
+    "INSERT OR IGNORE INTO members (username, fname, lname, email, role, goal, avatar, spritesheet, character_config) VALUES (?, ?, ?, ?, 'admin', '', '', '', '')",
+    [adminname, adminname, "", ""],
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS progress (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1268,7 +1269,7 @@ app.get("/", (req, res) => {
   res.redirect("/practice/questions?chapter=1");
 });
 
-app.get("/character-generator", requireLogin, (req, res) => {
+app.get("/character-generator", requireAuthenticated, (req, res) => {
   res.render("character-generator.handlebars", { layout: false });
 });
 

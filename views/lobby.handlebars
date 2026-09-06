@@ -45,8 +45,7 @@
           <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
        <aside class="teacher-control-sidebar">
-       {{#if isQuicktype}}<button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>{{/if}}
-       <button class="practice-button character-customize-button" type="button" data-lobby-character-open>Customize character</button>
+      {{#if isQuicktype}}<button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>{{/if}}
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
          {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
@@ -90,15 +89,6 @@
         </div>
         </aside>
       </div>
-      <dialog class="character-dialog" data-lobby-character-dialog>
-         <button class="close-dialog" type="button" data-lobby-character-close aria-label="Close character creator">&#215;</button>
-         <iframe
-         class="character-generator-frame"
-         src="http://localhost:5173"
-         title="Character creator"
-         loading="lazy"
-         ></iframe>
-      </dialog>
       {{/if}}
     {{else}}
       {{#if participant}}
@@ -658,76 +648,8 @@
     window.lobbySetTeacherPresent = (present) => { player.isPresent = present; window.lobbyTeacherPresent = present ? 1 : 0; };
     const scopedSpritesheetKey = `userSpritesheet_${playerCanvas.dataset.playerUserId || playerCanvas.dataset.playerUsername}`;
     loadPlayerImage(localStorage.getItem(scopedSpritesheetKey) || playerCanvas.dataset.spritesheetImage);
-    window.addEventListener("message", (event) => {
-      if (event.origin !== "http://localhost:5173" || event.data?.type !== "SAVE_LPC_CHARACTER") return;
-      const newSpritesheet = event.data.payload?.spritesheetImage || event.data.payload?.image;
-      if (!newSpritesheet) return;
-      localStorage.setItem(scopedSpritesheetKey, newSpritesheet);
-      loadPlayerImage(newSpritesheet);
-    });
     window.requestAnimationFrame(drawPlayer);
   }
-
-  const lobbyCharacterDialog = document.querySelector("[data-lobby-character-dialog]");
-  const lobbyCharacterFrame = lobbyCharacterDialog?.querySelector(".character-generator-frame");
-  const lobbyCharacterUserId = document.querySelector("[data-player-user-id]")?.dataset.playerUserId || "admin";
-  const lobbyCharacterKey = (name) => `${name}_${lobbyCharacterUserId}`;
-  document.querySelector("[data-lobby-character-open]")?.addEventListener("click", () => {
-    if (!lobbyCharacterDialog) return;
-    if (typeof lobbyCharacterDialog.showModal === "function") lobbyCharacterDialog.showModal();
-    else lobbyCharacterDialog.setAttribute("open", "");
-  });
-  document.querySelector("[data-lobby-character-close]")?.addEventListener("click", () => {
-    if (!lobbyCharacterDialog) return;
-    if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
-    else lobbyCharacterDialog.removeAttribute("open");
-  });
-  lobbyCharacterDialog?.addEventListener("click", (event) => {
-    if (event.target === lobbyCharacterDialog) {
-      if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
-      else lobbyCharacterDialog.removeAttribute("open");
-    }
-  });
-  lobbyCharacterFrame?.addEventListener("load", () => {
-    const savedConfig = localStorage.getItem(lobbyCharacterKey("userCharacterConfig"));
-    if (!savedConfig || !lobbyCharacterFrame.contentWindow) return;
-    try {
-      lobbyCharacterFrame.contentWindow.postMessage(
-        { type: "LOAD_LPC_CHARACTER", payload: JSON.parse(savedConfig) },
-        "http://localhost:5173",
-      );
-    } catch (error) {
-      localStorage.removeItem(lobbyCharacterKey("userCharacterConfig"));
-    }
-  });
-  window.addEventListener("message", (event) => {
-    if (event.origin !== "http://localhost:5173" || event.source !== lobbyCharacterFrame?.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
-    const payload = event.data.payload || {};
-    const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
-    const spritesheetImage = payload.spritesheetImage || payload.image;
-    if (!previewImage || !spritesheetImage) return;
-    fetch("/api/profile/character", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, previewImage, spritesheetImage }),
-    })
-      .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
-      .then(({ ok, result }) => {
-        if (!ok) throw new Error(result.error || "Unable to save character.");
-        localStorage.setItem(lobbyCharacterKey("userProfilePic"), previewImage);
-        localStorage.setItem(lobbyCharacterKey("userSpritesheet"), spritesheetImage);
-        localStorage.setItem(lobbyCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
-        if (playerCanvas) {
-          playerCanvas.dataset.spritesheetImage = `/uploads/profiles/${result.avatar}`;
-          window.lobbyLoadPlayerImage?.(spritesheetImage);
-        }
-        if (lobbyCharacterDialog) {
-          if (typeof lobbyCharacterDialog.close === "function") lobbyCharacterDialog.close();
-          else lobbyCharacterDialog.removeAttribute("open");
-        }
-      })
-      .catch((error) => console.error("Unable to save teacher character:", error));
-  });
 
   const exitModal = document.getElementById("lobby-exit-modal");
   if (exitModal && lobbyPhase) {
