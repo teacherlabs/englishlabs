@@ -1,4 +1,4 @@
-<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}">
+<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}" data-user-id="{{student.id}}">
   <section class="lobby-quiz-panel">
     {{#if isAdmin}}
       <div class="lobby-admin-tools">
@@ -149,6 +149,7 @@
     </div>
   </div>
 </div>
+<script src="/socket.io/socket.io.js"></script>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   const enterSessionMode = () => {
@@ -189,6 +190,25 @@
     const roomId = lobbyPhase.dataset.roomId;
     const role = lobbyPhase.dataset.role;
     const mode = lobbyPhase.dataset.mode;
+    const socketUrl = "{{socketUrl}}" || window.location.origin;
+    const lobbySocket = typeof io === "function" ? io(socketUrl, { withCredentials: true }) : null;
+    window.lobbySocket = lobbySocket;
+    if (lobbySocket) {
+      lobbySocket.emit("joinRoom", { roomId }, (result) => {
+        if (!result?.ok) console.warn("Unable to join lobby socket:", result?.error);
+      });
+      lobbySocket.on("playerMoved", (movement) => {
+        window.lobbyPlayers = (window.lobbyPlayers || []).map((player) =>
+          player.username === movement.username ? { ...player, ...movement } : player,
+        );
+      });
+      lobbySocket.on("teacherEntered", ({ entering }) => {
+        if (entranceButton) {
+          entranceButton.textContent = entering ? "Exit Lobby Canvas" : "Enter Lobby";
+          entranceButton.dataset.entering = entering ? "false" : "true";
+        }
+      });
+    }
     const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
     const phaseRunning = lobbyPhase.querySelector("[data-phase-running]");
     const phaseCountdown = lobbyPhase.querySelector("[data-phase-countdown]");
@@ -318,15 +338,14 @@
       document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
         const button = event.currentTarget;
         button.disabled = true;
-        fetch("/api/lobby/teacher-entrance", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomId: document.querySelector("[data-lobby-phase]")?.dataset.roomId, entering: button.dataset.entering === "true" }),
-        })
-          .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
-          .then(({ ok, result }) => {
-            if (!ok) throw new Error(result.error || "Unable to update lobby entrance.");
-            window.lobbySetTeacherPresent?.(result.teacherPresent);
+        const entering = button.dataset.entering === "true";
+        const update = lobbySocket
+          ? new Promise((resolve, reject) => lobbySocket.emit("teacherEntrance", { roomId, entering }, (result) => result?.ok ? resolve(result) : reject(new Error(result?.error || "Unable to update lobby entrance."))))
+          : fetch("/api/lobby/teacher-entrance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, entering }) }).then((response) => response.json().then((result) => ({ ...result, ok: response.ok })));
+        update
+          .then((result) => {
+            if (result.ok === false) throw new Error(result.error || "Unable to update lobby entrance.");
+            window.lobbySetTeacherPresent?.(result.teacherPresent ?? entering);
           })
           .catch((error) => console.error(error))
           .finally(() => { button.disabled = false; });
@@ -388,6 +407,8 @@
       if (gameFinished) renderFinalResults(state.leaderboard);
     });
 
+    lobbySocket?.on("lobbyStateChanged", () => refresh());
+
     const activateButton = lobbyPhase.querySelector("[data-activate-word]");
     if (role === "admin" && activateButton) activateButton.addEventListener("click", () => {
       enterSessionMode();
@@ -420,11 +441,12 @@
     }
 
     refresh();
-    setInterval(refresh, 1000);
   }
 
   const setupForm = document.querySelector("[data-quicktype-setup]");
   if (setupForm) {
+    const userId = document.querySelector(".lobby-page")?.dataset.userId || "anonymous";
+    const quicktypeUsedWordIdsKey = `quicktypeUsedWordIds_${userId}`;
     const picker = setupForm.querySelector(".quicktype-word-picker");
     const orderList = setupForm.querySelector("[data-word-order]");
     const count = setupForm.querySelector("[data-selected-count]");
@@ -432,7 +454,7 @@
     const search = setupForm.querySelector("[data-word-search]");
     let savedUsedWordIds = [];
     try {
-      savedUsedWordIds = JSON.parse(localStorage.getItem("quicktypeUsedWordIds") || "[]");
+      savedUsedWordIds = JSON.parse(localStorage.getItem(quicktypeUsedWordIdsKey) || "[]");
     } catch (error) {
       savedUsedWordIds = [];
     }
@@ -476,7 +498,7 @@
         setupForm.appendChild(input);
         usedWordIds.add(item.dataset.orderId);
       });
-      localStorage.setItem("quicktypeUsedWordIds", JSON.stringify([...usedWordIds]));
+      localStorage.setItem(quicktypeUsedWordIdsKey, JSON.stringify([...usedWordIds]));
       setupForm.submit();
     });
   }
@@ -617,7 +639,8 @@
       if (playerMode === "quicktype" && player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
         lastSyncAt = timestampNow();
         lastSyncedState = syncState;
-        fetch("/api/lobby/player-state", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame }) }).catch(() => {});
+        const movement = { roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame };
+        if (window.lobbySocket?.connected) window.lobbySocket.emit("playerMove", movement);
       }
       window.requestAnimationFrame(drawPlayer);
     };

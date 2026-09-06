@@ -9,6 +9,8 @@ const adminPassword =
 // PACKAGES
 //----------
 const express = require("express");
+const http = require("http");
+const { Server: SocketIOServer } = require("socket.io");
 const { engine } = require("express-handlebars");
 const sqlite3 = require("sqlite3");
 const path = require("path");
@@ -853,6 +855,7 @@ const buildAreaProgress = (progress) => {
 // APPLICATION
 //----------
 const app = express();
+const server = http.createServer(app);
 
 //----------
 // DATABASES
@@ -959,14 +962,13 @@ const usefulChunkLists = usefulChunkListsData.map((list, index) => ({
 //----------
 const SQLiteStore = connectSqlite3(session);
 
-app.use(
-  session({
-    store: new SQLiteStore({ db: "members.sqlite.db", dir: dataDir }),
-    saveUninitialized: false,
-    resave: false,
-    secret: process.env.SESSION_SECRET || "local-development-secret",
-  }),
-);
+const sessionMiddleware = session({
+  store: new SQLiteStore({ db: "members.sqlite.db", dir: dataDir }),
+  saveUninitialized: false,
+  resave: false,
+  secret: process.env.SESSION_SECRET || "local-development-secret",
+});
+app.use(sessionMiddleware);
 app.use(function (req, res, next) {
   if (req.session.name && !req.session.avatar_initial) {
     req.session.avatar_initial = req.session.name.charAt(0).toUpperCase();
@@ -1270,7 +1272,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/character-generator", requireAuthenticated, (req, res) => {
-  res.render("character-generator.handlebars", { layout: false });
+  res.render("character-generator.handlebars", {
+    layout: false,
+    studioUrl:
+      process.env.VITE_CHARACTER_STUDIO_URL ||
+      "https://vitruvian-web-englishlab-1.onrender.com",
+  });
 });
 
 app.get("/api/profile/character", requireLogin, (req, res) => {
@@ -2402,6 +2409,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
             characterConfig,
           },
           isAdmin: Boolean(req.session.isAdmin),
+          socketUrl: process.env.VITE_SOCKET_URL || "",
           room,
           questions,
           participant,
@@ -2804,6 +2812,11 @@ app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
           .json({ error: "Unable to update teacher entrance." });
       if (!this.changes)
         return res.status(404).json({ error: "QuickType room not found." });
+      io.to(String(roomId)).emit("teacherEntered", {
+        roomId,
+        entering,
+      });
+      io.to(String(roomId)).emit("lobbyStateChanged", { roomId });
       res.json({ teacherPresent: entering });
     },
   );
@@ -3861,8 +3874,109 @@ function initTableMembers(mydb) {
   );
 }
 
-// The app.listen call should be outside the post route
-app.listen(port, () => {
+const socketAllowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://vitruvian-web-englishlab-1.onrender.com",
+  ...(process.env.SOCKET_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+  process.env.VITE_CHARACTER_STUDIO_URL,
+].filter(Boolean);
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: socketAllowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+io.engine.use(sessionMiddleware);
+io.use((socket, next) => {
+  const request = socket.request;
+  if (!request.session?.isLoggedIn || !request.session.name) {
+    return next(new Error("Authentication required."));
+  }
+  next();
+});
+
+io.on("connection", (socket) => {
+  const username = socket.request.session.name;
+  const isAdmin = Boolean(socket.request.session.isAdmin);
+
+  socket.on("joinRoom", ({ roomId } = {}, acknowledge) => {
+    const numericRoomId = Number(roomId);
+    if (!numericRoomId) return acknowledge?.({ ok: false, error: "Room is required." });
+    db.get(
+      "SELECT id, mode FROM lobby_rooms WHERE id = ?",
+      [numericRoomId],
+      (roomError, room) => {
+        if (roomError || !room) return acknowledge?.({ ok: false, error: "Room not found." });
+        db.get(
+          "SELECT 1 AS participant FROM lobby_participants WHERE room_id = ? AND username = ?",
+          [numericRoomId, username],
+          (participantError, participant) => {
+            if (participantError || (!participant && !isAdmin)) {
+              return acknowledge?.({ ok: false, error: "You are not in this room." });
+            }
+            socket.join(String(numericRoomId));
+            socket.data.roomId = numericRoomId;
+            socket.data.mode = room.mode;
+            acknowledge?.({ ok: true });
+          },
+        );
+      },
+    );
+  });
+
+  socket.on("playerMove", (data = {}) => {
+    const roomId = Number(data.roomId);
+    if (!socket.data.roomId || socket.data.roomId !== roomId) return;
+    const x = Math.max(0, Math.min(310, Number(data.x) || 0));
+    const y = Math.max(60, Math.min(210, Number(data.y) || 60));
+    const direction = [0, 1, 2, 3].includes(Number(data.direction)) ? Number(data.direction) : 2;
+    const frame = Math.max(0, Math.min(8.99, Number(data.frame) || 0));
+    db.run(
+      "UPDATE lobby_participants SET x = ?, y = ?, direction = ?, frame = ? WHERE room_id = ? AND username = ?",
+      [x, y, direction, frame, roomId, username],
+      (error) => {
+        if (error) return;
+        socket.to(String(roomId)).emit("playerMoved", {
+          roomId,
+          userId: username,
+          username,
+          x,
+          y,
+          direction,
+          frame,
+          isAdmin,
+        });
+      },
+    );
+  });
+
+  socket.on("teacherEntrance", ({ roomId, entering } = {}, acknowledge) => {
+    const numericRoomId = Number(roomId);
+    if (!isAdmin || socket.data.roomId !== numericRoomId) {
+      return acknowledge?.({ ok: false, error: "Teacher access required." });
+    }
+    db.run(
+      "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+      [entering ? 1 : 0, entering ? `TEACHER_ENTRANCE:${Date.now()}` : `TEACHER_EXIT:${Date.now()}`, numericRoomId],
+      function (error) {
+        if (error || !this.changes) return acknowledge?.({ ok: false, error: "QuickType room not found." });
+        io.to(String(numericRoomId)).emit("teacherEntered", { roomId: numericRoomId, entering: Boolean(entering) });
+        io.to(String(numericRoomId)).emit("lobbyStateChanged", { roomId: numericRoomId });
+        acknowledge?.({ ok: true, teacherPresent: Boolean(entering) });
+      },
+    );
+  });
+});
+
+// The server.listen call should be outside the post route
+server.listen(port, () => {
   //initTableEvents(db);
   console.log(
     `Server is up & running. Listening on http://localhost:${port} ... :)`,

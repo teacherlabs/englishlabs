@@ -11,6 +11,12 @@ services:
         value: /var/data
       - key: SESSION_SECRET
         generateValue: true
+      - key: VITE_CHARACTER_STUDIO_URL
+        sync: false
+      - key: VITE_SOCKET_URL
+        sync: false
+      - key: SOCKET_ALLOWED_ORIGINS
+        sync: false
     disk:
       name: englishlabs-data
       mountPath: /var/data

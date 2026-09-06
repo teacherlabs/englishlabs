@@ -31,6 +31,7 @@
     "handlebars": "^4.7.8",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.6",
+    "socket.io": "^4.8.3",
     "sqlite-express": "^4.0.0",
     "sqlite3": "^5.1.7"
   }

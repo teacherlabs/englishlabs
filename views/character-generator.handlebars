@@ -10,10 +10,16 @@
     </style>
   </head>
   <body>
-    <iframe id="vitruvianCharacterEditor" src="http://localhost:5173" title="Character customization"></iframe>
+    <iframe id="vitruvianCharacterEditor" src="{{studioUrl}}" title="Character customization"></iframe>
     <script>
       const editor = document.getElementById("vitruvianCharacterEditor");
-      const editorOrigin = "http://localhost:5173";
+      const CHARACTER_STUDIO_URL = "{{studioUrl}}";
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://vitruvian-web-englishlab-1.onrender.com",
+      ];
+      const editorOrigin = new URL(CHARACTER_STUDIO_URL).origin;
       const loadSavedCharacter = () => {
         fetch("/api/profile/character")
           .then((response) => response.ok ? response.json() : { config: {} })
@@ -22,7 +28,7 @@
       };
       editor.addEventListener("load", loadSavedCharacter);
       window.addEventListener("message", async (event) => {
-        if (event.origin !== editorOrigin || event.source !== editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
+        if (!allowedOrigins.includes(event.origin) || event.source !== editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
         const payload = event.data.payload || {};
         const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
         const spritesheetImage = payload.spritesheetImage || payload.image;
