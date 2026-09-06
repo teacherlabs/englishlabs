@@ -88,7 +88,7 @@
         <iframe
           class="character-generator-frame"
           id="character-creator-iframe"
-          src="http://localhost:5173"
+          src="/character-generator"
           title="Character creator"
           loading="lazy"
         ></iframe>
@@ -252,7 +252,7 @@
     try {
       characterFrame.contentWindow.postMessage(
         { type: "LOAD_LPC_CHARACTER", payload: JSON.parse(savedConfig) },
-        "http://localhost:5173",
+        window.location.origin,
       );
     } catch (error) {
       localStorage.removeItem(scopedCharacterKey("userCharacterConfig"));
@@ -264,7 +264,7 @@
     if (event.target === characterDialog) characterDialog.close();
   });
   window.addEventListener("message", (event) => {
-    if (event.origin !== "http://localhost:5173" || event.source !== characterFrame?.contentWindow) return;
+    if (event.origin !== window.location.origin || event.source !== characterFrame?.contentWindow) return;
     if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
     const previewImage = event.data.payload?.previewImage || event.data.payload?.image || event.data.payload?.spritesheetImage;
     const spritesheetImage = event.data.payload?.spritesheetImage || event.data.payload?.image;

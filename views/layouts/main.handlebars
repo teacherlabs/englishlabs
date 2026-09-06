@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,7 +6,10 @@
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,10 +28,10 @@
       <nav>
         <ul>
           {{#if session.isLoggedIn}}<li><a href="/">Grammar</a></li>
-          <li><a href="/reading">Reading</a></li>
-          <li><a href="/listening">Listening</a></li>
-          <li><a href="/writing">Writing</a></li>
-          <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
+            <li><a href="/reading">Reading</a></li>
+            <li><a href="/listening">Listening</a></li>
+            <li><a href="/writing">Writing</a></li>
+            <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
           {{#if session.isLoggedIn}}
             <li class="game-room-nav">
               <span>Game Room</span>
@@ -44,15 +46,28 @@
           <div id="menulogin" class="user-profile-menu">
             <span>Hi, {{session.name}}</span>
 
-            <!-- Profile Picture Link Placeholder -->
-            <a href="{{#if session.isAdmin}}/teacher/dashboard{{else}}/profile{{/if}}" class="profile-pic-link" title="{{#if session.isAdmin}}Teacher dashboard{{else}}View Profile{{/if}}">
-              {{#if session.avatar}}
-                <img src="/uploads/profiles/{{session.avatar}}" alt="Profile Picture" class="nav-avatar" />
-              {{else}}
-                <span class="nav-avatar nav-avatar-placeholder" aria-label="Profile picture placeholder">{{session.avatar_initial}}</span>
-              {{/if}}
-              {{#unless session.isAdmin}}{{#if unreadFeedbackCount}}<span class="nav-feedback-badge" aria-label="{{unreadFeedbackCount}} unread teacher feedback">{{unreadFeedbackCount}}</span>{{/if}}{{/unless}}
-            </a>
+            {{#if session.isAdmin}}
+              <a href="/teacher/dashboard" class="login-btn">Students</a>
+            {{else}}
+              <a href="/profile" class="profile-pic-link" title="View Profile">
+                {{#if session.avatar}}
+                  <img
+                    src="/uploads/profiles/{{session.avatar}}"
+                    alt="Profile Picture"
+                    class="nav-avatar"
+                  />
+                {{else}}
+                  <span
+                    class="nav-avatar nav-avatar-placeholder"
+                    aria-label="Profile picture placeholder"
+                  >{{session.avatar_initial}}</span>
+                {{/if}}
+                {{#if unreadFeedbackCount}}<span
+                    class="nav-feedback-badge"
+                    aria-label="{{unreadFeedbackCount}} unread teacher feedback"
+                  >{{unreadFeedbackCount}}</span>{{/if}}
+              </a>
+            {{/if}}
 
             <a href="/logout" class="login-btn">Log out</a>
           </div>

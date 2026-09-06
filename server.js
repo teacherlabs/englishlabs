@@ -1237,10 +1237,7 @@ db.serialize(() => {
     "ALTER TABLE lobby_rooms ADD COLUMN question_started_at INTEGER",
     () => {},
   );
-  db.run(
-    "ALTER TABLE lobby_rooms ADD COLUMN last_event TEXT",
-    () => {},
-  );
+  db.run("ALTER TABLE lobby_rooms ADD COLUMN last_event TEXT", () => {});
   db.run(
     "ALTER TABLE lobby_rooms ADD COLUMN teacher_present INTEGER NOT NULL DEFAULT 0",
     () => {},
@@ -2321,21 +2318,27 @@ const QUICKTYPE_DURATION_MS = 15000;
 // Lazily flips a running round to "leaderboard" once the timer expires or everyone has answered.
 const finalizeRoundIfNeeded = (room, callback) => {
   if (room && room.status === "countdown") {
-    if (Date.now() - (room.question_started_at || Date.now()) < QUICKTYPE_COUNTDOWN_MS) {
+    if (
+      Date.now() - (room.question_started_at || Date.now()) <
+      QUICKTYPE_COUNTDOWN_MS
+    ) {
       return callback(room);
     }
     return db.run(
       "UPDATE lobby_rooms SET status = 'running', question_started_at = ? WHERE id = ? AND status = 'countdown'",
       [Date.now(), room.id],
-      () => db.get(
-        "SELECT * FROM lobby_rooms WHERE id = ?",
-        [room.id],
-        (error, updatedRoom) => callback(error || !updatedRoom ? room : updatedRoom),
-      ),
+      () =>
+        db.get(
+          "SELECT * FROM lobby_rooms WHERE id = ?",
+          [room.id],
+          (error, updatedRoom) =>
+            callback(error || !updatedRoom ? room : updatedRoom),
+        ),
     );
   }
   if (!room || room.status !== "running") return callback(room);
-  const duration = room.mode === "quicktype" ? QUICKTYPE_DURATION_MS : QUESTION_DURATION_MS;
+  const duration =
+    room.mode === "quicktype" ? QUICKTYPE_DURATION_MS : QUESTION_DURATION_MS;
   const elapsed = Date.now() - (room.question_started_at || Date.now());
   db.get(
     "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
@@ -2423,12 +2426,20 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
               room?.status,
             ),
         };
-        if (renderData.isAdmin && renderData.isQuicktype && renderData.isWaiting) {
+        if (
+          renderData.isAdmin &&
+          renderData.isQuicktype &&
+          renderData.isWaiting
+        ) {
           grammarDb.all(
             "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
             (vocabularyError, vocabularyWords) => {
-              if (vocabularyError) return res.status(500).send("Unable to load vocabulary.");
-              res.render("lobby.handlebars", { ...renderData, vocabularyWords });
+              if (vocabularyError)
+                return res.status(500).send("Unable to load vocabulary.");
+              res.render("lobby.handlebars", {
+                ...renderData,
+                vocabularyWords,
+              });
             },
           );
         } else {
@@ -2444,32 +2455,28 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
   const roomParams = req.session.isAdmin
     ? [requestedMode]
     : [Number(req.query.roomId), requestedMode];
-  db.get(
-    roomQuery,
-    roomParams,
-    (roomError, room) => {
-      if (roomError) return res.status(500).send("Unable to load lobby.");
-      if (!room) return renderLobby(null);
-      finalizeRoundIfNeeded(room, (updatedRoom) => {
-        const questionQuery =
-          updatedRoom.mode === "quicktype"
-            ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
-            : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
-        db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
-          if (questionError)
-            return res.status(500).send("Unable to load lobby questions.");
-          db.get(
-            "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
-            [updatedRoom.id, req.session.name],
-            (participantError, participant) =>
-              participantError
-                ? res.status(500).send("Unable to load lobby participant.")
-                : renderLobby(updatedRoom, questions, participant),
-          );
-        });
+  db.get(roomQuery, roomParams, (roomError, room) => {
+    if (roomError) return res.status(500).send("Unable to load lobby.");
+    if (!room) return renderLobby(null);
+    finalizeRoundIfNeeded(room, (updatedRoom) => {
+      const questionQuery =
+        updatedRoom.mode === "quicktype"
+          ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
+          : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
+      db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
+        if (questionError)
+          return res.status(500).send("Unable to load lobby questions.");
+        db.get(
+          "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
+          [updatedRoom.id, req.session.name],
+          (participantError, participant) =>
+            participantError
+              ? res.status(500).send("Unable to load lobby participant.")
+              : renderLobby(updatedRoom, questions, participant),
+        );
       });
-    },
-  );
+    });
+  });
 });
 
 app.get("/quicktype", requireAuthenticated, (req, res) => {
@@ -2480,7 +2487,8 @@ app.get("/quicktype", requireAuthenticated, (req, res) => {
     "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, 'quicktype')",
     [code, title],
     function (error) {
-      if (error) return res.status(500).send("Unable to create QuickType room.");
+      if (error)
+        return res.status(500).send("Unable to create QuickType room.");
       db.run(
         "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
         [this.lastID, req.session.name],
@@ -2501,7 +2509,8 @@ app.get("/question-game", requireAuthenticated, (req, res) => {
     "INSERT INTO lobby_rooms (code, title, mode) VALUES (?, ?, 'lobby')",
     [code, title],
     function (error) {
-      if (error) return res.status(500).send("Unable to create Question Game room.");
+      if (error)
+        return res.status(500).send("Unable to create Question Game room.");
       db.run(
         "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
         [this.lastID, req.session.name],
@@ -2531,7 +2540,9 @@ app.post("/lobby/rooms", requireAdmin, (req, res) => {
         (participantError) =>
           participantError
             ? res.status(500).send("Unable to join teacher to room.")
-            : res.redirect(`/lobby?mode=${mode === "quicktype" ? "quicktype" : "lobby"}`),
+            : res.redirect(
+                `/lobby?mode=${mode === "quicktype" ? "quicktype" : "lobby"}`,
+              ),
       );
     },
   );
@@ -2664,7 +2675,12 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
     "SELECT mode, status FROM lobby_rooms WHERE id = ?",
     [roomId],
     (roomError, room) => {
-      if (roomError || !room || room.mode !== "quicktype" || room.status !== "waiting")
+      if (
+        roomError ||
+        !room ||
+        room.mode !== "quicktype" ||
+        room.status !== "waiting"
+      )
         return res.status(400).redirect("/lobby?mode=quicktype");
       const placeholders = wordIds.map(() => "?").join(",");
       grammarDb.all(
@@ -2675,23 +2691,36 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
             return res.status(400).redirect("/lobby?mode=quicktype");
           const byId = new Map(words.map((word) => [word.id, word]));
           db.serialize(() => {
-            db.run("DELETE FROM lobby_quicktype_submissions WHERE room_id = ?", [roomId]);
-            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [roomId]);
+            db.run(
+              "DELETE FROM lobby_quicktype_submissions WHERE room_id = ?",
+              [roomId],
+            );
+            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [
+              roomId,
+            ]);
             const insert = db.prepare(
               "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
             );
             wordIds.forEach((wordId, index) => {
               const word = byId.get(wordId);
-              insert.run(roomId, index + 1, "Type the word you hear.", word.english_word);
+              insert.run(
+                roomId,
+                index + 1,
+                "Type the word you hear.",
+                word.english_word,
+              );
             });
             insert.finalize((insertError) => {
-              if (insertError) return res.status(500).send("Unable to create Quicktype game.");
+              if (insertError)
+                return res.status(500).send("Unable to create Quicktype game.");
               db.run(
                 "UPDATE lobby_rooms SET current_question = 1, status = 'waiting', question_started_at = NULL WHERE id = ?",
                 [roomId],
                 (updateError) =>
                   updateError
-                    ? res.status(500).send("Unable to initialize Quicktype game.")
+                    ? res
+                        .status(500)
+                        .send("Unable to initialize Quicktype game.")
                     : res.redirect("/lobby?mode=quicktype"),
               );
             });
@@ -2708,7 +2737,8 @@ app.post("/lobby/quicktype/activate", requireAdmin, (req, res) => {
     "UPDATE lobby_rooms SET status = 'countdown', current_question = COALESCE(NULLIF(current_question, 0), 1), question_started_at = ?, last_event = NULL WHERE id = ? AND mode = 'quicktype' AND status = 'waiting' AND EXISTS (SELECT 1 FROM lobby_quicktype_questions WHERE room_id = ?)",
     [Date.now(), roomId, roomId],
     function (error) {
-      if (error) return res.status(500).json({ error: "Unable to activate word." });
+      if (error)
+        return res.status(500).json({ error: "Unable to activate word." });
       res.json({ activated: this.changes === 1 });
     },
   );
@@ -2759,10 +2789,20 @@ app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
   if (!roomId) return res.status(400).json({ error: "Room is required." });
   db.run(
     "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
-    [entering ? 1 : 0, entering ? `TEACHER_ENTRANCE:${Date.now()}` : `TEACHER_EXIT:${Date.now()}`, roomId],
+    [
+      entering ? 1 : 0,
+      entering
+        ? `TEACHER_ENTRANCE:${Date.now()}`
+        : `TEACHER_EXIT:${Date.now()}`,
+      roomId,
+    ],
     function (error) {
-      if (error) return res.status(500).json({ error: "Unable to update teacher entrance." });
-      if (!this.changes) return res.status(404).json({ error: "QuickType room not found." });
+      if (error)
+        return res
+          .status(500)
+          .json({ error: "Unable to update teacher entrance." });
+      if (!this.changes)
+        return res.status(404).json({ error: "QuickType room not found." });
       res.json({ teacherPresent: entering });
     },
   );
@@ -2804,7 +2844,10 @@ app.post("/lobby/quicktype/submit", requireLogin, (req, res) => {
         (questionError, question) => {
           if (questionError || !question)
             return res.status(400).json({ error: "Prompt is unavailable." });
-          if (Date.now() - (room.question_started_at || Date.now()) >= QUICKTYPE_DURATION_MS) {
+          if (
+            Date.now() - (room.question_started_at || Date.now()) >=
+            QUICKTYPE_DURATION_MS
+          ) {
             return finalizeRoundIfNeeded(room, () =>
               res.status(400).json({ error: "This round has ended." }),
             );
@@ -2942,9 +2985,21 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
             "UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ?, last_event = ? WHERE id = ?",
             [
               next,
-              next > count.total ? "finished" : room.mode === "quicktype" ? "waiting" : "running",
-              next > count.total ? null : room.mode === "quicktype" ? null : Date.now(),
-              next > count.total ? null : room.mode === "quicktype" ? "NEXT_WORD_PREPARED" : null,
+              next > count.total
+                ? "finished"
+                : room.mode === "quicktype"
+                  ? "waiting"
+                  : "running",
+              next > count.total
+                ? null
+                : room.mode === "quicktype"
+                  ? null
+                  : Date.now(),
+              next > count.total
+                ? null
+                : room.mode === "quicktype"
+                  ? "NEXT_WORD_PREPARED"
+                  : null,
               roomId,
             ],
             () => {
@@ -3004,44 +3059,71 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                           (leaderboardError, leaderboard) => {
                             const elapsed =
                               updatedRoom.status === "running"
-                                ? Date.now() - (updatedRoom.question_started_at || Date.now())
+                                ? Date.now() -
+                                  (updatedRoom.question_started_at ||
+                                    Date.now())
                                 : 0;
-                            const duration = updatedRoom.mode === "quicktype"
-                              ? QUICKTYPE_DURATION_MS
-                              : QUESTION_DURATION_MS;
-                            const sendState = (correctWord = null) => res.json({
-                              room: updatedRoom,
-                              event: updatedRoom.last_event || null,
-                              totalQuestions: totalQuestionsError
-                                ? 0
-                                : totalQuestionsRow.total,
-                              question: questionError ? null : question,
-                              participant: participantError
-                                ? null
-                                : participant,
-                              leaderboard: leaderboardError ? [] : leaderboard,
-                              countdownRemaining: updatedRoom.status === "countdown"
-                                ? Math.max(0, Math.ceil((QUICKTYPE_COUNTDOWN_MS - (Date.now() - (updatedRoom.question_started_at || Date.now()))) / 1000))
-                                : 0,
-                              timeRemaining: updatedRoom.status === "running"
-                                ? Math.max(0, Math.ceil((duration - elapsed) / 1000))
-                                : 0,
-                              correctWord,
-                              answeredCount: countError
-                                ? 0
-                                : counts.answered || 0,
-                              totalParticipants: countError
-                                ? 0
-                                : counts.total || 0,
-                            });
+                            const duration =
+                              updatedRoom.mode === "quicktype"
+                                ? QUICKTYPE_DURATION_MS
+                                : QUESTION_DURATION_MS;
+                            const sendState = (correctWord = null) =>
+                              res.json({
+                                room: updatedRoom,
+                                event: updatedRoom.last_event || null,
+                                totalQuestions: totalQuestionsError
+                                  ? 0
+                                  : totalQuestionsRow.total,
+                                question: questionError ? null : question,
+                                participant: participantError
+                                  ? null
+                                  : participant,
+                                leaderboard: leaderboardError
+                                  ? []
+                                  : leaderboard,
+                                countdownRemaining:
+                                  updatedRoom.status === "countdown"
+                                    ? Math.max(
+                                        0,
+                                        Math.ceil(
+                                          (QUICKTYPE_COUNTDOWN_MS -
+                                            (Date.now() -
+                                              (updatedRoom.question_started_at ||
+                                                Date.now()))) /
+                                            1000,
+                                        ),
+                                      )
+                                    : 0,
+                                timeRemaining:
+                                  updatedRoom.status === "running"
+                                    ? Math.max(
+                                        0,
+                                        Math.ceil((duration - elapsed) / 1000),
+                                      )
+                                    : 0,
+                                correctWord,
+                                answeredCount: countError
+                                  ? 0
+                                  : counts.answered || 0,
+                                totalParticipants: countError
+                                  ? 0
+                                  : counts.total || 0,
+                              });
                             if (
                               updatedRoom.mode === "quicktype" &&
-                              ["leaderboard", "finished"].includes(updatedRoom.status)
+                              ["leaderboard", "finished"].includes(
+                                updatedRoom.status,
+                              )
                             ) {
                               db.get(
                                 "SELECT target_word FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?",
                                 [updatedRoom.id, updatedRoom.current_question],
-                                (wordError, result) => sendState(wordError ? null : result?.target_word || null),
+                                (wordError, result) =>
+                                  sendState(
+                                    wordError
+                                      ? null
+                                      : result?.target_word || null,
+                                  ),
                               );
                             } else {
                               sendState();
@@ -3445,14 +3527,122 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                 return res
                                   .status(500)
                                   .send("Unable to load writing submissions.");
+                              const groupTopicsByLevel = (topics, levelKey) => {
+                                const levels = new Map();
+                                topics.forEach((topic) => {
+                                  const level = String(topic[levelKey] || "1");
+                                  if (!levels.has(level)) {
+                                    levels.set(level, {
+                                      level,
+                                      topics: [],
+                                      completed: 0,
+                                      total: 0,
+                                    });
+                                  }
+                                  const levelData = levels.get(level);
+                                  const completedExercises =
+                                    topic.exercises.filter(
+                                      (exercise) => exercise.completed,
+                                    ).length;
+                                  levelData.topics.push({
+                                    title: topic.topic.title,
+                                    status: topic.completed
+                                      ? "Completed"
+                                      : completedExercises
+                                        ? "In Progress"
+                                        : "Not Started",
+                                    statusClass: topic.completed
+                                      ? "completed"
+                                      : completedExercises
+                                        ? "in-progress"
+                                        : "not-started",
+                                    completedExercises,
+                                    totalExercises: topic.exercises.length,
+                                  });
+                                  levelData.completed += completedExercises;
+                                  levelData.total += topic.exercises.length;
+                                });
+                                return [...levels.values()].sort(
+                                  (first, second) =>
+                                    Number(first.level) - Number(second.level),
+                                );
+                              };
+                              const decoratedReadingTopics = decorateTopics(
+                                readingTopics,
+                                progress,
+                                "reading",
+                                "readingLevel",
+                              );
+                              const decoratedWritingTopics = decorateTopics(
+                                writingTopics,
+                                progress,
+                                "writing",
+                                "writingLevel",
+                              );
+                              const decoratedListeningTopics = decorateTopics(
+                                listeningTopics,
+                                progress,
+                                "listening",
+                                "listeningLevel",
+                              );
+                              const grammarProgress = progress.filter((item) =>
+                                ["questions", "final"].includes(
+                                  item.activity_type,
+                                ),
+                              );
+                              const grammarChapters =
+                                practiceQuestionChapters.map((chapter) => {
+                                  const exercises = chapter.exercises.map(
+                                    (exercise, index) => {
+                                      const completion = grammarProgress.find(
+                                        (item) =>
+                                          item.activity_type === "questions" &&
+                                          item.difficulty_level ===
+                                            `questions:${chapter.id}:${index + 1}`,
+                                      );
+                                      return {
+                                        title: exercise.title,
+                                        completed: Boolean(completion),
+                                        score: completion?.percentage,
+                                      };
+                                    },
+                                  );
+                                  return {
+                                    title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                    status: exercises.every(
+                                      (exercise) => exercise.completed,
+                                    )
+                                      ? "Completed"
+                                      : exercises.some(
+                                            (exercise) => exercise.completed,
+                                          )
+                                        ? "In Progress"
+                                        : "Not Started",
+                                    statusClass: exercises.every(
+                                      (exercise) => exercise.completed,
+                                    )
+                                      ? "completed"
+                                      : exercises.some(
+                                            (exercise) => exercise.completed,
+                                          )
+                                        ? "in-progress"
+                                        : "not-started",
+                                    showStatus: exercises.some(
+                                      (exercise) => exercise.completed,
+                                    ),
+                                    exercises,
+                                  };
+                                });
+                              const finalTestRows = grammarProgress.filter(
+                                (item) => item.activity_type === "final",
+                              );
                               res.render("teacher-student.handlebars", {
                                 student,
                                 profileCategory,
                                 profileIsGrammar: profileCategory === "grammar",
                                 profileIsReading: profileCategory === "reading",
                                 profileIsActivity:
-                                  profileCategory === "grammar" ||
-                                  profileCategory === "reading",
+                                  profileCategory === "grammar",
                                 profileIsVocabulary:
                                   profileCategory === "vocabulary",
                                 profileIsWriting: profileCategory === "writing",
@@ -3475,6 +3665,20 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                 hardestWords,
                                 listeningCompletions,
                                 readingCompletions,
+                                readingProgressLevels: groupTopicsByLevel(
+                                  decoratedReadingTopics,
+                                  "readingLevel",
+                                ),
+                                writingProgressLevels: groupTopicsByLevel(
+                                  decoratedWritingTopics,
+                                  "writingLevel",
+                                ),
+                                listeningProgressLevels: groupTopicsByLevel(
+                                  decoratedListeningTopics,
+                                  "listeningLevel",
+                                ),
+                                grammarChapters,
+                                finalTestRows,
                                 writingSubmissions: writingSubmissions.map(
                                   (submission) => {
                                     const topic = writingTopics.find(
