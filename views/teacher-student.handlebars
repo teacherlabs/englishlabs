@@ -40,6 +40,7 @@
       </nav>
       <nav class="student-subtabs" data-student-subtabs="listening-section" aria-label="Listening progress views"{{#unless profileIsListening}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="listening-topics-panel" aria-selected="true">Topics</button>
+        <button class="student-subsection-link" type="button" data-student-subsection="listening-discussion-panel" aria-selected="false">Discussion Responses{{#if listeningDiscussionSubmissions.length}} <span class="section-count">{{listeningDiscussionSubmissions.length}}</span>{{/if}}</button>
       </nav>
 
       <div class="student-profile-sections">
@@ -131,6 +132,23 @@
                 </div>
               </div>
             {{else}}<p class="empty-state">No listening progress recorded yet.</p>{{/each}}
+          </div>
+          <div class="student-subsection-panel" id="listening-discussion-panel" data-student-subpanel hidden>
+            <h2>Discussion responses</h2>
+            <div class="admin-chunk-lists">
+              {{#each listeningDiscussionSubmissions}}
+                <details class="admin-chunk-list">
+                  <summary><strong>{{topic_title}}</strong><span>Submitted {{submitted_at}}</span></summary>
+                  <div class="admin-chunk-statuses">
+                    <article class="admin-chunk-status submitted">
+                      <p class="writing-feedback-text">{{submission_text}}</p>
+                    </article>
+                  </div>
+                </details>
+              {{else}}
+                <p class="empty-state">No discussion responses submitted yet.</p>
+              {{/each}}
+            </div>
           </div>
         </section>
 

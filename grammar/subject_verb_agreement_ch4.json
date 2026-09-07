@@ -128,70 +128,70 @@
       "questions": [
         {
           "id": 1,
-          "question": "Emily and Greg ( comes, come ) to my house every Friday for lunch.",
+          "question": "Emily and Greg ________ to my house every Friday for lunch.",
           "options": ["comes", "come"],
           "answer": "come",
           "explanation": "Compound subjects joined by 'and' take a plural verb."
         },
         {
           "id": 2,
-          "question": "There ( is, are ) time to watch the movie.",
+          "question": "There ________ time to watch the movie.",
           "options": ["is", "are"],
           "answer": "is",
           "explanation": "The subject 'time' is singular, so it takes 'is'."
         },
         {
           "id": 3,
-          "question": "My friends who are in the band ( wants, want ) me to play a musical instrument.",
+          "question": "My friends who are in the band ________ me to play a musical instrument.",
           "options": ["wants", "want"],
           "answer": "want",
           "explanation": "The main subject 'friends' is plural, so it requires 'want'."
         },
         {
           "id": 4,
-          "question": "My father or my brothers ( is, are ) coming with me to the ball game.",
+          "question": "My father or my brothers ________ coming with me to the ball game.",
           "options": ["is", "are"],
           "answer": "are",
           "explanation": "With subjects connected by 'or', the verb agrees with the closer subject ('brothers')."
         },
         {
           "id": 5,
-          "question": "Everyone ( needs, need ) time to relax.",
+          "question": "Everyone ________ time to relax.",
           "options": ["needs", "need"],
           "answer": "needs",
           "explanation": "'Everyone' is an indefinite pronoun and takes a singular verb."
         },
         {
           "id": 6,
-          "question": "That bag of oranges ( looks, look ) fresh.",
+          "question": "That bag of oranges ________ fresh.",
           "options": ["looks", "look"],
           "answer": "looks",
           "explanation": "The subject is 'bag' (singular), not 'oranges'."
         },
         {
           "id": 7,
-          "question": "The lacrosse team ( hopes, hope ) to win the tournament next week.",
+          "question": "The lacrosse team ________ to win the tournament next week.",
           "options": ["hopes", "hope"],
           "answer": "hopes",
           "explanation": "'Team' is a collective noun functioning as a single unit."
         },
         {
           "id": 8,
-          "question": "Your trousers ( needs, need ) to be cleaned.",
+          "question": "Your trousers ________ to be cleaned.",
           "options": ["needs", "need"],
           "answer": "need",
           "explanation": "'Trousers' is a plural noun."
         },
         {
           "id": 9,
-          "question": "Some of the books on the shelf ( is, are ) dusty.",
+          "question": "Some of the books on the shelf ________ dusty.",
           "options": ["is", "are"],
           "answer": "are",
           "explanation": "'Some' refers to 'books' (plural), requiring 'are'."
         },
         {
           "id": 10,
-          "question": "Even though the students like the class, a few ( thinks, think ) that it is too complicated.",
+          "question": "Even though the students like the class, a few ________ that it is too complicated.",
           "options": ["thinks", "think"],
           "answer": "think",
           "explanation": "'A few' refers to plural items/people and takes a plural verb."

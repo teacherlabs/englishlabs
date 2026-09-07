@@ -218,7 +218,13 @@ const practiceQuestionChapters = [
   loadRuleBasedGrammarChapter("capitalization_ch11.json", 10),
   loadRuleBasedGrammarChapter("pronouns_ch12.json", 11),
   loadThisOrThatGrammarChapter("this_or_that_ch13 (2).json", 12),
-];
+].map((chapter) => ({
+  ...chapter,
+  exercises: chapter.exercises.map((exercise, index) => ({
+    ...exercise,
+    title: `Exercise ${index + 1}: ${exercise.title.replace(/^Exercise\s+\d+:\s*/i, "")}`,
+  })),
+}));
 const listeningTopics = [
   (() => {
     const reading = JSON.parse(
@@ -641,16 +647,27 @@ const buildReadingV2Exercise = (exercise, index) => {
   }
 
   if (exercise.type === "gap_fill") {
-    const questions = exercise.questions.map((question, questionIndex) => ({
-      number: questionIndex + 1,
-      segments: buildGapFillSegments(
-        question.sentence.replace("[]", `[${questionIndex + 1}]`),
-      ),
-      answer: String(question.answer),
-    }));
+    let blankCounter = 0;
     const answers = {};
-    questions.forEach((question) => {
-      answers[question.number] = question.answer;
+    const questions = exercise.questions.map((question, questionIndex) => {
+      const blankCount = (question.sentence.match(/\[\]/g) || []).length;
+      const answerParts = String(question.answer)
+        .split(/\s*\.\.\.\s*/)
+        .map((part) => part.trim());
+      let sentenceWithBlanks = question.sentence;
+      for (let blankIndex = 0; blankIndex < blankCount; blankIndex += 1) {
+        blankCounter += 1;
+        sentenceWithBlanks = sentenceWithBlanks.replace(
+          "[]",
+          `[${blankCounter}]`,
+        );
+        answers[blankCounter] = answerParts[blankIndex] ?? answerParts[0];
+      }
+      return {
+        number: questionIndex + 1,
+        segments: buildGapFillSegments(sentenceWithBlanks),
+        answer: String(question.answer),
+      };
     });
     return {
       ...base,
@@ -1147,6 +1164,16 @@ db.serialize(() => {
     "ALTER TABLE writing_submissions ADD COLUMN feedback_seen INTEGER NOT NULL DEFAULT 0",
     () => {},
   );
+  db.run(`CREATE TABLE IF NOT EXISTS listening_discussion_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    topic_id TEXT NOT NULL,
+    topic_title TEXT NOT NULL,
+    submission_text TEXT NOT NULL,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES members(username),
+    UNIQUE (username, topic_id)
+  )`);
   db.run(`CREATE TABLE IF NOT EXISTS password_resets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1330,23 +1357,32 @@ app.get("/listening", requireAuthenticated, (req, res) => {
             topic.topic.id === req.query.topic &&
             topic.listeningLevel === selectedLevel,
         ) || decorated.find((topic) => topic.listeningLevel === selectedLevel);
-      res.render("listening.handlebars", {
-        listeningLevels: ["1", "2"].map((level) => ({
-          number: level,
-          selected: level === selectedLevel,
-          topics: decorated
-            .filter((topic) => topic.listeningLevel === level)
-            .map((topic) => ({
-              ...topic.topic,
-              selected: topic.topic.id === selectedTopic?.topic.id,
-            })),
-        })),
-        topic: selectedTopic?.topic,
-        content: selectedTopic?.content,
-        audioUrl: selectedTopic?.audioUrl,
-        exercises: selectedTopic?.exercises,
-        discussion: selectedTopic?.discussion,
-      });
+      const renderListening = (myDiscussionResponse) => {
+        res.render("listening.handlebars", {
+          listeningLevels: ["1", "2"].map((level) => ({
+            number: level,
+            selected: level === selectedLevel,
+            topics: decorated
+              .filter((topic) => topic.listeningLevel === level)
+              .map((topic) => ({
+                ...topic.topic,
+                selected: topic.topic.id === selectedTopic?.topic.id,
+              })),
+          })),
+          topic: selectedTopic?.topic,
+          content: selectedTopic?.content,
+          audioUrl: selectedTopic?.audioUrl,
+          exercises: selectedTopic?.exercises,
+          discussion: selectedTopic?.discussion,
+          myDiscussionResponse,
+        });
+      };
+      if (!selectedTopic?.discussion) return renderListening(null);
+      db.get(
+        "SELECT submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? AND topic_id = ?",
+        [req.session.name, selectedTopic.topic.id],
+        (error, submission) => renderListening(error ? null : submission),
+      );
     },
   );
 });
@@ -1440,6 +1476,25 @@ app.get("/reading", requireAuthenticated, (req, res) => {
         discussion: selectedTopic?.discussion,
       });
     },
+  );
+});
+
+app.post("/api/listening/discussion", requireLogin, (req, res) => {
+  const topicId = String(req.body.topicId || "").trim();
+  const topicTitle = String(req.body.topicTitle || "").trim();
+  const text = String(req.body.text || "").trim();
+  if (!topicId || !text)
+    return res.status(400).json({ error: "A response is required." });
+  db.run(
+    `INSERT INTO listening_discussion_submissions (username, topic_id, topic_title, submission_text)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(username, topic_id)
+     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP`,
+    [req.session.name, topicId, topicTitle, text],
+    (error) =>
+      error
+        ? res.status(500).json({ error: "Unable to save your response." })
+        : res.json({ saved: true }),
   );
 });
 
@@ -1571,8 +1626,7 @@ app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
         vocabularyLevels: vocabularyLevelChoices(selectedLevel),
         selectedLevel,
         pageTitle: "Flip cards",
-        pageIntro:
-          "Flip each card to reveal the Swedish word and examples. Swipe right when you know it.",
+        pageIntro: "Flip each card to reveal the Swedish word and examples.",
         words: levelWords,
       });
     },
@@ -3534,6 +3588,10 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                               };
                             });
                           db.all(
+                            "SELECT topic_id, topic_title, submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                            [student.username],
+                            (discussionError, listeningDiscussionSubmissions) => {
+                          db.all(
                             "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
                             [student.username],
                             (writingError, writingSubmissions) => {
@@ -3679,6 +3737,10 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                 hardestWords,
                                 listeningCompletions,
                                 readingCompletions,
+                                listeningDiscussionSubmissions:
+                                  discussionError
+                                    ? []
+                                    : listeningDiscussionSubmissions,
                                 readingProgressLevels: groupTopicsByLevel(
                                   decoratedReadingTopics,
                                   "readingLevel",
@@ -3709,6 +3771,8 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                 writingSubmissionCount:
                                   writingSubmissions.length,
                               });
+                            },
+                          );
                             },
                           );
                         },

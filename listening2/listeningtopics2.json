@@ -18,7 +18,7 @@
         "type": "matching_synonyms",
         "id": "preparation-vocabulary",
         "title": "Preparation: Matching",
-        "instruction": "Match the idiom or phrasal verb on the left to its meaning on the right.",
+        "instruction": "Match the idiom or phrasal verb to its meaning.",
         "pairs": [
           {
             "phrase": "She looked after me.",
@@ -157,72 +157,6 @@
   },
   {
     "topic": {
-      "id": "my-favourite-film",
-      "title": "My favourite film",
-      "level": "B1 Intermediate",
-      "category": "Entertainment",
-      "description": "Listen to someone reviewing their favourite film, its plot, and main characters."
-    },
-    "content": {
-      "audio": {
-        "src": "",
-        "placeholderText": "Insert your audio file URL here"
-      }
-    },
-    "exercises": [
-      {
-        "type": "multiple_choice",
-        "id": "film-review-comprehension",
-        "title": "Check your understanding: multiple choice",
-        "instruction": "Choose the correct options summarizing the film review.",
-        "questions": [
-          {
-            "id": 1,
-            "question": "What genre is the speaker's favourite film?",
-            "options": [
-              "Science Fiction / Fantasy",
-              "Historical Drama",
-              "Horror"
-            ],
-            "answer": "Science Fiction / Fantasy"
-          },
-          {
-            "id": 2,
-            "question": "What does the reviewer praise most about the film?",
-            "options": [
-              "The special effects and soundtrack",
-              "The length of the film",
-              "The comedy dialogues"
-            ],
-            "answer": "The special effects and soundtrack"
-          }
-        ]
-      },
-      {
-        "type": "true_or_false",
-        "id": "film-details-tf",
-        "title": "Check your understanding: true or false",
-        "instruction": "Decide if the statements about the review are True or False.",
-        "questions": [
-          {
-            "id": 1,
-            "statement": "The speaker has watched this movie more than once.",
-            "correctAnswer": true
-          },
-          {
-            "id": 2,
-            "statement": "The speaker recommends the film only for young children.",
-            "correctAnswer": false
-          }
-        ]
-      }
-    ],
-    "discussion": {
-      "question": "What is your all-time favourite film and what makes it special to you?"
-    }
-  },
-  {
-    "topic": {
       "id": "organising-your-time",
       "title": "Organising your time",
       "level": "B1 Intermediate",
@@ -240,7 +174,7 @@
         "type": "matching_definitions",
         "id": "preparation-vocabulary",
         "title": "Preparation: Matching",
-        "instruction": "Match the terms on the left to their definition on the right.",
+        "instruction": "Match the terms to their definitions.",
         "pairs": [
           {
             "word": "a timer",

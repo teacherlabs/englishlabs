@@ -400,7 +400,7 @@
         "type": "phrase_matching",
         "id": "preparation-matching",
         "title": "Preparation: Matching",
-        "instruction": "Match the verb on the left to the noun on the right.",
+        "instruction": "Match the verb to the noun by dragging it into the correct box.",
         "pairs": [
           {
             "verb": "take",
