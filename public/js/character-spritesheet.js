@@ -14,9 +14,12 @@
     });
 
   const bakeCharacterSpriteSheet = async (payload) => {
+    if (payload?.spritesheetImage || payload?.image) {
+      return payload.spritesheetImage || payload.image;
+    }
     const layers = payload?.layers || payload?.layerImages || payload?.spritesheetLayers;
     if (!Array.isArray(layers) || layers.length === 0) {
-      return payload?.spritesheetImage || payload?.image || "";
+      return "";
     }
 
     const frameWidth = Number(payload.frameWidth) || 64;
