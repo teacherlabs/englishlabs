@@ -13,6 +13,7 @@ const http = require("http");
 const { Server: SocketIOServer } = require("socket.io");
 const { engine } = require("express-handlebars");
 const sqlite3 = require("sqlite3");
+const { Pool } = require("pg");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
@@ -25,6 +26,16 @@ const nodemailer = require("nodemailer");
 // PORT
 //----------
 const port = Number(process.env.PORT || 8090);
+const postgresPool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: false }
+          : undefined,
+    })
+  : null;
+let postgresReady = Promise.resolve();
 
 const loadRuleBasedGrammarChapter = (fileName, chapterNumber) => {
   const data = JSON.parse(
@@ -890,6 +901,59 @@ fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(path.join(dataDir, "uploads", "profiles"), { recursive: true });
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
+if (postgresPool) {
+  postgresReady = postgresPool
+    .query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        fname TEXT NOT NULL,
+        lname TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'student',
+        goal TEXT NOT NULL DEFAULT '',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+    .then(
+      () =>
+        new Promise((resolve, reject) => {
+          db.all(
+            "SELECT username, fname, lname, email, password_hash, role, goal FROM members WHERE password_hash IS NOT NULL AND password_hash != ''",
+            (error, members) => {
+              if (error) return reject(error);
+              Promise.all(
+                members.map((member) =>
+                  postgresPool.query(
+                    `INSERT INTO users
+                      (username, fname, lname, email, password_hash, role, goal)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)
+                     ON CONFLICT DO NOTHING`,
+                    [
+                      member.username,
+                      member.fname || "",
+                      member.lname || "",
+                      member.email || `${member.username}@placeholder.invalid`,
+                      member.password_hash,
+                      member.role || "student",
+                      member.goal || "",
+                    ],
+                  ),
+                ),
+              )
+                .then(() => resolve())
+                .catch(reject);
+            },
+          );
+        }),
+    )
+    .catch((error) => {
+      console.error("PostgreSQL user database initialization failed:", error);
+      throw error;
+    });
+  postgresReady.catch(() => {});
+}
 const profileUpload = multer({
   storage: multer.diskStorage({
     destination: path.join(dataDir, "uploads", "profiles"),
@@ -2105,20 +2169,37 @@ app.post("/reset-password", (req, res) => {
           return res.status(500).render("reset-password.handlebars", {
             error: "Unable to reset your password.",
           });
-        db.run(
-          "UPDATE members SET password_hash = ? WHERE username = ?",
-          [passwordHash, reset.username],
-          (updateError) => {
-            if (updateError)
-              return res.status(500).render("reset-password.handlebars", {
-                error: "Unable to reset your password.",
-              });
+        const savePassword = () =>
+          new Promise((resolve, reject) => {
+            db.run(
+              "UPDATE members SET password_hash = ? WHERE username = ?",
+              [passwordHash, reset.username],
+              (updateError) => (updateError ? reject(updateError) : resolve()),
+            );
+          });
+        const passwordUpdate = postgresPool
+          ? postgresReady.then(() =>
+              postgresPool.query(
+                "UPDATE users SET password_hash = $1 WHERE username = $2",
+                [passwordHash, reset.username],
+              ),
+            )
+          : Promise.resolve();
+        passwordUpdate
+          .then(savePassword)
+          .then(() => {
             db.run("DELETE FROM password_resets WHERE id = ?", [reset.id]);
             res.render("login.handlebars", {
               message: "Your password has been reset. You can now log in.",
             });
-          },
-        );
+          })
+          .catch((updateError) => {
+            console.error("Password update failed:", updateError);
+            res.status(500).render("reset-password.handlebars", {
+              token,
+              error: "Unable to reset your password.",
+            });
+          });
       });
     },
   );
@@ -2174,37 +2255,48 @@ app.post("/login", (req, res) => {
       }
     });
   } else {
-    db.get(
-      "SELECT * FROM members WHERE username = ?",
-      [username],
-      (error, member) => {
-        if (error || !member || !member.password_hash) {
+    if (!postgresPool) {
+      return res.status(500).render("login.handlebars", {
+        error: "User database is not configured.",
+        message: "",
+      });
+    }
+    postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT username, password_hash, role FROM users WHERE username = $1",
+          [username],
+        ),
+      )
+      .then(({ rows }) => {
+        const member = rows[0];
+        if (!member || !member.password_hash) {
           return res.status(400).render("login.handlebars", {
             error: "Username or password is incorrect.",
             message: "",
           });
         }
-        bcrypt.compare(
-          password,
-          member.password_hash,
-          (compareError, valid) => {
-            if (compareError || !valid)
-              return res.status(400).render("login.handlebars", {
-                error: "Username or password is incorrect.",
-                message: "",
-              });
-            req.session.isLoggedIn = true;
-            req.session.isAdmin = member.role === "admin";
-            req.session.name = member.username;
-            req.session.avatar = member.avatar || "";
-            req.session.avatar_initial = member.username
-              .charAt(0)
-              .toUpperCase();
-            res.redirect("/");
-          },
-        );
-      },
-    );
+        bcrypt.compare(password, member.password_hash, (compareError, valid) => {
+          if (compareError || !valid)
+            return res.status(400).render("login.handlebars", {
+              error: "Username or password is incorrect.",
+              message: "",
+            });
+          req.session.isLoggedIn = true;
+          req.session.isAdmin = member.role === "admin";
+          req.session.name = member.username;
+          req.session.avatar = "";
+          req.session.avatar_initial = member.username.charAt(0).toUpperCase();
+          res.redirect("/");
+        });
+      })
+      .catch((error) => {
+        console.error("PostgreSQL login failed:", error);
+        res.status(500).render("login.handlebars", {
+          error: "Unable to access the user database.",
+          message: "",
+        });
+      });
   }
 });
 
@@ -2237,29 +2329,54 @@ app.post("/signup", (req, res) => {
       return res
         .status(500)
         .render("signup.handlebars", { error: "Unable to create account." });
-    db.run(
-      "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
-      [
-        requestedUsername,
-        firstName,
-        lastName,
-        requestedEmail,
-        passwordHash,
-        goal || "",
-      ],
-      function (insertError) {
-        if (insertError)
-          return res.status(400).render("signup.handlebars", {
-            error: "That username is already taken.",
-          });
+    if (!postgresPool) {
+      return res.status(500).render("signup.handlebars", {
+        error: "User database is not configured.",
+      });
+    }
+    postgresReady
+      .then(() =>
+        postgresPool.query(
+          "INSERT INTO users (username, fname, lname, email, password_hash, role, goal) VALUES ($1, $2, $3, $4, $5, 'student', $6)",
+          [
+            requestedUsername,
+            firstName,
+            lastName,
+            requestedEmail,
+            passwordHash,
+            goal || "",
+          ],
+        ),
+      )
+      .then(() => {
+        db.run(
+          "INSERT OR IGNORE INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
+          [
+            requestedUsername,
+            firstName,
+            lastName,
+            requestedEmail,
+            passwordHash,
+            goal || "",
+          ],
+        );
         req.session.isLoggedIn = true;
         req.session.isAdmin = false;
         req.session.name = requestedUsername;
         req.session.avatar = "";
         req.session.avatar_initial = requestedUsername.charAt(0).toUpperCase();
         res.redirect("/profile");
-      },
-    );
+      })
+      .catch((insertError) => {
+        if (insertError.code === "23505")
+          return res.status(400).render("signup.handlebars", {
+            error: "That username is already taken.",
+          });
+        console.error("PostgreSQL signup failed:", insertError);
+        res.status(500).render("signup.handlebars", {
+          error: "Unable to create account.",
+        });
+      });
   });
 });
 
