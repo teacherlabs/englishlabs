@@ -3491,27 +3491,48 @@ app.post("/api/profile/character", requireProfileUser, (req, res) => {
         (spritesheetWriteError) => {
           if (spritesheetWriteError)
             return res.status(500).json({ error: "Unable to save character." });
-          db.run(
-            "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
-            [
-              avatarFilename,
-              spritesheetFilename,
-              JSON.stringify(config),
-              req.session.name,
-            ],
-            (error) => {
-              if (error)
-                return res
-                  .status(500)
-                  .json({ error: "Unable to save character." });
+          const characterConfig = JSON.stringify(config);
+          const saveToPostgres = postgresPool
+            ? postgresReady.then(() =>
+                postgresPool.query(
+                  "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4",
+                  [
+                    avatarFilename,
+                    spritesheetFilename,
+                    characterConfig,
+                    req.session.name,
+                  ],
+                ),
+              )
+            : Promise.resolve();
+          saveToPostgres
+            .then(
+              () =>
+                new Promise((resolve, reject) => {
+                  db.run(
+                    "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
+                    [
+                      avatarFilename,
+                      spritesheetFilename,
+                      characterConfig,
+                      req.session.name,
+                    ],
+                    (error) => (error ? reject(error) : resolve()),
+                  );
+                }),
+            )
+            .then(() => {
               req.session.avatar = avatarFilename;
               res.json({
                 saved: true,
                 avatar: avatarFilename,
                 spritesheet: spritesheetFilename,
               });
-            },
-          );
+            })
+            .catch((error) => {
+              console.error("Unable to save character:", error);
+              res.status(500).json({ error: "Unable to save character." });
+            });
         },
       );
     },
