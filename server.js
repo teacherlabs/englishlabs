@@ -918,6 +918,15 @@ if (postgresPool) {
     `)
     .then(() =>
       postgresPool.query(`
+        ALTER TABLE users
+          ADD COLUMN IF NOT EXISTS avatar TEXT NOT NULL DEFAULT '',
+          ADD COLUMN IF NOT EXISTS spritesheet TEXT NOT NULL DEFAULT '',
+          ADD COLUMN IF NOT EXISTS character_config TEXT NOT NULL DEFAULT '',
+          ADD COLUMN IF NOT EXISTS profile_background TEXT NOT NULL DEFAULT '#edf4ff'
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
         CREATE TABLE IF NOT EXISTS password_resets (
           id SERIAL PRIMARY KEY,
           username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
@@ -2441,11 +2450,17 @@ app.get("/profile", requireProfileUser, (req, res) => {
     "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
     [req.session.name],
   );
-  db.get(
-    "SELECT username, goal, avatar, character_config, profile_background FROM members WHERE username = ?",
-    [req.session.name],
-    (error, student) => {
-      if (error || !student) return res.status(404).send("Profile not found.");
+  if (!postgresPool) return res.status(500).send("User database is not configured.");
+  postgresReady
+    .then(() =>
+      postgresPool.query(
+        "SELECT username, email, goal, avatar, character_config, profile_background FROM users WHERE username = $1",
+        [req.session.name],
+      ),
+    )
+    .then(({ rows }) => {
+      const student = rows[0];
+      if (!student) return res.status(404).send("Profile not found.");
       const background = /^#[0-9a-fA-F]{6}$/.test(
         student.profile_background || "",
       )
@@ -2536,8 +2551,11 @@ app.get("/profile", requireProfileUser, (req, res) => {
           );
         },
       );
-    },
-  );
+    })
+    .catch((error) => {
+      console.error("Unable to load profile:", error);
+      res.status(500).send("Unable to load profile.");
+    });
 });
 
 const QUESTION_DURATION_MS = 20000;
