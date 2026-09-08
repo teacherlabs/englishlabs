@@ -2858,17 +2858,10 @@ app.post("/api/lobby/player-state", requireProfileUser, (req, res) => {
 
 app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
-  const entering = req.body.entering === true || req.body.entering === "true";
   if (!roomId) return res.status(400).json({ error: "Room is required." });
   db.run(
-    "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
-    [
-      entering ? 1 : 0,
-      entering
-        ? `TEACHER_ENTRANCE:${Date.now()}`
-        : `TEACHER_EXIT:${Date.now()}`,
-      roomId,
-    ],
+    "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+    [`TEACHER_ENTRANCE:${Date.now()}`, roomId],
     function (error) {
       if (error)
         return res
@@ -2878,10 +2871,10 @@ app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
         return res.status(404).json({ error: "QuickType room not found." });
       io.to(String(roomId)).emit("teacherEntered", {
         roomId,
-        entering,
+        entering: true,
       });
       io.to(String(roomId)).emit("lobbyStateChanged", { roomId });
-      res.json({ teacherPresent: entering });
+      res.json({ teacherPresent: true });
     },
   );
 });
@@ -4060,20 +4053,14 @@ io.on("connection", (socket) => {
     );
   });
 
-  socket.on("teacherEntrance", ({ roomId, entering } = {}, acknowledge) => {
+  socket.on("teacherEntrance", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
     if (!isAdmin || socket.data.roomId !== numericRoomId) {
       return acknowledge?.({ ok: false, error: "Teacher access required." });
     }
     db.run(
-      "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
-      [
-        entering ? 1 : 0,
-        entering
-          ? `TEACHER_ENTRANCE:${Date.now()}`
-          : `TEACHER_EXIT:${Date.now()}`,
-        numericRoomId,
-      ],
+      "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+      [`TEACHER_ENTRANCE:${Date.now()}`, numericRoomId],
       function (error) {
         if (error || !this.changes)
           return acknowledge?.({
@@ -4082,12 +4069,12 @@ io.on("connection", (socket) => {
           });
         io.to(String(numericRoomId)).emit("teacherEntered", {
           roomId: numericRoomId,
-          entering: Boolean(entering),
+          entering: true,
         });
         io.to(String(numericRoomId)).emit("lobbyStateChanged", {
           roomId: numericRoomId,
         });
-        acknowledge?.({ ok: true, teacherPresent: Boolean(entering) });
+        acknowledge?.({ ok: true, teacherPresent: true });
       },
     );
   });

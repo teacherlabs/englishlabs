@@ -44,8 +44,8 @@
         <div class="lobby-character-stage">
           <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
-       <aside class="teacher-control-sidebar">
-      {{#if isQuicktype}}<button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>{{/if}}
+      <aside class="teacher-control-sidebar">
+          <button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
          {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
@@ -204,8 +204,9 @@
       });
       lobbySocket.on("teacherEntered", ({ entering }) => {
         if (entranceButton) {
-          entranceButton.textContent = entering ? "Exit Lobby Canvas" : "Enter Lobby";
+          entranceButton.textContent = entering ? "In Lobby" : "Enter Lobby";
           entranceButton.dataset.entering = entering ? "false" : "true";
+          entranceButton.disabled = entering;
         }
       });
     }
@@ -259,6 +260,7 @@
       }
     }
     let currentQuestionNumber = Number(questionNumberEl.textContent) || 0;
+    let previousRoomStatus = "waiting";
     let lastEvent = null;
     let lastEntranceEvent = null;
 
@@ -282,6 +284,9 @@
 
     const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
+      const enteredRunningState =
+        previousRoomStatus !== "running" && state.room.status === "running";
+      previousRoomStatus = state.room.status;
       const teacherPresent = Number(state.room.teacher_present) === 1;
       document.querySelectorAll("[data-player-canvas]").forEach((canvas) => {
         canvas.dataset.teacherPresent = teacherPresent ? "1" : "0";
@@ -289,8 +294,9 @@
       window.lobbySetTeacherPresent?.(teacherPresent);
       window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
       if (entranceButton) {
-        entranceButton.textContent = teacherPresent ? "Exit Lobby Canvas" : "Enter Lobby";
+        entranceButton.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
         entranceButton.dataset.entering = teacherPresent ? "false" : "true";
+        entranceButton.disabled = teacherPresent;
       }
       if (state.event?.startsWith("TEACHER_ENTRANCE:") && state.event !== lastEntranceEvent) {
         lastEntranceEvent = state.event;
@@ -346,6 +352,8 @@
           .then((result) => {
             if (result.ok === false) throw new Error(result.error || "Unable to update lobby entrance.");
             window.lobbySetTeacherPresent?.(result.teacherPresent ?? entering);
+            button.textContent = "In Lobby";
+            button.disabled = true;
           })
           .catch((error) => console.error(error))
           .finally(() => { button.disabled = false; });
@@ -377,21 +385,28 @@
       if (state.room.status === "running" && state.question) {
         questionNumberEl.textContent = state.room.current_question;
         questionTimerEl.textContent = state.timeRemaining;
+        const quicktypeInput = phaseRunning.querySelector("[data-quicktype-input]");
+        const quicktypeSubmit = phaseRunning.querySelector("[data-quicktype-form] button");
         if (answeredCountEl) answeredCountEl.textContent = state.answeredCount;
         if (totalParticipantsEl) totalParticipantsEl.textContent = state.totalParticipants;
-        const isNewQuestion = currentQuestionNumber !== state.room.current_question;
+        const isNewQuestion =
+          currentQuestionNumber !== state.room.current_question || enteredRunningState;
         if (isNewQuestion) {
           currentQuestionNumber = state.room.current_question;
           if (questionTextEl) questionTextEl.textContent = state.question.question_text;
           const targetWordEl = phaseRunning.querySelector("[data-target-word]");
           if (targetWordEl && state.question.target_word) targetWordEl.textContent = state.question.target_word;
-          const quicktypeInput = phaseRunning.querySelector("[data-quicktype-input]");
           if (quicktypeInput) { quicktypeInput.value = ""; quicktypeInput.disabled = false; }
+          if (quicktypeSubmit) quicktypeSubmit.disabled = false;
           [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => {
             const answerEl = phaseRunning.querySelector(`[data-answer="${key}"], [data-answer-text="${key}"]`);
             if (answerEl) { answerEl.textContent = state.question[field]; answerEl.disabled = false; }
           });
           if (feedback) feedback.textContent = "";
+        }
+        if (mode === "quicktype" && role === "student" && state.participant?.answer == null) {
+          if (quicktypeInput) quicktypeInput.disabled = false;
+          if (quicktypeSubmit) quicktypeSubmit.disabled = false;
         }
       }
       if (state.room.status === "waiting") {
@@ -408,6 +423,7 @@
     });
 
     lobbySocket?.on("lobbyStateChanged", () => refresh());
+    window.setInterval(refresh, 1000);
 
     const activateButton = lobbyPhase.querySelector("[data-activate-word]");
     if (role === "admin" && activateButton) activateButton.addEventListener("click", () => {
