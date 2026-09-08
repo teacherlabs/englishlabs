@@ -2860,7 +2860,7 @@ app.post("/api/lobby/teacher-entrance", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
   if (!roomId) return res.status(400).json({ error: "Room is required." });
   db.run(
-    "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+    "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ?",
     [`TEACHER_ENTRANCE:${Date.now()}`, roomId],
     function (error) {
       if (error)
@@ -3125,8 +3125,8 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
-                          [updatedRoom.id],
+                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          [updatedRoom.id, Number(updatedRoom.teacher_present) === 1 ? 1 : 0],
                           (leaderboardError, leaderboard) => {
                             const elapsed =
                               updatedRoom.status === "running"
@@ -4059,7 +4059,7 @@ io.on("connection", (socket) => {
       return acknowledge?.({ ok: false, error: "Teacher access required." });
     }
     db.run(
-      "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ? AND mode = 'quicktype'",
+      "UPDATE lobby_rooms SET teacher_present = 1, last_event = ? WHERE id = ?",
       [`TEACHER_ENTRANCE:${Date.now()}`, numericRoomId],
       function (error) {
         if (error || !this.changes)
