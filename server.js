@@ -1969,7 +1969,7 @@ app.get("/forgot-password", (req, res) => {
   res.render("forgot-password.handlebars");
 });
 
-app.post("/forgot-password", (req, res) => {
+app.post(["/forgot-password", "/forget-password"], (req, res) => {
   const email = String(req.body.email || "")
     .trim()
     .toLowerCase();
@@ -2003,20 +2003,14 @@ app.post("/forgot-password", (req, res) => {
                 return res.status(500).render("forgot-password.handlebars", {
                   error: "Unable to create a reset link.",
                 });
-              const baseUrl = process.env.APP_URL || `http://localhost:${port}`;
-              const resetUrl = `${baseUrl}/reset-password/${token}`;
-              const hasMailConfig =
-                process.env.SMTP_HOST &&
-                process.env.SMTP_USER &&
-                process.env.SMTP_PASS;
+              const hasMailConfig = process.env.GMAIL_USER && process.env.GMAIL_PASS;
               if (!hasMailConfig) {
                 if (process.env.NODE_ENV !== "production") {
                   console.log(
-                    `Password reset link for ${member.username}: ${resetUrl}`,
+                    `Password reset link for ${member.username}: ${(process.env.CLIENT_URL || `http://localhost:${port}`)}/reset-password?token=${token}`,
                   );
                   return res.render("forgot-password.handlebars", {
-                    message:
-                      "A development reset link was printed in the server terminal.",
+                    message: "A development reset link was printed in the server terminal.",
                   });
                 }
                 return res.status(500).render("forgot-password.handlebars", {
@@ -2024,17 +2018,16 @@ app.post("/forgot-password", (req, res) => {
                 });
               }
               const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: Number(process.env.SMTP_PORT || 587),
-                secure: process.env.SMTP_SECURE === "true",
+                service: "gmail",
                 auth: {
-                  user: process.env.SMTP_USER,
-                  pass: process.env.SMTP_PASS,
+                  user: process.env.GMAIL_USER,
+                  pass: process.env.GMAIL_PASS,
                 },
               });
+              const resetUrl = `${process.env.CLIENT_URL || `http://localhost:${port}`}/reset-password?token=${token}`;
               transporter.sendMail(
                 {
-                  from: process.env.SMTP_FROM || process.env.SMTP_USER,
+                  from: process.env.GMAIL_USER,
                   to: email,
                   subject: "Reset your English Labs password",
                   text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
@@ -2059,10 +2052,13 @@ app.post("/forgot-password", (req, res) => {
   );
 });
 
-app.get("/reset-password/:token", (req, res) => {
+app.get("/forget-password", (req, res) => res.redirect("/forgot-password"));
+
+app.get("/reset-password", (req, res) => {
+  const token = String(req.query.token || "");
   const tokenHash = crypto
     .createHash("sha256")
-    .update(req.params.token)
+    .update(token)
     .digest("hex");
   db.get(
     "SELECT id FROM password_resets WHERE token_hash = ? AND expires_at > ?",
@@ -2072,23 +2068,28 @@ app.get("/reset-password/:token", (req, res) => {
         return res.status(400).render("reset-password.handlebars", {
           error: "This reset link is invalid or has expired.",
         });
-      res.render("reset-password.handlebars", { token: req.params.token });
+      res.render("reset-password.handlebars", { token });
     },
   );
 });
 
-app.post("/reset-password/:token", (req, res) => {
+app.get("/reset-password/:token", (req, res) => {
+  res.redirect(`/reset-password?token=${encodeURIComponent(req.params.token)}`);
+});
+
+app.post("/reset-password", (req, res) => {
+  const token = String(req.body.token || "");
   const password = String(req.body.password || "");
   const confirmPassword = String(req.body.confirmPassword || "");
   if (password.length < 8 || password !== confirmPassword) {
     return res.status(400).render("reset-password.handlebars", {
-      token: req.params.token,
+      token,
       error: "Use matching passwords with at least 8 characters.",
     });
   }
   const tokenHash = crypto
     .createHash("sha256")
-    .update(req.params.token)
+    .update(token)
     .digest("hex");
   db.get(
     "SELECT id, username FROM password_resets WHERE token_hash = ? AND expires_at > ?",
@@ -2098,6 +2099,7 @@ app.post("/reset-password/:token", (req, res) => {
         return res.status(400).render("reset-password.handlebars", {
           error: "This reset link is invalid or has expired.",
         });
+
       bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
         if (hashError)
           return res.status(500).render("reset-password.handlebars", {
@@ -2120,6 +2122,11 @@ app.post("/reset-password/:token", (req, res) => {
       });
     },
   );
+});
+
+app.post("/reset-password/:token", (req, res) => {
+  req.body.token = req.params.token;
+  res.redirect(307, "/reset-password");
 });
 
 app.post("/login", (req, res) => {
