@@ -34,7 +34,7 @@
   "exercises": [
     {
       "source": "Exercise 1: englisch-hilfen.de (Adjective or Adverb 1)",
-      "title": "Adjective or Adverb Selection 1",
+      "title": "Adjective or Adverb Selection Part 1",
       "type": "gap_fill",
       "questions": [
         {
@@ -76,7 +76,7 @@
     },
     {
       "source": "Exercise 2: englisch-hilfen.de (Adjective or Adverb 2)",
-      "title": "Adjective or Adverb Selection 2",
+      "title": "Adjective or Adverb Selection Part 2",
       "type": "gap_fill",
       "questions": [
         {
@@ -118,7 +118,7 @@
     },
     {
       "source": "Exercise 3: englisch-hilfen.de (Adverbs ending in -ly 1)",
-      "title": "Forming Adverbs with '-ly' 1",
+      "title": "Forming Adverbs with '-ly' Part 1",
       "type": "gap_fill",
       "questions": [
         {
@@ -160,7 +160,7 @@
     },
     {
       "source": "Exercise 4: englisch-hilfen.de (Adverbs ending in -ly 2)",
-      "title": "Forming Adverbs with '-ly' 2",
+      "title": "Forming Adverbs with '-ly' Part 2",
       "type": "gap_fill",
       "questions": [
         {
@@ -202,7 +202,7 @@
     },
     {
       "source": "Exercise 5: englisch-hilfen.de (Comparison Easy)",
-      "title": "Comparison of Adjectives (Basic)",
+      "title": "Comparison of Adjectives (Basics)",
       "type": "gap_fill",
       "questions": [
         {
@@ -244,7 +244,7 @@
     },
     {
       "source": "Exercise 6: englisch-hilfen.de (Comparison 1)",
-      "title": "Comparison of Adjectives 1",
+      "title": "Comparison of Adjectives Part 1",
       "type": "multiple_choice",
       "questions": [
         {
@@ -301,7 +301,7 @@
     },
     {
       "source": "Exercise 7: englisch-hilfen.de (Comparison 2)",
-      "title": "Comparison of Adjectives 2",
+      "title": "Comparison of Adjectives Part 2",
       "type": "gap_fill",
       "questions": [
         {

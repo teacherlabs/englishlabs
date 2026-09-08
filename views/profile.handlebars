@@ -5,17 +5,22 @@
     style="--profile-card-bg: {{student.profile_background}}; --profile-card-text: {{student.profile_text_color}}; --profile-card-muted: {{student.profile_muted_color}}; --profile-card-button-bg: {{student.profile_button_color}}; --profile-card-button-text: {{student.profile_button_text_color}}; --profile-progress-fill: {{student.profile_button_color}};"
   >
     <aside class="profile-messages-panel">
-      <div class="profile-messages-heading"><p class="eyebrow">Messages</p><h2>Teacher feedback{{#if unreadFeedbackCount}} <span class="profile-message-badge">{{unreadFeedbackCount}}</span>{{/if}}</h2></div>
-      {{#each feedbackMessages}}
-        <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
-          <strong>{{topic_title}}</strong>
-          <p>{{feedback}}</p>
-          <small>{{feedback_at}}</small>
-          <a class="profile-message-link" href="/writing/feedback/{{id}}/open">Go to exercise <span aria-hidden="true">→</span></a>
-        </article>
-      {{else}}
-        <p class="empty-state">No teacher feedback yet.</p>
-      {{/each}}
+      <button class="profile-messages-toggle" type="button" data-profile-messages-toggle aria-expanded="false" aria-controls="profileMessagesContent">
+        <span>Messages</span>
+        {{#if unreadFeedbackCount}}<span class="profile-message-badge">{{unreadFeedbackCount}}</span>{{/if}}
+        <span class="profile-messages-toggle-arrow" aria-hidden="true">›</span>
+      </button>
+      <div id="profileMessagesContent" class="profile-messages-content" data-profile-messages-content hidden>
+        {{#each feedbackMessages}}
+          <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
+            <strong>{{topic_title}}</strong>
+            <p>{{feedback}}</p>
+            <a class="profile-message-link" href="/writing/feedback/{{id}}/open">Go to exercise <span aria-hidden="true">→</span></a>
+          </article>
+        {{else}}
+          <p class="empty-state">No teacher feedback yet.</p>
+        {{/each}}
+      </div>
     </aside>
     <section
       class="profile-card"
@@ -74,14 +79,17 @@
         {{#if student.avatar}}{{/if}}
       </div>
       <section class="character-settings" aria-labelledby="character-heading">
-        <div>
+        <button class="character-settings-toggle" type="button" data-character-settings-toggle aria-expanded="false" aria-controls="characterSettingsContent">
+          <span id="character-heading">{{#if isAdmin}}Create your teacher character{{else}}Create your character{{/if}}</span>
+          <span class="character-settings-toggle-arrow" aria-hidden="true">›</span>
+        </button>
+        <div id="characterSettingsContent" class="character-settings-content" data-character-settings-content hidden>
           <p class="eyebrow">{{#if isAdmin}}Your teacher lobby identity{{else}}Your lobby identity{{/if}}</p>
-          <h2 id="character-heading">{{#if isAdmin}}Create your teacher character{{else}}Create your character{{/if}}</h2>
           <p class="character-description">Choose a character to represent you when you join a lobby.</p>
+          <button class="practice-button character-customize-button" type="button" data-character-open>Customize character</button>
+          <p class="upload-success" data-character-saved hidden>Character saved to your profile.</p>
+          <p class="account-error" data-character-error hidden></p>
         </div>
-        <button class="practice-button character-customize-button" type="button" data-character-open>Customize character</button>
-        <p class="upload-success" data-character-saved hidden>Character saved to your profile.</p>
-        <p class="account-error" data-character-error hidden></p>
       </section>
       <dialog class="character-dialog" data-character-dialog>
         <button class="close-dialog" type="button" data-character-close aria-label="Close character creator">&#215;</button>
@@ -156,6 +164,32 @@
   </div>
 </main>
 <script>
+  const profileMessagesToggle = document.querySelector("[data-profile-messages-toggle]");
+  const profileMessagesContent = document.querySelector("[data-profile-messages-content]");
+  const profileMessagesArrow = document.querySelector(".profile-messages-toggle-arrow");
+
+  profileMessagesToggle?.addEventListener("click", () => {
+    const willOpen = profileMessagesContent.hidden;
+    profileMessagesContent.hidden = !willOpen;
+    profileMessagesToggle.setAttribute("aria-expanded", String(willOpen));
+    if (profileMessagesArrow) {
+      profileMessagesArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
+    }
+  });
+
+  const characterSettingsToggle = document.querySelector("[data-character-settings-toggle]");
+  const characterSettingsContent = document.querySelector("[data-character-settings-content]");
+  const characterSettingsArrow = document.querySelector(".character-settings-toggle-arrow");
+
+  characterSettingsToggle?.addEventListener("click", () => {
+    const willOpen = characterSettingsContent.hidden;
+    characterSettingsContent.hidden = !willOpen;
+    characterSettingsToggle.setAttribute("aria-expanded", String(willOpen));
+    if (characterSettingsArrow) {
+      characterSettingsArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
+    }
+  });
+
   const goalEditButton = document.querySelector("[data-goal-edit]");
   if (goalEditButton) {
     goalEditButton.addEventListener("click", () => {

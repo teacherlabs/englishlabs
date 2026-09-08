@@ -7,7 +7,7 @@
           <div class="listening-level{{#if selected}} is-open{{/if}}">
             <button class="listening-level-toggle" type="button" data-reading-level-toggle aria-expanded="{{#if selected}}true{{else}}false{{/if}}"><strong>Level {{number}}</strong><span aria-hidden="true">+</span></button>
             <div class="listening-level-topics"><div>
-              {{#if topics}}{{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}" href="/reading?level={{../number}}&topic={{id}}">{{title}}{{#if completed}}<span class="topic-completion-tick" aria-label="Completed">&#10003;</span>{{/if}}</a>{{/each}}{{else}}<p>No topics yet.</p>{{/if}}
+              {{#if topics}}{{#each topics}}<a class="reading-topic-link{{#if selected}} selected{{/if}}{{#if completed}} completed{{/if}}" data-topic-id="{{id}}" href="/reading?level={{../number}}&topic={{id}}">{{title}}{{#if completed}}<span class="topic-completion-tick" aria-label="Completed">&#10003;</span>{{/if}}</a>{{/each}}{{else}}<p>No topics yet.</p>{{/if}}
             </div></div>
           </div>
         {{/each}}
@@ -18,9 +18,22 @@
       {{#if topic}}
         <div class="practice-heading"><p class="eyebrow">Reading / {{topic.category}}</p><h1>{{topic.title}}</h1><p>{{topic.description}}</p></div>
         {{#if preparation}}
-          <section class="reading-preparation"><div class="reading-section-heading"><p class="eyebrow">Before you read</p><h2>{{preparation.instruction}}</h2></div>
+          <section class="reading-preparation" data-topic-id="{{topic.id}}"><div class="reading-section-heading"><p class="eyebrow">Before you read</p><h2>{{preparation.instruction}}</h2></div>
             {{#if preparation.isWordList}}
-              <div class="reading-vocabulary-list">{{#each preparation.pairs}}<div><strong>{{term}}</strong><span>{{definition}}</span></div>{{/each}}</div>
+              <div class="reading-word-definition-match" data-word-definition-match>
+                <div class="reading-word-definition-words">
+                  {{#each preparation.pairs}}<div class="reading-word-target" data-word-target data-answer="{{term}}"><strong>{{term}}</strong><span class="reading-word-drop-slot">Drop definition here</span></div>{{/each}}
+                </div>
+                <div class="reading-definition-bank" data-definition-bank>
+                  {{#if preparation.shuffledDefinitions}}
+                    {{#each preparation.shuffledDefinitions}}<button type="button" class="reading-definition-chip" draggable="true" data-definition="{{definition}}" data-for-word="{{forWord}}">{{definition}}</button>{{/each}}
+                  {{else}}
+                    {{#each preparation.pairs}}<button type="button" class="reading-definition-chip" draggable="true" data-definition="{{definition}}" data-for-word="{{term}}">{{definition}}</button>{{/each}}
+                  {{/if}}
+                </div>
+                <p class="drag-drop-feedback" data-word-definition-feedback hidden></p>
+                <button class="practice-button" type="button" data-word-definition-retry hidden>Try again</button>
+              </div>
             {{/if}}
             {{#if preparation.isImageMatch}}
               <div class="reading-drag-drop" data-drag-drop>
@@ -49,6 +62,32 @@
             {{/if}}
           </section>
         {{/if}}
+        {{#if preparationExercise}}
+          <section class="reading-exercises reading-preparation-exercise">
+            <div class="reading-section-heading"><p class="eyebrow">Before you read</p><h2>{{preparationExercise.instruction}}</h2></div>
+            {{#if preparationExercise.isSportsGrouping}}
+              <article class="reading-exercise sports-grouping-exercise" data-sports-preparation>
+                <h3>{{preparationExercise.title}}</h3>
+                <p>{{preparationExercise.activity.instruction}}</p>
+                <div class="sports-items" data-sports-items>
+                  {{#each preparationExercise.allItems}}<button class="sport-item" type="button" draggable="true" data-sport="{{this}}">{{this}}</button>{{/each}}
+                </div>
+                <div class="sports-category-grid">
+                  {{#each preparationExercise.categories}}
+                    <section class="sports-drop-zone" data-category="{{id}}" data-sports="{{#each items}}{{this}}|{{/each}}"><h4>{{title}}</h4><div class="sports-drop-items"></div></section>
+                  {{/each}}
+                </div>
+              </article>
+            {{else if preparationExercise.isGapFill}}
+              <form class="gap-fill-box" data-gap-fill-exercise data-answers='{{{json preparationExercise.answers}}}'>
+                {{#if preparationExercise.wordBox}}<div class="drag-drop-word-bank">{{#each preparationExercise.wordBox}}<span class="drag-drop-chip">{{this}}</span>{{/each}}</div>{{/if}}
+                {{#each preparationExercise.questions}}<p class="gap-fill-text">{{#each segments}}{{#if text}}{{text}}{{else}}<input type="text" class="gap-fill-input" data-gap-blank="{{blank}}" autocomplete="off">{{/if}}{{/each}}</p>{{/each}}
+                <button class="practice-button" type="button" data-gap-fill-exercise-check>Check answers</button>
+                <p class="drag-drop-feedback" data-gap-fill-exercise-feedback hidden></p>
+              </form>
+            {{/if}}
+          </section>
+        {{/if}}
         {{#if content.readingPassage}}
           <section class="reading-content"><div class="reading-section-heading"><p class="eyebrow">Read</p>{{#if content.readingPassage.title}}<h2>{{content.readingPassage.title}}</h2>{{/if}}</div><p class="writing-passage-text">{{content.readingPassage.text}}</p></section>
         {{/if}}
@@ -63,9 +102,18 @@
         {{/if}}
         <section class="reading-exercises"><div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
           {{#each exercises}}
-            <article class="reading-exercise{{#if isGapFill}} gap-fill-exercise{{/if}}"{{#unless isGapFill}} data-reading-exercise{{/unless}} data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
+            <article class="reading-exercise{{#if isGapFill}} gap-fill-exercise{{/if}}{{#if isOrdering}} ordering-exercise{{/if}}"{{#unless isGapFill}}{{#unless isOrdering}} data-reading-exercise{{/unless}}{{/unless}} data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-order-answer='{{#if isOrdering}}{{{json orderingAnswer}}}{{/if}}' data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
               <h3>{{title}}</h3><p>{{instruction}}</p>
-              {{#if isGapFill}}
+              {{#if isOrdering}}
+                <p class="ordering-hint">Step 1 is the first event. Drag the earliest event to the top and the latest event to the bottom.</p>
+                <ol class="reading-order-list" data-order-list>
+                  {{#each orderingItems}}<li draggable="true" data-order-item="{{this}}"><span class="order-number">{{@index}}</span><span>{{this}}</span></li>{{/each}}
+                </ol>
+                <strong class="score-result" data-order-score>Points: 0 / {{orderingAnswer.length}}</strong>
+                <button class="practice-button" type="button" data-order-check>Check answers</button>
+                <button class="practice-button" type="button" data-order-retry hidden>Try again</button>
+                <p class="answer-feedback" data-order-feedback hidden></p>
+              {{else if isGapFill}}
                 <form class="gap-fill-box" data-gap-fill-exercise data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}" data-answers='{{{json answers}}}'>
                   {{#if wordBox}}<div class="drag-drop-word-bank">{{#each wordBox}}<span class="drag-drop-chip">{{this}}</span>{{/each}}</div>{{/if}}
                   {{#each questions}}
@@ -100,8 +148,11 @@
     const score = exercise.querySelector("[data-reading-score]");
     const next = exercise.querySelector("[data-reading-next]");
     const retry = exercise.querySelector("[data-reading-retry]");
+    const multiSelectStorageKey = `reading-multi-select-{{session.name}}-${exercise.dataset.topicId}-${exercise.dataset.exerciseNumber}`;
+    const totalPossiblePoints = questions.reduce((total, question) => total + question.dataset.answer.split("||").length, 0);
     let current = 0;
     let points = 0;
+    score.textContent = `Points: 0 / ${totalPossiblePoints}`;
     const answer = (question, value) => {
       if (question.dataset.answered) return;
       const correct = value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
@@ -115,22 +166,48 @@
       feedback.hidden = false;
       feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
       feedback.textContent = correct ? "Correct! +1 point." : `Not quite. The answer is “${correctAnswerText}”.`;
-      score.textContent = `Points: ${points} / ${questions.length}`;
+      score.textContent = `Points: ${points} / ${totalPossiblePoints}`;
       next.disabled = false;
       next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
     };
     exercise.querySelectorAll(".answer-options:not([data-multi-answer]) button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
     exercise.querySelectorAll(".answer-options[data-multi-answer] button").forEach((button) => button.addEventListener("click", () => {
       if (button.disabled) return;
+      const selectedCount = button.closest(".answer-options").querySelectorAll("button.selected").length;
+      if (!button.classList.contains("selected") && selectedCount >= 6) return;
       button.classList.toggle("selected");
     }));
     exercise.querySelectorAll("[data-multi-submit]").forEach((submitButton) => submitButton.addEventListener("click", () => {
       const question = submitButton.closest(".reading-question");
       if (question.dataset.answered) return;
-      const selected = [...question.querySelectorAll(".answer-options button.selected")].map((button) => button.value.trim().toLowerCase());
+      const optionButtons = [...question.querySelectorAll(".answer-options button")];
+      const selected = optionButtons.filter((button) => button.classList.contains("selected")).map((button) => button.value.trim().toLowerCase());
       const correctOptions = question.dataset.answer.split("||").map((value) => value.trim().toLowerCase());
       const correct = selected.length === correctOptions.length && correctOptions.every((value) => selected.includes(value));
-      finalize(question, correct, question.dataset.answer.split("||").join(", "));
+      const correctSelected = optionButtons.filter((button) => correctOptions.includes(button.value.trim().toLowerCase()) && button.classList.contains("selected")).length;
+      const savedMultiSelect = JSON.parse(localStorage.getItem(multiSelectStorageKey) || "{}");
+      savedMultiSelect[question.dataset.answer] = {
+        selected: selected,
+        correct: correct,
+        correctSelected,
+      };
+      localStorage.setItem(multiSelectStorageKey, JSON.stringify(savedMultiSelect));
+      optionButtons.forEach((button) => {
+        const isCorrect = correctOptions.includes(button.value.trim().toLowerCase());
+        const wasSelected = button.classList.contains("selected");
+        button.disabled = true;
+        button.classList.remove("selected");
+        button.classList.add(isCorrect ? (wasSelected ? "multi-correct" : "multi-missed") : (wasSelected ? "multi-incorrect" : "multi-neutral"));
+      });
+      question.dataset.answered = "true";
+      points += correctSelected;
+      const feedback = question.querySelector(".answer-feedback");
+      feedback.hidden = false;
+      feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
+      feedback.textContent = correct ? "All correct selections." : `${correctSelected} of ${correctOptions.length} correct selections.`;
+      score.textContent = `Points: ${points} / ${totalPossiblePoints}`;
+      next.disabled = false;
+      next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
     }));
     exercise.querySelectorAll("[data-reading-check]").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.previousElementSibling.value)));
     next.addEventListener("click", () => {
@@ -138,7 +215,7 @@
       current += 1;
       if (current === questions.length) {
         next.hidden = true;
-        score.textContent = `Final score: ${points} / ${questions.length}`;
+        score.textContent = `Final score: ${points} / ${totalPossiblePoints}`;
         fetch("/api/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -146,7 +223,7 @@
             activityType: "reading",
             difficultyLevel: `reading:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
             points,
-            totalPoints: questions.length,
+            totalPoints: totalPossiblePoints,
           }),
         });
         if (retry) retry.hidden = false;
@@ -255,6 +332,119 @@
         }
       });
     });
+  });
+
+  document.querySelectorAll("[data-word-definition-match]").forEach((activity) => {
+    const feedback = activity.querySelector("[data-word-definition-feedback]");
+    const retry = activity.querySelector("[data-word-definition-retry]");
+    const topicId = activity.closest(".reading-preparation")?.dataset.topicId || "topic";
+    const completionKey = `reading-word-definition-complete-${topicId}`;
+    const topicLink = document.querySelector(`[data-topic-id="${CSS.escape(topicId)}"]`);
+    const markTopicComplete = () => topicLink?.classList.add("completed");
+    let selectedDefinition = null;
+    const placeDefinition = (definition, target) => {
+      if (!definition || target.dataset.matched) return;
+      const correct = definition.dataset.forWord === target.dataset.answer;
+      const slot = target.querySelector(".reading-word-drop-slot");
+      slot.textContent = correct ? definition.dataset.definition : "Try another definition";
+      if (correct) target.dataset.matched = "true";
+      target.classList.toggle("correct", correct);
+      target.classList.toggle("incorrect", !correct);
+      if (correct) definition.remove();
+      selectedDefinition = null;
+      const remaining = activity.querySelectorAll("[data-word-target]:not([data-matched])").length;
+      feedback.hidden = false;
+      feedback.className = `drag-drop-feedback ${correct ? "correct" : "incorrect"}`;
+      feedback.textContent = correct ? "Correct match." : "Not quite. Try another definition.";
+      if (!remaining) {
+        const correctCount = activity.querySelectorAll("[data-word-target].correct").length;
+        feedback.className = `drag-drop-feedback ${correctCount === activity.querySelectorAll("[data-word-target]").length ? "correct" : "incorrect"}`;
+        feedback.textContent = `You matched ${correctCount} / ${activity.querySelectorAll("[data-word-target]").length} correctly.`;
+        if (correctCount === activity.querySelectorAll("[data-word-target]").length) {
+          localStorage.setItem(completionKey, "true");
+          markTopicComplete();
+          if (retry) retry.hidden = false;
+        }
+      }
+    };
+    activity.querySelectorAll(".reading-definition-chip").forEach((definition) => {
+      definition.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", definition.dataset.forWord);
+        event.dataTransfer.effectAllowed = "move";
+      });
+      definition.addEventListener("click", () => {
+        activity.querySelectorAll(".reading-definition-chip").forEach((item) => item.classList.remove("selected"));
+        definition.classList.add("selected");
+        selectedDefinition = definition;
+      });
+    });
+    activity.querySelectorAll("[data-word-target]").forEach((target) => {
+      target.addEventListener("dragover", (event) => { event.preventDefault(); target.classList.add("drag-over"); });
+      target.addEventListener("dragleave", () => target.classList.remove("drag-over"));
+      target.addEventListener("drop", (event) => {
+        event.preventDefault();
+        target.classList.remove("drag-over");
+        const word = event.dataTransfer.getData("text/plain");
+        const definition = [...activity.querySelectorAll(".reading-definition-chip")].find((item) => item.dataset.forWord === word);
+        placeDefinition(definition, target);
+      });
+      target.addEventListener("click", () => { if (selectedDefinition) placeDefinition(selectedDefinition, target); });
+    });
+    const completePreparation = () => {
+      activity.querySelectorAll("[data-word-target]").forEach((target) => {
+        target.dataset.matched = "true";
+        target.classList.add("correct");
+        target.querySelector(".reading-word-drop-slot").textContent = "Matched";
+      });
+      activity.querySelectorAll(".reading-definition-chip").forEach((definition) => definition.remove());
+      feedback.hidden = false;
+      feedback.className = "drag-drop-feedback correct";
+      feedback.textContent = "All definitions matched. You can try again anytime.";
+      markTopicComplete();
+      if (retry) retry.hidden = false;
+    };
+    if (localStorage.getItem(completionKey) === "true") completePreparation();
+    retry?.addEventListener("click", () => {
+      localStorage.removeItem(completionKey);
+      window.location.reload();
+    });
+  });
+
+  document.querySelectorAll(".ordering-exercise").forEach((exercise) => {
+    const list = exercise.querySelector("[data-order-list]");
+    const check = exercise.querySelector("[data-order-check]");
+    const retry = exercise.querySelector("[data-order-retry]");
+    const feedback = exercise.querySelector("[data-order-feedback]");
+    const score = exercise.querySelector("[data-order-score]");
+    const answer = JSON.parse(exercise.dataset.orderAnswer || "[]");
+    let draggedItem = null;
+    const updateNumbers = () => list.querySelectorAll("[data-order-item]").forEach((item, index) => { item.querySelector(".order-number").textContent = index + 1; });
+    list.querySelectorAll("[data-order-item]").forEach((item) => {
+      item.addEventListener("dragstart", () => { draggedItem = item; item.classList.add("dragging"); });
+      item.addEventListener("dragend", () => { draggedItem = null; item.classList.remove("dragging"); });
+      item.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        if (draggedItem && draggedItem !== item) list.insertBefore(draggedItem, item);
+        updateNumbers();
+      });
+    });
+    check.addEventListener("click", () => {
+      const current = [...list.querySelectorAll("[data-order-item]")].map((item) => item.dataset.orderItem);
+      const correctCount = current.filter((item, index) => item === answer[index]).length;
+      const correct = correctCount === answer.length;
+      list.querySelectorAll("[data-order-item]").forEach((item, index) => {
+        const itemIsCorrect = current[index] === answer[index];
+        item.classList.toggle("correct-order", itemIsCorrect);
+        item.classList.toggle("incorrect-order", !itemIsCorrect);
+      });
+      if (score) score.textContent = `Points: ${correctCount} / ${answer.length}`;
+      feedback.hidden = false;
+      feedback.className = `answer-feedback ${correct ? "correct" : "incorrect"}`;
+      feedback.textContent = correct ? "Correct timeline!" : `${correctCount} of ${answer.length} events are in the correct position.`;
+      check.hidden = true;
+      retry.hidden = false;
+    });
+    retry.addEventListener("click", () => { list.classList.remove("correct", "incorrect"); list.querySelectorAll("[data-order-item]").forEach((item) => item.classList.remove("correct-order", "incorrect-order")); feedback.hidden = true; check.hidden = false; retry.hidden = true; if (score) score.textContent = `Points: 0 / ${answer.length}`; updateNumbers(); });
   });
 
   document.querySelectorAll("[data-gap-fill-box]").forEach((form) => {

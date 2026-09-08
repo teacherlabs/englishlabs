@@ -131,11 +131,7 @@
           {
             "id": 1,
             "question": "Where are llamas originally from?",
-            "options": [
-              "South America",
-              "North America",
-              "Africa"
-            ],
+            "options": ["South America", "North America", "Africa"],
             "answer": "South America"
           },
           {
@@ -277,12 +273,7 @@
           {
             "id": "gym_classes",
             "title": "Gym classes",
-            "items": [
-              "Zumba",
-              "water aerobics",
-              "Pilates",
-              "jazz dancing"
-            ]
+            "items": ["Zumba", "water aerobics", "Pilates", "jazz dancing"]
           }
         ],
         "allItems": [

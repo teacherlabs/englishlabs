@@ -1,51 +1,59 @@
-<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Character customization</title>
     <style>
-      html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #fff8f1; }
-      iframe { display: block; width: 100%; height: 100%; border: 0; }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #fff8f1;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
     </style>
   </head>
   <body>
-    <iframe id="vitruvianCharacterEditor" src="{{studioUrl}}" title="Character customization"></iframe>
+    <iframe
+      id="vitruvianCharacterEditor"
+      src="{{studioUrl}}"
+      title="Character customization"
+    ></iframe>
     <script>
-      const editor = document.getElementById("vitruvianCharacterEditor");
-      const CHARACTER_STUDIO_URL = "{{studioUrl}}";
-      const allowedOrigins = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://vitruvian-web-englishlab-1.onrender.com",
-      ];
-      const editorOrigin = new URL(CHARACTER_STUDIO_URL).origin;
-      const loadSavedCharacter = () => {
-        fetch("/api/profile/character")
-          .then((response) => response.ok ? response.json() : { config: {} })
-          .then(({ config }) => editor.contentWindow?.postMessage({ type: "LOAD_LPC_CHARACTER", payload: { config } }, editorOrigin))
-          .catch(() => {});
-      };
+      const editor = document.getElementById("vitruvianCharacterEditor"); const
+      CHARACTER_STUDIO_URL = "{{studioUrl}}"; const allowedOrigins = [
+      "http://localhost:5173", "http://localhost:3000",
+      "https://vitruvian-web-englishlab-1.onrender.com", ]; const editorOrigin =
+      new URL(CHARACTER_STUDIO_URL).origin; const loadSavedCharacter = () => {
+      fetch("/api/profile/character") .then((response) => response.ok ?
+      response.json() : { config: {} }) .then(({ config }) =>
+      editor.contentWindow?.postMessage({ type: "LOAD_LPC_CHARACTER", payload: {
+      config } }, editorOrigin)) .catch(() => {}); };
       editor.addEventListener("load", loadSavedCharacter);
-      window.addEventListener("message", async (event) => {
-        if (!allowedOrigins.includes(event.origin) || event.source !== editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
-        const payload = event.data.payload || {};
-        const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
-        const spritesheetImage = payload.spritesheetImage || payload.image;
-        if (!previewImage || !spritesheetImage) return;
-        try {
-          const response = await fetch("/api/profile/character", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payload, previewImage, spritesheetImage }),
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Unable to save character.");
-          window.parent.postMessage({ type: "SAVE_LPC_CHARACTER", payload: { ...payload, previewImage, spritesheetImage, avatar: result.avatar, spritesheet: result.spritesheet } }, window.location.origin);
-        } catch (error) {
-          window.parent.postMessage({ type: "CHARACTER_SAVE_ERROR", message: error.message }, window.location.origin);
-        }
-      });
+      window.addEventListener("message", async (event) => { if
+      (!allowedOrigins.includes(event.origin) || event.source !==
+      editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
+      const payload = event.data.payload || {}; const previewImage =
+      payload.previewImage || payload.image || payload.spritesheetImage; const
+      spritesheetImage = payload.spritesheetImage || payload.image; if
+      (!previewImage || !spritesheetImage) return; try { const response = await
+      fetch("/api/profile/character", { method: "POST", headers: {
+      "Content-Type": "application/json" }, body: JSON.stringify({ ...payload,
+      previewImage, spritesheetImage }), }); const result = await
+      response.json(); if (!response.ok) throw new Error(result.error || "Unable
+      to save character."); window.parent.postMessage({ type:
+      "SAVE_LPC_CHARACTER", payload: { ...payload, previewImage,
+      spritesheetImage, avatar: result.avatar, spritesheet: result.spritesheet }
+      }, window.location.origin); } catch (error) { window.parent.postMessage({
+      type: "CHARACTER_SAVE_ERROR", message: error.message },
+      window.location.origin); } });
     </script>
   </body>
 </html>

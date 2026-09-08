@@ -73,11 +73,7 @@
           {
             "id": 2,
             "question": "When you are studying, you should take a break every...",
-            "options": [
-              "30 minutes",
-              "45 to 60 minutes",
-              "2 hours"
-            ],
+            "options": ["30 minutes", "45 to 60 minutes", "2 hours"],
             "answer": "45 to 60 minutes"
           },
           {
@@ -178,11 +174,7 @@
           {
             "id": 1,
             "question": "How many cells is the human body composed of?",
-            "options": [
-              "Millions",
-              "Billions",
-              "Trillions"
-            ],
+            "options": ["Millions", "Billions", "Trillions"],
             "answer": "Trillions"
           },
           {

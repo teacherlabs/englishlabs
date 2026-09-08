@@ -222,7 +222,9 @@ const practiceQuestionChapters = [
   ...chapter,
   exercises: chapter.exercises.map((exercise, index) => ({
     ...exercise,
-    title: `Exercise ${index + 1}: ${exercise.title.replace(/^Exercise\s+\d+:\s*/i, "")}`,
+    title: [3, 4, 5, 6].includes(chapter.chapterNumber)
+      ? `Exercise ${index + 1}`
+      : `Exercise ${index + 1}: ${exercise.title.replace(/^Exercise\s+\d+:\s*/i, "")}`,
   })),
 }));
 const listeningTopics = [
@@ -410,15 +412,22 @@ const buildTopicExercise = (exercise, index) => {
       allItems: shuffleArray(categories.map((category) => category.items[0])),
     };
   }
-  if (exercise.type === "drag_and_drop") {
-    return {
-      ...base,
-      isSportsGrouping: true,
-      activity: { title: exercise.title, instruction: exercise.instruction },
-      categories: exercise.categories,
-      allItems: exercise.allItems,
-    };
-  }
+    if (exercise.type === "category_matching") {
+      const categories = exercise.categories.map((title) => ({
+        id: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        title,
+        items: exercise.items
+          .filter((item) => item.correct_category === title)
+          .map((item) => item.item),
+      }));
+      return {
+        ...base,
+        isSportsGrouping: true,
+        activity: { title: exercise.title, instruction: exercise.instruction },
+        categories,
+        allItems: shuffleArray(exercise.items.map((item) => item.item)),
+      };
+    }
   if (exercise.type === "ordering_stages") {
     const categories = exercise.stages.map((stage) => ({
       id: `step-${stage.order}`,
@@ -549,6 +558,10 @@ const normalizeReadingV2Preparation = (preparation, imageBase) => {
       instruction: preparation.instruction,
       isWordList: true,
       pairs: preparation.pairs,
+      shuffledDefinitions: shuffleArray(preparation.pairs.map((pair) => ({
+        definition: pair.definition,
+        forWord: pair.term,
+      }))),
     };
   }
   if (
@@ -681,14 +694,9 @@ const buildReadingV2Exercise = (exercise, index) => {
   if (exercise.type === "ordering") {
     return {
       ...base,
-      isMultipleChoice: true,
-      questions: exercise.items.map((item, itemIndex) => ({
-        number: itemIndex + 1,
-        question: `What happened at step ${itemIndex + 1}?`,
-        options: shuffleArray(exercise.items),
-        isMultiAnswer: false,
-        answer: item,
-      })),
+      isOrdering: true,
+      orderingItems: shuffleArray(exercise.items),
+      orderingAnswer: exercise.items,
     };
   }
 
@@ -721,9 +729,6 @@ const convertPreparationToExercise = (preparation) => {
 
 const normalizeReadingV2Topic = (entry, imageBase) => {
   const preparationExercise = convertPreparationToExercise(entry.preparation);
-  const exercises = preparationExercise
-    ? [preparationExercise, ...entry.exercises]
-    : entry.exercises;
   return {
     topic: {
       id: entry.id,
@@ -739,7 +744,10 @@ const normalizeReadingV2Topic = (entry, imageBase) => {
       ? null
       : normalizeReadingV2Preparation(entry.preparation, imageBase),
     tips: [],
-    exercises: exercises.map(buildReadingV2Exercise),
+    preparationExercise: preparationExercise
+      ? buildTopicExercise({ ...preparationExercise, title: "Before you read" }, 0)
+      : null,
+    exercises: entry.exercises.map(buildReadingV2Exercise),
     discussion: null,
   };
 };
@@ -1627,7 +1635,7 @@ app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
         selectedLevel,
         pageTitle: "Flip cards",
         pageIntro: "Flip each card to reveal the Swedish word and examples.",
-        words: levelWords,
+        words: shuffleArray(levelWords),
       });
     },
   );
@@ -1644,7 +1652,7 @@ app.get("/vocabulary/translation", requireAuthenticated, (req, res) => {
       const levelWords = words.filter(
         (word) => vocabularyLevel(word.cefr_level) === selectedLevel,
       );
-      const options = levelWords.map((word) => {
+      const options = shuffleArray(levelWords).map((word) => {
         const alternatives = levelWords
           .filter((candidate) => candidate.id !== word.id)
           .sort(() => Math.random() - 0.5)
@@ -1689,8 +1697,10 @@ app.get("/vocabulary/spelling", requireAuthenticated, (req, res) => {
         vocabularyBasePath: "/vocabulary/spelling",
         pageTitle: "Write the word",
         pageIntro: "Type each English word correctly to pass.",
-        words: words.filter(
-          (word) => vocabularyLevel(word.cefr_level) === selectedLevel,
+        words: shuffleArray(
+          words.filter(
+            (word) => vocabularyLevel(word.cefr_level) === selectedLevel,
+          ),
         ),
       });
     },
@@ -2343,7 +2353,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
                       : item.activity_type;
                   });
                   db.all(
-                    "SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL ORDER BY feedback_at DESC",
+                    "SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL ORDER BY feedback_at DESC LIMIT 3",
                     [req.session.name],
                     (feedbackError, feedbackMessages) => {
                       if (feedbackError)
@@ -3590,189 +3600,211 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                           db.all(
                             "SELECT topic_id, topic_title, submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
                             [student.username],
-                            (discussionError, listeningDiscussionSubmissions) => {
-                          db.all(
-                            "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                            [student.username],
-                            (writingError, writingSubmissions) => {
-                              if (writingError)
-                                return res
-                                  .status(500)
-                                  .send("Unable to load writing submissions.");
-                              const groupTopicsByLevel = (topics, levelKey) => {
-                                const levels = new Map();
-                                topics.forEach((topic) => {
-                                  const level = String(topic[levelKey] || "1");
-                                  if (!levels.has(level)) {
-                                    levels.set(level, {
-                                      level,
-                                      topics: [],
-                                      completed: 0,
-                                      total: 0,
+                            (
+                              discussionError,
+                              listeningDiscussionSubmissions,
+                            ) => {
+                              db.all(
+                                "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                                [student.username],
+                                (writingError, writingSubmissions) => {
+                                  if (writingError)
+                                    return res
+                                      .status(500)
+                                      .send(
+                                        "Unable to load writing submissions.",
+                                      );
+                                  const groupTopicsByLevel = (
+                                    topics,
+                                    levelKey,
+                                  ) => {
+                                    const levels = new Map();
+                                    topics.forEach((topic) => {
+                                      const level = String(
+                                        topic[levelKey] || "1",
+                                      );
+                                      if (!levels.has(level)) {
+                                        levels.set(level, {
+                                          level,
+                                          topics: [],
+                                          completed: 0,
+                                          total: 0,
+                                        });
+                                      }
+                                      const levelData = levels.get(level);
+                                      const completedExercises =
+                                        topic.exercises.filter(
+                                          (exercise) => exercise.completed,
+                                        ).length;
+                                      levelData.topics.push({
+                                        title: topic.topic.title,
+                                        status: topic.completed
+                                          ? "Completed"
+                                          : completedExercises
+                                            ? "In Progress"
+                                            : "Not Started",
+                                        statusClass: topic.completed
+                                          ? "completed"
+                                          : completedExercises
+                                            ? "in-progress"
+                                            : "not-started",
+                                        completedExercises,
+                                        totalExercises: topic.exercises.length,
+                                      });
+                                      levelData.completed += completedExercises;
+                                      levelData.total += topic.exercises.length;
                                     });
-                                  }
-                                  const levelData = levels.get(level);
-                                  const completedExercises =
-                                    topic.exercises.filter(
-                                      (exercise) => exercise.completed,
-                                    ).length;
-                                  levelData.topics.push({
-                                    title: topic.topic.title,
-                                    status: topic.completed
-                                      ? "Completed"
-                                      : completedExercises
-                                        ? "In Progress"
-                                        : "Not Started",
-                                    statusClass: topic.completed
-                                      ? "completed"
-                                      : completedExercises
-                                        ? "in-progress"
-                                        : "not-started",
-                                    completedExercises,
-                                    totalExercises: topic.exercises.length,
-                                  });
-                                  levelData.completed += completedExercises;
-                                  levelData.total += topic.exercises.length;
-                                });
-                                return [...levels.values()].sort(
-                                  (first, second) =>
-                                    Number(first.level) - Number(second.level),
-                                );
-                              };
-                              const decoratedReadingTopics = decorateTopics(
-                                readingTopics,
-                                progress,
-                                "reading",
-                                "readingLevel",
-                              );
-                              const decoratedWritingTopics = decorateTopics(
-                                writingTopics,
-                                progress,
-                                "writing",
-                                "writingLevel",
-                              );
-                              const decoratedListeningTopics = decorateTopics(
-                                listeningTopics,
-                                progress,
-                                "listening",
-                                "listeningLevel",
-                              );
-                              const grammarProgress = progress.filter((item) =>
-                                ["questions", "final"].includes(
-                                  item.activity_type,
-                                ),
-                              );
-                              const grammarChapters =
-                                practiceQuestionChapters.map((chapter) => {
-                                  const exercises = chapter.exercises.map(
-                                    (exercise, index) => {
-                                      const completion = grammarProgress.find(
-                                        (item) =>
-                                          item.activity_type === "questions" &&
-                                          item.difficulty_level ===
-                                            `questions:${chapter.id}:${index + 1}`,
+                                    return [...levels.values()].sort(
+                                      (first, second) =>
+                                        Number(first.level) -
+                                        Number(second.level),
+                                    );
+                                  };
+                                  const decoratedReadingTopics = decorateTopics(
+                                    readingTopics,
+                                    progress,
+                                    "reading",
+                                    "readingLevel",
+                                  );
+                                  const decoratedWritingTopics = decorateTopics(
+                                    writingTopics,
+                                    progress,
+                                    "writing",
+                                    "writingLevel",
+                                  );
+                                  const decoratedListeningTopics =
+                                    decorateTopics(
+                                      listeningTopics,
+                                      progress,
+                                      "listening",
+                                      "listeningLevel",
+                                    );
+                                  const grammarProgress = progress.filter(
+                                    (item) =>
+                                      ["questions", "final"].includes(
+                                        item.activity_type,
+                                      ),
+                                  );
+                                  const grammarChapters =
+                                    practiceQuestionChapters.map((chapter) => {
+                                      const exercises = chapter.exercises.map(
+                                        (exercise, index) => {
+                                          const completion =
+                                            grammarProgress.find(
+                                              (item) =>
+                                                item.activity_type ===
+                                                  "questions" &&
+                                                item.difficulty_level ===
+                                                  `questions:${chapter.id}:${index + 1}`,
+                                            );
+                                          return {
+                                            title: exercise.title,
+                                            completed: Boolean(completion),
+                                            score: completion?.percentage,
+                                          };
+                                        },
                                       );
                                       return {
-                                        title: exercise.title,
-                                        completed: Boolean(completion),
-                                        score: completion?.percentage,
+                                        title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                        status: exercises.every(
+                                          (exercise) => exercise.completed,
+                                        )
+                                          ? "Completed"
+                                          : exercises.some(
+                                                (exercise) =>
+                                                  exercise.completed,
+                                              )
+                                            ? "In Progress"
+                                            : "Not Started",
+                                        statusClass: exercises.every(
+                                          (exercise) => exercise.completed,
+                                        )
+                                          ? "completed"
+                                          : exercises.some(
+                                                (exercise) =>
+                                                  exercise.completed,
+                                              )
+                                            ? "in-progress"
+                                            : "not-started",
+                                        showStatus: exercises.some(
+                                          (exercise) => exercise.completed,
+                                        ),
+                                        exercises,
                                       };
-                                    },
+                                    });
+                                  const finalTestRows = grammarProgress.filter(
+                                    (item) => item.activity_type === "final",
                                   );
-                                  return {
-                                    title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
-                                    status: exercises.every(
-                                      (exercise) => exercise.completed,
-                                    )
-                                      ? "Completed"
-                                      : exercises.some(
-                                            (exercise) => exercise.completed,
-                                          )
-                                        ? "In Progress"
-                                        : "Not Started",
-                                    statusClass: exercises.every(
-                                      (exercise) => exercise.completed,
-                                    )
-                                      ? "completed"
-                                      : exercises.some(
-                                            (exercise) => exercise.completed,
-                                          )
-                                        ? "in-progress"
-                                        : "not-started",
-                                    showStatus: exercises.some(
-                                      (exercise) => exercise.completed,
+                                  res.render("teacher-student.handlebars", {
+                                    student,
+                                    profileCategory,
+                                    profileIsGrammar:
+                                      profileCategory === "grammar",
+                                    profileIsReading:
+                                      profileCategory === "reading",
+                                    profileIsActivity:
+                                      profileCategory === "grammar",
+                                    profileIsVocabulary:
+                                      profileCategory === "vocabulary",
+                                    profileIsWriting:
+                                      profileCategory === "writing",
+                                    profileIsListening:
+                                      profileCategory === "listening",
+                                    progress,
+                                    grammarStats: preparedStats.filter((stat) =>
+                                      ["questions", "final"].includes(
+                                        stat.activity_type,
+                                      ),
                                     ),
-                                    exercises,
-                                  };
-                                });
-                              const finalTestRows = grammarProgress.filter(
-                                (item) => item.activity_type === "final",
+                                    activityStats: preparedStats,
+                                    bestActivity: rankedStats[0],
+                                    needsFocus:
+                                      rankedStats[rankedStats.length - 1],
+                                    usefulChunkSubmissions,
+                                    usefulChunkSubmissionCount:
+                                      usefulChunkSubmissions.length,
+                                    usefulChunkListsForAdmin,
+                                    flipCompletions,
+                                    hardestWords,
+                                    listeningCompletions,
+                                    readingCompletions,
+                                    listeningDiscussionSubmissions:
+                                      discussionError
+                                        ? []
+                                        : listeningDiscussionSubmissions,
+                                    readingProgressLevels: groupTopicsByLevel(
+                                      decoratedReadingTopics,
+                                      "readingLevel",
+                                    ),
+                                    writingProgressLevels: groupTopicsByLevel(
+                                      decoratedWritingTopics,
+                                      "writingLevel",
+                                    ),
+                                    listeningProgressLevels: groupTopicsByLevel(
+                                      decoratedListeningTopics,
+                                      "listeningLevel",
+                                    ),
+                                    grammarChapters,
+                                    finalTestRows,
+                                    writingSubmissions: writingSubmissions.map(
+                                      (submission) => {
+                                        const topic = writingTopics.find(
+                                          (entry) =>
+                                            entry.topic.id ===
+                                            submission.topic_id,
+                                        );
+                                        return {
+                                          ...submission,
+                                          level: topic?.writingLevel || "2",
+                                          needsFeedback: !submission.feedback,
+                                        };
+                                      },
+                                    ),
+                                    writingSubmissionCount:
+                                      writingSubmissions.length,
+                                  });
+                                },
                               );
-                              res.render("teacher-student.handlebars", {
-                                student,
-                                profileCategory,
-                                profileIsGrammar: profileCategory === "grammar",
-                                profileIsReading: profileCategory === "reading",
-                                profileIsActivity:
-                                  profileCategory === "grammar",
-                                profileIsVocabulary:
-                                  profileCategory === "vocabulary",
-                                profileIsWriting: profileCategory === "writing",
-                                profileIsListening:
-                                  profileCategory === "listening",
-                                progress,
-                                grammarStats: preparedStats.filter((stat) =>
-                                  ["questions", "final"].includes(
-                                    stat.activity_type,
-                                  ),
-                                ),
-                                activityStats: preparedStats,
-                                bestActivity: rankedStats[0],
-                                needsFocus: rankedStats[rankedStats.length - 1],
-                                usefulChunkSubmissions,
-                                usefulChunkSubmissionCount:
-                                  usefulChunkSubmissions.length,
-                                usefulChunkListsForAdmin,
-                                flipCompletions,
-                                hardestWords,
-                                listeningCompletions,
-                                readingCompletions,
-                                listeningDiscussionSubmissions:
-                                  discussionError
-                                    ? []
-                                    : listeningDiscussionSubmissions,
-                                readingProgressLevels: groupTopicsByLevel(
-                                  decoratedReadingTopics,
-                                  "readingLevel",
-                                ),
-                                writingProgressLevels: groupTopicsByLevel(
-                                  decoratedWritingTopics,
-                                  "writingLevel",
-                                ),
-                                listeningProgressLevels: groupTopicsByLevel(
-                                  decoratedListeningTopics,
-                                  "listeningLevel",
-                                ),
-                                grammarChapters,
-                                finalTestRows,
-                                writingSubmissions: writingSubmissions.map(
-                                  (submission) => {
-                                    const topic = writingTopics.find(
-                                      (entry) =>
-                                        entry.topic.id === submission.topic_id,
-                                    );
-                                    return {
-                                      ...submission,
-                                      level: topic?.writingLevel || "2",
-                                      needsFeedback: !submission.feedback,
-                                    };
-                                  },
-                                ),
-                                writingSubmissionCount:
-                                  writingSubmissions.length,
-                              });
-                            },
-                          );
                             },
                           );
                         },
@@ -3972,18 +4004,23 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
-    if (!numericRoomId) return acknowledge?.({ ok: false, error: "Room is required." });
+    if (!numericRoomId)
+      return acknowledge?.({ ok: false, error: "Room is required." });
     db.get(
       "SELECT id, mode FROM lobby_rooms WHERE id = ?",
       [numericRoomId],
       (roomError, room) => {
-        if (roomError || !room) return acknowledge?.({ ok: false, error: "Room not found." });
+        if (roomError || !room)
+          return acknowledge?.({ ok: false, error: "Room not found." });
         db.get(
           "SELECT 1 AS participant FROM lobby_participants WHERE room_id = ? AND username = ?",
           [numericRoomId, username],
           (participantError, participant) => {
             if (participantError || (!participant && !isAdmin)) {
-              return acknowledge?.({ ok: false, error: "You are not in this room." });
+              return acknowledge?.({
+                ok: false,
+                error: "You are not in this room.",
+              });
             }
             socket.join(String(numericRoomId));
             socket.data.roomId = numericRoomId;
@@ -4000,7 +4037,9 @@ io.on("connection", (socket) => {
     if (!socket.data.roomId || socket.data.roomId !== roomId) return;
     const x = Math.max(0, Math.min(310, Number(data.x) || 0));
     const y = Math.max(60, Math.min(210, Number(data.y) || 60));
-    const direction = [0, 1, 2, 3].includes(Number(data.direction)) ? Number(data.direction) : 2;
+    const direction = [0, 1, 2, 3].includes(Number(data.direction))
+      ? Number(data.direction)
+      : 2;
     const frame = Math.max(0, Math.min(8.99, Number(data.frame) || 0));
     db.run(
       "UPDATE lobby_participants SET x = ?, y = ?, direction = ?, frame = ? WHERE room_id = ? AND username = ?",
@@ -4028,11 +4067,26 @@ io.on("connection", (socket) => {
     }
     db.run(
       "UPDATE lobby_rooms SET teacher_present = ?, last_event = ? WHERE id = ? AND mode = 'quicktype'",
-      [entering ? 1 : 0, entering ? `TEACHER_ENTRANCE:${Date.now()}` : `TEACHER_EXIT:${Date.now()}`, numericRoomId],
+      [
+        entering ? 1 : 0,
+        entering
+          ? `TEACHER_ENTRANCE:${Date.now()}`
+          : `TEACHER_EXIT:${Date.now()}`,
+        numericRoomId,
+      ],
       function (error) {
-        if (error || !this.changes) return acknowledge?.({ ok: false, error: "QuickType room not found." });
-        io.to(String(numericRoomId)).emit("teacherEntered", { roomId: numericRoomId, entering: Boolean(entering) });
-        io.to(String(numericRoomId)).emit("lobbyStateChanged", { roomId: numericRoomId });
+        if (error || !this.changes)
+          return acknowledge?.({
+            ok: false,
+            error: "QuickType room not found.",
+          });
+        io.to(String(numericRoomId)).emit("teacherEntered", {
+          roomId: numericRoomId,
+          entering: Boolean(entering),
+        });
+        io.to(String(numericRoomId)).emit("lobbyStateChanged", {
+          roomId: numericRoomId,
+        });
         acknowledge?.({ ok: true, teacherPresent: Boolean(entering) });
       },
     );

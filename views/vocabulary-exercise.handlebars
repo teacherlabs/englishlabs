@@ -101,6 +101,16 @@
     const mode = vocabularyExercise.dataset.mode;
     const selectedLevel = vocabularyExercise.dataset.level;
     const items = [...vocabularyExercise.querySelectorAll("[data-vocabulary-item]")];
+    for (let itemIndex = items.length - 1; itemIndex > 0; itemIndex -= 1) {
+      const randomIndex = Math.floor(Math.random() * (itemIndex + 1));
+      [items[itemIndex], items[randomIndex]] = [items[randomIndex], items[itemIndex]];
+    }
+    const itemContainer = vocabularyExercise.querySelector(".vocabulary-items");
+    items.forEach((item, itemIndex) => {
+      itemContainer.appendChild(item);
+      item.classList.toggle("is-hidden", itemIndex !== 0);
+      item.hidden = itemIndex !== 0;
+    });
     const counter = vocabularyExercise.querySelector("[data-vocabulary-counter]");
     const scoreDisplay = vocabularyExercise.querySelector("[data-vocabulary-score]");
     const nextButton = vocabularyExercise.querySelector("[data-vocabulary-next]");
