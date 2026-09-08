@@ -163,6 +163,7 @@
     </section>
   </div>
 </main>
+<script src="/js/character-spritesheet.js"></script>
 <script>
   const profileMessagesToggle = document.querySelector("[data-profile-messages-toggle]");
   const profileMessagesContent = document.querySelector("[data-profile-messages-content]");
@@ -300,23 +301,28 @@
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin || event.source !== characterFrame?.contentWindow) return;
     if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
-    const previewImage = event.data.payload?.previewImage || event.data.payload?.image || event.data.payload?.spritesheetImage;
-    const spritesheetImage = event.data.payload?.spritesheetImage || event.data.payload?.image;
-    if (!previewImage || !spritesheetImage) {
+    const payload = event.data.payload || {};
+    const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
+    if (!previewImage) {
       if (characterError) { characterError.textContent = "The character generator did not send the character images."; characterError.hidden = false; }
       return;
     }
-    fetch("/api/profile/character", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...event.data.payload, previewImage, spritesheetImage }),
-    })
+    window.bakeCharacterSpriteSheet(payload)
+      .then((spritesheetImage) => {
+        if (!spritesheetImage) throw new Error("The character generator did not send a sprite sheet.");
+        const { layers, layerImages, spritesheetLayers, ...bakedPayload } = payload;
+        return fetch("/api/profile/character", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...bakedPayload, previewImage, spritesheetImage }),
+        });
+      })
       .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
       .then(({ ok, result }) => {
         if (!ok) throw new Error(result.error || "Unable to save character.");
         localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
         localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
-        localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(event.data.payload?.config || {}));
+        localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
         const avatarUrl = `/uploads/profiles/${result.avatar}?t=${Date.now()}`;
         document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
           if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;

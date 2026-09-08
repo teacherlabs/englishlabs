@@ -21,6 +21,7 @@
     </style>
   </head>
   <body>
+    <script src="/js/character-spritesheet.js"></script>
     <iframe
       id="vitruvianCharacterEditor"
       src="{{studioUrl}}"
@@ -41,11 +42,14 @@
       (!allowedOrigins.includes(event.origin) || event.source !==
       editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
       const payload = event.data.payload || {}; const previewImage =
-      payload.previewImage || payload.image || payload.spritesheetImage; const
-      spritesheetImage = payload.spritesheetImage || payload.image; if
-      (!previewImage || !spritesheetImage) return; try { const response = await
+      payload.previewImage || payload.image || payload.spritesheetImage; if
+      (!previewImage) return; try { const spritesheetImage =
+      await window.bakeCharacterSpriteSheet(payload); if (!spritesheetImage)
+      throw new Error("The character generator did not send a sprite sheet.");
+      const { layers, layerImages, spritesheetLayers, ...bakedPayload } = payload;
+      const response = await
       fetch("/api/profile/character", { method: "POST", headers: {
-      "Content-Type": "application/json" }, body: JSON.stringify({ ...payload,
+      "Content-Type": "application/json" }, body: JSON.stringify({ ...bakedPayload,
       previewImage, spritesheetImage }), }); const result = await
       response.json(); if (!response.ok) throw new Error(result.error || "Unable
       to save character."); window.parent.postMessage({ type:
