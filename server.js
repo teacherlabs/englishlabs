@@ -916,6 +916,16 @@ if (postgresPool) {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `)
+    .then(() =>
+      postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS password_resets (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          token_hash TEXT NOT NULL UNIQUE,
+          expires_at BIGINT NOT NULL
+        )
+      `),
+    )
     .then(
       () =>
         new Promise((resolve, reject) => {
@@ -2044,30 +2054,44 @@ app.post(["/forgot-password", "/forget-password"], (req, res) => {
       error: "Enter your email address.",
     });
 
-  db.get(
-    "SELECT username FROM members WHERE LOWER(email) = ?",
-    [email],
-    (lookupError, member) => {
-      if (lookupError || !member)
+  if (!postgresPool) {
+    return res.status(500).render("forgot-password.handlebars", {
+      error: "User database is not configured.",
+    });
+  }
+  postgresReady
+    .then(() =>
+      postgresPool.query(
+        "SELECT username FROM users WHERE LOWER(email) = $1",
+        [email],
+      ),
+    )
+    .then(({ rows }) => {
+      const member = rows[0];
+      if (!member) {
         return res.render("forgot-password.handlebars", {
           message: genericMessage,
         });
+      }
       const token = crypto.randomBytes(32).toString("hex");
       const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
       const expiresAt = Date.now() + 60 * 60 * 1000;
-      db.run(
-        "DELETE FROM password_resets WHERE username = ?",
-        [member.username],
-        () => {
-          db.run(
-            "INSERT INTO password_resets (username, token_hash, expires_at) VALUES (?, ?, ?)",
+      return postgresPool
+        .query("DELETE FROM password_resets WHERE username = $1", [
+          member.username,
+        ])
+        .then(() =>
+          postgresPool.query(
+            "INSERT INTO password_resets (username, token_hash, expires_at) VALUES ($1, $2, $3)",
             [member.username, tokenHash, expiresAt],
-            (insertError) => {
-              if (insertError)
-                return res.status(500).render("forgot-password.handlebars", {
-                  error: "Unable to create a reset link.",
-                });
-              const hasMailConfig = process.env.GMAIL_USER && process.env.GMAIL_PASS;
+          ),
+        )
+        .then(() => {
+              const gmailUser = String(process.env.GMAIL_USER || "").trim();
+              const gmailPass = String(process.env.GMAIL_PASS || "")
+                .trim()
+                .replace(/\s+/g, "");
+              const hasMailConfig = gmailUser && gmailPass;
               if (!hasMailConfig) {
                 if (process.env.NODE_ENV !== "production") {
                   console.log(
@@ -2084,19 +2108,21 @@ app.post(["/forgot-password", "/forget-password"], (req, res) => {
               const transporter = nodemailer.createTransport({
                 service: "gmail",
                 auth: {
-                  user: process.env.GMAIL_USER,
-                  pass: process.env.GMAIL_PASS,
+                  user: gmailUser,
+                  pass: gmailPass,
                 },
               });
               const resetUrl = `${process.env.CLIENT_URL || `http://localhost:${port}`}/reset-password?token=${token}`;
               transporter.sendMail(
                 {
-                  from: process.env.GMAIL_USER,
+                  from: gmailUser,
                   to: email,
                   subject: "Reset your English Labs password",
                   text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
                 },
                 (mailError) => {
+                  if (mailError)
+                    console.error("Password reset email failed:", mailError);
                   if (mailError)
                     return res
                       .status(500)
@@ -2108,12 +2134,14 @@ app.post(["/forgot-password", "/forget-password"], (req, res) => {
                   });
                 },
               );
-            },
-          );
-        },
-      );
-    },
-  );
+        });
+    })
+    .catch((error) => {
+      console.error("Password reset request failed:", error);
+      res.status(500).render("forgot-password.handlebars", {
+        error: "Unable to create a reset link.",
+      });
+    });
 });
 
 app.get("/forget-password", (req, res) => res.redirect("/forgot-password"));
@@ -2124,17 +2152,32 @@ app.get("/reset-password", (req, res) => {
     .createHash("sha256")
     .update(token)
     .digest("hex");
-  db.get(
-    "SELECT id FROM password_resets WHERE token_hash = ? AND expires_at > ?",
-    [tokenHash, Date.now()],
-    (error, reset) => {
-      if (error || !reset)
+  if (!postgresPool) {
+    return res.status(500).render("reset-password.handlebars", {
+      token,
+      error: "User database is not configured.",
+    });
+  }
+  postgresReady
+    .then(() =>
+      postgresPool.query(
+        "SELECT id FROM password_resets WHERE token_hash = $1 AND expires_at > $2",
+        [tokenHash, Date.now()],
+      ),
+    )
+    .then(({ rows }) => {
+      if (!rows[0])
         return res.status(400).render("reset-password.handlebars", {
           error: "This reset link is invalid or has expired.",
         });
       res.render("reset-password.handlebars", { token });
-    },
-  );
+    })
+    .catch(() =>
+      res.status(500).render("reset-password.handlebars", {
+        token,
+        error: "Unable to verify the reset link.",
+      }),
+    );
 });
 
 app.get("/reset-password/:token", (req, res) => {
@@ -2155,54 +2198,44 @@ app.post("/reset-password", (req, res) => {
     .createHash("sha256")
     .update(token)
     .digest("hex");
-  db.get(
-    "SELECT id, username FROM password_resets WHERE token_hash = ? AND expires_at > ?",
-    [tokenHash, Date.now()],
-    (lookupError, reset) => {
-      if (lookupError || !reset)
+  if (!postgresPool) {
+    return res.status(500).render("reset-password.handlebars", {
+      token,
+      error: "User database is not configured.",
+    });
+  }
+  postgresReady
+    .then(() =>
+      postgresPool.query(
+        "SELECT id, username FROM password_resets WHERE token_hash = $1 AND expires_at > $2",
+        [tokenHash, Date.now()],
+      ),
+    )
+    .then(({ rows }) => {
+      const reset = rows[0];
+      if (!reset)
         return res.status(400).render("reset-password.handlebars", {
           error: "This reset link is invalid or has expired.",
         });
 
-      bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
+      return new Promise((resolve, reject) => bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
         if (hashError)
-          return res.status(500).render("reset-password.handlebars", {
-            error: "Unable to reset your password.",
-          });
-        const savePassword = () =>
-          new Promise((resolve, reject) => {
-            db.run(
-              "UPDATE members SET password_hash = ? WHERE username = ?",
-              [passwordHash, reset.username],
-              (updateError) => (updateError ? reject(updateError) : resolve()),
-            );
-          });
-        const passwordUpdate = postgresPool
-          ? postgresReady.then(() =>
-              postgresPool.query(
-                "UPDATE users SET password_hash = $1 WHERE username = $2",
-                [passwordHash, reset.username],
-              ),
-            )
-          : Promise.resolve();
-        passwordUpdate
-          .then(savePassword)
-          .then(() => {
-            db.run("DELETE FROM password_resets WHERE id = ?", [reset.id]);
-            res.render("login.handlebars", {
-              message: "Your password has been reset. You can now log in.",
-            });
-          })
-          .catch((updateError) => {
-            console.error("Password update failed:", updateError);
-            res.status(500).render("reset-password.handlebars", {
-              token,
-              error: "Unable to reset your password.",
-            });
-          });
+          return reject(new Error("Unable to hash password."));
+        postgresPool
+          .query("UPDATE users SET password_hash = $1 WHERE username = $2", [passwordHash, reset.username])
+          .then(() => postgresPool.query("DELETE FROM password_resets WHERE id = $1", [reset.id]))
+          .then(() => resolve())
+          .catch(reject);
+      }));
+    })
+    .then(() => res.render("login.handlebars", { message: "Your password has been reset. You can now log in." }))
+    .catch((error) => {
+      console.error("Password update failed:", error);
+      res.status(500).render("reset-password.handlebars", {
+        token,
+        error: "Unable to reset your password.",
       });
-    },
-  );
+    });
 });
 
 app.post("/reset-password/:token", (req, res) => {
