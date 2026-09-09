@@ -935,7 +935,13 @@ if (postgresPool) {
         )
       `),
     )
-    .then(
+    .catch((error) => {
+      console.error("PostgreSQL user database initialization failed:", error);
+      throw error;
+    });
+  postgresReady.catch(() => {});
+  if (process.env.MIGRATE_SQLITE_USERS === "true") {
+    postgresReady = postgresReady.then(
       () =>
         new Promise((resolve, reject) => {
           db.all(
@@ -966,12 +972,8 @@ if (postgresPool) {
             },
           );
         }),
-    )
-    .catch((error) => {
-      console.error("PostgreSQL user database initialization failed:", error);
-      throw error;
-    });
-  postgresReady.catch(() => {});
+    );
+  }
 }
 const profileUpload = multer({
   storage: multer.diskStorage({
@@ -3784,20 +3786,38 @@ const deleteStudent = (req, res) => {
                 [`public.${table}`],
               );
               if (exists.rows[0].table_name) {
-                await client.query(
-                  `DELETE FROM "${table}" WHERE ${
-                    table === characterTable ? "user_id" : "username"
-                  } = $1`,
-                  [username],
-                );
+                if (table === characterTable) {
+                  const column = await client.query(
+                    `SELECT data_type FROM information_schema.columns
+                     WHERE table_schema = 'public' AND table_name = $1
+                       AND column_name = 'user_id'`,
+                    [table],
+                  );
+                  if (column.rows[0]?.data_type === "integer") {
+                    await client.query(
+                      `DELETE FROM "${table}" WHERE user_id = (
+                        SELECT id FROM users WHERE username = $1
+                      )`,
+                      [username],
+                    );
+                  } else {
+                    await client.query(
+                      `DELETE FROM "${table}" WHERE user_id = $1`,
+                      [username],
+                    );
+                  }
+                } else {
+                  await client.query(
+                    `DELETE FROM "${table}" WHERE username = $1`,
+                    [username],
+                  );
+                }
               }
             }
             const result = await client.query(
               "DELETE FROM users WHERE username = $1 AND role != 'admin'",
               [username],
             );
-            if (result.rowCount !== 1)
-              throw new Error("Student was not found in PostgreSQL.");
             await client.query("COMMIT");
           } catch (error) {
             try {
