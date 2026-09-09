@@ -42,7 +42,7 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
           <button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>
@@ -270,13 +270,19 @@
         ? students.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
         : "<li>No scores yet.</li>";
     };
+    const lobbyImageSrc = (value) => {
+      const source = String(value || "");
+      if (!source) return "";
+      if (source.startsWith("data:image/") || source.startsWith("/") || source.startsWith("http")) return source;
+      return `/uploads/profiles/${encodeURIComponent(source)}`;
+    };
 
     const renderFinalResults = (players) => {
       const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
       if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
       finalResultsList.innerHTML = students.map((player, index) => {
         const avatar = player.avatar
-          ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
+        ? `<img src="${escapeHtml(lobbyImageSrc(player.avatar))}" alt="" />`
           : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
         return `<li class="final-results-row${index === 0 ? " final-results-winner" : ""}"><div class="final-results-avatar">${avatar}</div><span class="final-results-name">${index + 1}. ${escapeHtml(player.username)}</span><strong class="final-results-score">${player.score}</strong></li>`;
       }).join("");
@@ -334,7 +340,7 @@
         playersGrid.innerHTML = state.leaderboard?.length
           ? state.leaderboard.map((player) => {
               const avatar = player.avatar
-                ? `<img src="/uploads/profiles/${escapeHtml(player.avatar)}" alt="" />`
+                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
               return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
             }).join("")
@@ -644,7 +650,8 @@
         let remoteImage = cachedRemote?.key === remotePlayer.spritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
           remoteImage = new Image();
-          remoteImage.src = `/uploads/profiles/${remotePlayer.spritesheet}?t=${encodeURIComponent(remotePlayer.spritesheet)}`;
+          const remoteSource = lobbyImageSrc(remotePlayer.spritesheet);
+          remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
           remoteImages.set(remoteKey, { key: remotePlayer.spritesheet, image: remoteImage });
         }
         drawSprite(remoteImage, remotePosition.x, remotePosition.y, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);

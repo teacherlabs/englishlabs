@@ -907,6 +907,37 @@ const profileImageUrl = (value) =>
     : value
       ? `/uploads/profiles/${encodeURIComponent(String(value))}`
       : "";
+
+const parseCharacterConfig = (value) => {
+  if (!value) return null;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn("Unable to parse lobby character configuration:", error.message);
+    return null;
+  }
+};
+
+const loadLobbyCharacter = (username) => {
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT avatar, spritesheet, character_config FROM users WHERE username = $1",
+          [username],
+        ),
+      )
+      .then(({ rows }) => rows[0] || {});
+  }
+  return new Promise((resolve) => {
+    db.get(
+      "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
+      [username],
+      (error, row) => resolve(error ? {} : row || {}),
+    );
+  });
+};
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
 const grammarReady = new Promise((resolve) => {
@@ -2824,6 +2855,10 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
             id: req.session.name,
             avatar: member?.avatar || "",
             spritesheet: member?.spritesheet || member?.avatar || "",
+            avatarUrl: profileImageUrl(member?.avatar),
+            spritesheetUrl: profileImageUrl(
+              member?.spritesheet || member?.avatar,
+            ),
             characterConfig,
           },
           isAdmin: Boolean(req.session.isAdmin),
@@ -3479,9 +3514,51 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, COALESCE(NULLIF(members.spritesheet, ''), members.avatar) AS spritesheet, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
                           [updatedRoom.id, Number(updatedRoom.teacher_present) === 1 ? 1 : 0],
-                          (leaderboardError, leaderboard) => {
+                          async (leaderboardError, rawLeaderboard) => {
+                            let leaderboard = rawLeaderboard || [];
+                            if (!leaderboardError && leaderboard.length && postgresPool) {
+                              try {
+                                const usernames = leaderboard.map((entry) => entry.username);
+                                const { rows: profiles } = await postgresReady.then(() =>
+                                  postgresPool.query(
+                                    "SELECT username, avatar, spritesheet, character_config, role FROM users WHERE username = ANY($1::text[])",
+                                    [usernames],
+                                  ),
+                                );
+                                const profilesByUsername = new Map(
+                                  profiles.map((profile) => [profile.username, profile]),
+                                );
+                                leaderboard = leaderboard.map((entry) => {
+                                  const profile = profilesByUsername.get(entry.username);
+                                  if (!profile) return entry;
+                                  return {
+                                    ...entry,
+                                    avatar: profile.avatar,
+                                    spritesheet: profile.spritesheet,
+                                    character_config: profile.character_config,
+                                    isAdmin: profile.role === "admin" ? 1 : 0,
+                                  };
+                                }).filter(
+                                  (entry) =>
+                                    Number(updatedRoom.teacher_present) === 1 ||
+                                    Number(entry.isAdmin) !== 1,
+                                );
+                              } catch (error) {
+                                console.error("Unable to load lobby character profiles:", error);
+                              }
+                            }
+                            leaderboard = leaderboard.map((entry) => ({
+                              ...entry,
+                              avatar: profileImageUrl(entry.avatar),
+                              spritesheet: profileImageUrl(
+                                entry.spritesheet || entry.avatar,
+                              ),
+                              characterConfig: parseCharacterConfig(
+                                entry.character_config,
+                              ),
+                            }));
                             const elapsed =
                               updatedRoom.status === "running"
                                 ? Date.now() -
@@ -4677,10 +4754,26 @@ io.on("connection", (socket) => {
                 error: "You are not in this room.",
               });
             }
-            socket.join(String(numericRoomId));
-            socket.data.roomId = numericRoomId;
-            socket.data.mode = room.mode;
-            acknowledge?.({ ok: true });
+            loadLobbyCharacter(username)
+              .then((character) => {
+                socket.join(String(numericRoomId));
+                socket.data.roomId = numericRoomId;
+                socket.data.mode = room.mode;
+                socket.data.character = {
+                  avatar: profileImageUrl(character.avatar),
+                  spritesheet: profileImageUrl(
+                    character.spritesheet || character.avatar,
+                  ),
+                  characterConfig: parseCharacterConfig(
+                    character.character_config,
+                  ),
+                };
+                acknowledge?.({ ok: true });
+              })
+              .catch((error) => {
+                console.error("Unable to load socket lobby character:", error);
+                acknowledge?.({ ok: false, error: "Unable to load your character." });
+              });
           },
         );
       },
@@ -4710,6 +4803,7 @@ io.on("connection", (socket) => {
           direction,
           frame,
           isAdmin,
+          ...socket.data.character,
         });
       },
     );
