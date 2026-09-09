@@ -1399,23 +1399,30 @@ app.get("/character-generator", requireAuthenticated, (req, res) => {
 });
 
 app.get("/api/profile/character", requireLogin, (req, res) => {
-  db.get(
-    "SELECT character_config FROM members WHERE username = ?",
-    [req.session.name],
-    (error, member) => {
-      if (error || !member)
-        return res.status(500).json({ error: "Unable to load character." });
+  if (!postgresPool) return res.status(500).json({ error: "User database is not configured." });
+  postgresReady
+    .then(() =>
+      postgresPool.query(
+        "SELECT character_config FROM users WHERE username = $1",
+        [req.session.name],
+      ),
+    )
+    .then(({ rows }) => {
+      const characterConfig = rows[0]?.character_config;
       let config = {};
-      try {
-        config = member.character_config
-          ? JSON.parse(member.character_config)
-          : {};
-      } catch (parseError) {
-        config = {};
+      if (characterConfig) {
+        try {
+          config = JSON.parse(characterConfig);
+        } catch (parseError) {
+          console.error("Unable to parse saved character:", parseError);
+        }
       }
       res.json({ config });
-    },
-  );
+    })
+    .catch((error) => {
+      console.error("Unable to load character:", error);
+      res.status(500).json({ error: "Unable to load character." });
+    });
 });
 
 app.get("/vocabulary", requireAuthenticated, (req, res) => {
@@ -2306,7 +2313,7 @@ app.post("/login", (req, res) => {
     postgresReady
       .then(() =>
         postgresPool.query(
-          "SELECT username, password_hash, role FROM users WHERE username = $1",
+          "SELECT username, password_hash, role, avatar FROM users WHERE username = $1",
           [username],
         ),
       )
@@ -2327,7 +2334,7 @@ app.post("/login", (req, res) => {
           req.session.isLoggedIn = true;
           req.session.isAdmin = member.role === "admin";
           req.session.name = member.username;
-          req.session.avatar = "";
+          req.session.avatar = member.avatar || "";
           req.session.avatar_initial = member.username.charAt(0).toUpperCase();
           res.redirect("/");
         });
@@ -2454,13 +2461,14 @@ app.get("/profile", requireProfileUser, (req, res) => {
   postgresReady
     .then(() =>
       postgresPool.query(
-        "SELECT username, email, goal, avatar, character_config, profile_background FROM users WHERE username = $1",
+        "SELECT username, email, goal, avatar, spritesheet, character_config, profile_background FROM users WHERE username = $1",
         [req.session.name],
       ),
     )
     .then(({ rows }) => {
       const student = rows[0];
       if (!student) return res.status(404).send("Profile not found.");
+      student.avatar = student.avatar || student.spritesheet || "";
       const background = /^#[0-9a-fA-F]{6}$/.test(
         student.profile_background || "",
       )
@@ -3421,28 +3429,52 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
     if (uploadError || !req.file) {
       return res.status(400).redirect("/profile?avatarError=1");
     }
-    db.run(
-      "UPDATE members SET avatar = ? WHERE username = ?",
-      [req.file.filename, req.session.name],
-      (error) => {
-        if (error) return res.status(500).redirect("/profile?avatarError=1");
+    const saveAvatar = postgresPool
+      ? postgresReady.then(() =>
+          postgresPool.query(
+            "UPDATE users SET avatar = $1 WHERE username = $2",
+            [req.file.filename, req.session.name],
+          ),
+        )
+      : Promise.reject(new Error("User database is not configured."));
+    saveAvatar
+      .then(
+        () =>
+          new Promise((resolve, reject) => {
+            db.run(
+              "UPDATE members SET avatar = ? WHERE username = ?",
+              [req.file.filename, req.session.name],
+              (error) => (error ? reject(error) : resolve()),
+            );
+          }),
+      )
+      .then(() => {
         req.session.avatar = req.file.filename;
         res.redirect("/profile?avatarSaved=1");
-      },
-    );
+      })
+      .catch((error) => {
+        console.error("Unable to save profile avatar:", error);
+        res.status(500).redirect("/profile?avatarError=1");
+      });
   });
 });
 
 app.post("/api/profile/character", requireProfileUser, (req, res) => {
   const previewImage = String(
-    req.body.previewImage || req.body.image || req.body.spritesheetImage || "",
+    req.body.previewImage ||
+      req.body.preview ||
+      req.body.previewDataUrl ||
+      req.body.image ||
+      req.body.spritesheetImage ||
+      "",
   );
   const spritesheetImage = String(
     req.body.spritesheetImage || req.body.image || "",
   );
   const config =
-    req.body.config && typeof req.body.config === "object"
-      ? req.body.config
+    (req.body.config || req.body.characterConfig) &&
+    typeof (req.body.config || req.body.characterConfig) === "object"
+      ? req.body.config || req.body.characterConfig
       : {};
   const previewMatch = previewImage
     .trim()
@@ -3495,7 +3527,7 @@ app.post("/api/profile/character", requireProfileUser, (req, res) => {
           const saveToPostgres = postgresPool
             ? postgresReady.then(() =>
                 postgresPool.query(
-                  "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4",
+                  "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
                   [
                     avatarFilename,
                     spritesheetFilename,
@@ -3506,6 +3538,12 @@ app.post("/api/profile/character", requireProfileUser, (req, res) => {
               )
             : Promise.resolve();
           saveToPostgres
+            .then((result) => {
+              if (postgresPool && result.rowCount !== 1) {
+                throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
+              }
+              return result;
+            })
             .then(
               () =>
                 new Promise((resolve, reject) => {

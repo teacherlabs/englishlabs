@@ -31,19 +31,13 @@
           <div class="profile-avatar-wrap">
             {{#if student.avatar}}<img
                 class="profile-avatar"
-                src="/uploads/profiles/{{student.avatar}}"
+                src="/uploads/profiles/{{student.avatar}}?v={{student.avatar}}"
                 alt="Profile picture"
+                data-avatar-initial="{{student.avatar_initial}}"
               />{{else}}<div
                 class="profile-avatar profile-avatar-placeholder"
                 aria-label="Profile picture placeholder"
               >{{student.avatar_initial}}</div>{{/if}}
-            <button
-              class="avatar-edit-button"
-              type="button"
-              data-avatar-edit
-              aria-label="Change profile picture"
-              title="Change profile picture"
-            >&#9998;</button>
           </div>
           <div class="profile-copy"><p class="eyebrow">Student profile</p><h1
             >{{student.username}}</h1><p class="profile-email">{{student.email}}</p><div class="profile-goal-row">{{#if
@@ -57,26 +51,6 @@
               >&#9998;</button></div></div>
         </div>
         <a class="practice-button" href="/logout">Log out</a>
-      </div>
-      <div class="avatar-settings" data-avatar-settings hidden>
-        <form
-          class="avatar-form"
-          action="/profile/avatar"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <label for="profilePicture">Profile picture</label>
-          <input
-            id="profilePicture"
-            name="profilePicture"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            required
-          />
-          <small>PNG, JPG, WEBP or GIF. Maximum 2 MB.</small>
-          <button class="notes-button" type="submit">Upload picture</button>
-        </form>
-        {{#if student.avatar}}{{/if}}
       </div>
       <section class="character-settings" aria-labelledby="character-heading">
         <button class="character-settings-toggle" type="button" data-character-settings-toggle aria-expanded="false" aria-controls="characterSettingsContent">
@@ -101,10 +75,6 @@
           loading="lazy"
         ></iframe>
       </dialog>
-      {{#if query.avatarSaved}}<p class="upload-success">Profile picture
-          updated.</p>{{/if}}
-      {{#if query.avatarError}}<p class="account-error">Please choose a valid
-          image under 2 MB.</p>{{/if}}
       <form
         class="goal-box goal-form"
         data-goal-settings
@@ -281,6 +251,15 @@
   const characterError = document.querySelector("[data-character-error]");
   const profileUserId = document.querySelector(".profile-layout")?.dataset.userId || "unknown";
   const scopedCharacterKey = (name) => `${name}_${profileUserId}`;
+  document.querySelectorAll("img[data-avatar-initial]").forEach((image) => {
+    image.addEventListener("error", () => {
+      const placeholder = document.createElement("div");
+      placeholder.className = "profile-avatar profile-avatar-placeholder";
+      placeholder.setAttribute("aria-label", "Profile picture placeholder");
+      placeholder.textContent = image.dataset.avatarInitial || "?";
+      image.replaceWith(placeholder);
+    });
+  });
   characterFrame?.addEventListener("load", () => {
     const savedConfig = localStorage.getItem(scopedCharacterKey("userCharacterConfig"));
     if (!savedConfig || !characterFrame.contentWindow) return;
@@ -302,7 +281,12 @@
     if (event.origin !== window.location.origin || event.source !== characterFrame?.contentWindow) return;
     if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
     const payload = event.data.payload || {};
-    const previewImage = payload.previewImage || payload.image || payload.spritesheetImage;
+    const previewImage =
+      payload.previewImage ||
+      payload.preview ||
+      payload.previewDataUrl ||
+      payload.image ||
+      payload.spritesheetImage;
     if (!previewImage) {
       if (characterError) { characterError.textContent = "The character generator did not send the character images."; characterError.hidden = false; }
       return;
@@ -315,15 +299,21 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...bakedPayload, previewImage, spritesheetImage }),
-        });
+        }).then((response) =>
+          response.json().then((result) => ({
+            ok: response.ok,
+            result,
+            spritesheetImage,
+          })),
+        );
       })
-      .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
-      .then(({ ok, result }) => {
+      .then(({ ok, result, spritesheetImage }) => {
         if (!ok) throw new Error(result.error || "Unable to save character.");
         localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
         localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
         localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
-        const avatarUrl = `/uploads/profiles/${result.avatar}?t=${Date.now()}`;
+        if (!result.avatar) throw new Error("The server did not return the saved avatar.");
+        const avatarUrl = `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
         document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
           if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;
           else {

@@ -42,7 +42,8 @@
       (!allowedOrigins.includes(event.origin) || event.source !==
       editor.contentWindow || event.data?.type !== "SAVE_LPC_CHARACTER") return;
       const payload = event.data.payload || {}; const previewImage =
-      payload.previewImage || payload.image || payload.spritesheetImage; if
+      payload.previewImage || payload.preview || payload.previewDataUrl ||
+      payload.image || payload.spritesheetImage; if
       (!previewImage) return; try { const spritesheetImage =
       await window.bakeCharacterSpriteSheet(payload); if (!spritesheetImage)
       throw new Error("The character generator did not send a sprite sheet.");

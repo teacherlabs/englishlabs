@@ -1414,7 +1414,7 @@ header > nav > .auth-button {
   object-fit: cover;
 }
 
-.profile-avatar-placeholder {
+div.profile-avatar-placeholder {
   display: grid;
   place-items: center;
   background: #fff4c7;
