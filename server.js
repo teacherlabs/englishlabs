@@ -1190,6 +1190,21 @@ app.get("/audio/work", (req, res) => {
 });
 
 db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS members (
+    username TEXT PRIMARY KEY,
+    fname TEXT NOT NULL DEFAULT '',
+    lname TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    password_hash TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT 'student',
+    goal TEXT NOT NULL DEFAULT '',
+    avatar TEXT NOT NULL DEFAULT '',
+    spritesheet TEXT NOT NULL DEFAULT '',
+    character_config TEXT NOT NULL DEFAULT '',
+    profile_background TEXT NOT NULL DEFAULT '#edf4ff',
+    joined_date TEXT,
+    phone_number TEXT
+  )`);
   db.run("ALTER TABLE members ADD COLUMN password_hash TEXT", () => {});
   db.run("ALTER TABLE members ADD COLUMN fname TEXT DEFAULT ''", () => {});
   db.run("ALTER TABLE members ADD COLUMN lname TEXT DEFAULT ''", () => {});
@@ -2430,7 +2445,12 @@ app.post("/signup", (req, res) => {
           )
           .then(() => {
             postgresInserted = true;
-            return sqliteSignup();
+            return sqliteSignup().catch((sqliteError) => {
+              console.warn(
+                "SQLite signup backup failed; PostgreSQL account was kept:",
+                sqliteError,
+              );
+            });
           })
           .catch((error) => {
             console.error("PostgreSQL signup failed:", {
