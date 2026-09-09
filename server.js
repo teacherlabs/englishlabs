@@ -2637,6 +2637,18 @@ app.get("/profile", requireProfileUser, (req, res) => {
         student.profile_button_color,
       );
       student.avatar_initial = student.username.charAt(0).toUpperCase();
+      student.avatarUrl = profileImageUrl(student.avatar || student.spritesheet);
+      student.spritesheetUrl = profileImageUrl(student.spritesheet);
+      if (student.character_config) {
+        try {
+          student.character_config = JSON.parse(student.character_config);
+        } catch (error) {
+          console.warn("Unable to parse student character configuration:", error);
+          student.character_config = {};
+        }
+      } else {
+        student.character_config = {};
+      }
       db.all(
         "SELECT * FROM progress WHERE username = ? ORDER BY completed_at DESC",
         [req.session.name],
@@ -4426,7 +4438,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     postgresReady
       .then(() =>
         postgresPool.query(
-          "SELECT username, fname, lname, goal, avatar FROM users WHERE username = $1 AND role = $2",
+          "SELECT username, fname, lname, goal, avatar, spritesheet, character_config FROM users WHERE username = $1 AND role = $2",
           [req.params.username, "student"],
         ),
       )
@@ -4437,7 +4449,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
       });
   } else {
     db.get(
-      "SELECT username, fname, lname, goal, avatar FROM members WHERE username = ? AND role = 'student'",
+      "SELECT username, fname, lname, goal, avatar, spritesheet, character_config FROM members WHERE username = ? AND role = 'student'",
       [req.params.username],
       loadStudentDetails,
     );
