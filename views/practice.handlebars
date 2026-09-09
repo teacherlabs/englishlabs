@@ -40,7 +40,7 @@
   {{/if}}
 
   {{#if questions}}
-    <form class="question-list" data-quiz-form data-activity="{{mode}}" data-chapter-id="{{chapterId}}" data-difficulty-level="{{selectedLevel}}">
+    <form class="question-list" data-quiz-form data-activity="{{mode}}" data-chapter-id="{{chapterId}}" data-difficulty-level="{{selectedLevel}}" data-username="{{session.name}}">
       {{#if showFinalTestIntro}}
         <section class="final-test-intro" data-final-test-intro>
           <p class="eyebrow">Chapters Test</p>
@@ -146,7 +146,8 @@
       return list;
     };
 
-    const finalTestKey = "englishlabs-final-test-used-ids";
+    const username = quizForm.dataset.username || "anonymous";
+    const finalTestKey = `englishlabs:${username}:final-test-used-ids`;
     const getStoredFinalIds = () => {
       try {
         const stored = JSON.parse(localStorage.getItem(finalTestKey) || "[]");

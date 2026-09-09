@@ -3822,6 +3822,22 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
   );
 });
 
+app.get("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
+  const username = String(req.session.name || "").trim();
+  if (!username) return res.status(401).json({ error: "Login required." });
+  db.all(
+    "SELECT difficulty_level, word, attempts, last_seen FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 20",
+    [username],
+    (error, words) => {
+      if (error) {
+        console.error("Unable to load difficult words:", error);
+        return res.status(500).json({ error: "Unable to load difficult words." });
+      }
+      res.json({ words });
+    },
+  );
+});
+
 const teacherCategories = {
   grammar: { label: "Grammar", activityTypes: ["questions", "final"] },
   vocabulary: { label: "Vocabulary", activityTypes: ["flip-cards"] },

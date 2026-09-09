@@ -26,7 +26,7 @@
       {{/if}}
 
   {{#if words}}
-    <div class="vocabulary-exercise" data-vocabulary-exercise data-mode="{{mode}}" data-level="{{selectedLevel}}" data-total="{{words.length}}">
+    <div class="vocabulary-exercise" data-vocabulary-exercise data-mode="{{mode}}" data-level="{{selectedLevel}}" data-total="{{words.length}}" data-username="{{session.name}}">
       <div class="vocabulary-counter" data-vocabulary-counter>Word 1 of {{words.length}}</div>
       <div class="vocabulary-items">
         {{#each words}}
@@ -100,6 +100,8 @@
   if (vocabularyExercise) {
     const mode = vocabularyExercise.dataset.mode;
     const selectedLevel = vocabularyExercise.dataset.level;
+    const username = vocabularyExercise.dataset.username || "anonymous";
+    const storageKey = (key) => `englishlabs:${username}:${key}`;
     const items = [...vocabularyExercise.querySelectorAll("[data-vocabulary-item]")];
     for (let itemIndex = items.length - 1; itemIndex > 0; itemIndex -= 1) {
       const randomIndex = Math.floor(Math.random() * (itemIndex + 1));
@@ -118,12 +120,17 @@
     const completePanel = vocabularyExercise.querySelector("[data-vocabulary-complete]");
     const completeResult = vocabularyExercise.querySelector("[data-complete-result]");
     const restartButton = vocabularyExercise.querySelector("[data-vocabulary-restart]");
-    const resultKey = `vocabulary-result-${mode}-${selectedLevel}`;
+    const resultKey = storageKey(`vocabulary-result-${mode}-${selectedLevel}`);
     let currentIndex = 0;
     let points = 0;
     let totalFlipPoints = 0;
     let completed = new Set();
     let failed = [];
+    const saveDifficultWords = (words) => fetch("/api/vocabulary/difficult-words", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ difficultyLevel: selectedLevel, words }),
+    });
 
     const readResult = () => JSON.parse(localStorage.getItem(resultKey) || "null");
     const showCompletion = (result) => {
@@ -138,22 +145,34 @@
       const result = { points, total: items.length, percentage: Math.round((points / items.length) * 100) };
       localStorage.setItem(resultKey, JSON.stringify(result));
       showCompletion(result);
+      if (mode !== "flip") {
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            activityType: mode === "spelling" ? "spelling" : "translation",
+            difficultyLevel: selectedLevel,
+            points,
+            totalPoints: items.length,
+          }),
+        }).catch(() => {});
+      }
     };
 
-    const previousResult = readResult() || (mode === "flip" ? JSON.parse(localStorage.getItem(`vocabulary-last-flip-${selectedLevel}`) || "null") : null);
+    const previousResult = readResult() || (mode === "flip" ? JSON.parse(localStorage.getItem(storageKey(`vocabulary-last-flip-${selectedLevel}`)) || "null") : null);
     if (previousResult) showCompletion(previousResult);
     restartButton.addEventListener("click", () => {
       localStorage.removeItem(resultKey);
-      if (mode === "flip") localStorage.removeItem(`vocabulary-last-flip-${selectedLevel}`);
-      localStorage.removeItem(`vocabulary-known-${selectedLevel}`);
-      localStorage.removeItem(`vocabulary-level-${selectedLevel}-complete`);
+      if (mode === "flip") localStorage.removeItem(storageKey(`vocabulary-last-flip-${selectedLevel}`));
+      localStorage.removeItem(storageKey(`vocabulary-known-${selectedLevel}`));
+      localStorage.removeItem(storageKey(`vocabulary-level-${selectedLevel}-complete`));
       location.reload();
     });
 
     const levelLinks = [...document.querySelectorAll("[data-level-link]")];
     const completedLevels = {
-      easy: localStorage.getItem("vocabulary-level-easy-complete") === "true",
-      medium: localStorage.getItem("vocabulary-level-medium-complete") === "true",
+      easy: localStorage.getItem(storageKey("vocabulary-level-easy-complete")) === "true",
+      medium: localStorage.getItem(storageKey("vocabulary-level-medium-complete")) === "true",
     };
     levelLinks.forEach((link) => {
       const locked = link.dataset.level === "medium" && !completedLevels.easy;
@@ -175,7 +194,7 @@
     };
 
     if (mode === "flip") {
-      const knownKey = `vocabulary-known-${selectedLevel}`;
+      const knownKey = storageKey(`vocabulary-known-${selectedLevel}`);
       const knownWords = new Set(JSON.parse(localStorage.getItem(knownKey) || "[]"));
       const originalItems = [...items];
         const totalFlipWords = originalItems.length;
@@ -187,27 +206,32 @@
       items.splice(0, items.length, ...activeItems);
       const hardestList = document.querySelector("[data-hardest-words]");
       const currentWords = new Set(originalItems.map((item) => item.dataset.english));
-      const skippedKey = `vocabulary-skipped-${selectedLevel}`;
-      const skipCountsKey = `vocabulary-skip-counts-${selectedLevel}`;
+      const skippedKey = storageKey(`vocabulary-skipped-${selectedLevel}`);
+      const skipCountsKey = storageKey(`vocabulary-skip-counts-${selectedLevel}`);
+      let persistedHardestWords = [];
       const skipped = JSON.parse(localStorage.getItem(skippedKey) || "[]")
         .filter((word) => currentWords.has(word));
       localStorage.setItem(skippedKey, JSON.stringify(skipped));
       const renderHardestWords = () => {
         if (!hardestList) return;
         const skipCounts = JSON.parse(localStorage.getItem(skipCountsKey) || "{}");
-        const hardestWords = Object.entries(skipCounts)
-          .sort((first, second) => second[1] - first[1])
-          .slice(0, 3);
+        const hardestWords = persistedHardestWords.length
+          ? persistedHardestWords.slice(0, 3).map((entry) => [entry.word, entry.attempts])
+          : Object.entries(skipCounts)
+              .sort((first, second) => second[1] - first[1])
+              .slice(0, 3);
         hardestList.innerHTML = hardestWords.length
           ? hardestWords.map(([word]) => `<li>${word}</li>`).join("")
           : "<li>No skipped words yet</li>";
       };
       renderHardestWords();
-      const saveDifficultWords = (words) => fetch("/api/vocabulary/difficult-words", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ difficultyLevel: selectedLevel, words }),
-      });
+      fetch("/api/vocabulary/difficult-words")
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error("Unable to load difficult words."))))
+        .then((result) => {
+          persistedHardestWords = Array.isArray(result.words) ? result.words : [];
+          renderHardestWords();
+        })
+        .catch(() => {});
       const recordSkippedWord = (word) => {
         const skipCounts = JSON.parse(localStorage.getItem(skipCountsKey) || "{}");
         skipCounts[word] = (skipCounts[word] || 0) + 1;
@@ -273,9 +297,9 @@
           return;
         }
         counter.textContent = `Complete · ${items.length} words learned`;
-        localStorage.setItem(`vocabulary-level-${selectedLevel}-complete`, "true");
+        localStorage.setItem(storageKey(`vocabulary-level-${selectedLevel}-complete`), "true");
         const result = { points: totalFlipPoints, total: totalFlipWords, percentage: 100 };
-        localStorage.setItem(`vocabulary-last-flip-${selectedLevel}`, JSON.stringify(result));
+        localStorage.setItem(storageKey(`vocabulary-last-flip-${selectedLevel}`), JSON.stringify(result));
         showCompletion(result);
         fetch("/api/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ activityType: "flip-cards", difficultyLevel: selectedLevel, points: totalFlipPoints, totalPoints: totalFlipWords }) });
         nextButton.hidden = true;
@@ -363,6 +387,7 @@
       const wrongWordsList = document.querySelector("[data-spelling-wrong-words]");
       const recordWrongWord = (word) => {
         wrongWords.set(word, (wrongWords.get(word) || 0) + 1);
+        saveDifficultWords([word]);
       };
       const showWrongWords = () => {
         if (!wrongWordsList) return;
