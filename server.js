@@ -902,11 +902,11 @@ const profileDirectory = path.join(dataDir, "uploads", "profiles");
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(profileDirectory, { recursive: true });
 const profileImageUrl = (value) =>
-  String(value || "").startsWith("data:image/")
-    ? String(value)
-    : value
-      ? `/uploads/profiles/${encodeURIComponent(String(value))}`
-      : "";
+  !value
+    ? ""
+    : /^(data:image\/|https?:\/\/|\/)/.test(String(value))
+      ? String(value)
+      : `/uploads/profiles/${encodeURIComponent(String(value))}`;
 
 const parseCharacterConfig = (value) => {
   if (!value) return null;
@@ -3555,6 +3555,10 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                               spritesheet: profileImageUrl(
                                 entry.spritesheet || entry.avatar,
                               ),
+                              avatarUrl: profileImageUrl(entry.avatar),
+                              spritesheetUrl: profileImageUrl(
+                                entry.spritesheet || entry.avatar,
+                              ),
                               characterConfig: parseCharacterConfig(
                                 entry.character_config,
                               ),
@@ -4762,6 +4766,10 @@ io.on("connection", (socket) => {
                 socket.data.character = {
                   avatar: profileImageUrl(character.avatar),
                   spritesheet: profileImageUrl(
+                    character.spritesheet || character.avatar,
+                  ),
+                  avatarUrl: profileImageUrl(character.avatar),
+                  spritesheetUrl: profileImageUrl(
                     character.spritesheet || character.avatar,
                   ),
                   characterConfig: parseCharacterConfig(

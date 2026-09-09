@@ -281,8 +281,8 @@
       const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
       if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
       finalResultsList.innerHTML = students.map((player, index) => {
-        const avatar = player.avatar
-        ? `<img src="${escapeHtml(lobbyImageSrc(player.avatar))}" alt="" />`
+        const avatar = (player.avatarUrl || player.avatar)
+        ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
           : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
         return `<li class="final-results-row${index === 0 ? " final-results-winner" : ""}"><div class="final-results-avatar">${avatar}</div><span class="final-results-name">${index + 1}. ${escapeHtml(player.username)}</span><strong class="final-results-score">${player.score}</strong></li>`;
       }).join("");
@@ -339,8 +339,8 @@
       if (playersGrid) {
         playersGrid.innerHTML = state.leaderboard?.length
           ? state.leaderboard.map((player) => {
-              const avatar = player.avatar
-                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatar))}" alt="" />`
+              const avatar = (player.avatarUrl || player.avatar)
+                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
               return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
             }).join("")
@@ -631,7 +631,8 @@
       if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
       if (player.isLoaded && player.isPresent) drawSprite(player.image, player.x, player.y, player.direction, player.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
-        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remotePlayer.spritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
+        const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
+        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
         const targetX = Number(remotePlayer.x) || 160;
         const targetY = Number(remotePlayer.y) || 190;
@@ -647,12 +648,12 @@
         }
         remotePositions.set(remoteKey, remotePosition);
         const cachedRemote = remoteImages.get(remoteKey);
-        let remoteImage = cachedRemote?.key === remotePlayer.spritesheet ? cachedRemote.image : null;
+        let remoteImage = cachedRemote?.key === remoteSpritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
           remoteImage = new Image();
-          const remoteSource = lobbyImageSrc(remotePlayer.spritesheet);
+          const remoteSource = lobbyImageSrc(remoteSpritesheet);
           remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
-          remoteImages.set(remoteKey, { key: remotePlayer.spritesheet, image: remoteImage });
+          remoteImages.set(remoteKey, { key: remoteSpritesheet, image: remoteImage });
         }
         drawSprite(remoteImage, remotePosition.x, remotePosition.y, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
       });
