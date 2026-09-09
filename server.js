@@ -3742,7 +3742,7 @@ app.get("/teacher/dashboard", requireAdmin, (req, res) => {
     COALESCE(SUM(progress.points), 0) AS points,
     COALESCE(SUM(progress.total_points), 0) AS possible_points,
     COUNT(progress.id) AS activities,
-    COALESCE(GROUP_CONCAT(DISTINCT progress.difficulty_level), '') AS levels,
+    COALESCE(GROUP_CONCAT(progress.difficulty_level), '') AS levels,
     COALESCE(SUM(CASE WHEN progress.difficulty_level = 'easy' THEN 1 ELSE 0 END), 0) AS easy_activities,
     COALESCE(SUM(CASE WHEN progress.difficulty_level = 'medium' THEN 1 ELSE 0 END), 0) AS medium_activities
     FROM members LEFT JOIN progress ON progress.username = members.username ${joinFilter}
@@ -3954,7 +3954,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
           if (progressError)
             return res.status(500).send("Unable to load student details.");
           db.all(
-            "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(DISTINCT difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
+            "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
             [student.username],
             (statsError, activityStats) => {
               if (statsError)
