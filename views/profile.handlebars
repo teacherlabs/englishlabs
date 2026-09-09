@@ -31,12 +31,12 @@
           <div class="profile-avatar-wrap">
             {{#if student.avatar}}<img
                 class="profile-avatar"
-                src="/uploads/profiles/{{student.avatar}}?v={{student.avatar}}"
+                src="{{student.avatarUrl}}"
                 alt="Profile picture"
                 data-avatar-initial="{{student.avatar_initial}}"
               />{{else if student.spritesheet}}<img
                 class="profile-avatar"
-                src="/uploads/profiles/{{student.spritesheet}}?v={{student.spritesheet}}"
+                src="{{student.avatarUrl}}"
                 alt="Profile picture"
                 data-avatar-initial="{{student.avatar_initial}}"
               />{{else}}<div
@@ -318,7 +318,9 @@
         localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
         localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
         if (!result.avatar) throw new Error("The server did not return the saved avatar.");
-        const avatarUrl = `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
+        const avatarUrl = result.avatar.startsWith("data:image/")
+          ? result.avatar
+          : `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
         document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
           if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;
           else {

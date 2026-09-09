@@ -901,6 +901,12 @@ const dataDir = process.env.DATA_DIR || __dirname;
 const profileDirectory = path.join(dataDir, "uploads", "profiles");
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(profileDirectory, { recursive: true });
+const profileImageUrl = (value) =>
+  String(value || "").startsWith("data:image/")
+    ? String(value)
+    : value
+      ? `/uploads/profiles/${encodeURIComponent(String(value))}`
+      : "";
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
 const grammarReady = new Promise((resolve) => {
@@ -1150,6 +1156,9 @@ app.use(sessionMiddleware);
 app.use(function (req, res, next) {
   if (req.session.name && !req.session.avatar_initial) {
     req.session.avatar_initial = req.session.name.charAt(0).toUpperCase();
+  }
+  if (req.session.avatar && !req.session.avatarUrl) {
+    req.session.avatarUrl = profileImageUrl(req.session.avatar);
   }
   res.locals.session = req.session;
   next();
@@ -2434,6 +2443,7 @@ app.post("/login", (req, res) => {
           req.session.isAdmin = member.role === "admin";
           req.session.name = member.username;
           req.session.avatar = member.avatar || "";
+          req.session.avatarUrl = profileImageUrl(req.session.avatar);
           req.session.avatar_initial = member.username.charAt(0).toUpperCase();
           res.redirect("/");
         });
@@ -2612,6 +2622,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
       const student = rows[0];
       if (!student) return res.status(404).send("Profile not found.");
       student.avatar = student.avatar || student.spritesheet || "";
+      student.avatarUrl = profileImageUrl(student.avatar);
       const background = /^#[0-9a-fA-F]{6}$/.test(
         student.profile_background || "",
       )
@@ -3634,6 +3645,7 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
       )
       .then(() => {
         req.session.avatar = req.file.filename;
+        req.session.avatarUrl = profileImageUrl(req.file.filename);
         res.redirect("/profile?avatarSaved=1");
       })
       .catch((error) => {
@@ -3695,74 +3707,54 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
       .status(400)
       .json({ error: "Character image must be under 2 MB." });
   }
-  const extension = (type) => (type === "jpeg" ? "jpg" : type);
-  const avatarFilename = `character-preview-${crypto.randomUUID()}.${extension(previewMatch[1])}`;
-  const spritesheetFilename = `character-sheet-${crypto.randomUUID()}.${extension(spritesheetMatch[1])}`;
-  fs.writeFile(
-    path.join(profileDirectory, avatarFilename),
-    previewBuffer,
-    (previewWriteError) => {
-      if (previewWriteError)
-        return res.status(500).json({ error: "Unable to save character." });
-      fs.writeFile(
-        path.join(profileDirectory, spritesheetFilename),
-        spritesheetBuffer,
-        (spritesheetWriteError) => {
-          if (spritesheetWriteError)
-            return res.status(500).json({ error: "Unable to save character." });
-          const characterConfig = JSON.stringify(config);
-          const saveToPostgres = postgresPool
-            ? postgresReady.then(() =>
-                postgresPool.query(
-                  "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
-                  [
-                    avatarFilename,
-                    spritesheetFilename,
-                    characterConfig,
-                    req.session.name,
-                  ],
-                ),
-              )
-            : Promise.resolve();
-          saveToPostgres
-            .then((result) => {
-              if (postgresPool && result.rowCount !== 1) {
-                throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
-              }
-              return result;
-            })
-            .then(
-              () =>
-                new Promise((resolve, reject) => {
-                  db.run(
-                    "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
-                    [
-                      avatarFilename,
-                      spritesheetFilename,
-                      characterConfig,
-                      req.session.name,
-                    ],
-                    (error) => (error ? reject(error) : resolve()),
-                  );
-                }),
-            )
-            .then(() => {
-              req.session.avatar = avatarFilename;
-              req.session.spritesheet = spritesheetFilename;
-              res.json({
-                saved: true,
-                avatar: avatarFilename,
-                spritesheet: spritesheetFilename,
-              });
-            })
-            .catch((error) => {
-              console.error("Unable to save character:", error);
-              res.status(500).json({ error: "Unable to save character." });
-            });
-        },
-      );
-    },
-  );
+  const avatarDataUrl = previewImage.trim();
+  const spritesheetDataUrl = spritesheetImage.trim();
+  const characterConfig = JSON.stringify(config);
+  const saveToPostgres = postgresPool
+    ? postgresReady.then(() =>
+        postgresPool.query(
+          "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
+          [
+            avatarDataUrl,
+            spritesheetDataUrl,
+            characterConfig,
+            req.session.name,
+          ],
+        ),
+      )
+    : Promise.resolve({ rowCount: 0 });
+  saveToPostgres
+    .then((result) => {
+      if (postgresPool && result.rowCount !== 1) {
+        throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
+      }
+      return new Promise((resolve, reject) => {
+        db.run(
+          "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
+          [
+            avatarDataUrl,
+            spritesheetDataUrl,
+            characterConfig,
+            req.session.name,
+          ],
+          (error) => (error ? reject(error) : resolve()),
+        );
+      });
+    })
+    .then(() => {
+      req.session.avatar = avatarDataUrl;
+      req.session.avatarUrl = avatarDataUrl;
+      req.session.spritesheet = spritesheetDataUrl;
+      res.json({
+        saved: true,
+        avatar: avatarDataUrl,
+        spritesheet: spritesheetDataUrl,
+      });
+    })
+    .catch((error) => {
+      console.error("Unable to save character:", error);
+      res.status(500).json({ error: "Unable to save character." });
+    });
 });
 
 app.post("/api/progress", requireLogin, (req, res) => {
