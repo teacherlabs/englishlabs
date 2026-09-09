@@ -2037,13 +2037,25 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
 });
 
 app.get("/members", (req, res) => {
-  db.all("SELECT * FROM members", (error, listofMembers) => {
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT username, fname, lname, email, role, goal, avatar, spritesheet FROM users ORDER BY username",
+        ),
+      )
+      .then(({ rows }) => res.render("members.handlebars", { members: rows }))
+      .catch((error) => {
+        console.error("Unable to load PostgreSQL members:", error);
+        res.status(500).send("Unable to load members.");
+      });
+  }
+  db.all("SELECT * FROM members ORDER BY username", (error, listofMembers) => {
     if (error) {
-      console.log("ERROR: ", error);
-    } else {
-      const model = { members: listofMembers };
-      res.render("members.handlebars", model);
+      console.error("Unable to load SQLite members:", error);
+      return res.status(500).send("Unable to load members.");
     }
+    res.render("members.handlebars", { members: listofMembers });
   });
 });
 
@@ -3749,42 +3761,89 @@ const deleteStudent = (req, res) => {
     return res.status(400).json({ error: "The admin account cannot be deleted." });
   }
 
+  const dependentTables = [
+    "listening_discussion_submissions",
+    "writing_submissions",
+    "useful_chunk_submissions",
+    "progress",
+    "password_resets",
+    "lobby_participants",
+    "lobby_quicktype_submissions",
+    "vocabulary_difficult_words",
+  ];
+  const characterTable = "user_character";
   const deleteFromPostgres = postgresPool
-    ? postgresReady.then(() =>
-        postgresPool.query("DELETE FROM users WHERE username = $1 AND role != 'admin'", [
-          username,
-        ]),
-      )
-    : Promise.resolve(null);
+    ? postgresReady
+        .then(() => postgresPool.connect())
+        .then(async (client) => {
+          try {
+            await client.query("BEGIN");
+            for (const table of [...dependentTables, characterTable]) {
+              const exists = await client.query(
+                "SELECT to_regclass($1) AS table_name",
+                [`public.${table}`],
+              );
+              if (exists.rows[0].table_name) {
+                await client.query(
+                  `DELETE FROM "${table}" WHERE ${
+                    table === characterTable ? "user_id" : "username"
+                  } = $1`,
+                  [username],
+                );
+              }
+            }
+            const result = await client.query(
+              "DELETE FROM users WHERE username = $1 AND role != 'admin'",
+              [username],
+            );
+            if (result.rowCount !== 1)
+              throw new Error("Student was not found in PostgreSQL.");
+            await client.query("COMMIT");
+          } catch (error) {
+            try {
+              await client.query("ROLLBACK");
+            } catch (rollbackError) {
+              console.error("Unable to roll back student deletion:", rollbackError);
+            }
+            throw error;
+          } finally {
+            client.release();
+          }
+        })
+    : Promise.resolve();
 
   deleteFromPostgres
-    .then((result) => {
-      if (postgresPool && result.rowCount !== 1)
-        throw new Error("Student was not found in PostgreSQL.");
-      return new Promise((resolve, reject) => {
-        db.serialize(() => {
-          const statements = [
-            "DELETE FROM progress WHERE username = ?",
-            "DELETE FROM useful_chunk_submissions WHERE username = ?",
-            "DELETE FROM writing_submissions WHERE username = ?",
-            "DELETE FROM listening_discussion_submissions WHERE username = ?",
-            "DELETE FROM password_resets WHERE username = ?",
-            "DELETE FROM vocabulary_difficult_words WHERE username = ?",
-            "DELETE FROM lobby_quicktype_submissions WHERE username = ?",
-            "DELETE FROM lobby_participants WHERE username = ?",
-            "DELETE FROM members WHERE username = ? AND role != 'admin'",
-          ];
-          let index = 0;
-          const next = (error) => {
-            if (error) return reject(error);
-            if (index === statements.length) return resolve();
-            db.run(statements[index++], [username], next);
-          };
-          next();
-        });
-      });
-    })
-    .then(() => res.json({ deleted: true, username }))
+    .then(
+      () =>
+        new Promise((resolve, reject) => {
+          db.serialize(() => {
+            db.run("BEGIN TRANSACTION", (beginError) => {
+              if (beginError) return reject(beginError);
+              const statements = [
+                ...dependentTables.map(
+                  (table) => `DELETE FROM "${table}" WHERE username = ?`,
+                ),
+                `DELETE FROM "${characterTable}" WHERE user_id = ?`,
+                "DELETE FROM members WHERE username = ? AND role != 'admin'",
+              ];
+              let index = 0;
+              const next = (error) => {
+                if (error) {
+                  return db.run("ROLLBACK", () => reject(error));
+                }
+                if (index === statements.length) {
+                  return db.run("COMMIT", (commitError) =>
+                    commitError ? reject(commitError) : resolve(),
+                  );
+                }
+                db.run(statements[index++], [username], next);
+              };
+              next();
+            });
+          });
+        }),
+    )
+    .then(() => res.json({ success: true, deleted: true, username }))
     .catch((error) => {
       console.error("Unable to delete student:", error);
       res.status(500).json({ error: "Unable to delete student." });
