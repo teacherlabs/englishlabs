@@ -898,8 +898,9 @@ const server = http.createServer(app);
 // DATABASES
 //----------
 const dataDir = process.env.DATA_DIR || __dirname;
+const profileDirectory = path.join(dataDir, "uploads", "profiles");
 fs.mkdirSync(dataDir, { recursive: true });
-fs.mkdirSync(path.join(dataDir, "uploads", "profiles"), { recursive: true });
+fs.mkdirSync(profileDirectory, { recursive: true });
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
 const grammarReady = new Promise((resolve) => {
@@ -1044,7 +1045,7 @@ if (postgresPool) {
 }
 const profileUpload = multer({
   storage: multer.diskStorage({
-    destination: path.join(dataDir, "uploads", "profiles"),
+    destination: profileDirectory,
     filename: (req, file, callback) => {
       const extension = path.extname(file.originalname).toLowerCase();
       callback(null, `${req.session.name}-${Date.now()}${extension}`);
@@ -3697,7 +3698,6 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
   const extension = (type) => (type === "jpeg" ? "jpg" : type);
   const avatarFilename = `character-preview-${crypto.randomUUID()}.${extension(previewMatch[1])}`;
   const spritesheetFilename = `character-sheet-${crypto.randomUUID()}.${extension(spritesheetMatch[1])}`;
-  const profileDirectory = path.join(dataDir, "uploads", "profiles");
   fs.writeFile(
     path.join(profileDirectory, avatarFilename),
     previewBuffer,
