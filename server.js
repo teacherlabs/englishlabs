@@ -2641,13 +2641,13 @@ app.get("/profile", requireProfileUser, (req, res) => {
       student.spritesheetUrl = profileImageUrl(student.spritesheet);
       if (student.character_config) {
         try {
-          student.character_config = JSON.parse(student.character_config);
+          student.characterConfig = JSON.parse(student.character_config);
         } catch (error) {
           console.warn("Unable to parse student character configuration:", error);
-          student.character_config = {};
+          student.characterConfig = {};
         }
       } else {
-        student.character_config = {};
+        student.characterConfig = {};
       }
       db.all(
         "SELECT * FROM progress WHERE username = ? ORDER BY completed_at DESC",
@@ -4100,6 +4100,21 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
   const loadStudentDetails = (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
       student.avatar_initial = student.username.charAt(0).toUpperCase();
+      student.avatarUrl = profileImageUrl(student.avatar);
+      student.spritesheetUrl = profileImageUrl(student.spritesheet);
+      if (student.character_config) {
+        try {
+          student.characterConfig =
+            typeof student.character_config === "string"
+              ? JSON.parse(student.character_config)
+              : student.character_config;
+        } catch (parseError) {
+          console.warn("Unable to parse student character configuration:", parseError);
+          student.characterConfig = {};
+        }
+      } else {
+        student.characterConfig = {};
+      }
       db.all(
         "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
         [student.username],
@@ -4351,7 +4366,12 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                     (item) => item.activity_type === "final",
                                   );
                                   res.render("teacher-student.handlebars", {
-                                    student,
+                                    student: {
+                                      ...student,
+                                      avatarUrl: student.avatarUrl,
+                                      spritesheetUrl: student.spritesheetUrl,
+                                      characterConfig: student.characterConfig,
+                                    },
                                     profileCategory,
                                     profileIsGrammar:
                                       profileCategory === "grammar",

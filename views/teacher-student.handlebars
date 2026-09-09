@@ -4,7 +4,7 @@
     <p class="eyebrow">Student profile</p>
     <div class="student-profile-header">
       <div class="student-profile-identity">
-        {{#if student.avatarUrl}}<img class="student-character-preview student-uploaded-avatar" src="{{student.avatarUrl}}" alt="{{student.username}}'s profile picture" />{{else}}<div class="student-character-preview student-avatar-placeholder" aria-label="Profile picture placeholder">{{student.avatar_initial}}</div>{{/if}}
+        {{#if student.avatarUrl}}<img class="student-character-preview student-uploaded-avatar" src="{{student.avatarUrl}}" alt="{{student.username}}'s profile picture" />{{else if student.spritesheetUrl}}<img class="student-character-preview student-uploaded-avatar" src="{{student.spritesheetUrl}}" alt="{{student.username}}'s profile picture" />{{else}}<div class="student-character-preview student-avatar-placeholder" aria-label="Profile picture placeholder">{{student.avatar_initial}}</div>{{/if}}
         <div class="student-profile-info">
           <h1 class="student-profile-name">{{#if student.fname}}{{student.fname}} {{student.lname}}{{else}}{{student.username}}{{/if}}</h1>
           <p class="student-username">@{{student.username}}</p>
