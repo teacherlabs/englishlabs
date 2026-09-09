@@ -928,16 +928,29 @@ const loadLobbyCharacter = (username) => {
           [username],
         ),
       )
-      .then(({ rows }) => rows[0] || {});
+      .then(({ rows }) => {
+        if (rows[0]) return rows[0];
+        return loadLobbyCharacterFromSqlite(username);
+      })
+      .catch((error) => {
+        console.error("Unable to load lobby character from PostgreSQL:", error);
+        return loadLobbyCharacterFromSqlite(username);
+      });
   }
-  return new Promise((resolve) => {
+  return loadLobbyCharacterFromSqlite(username);
+};
+
+const loadLobbyCharacterFromSqlite = (username) =>
+  new Promise((resolve, reject) => {
     db.get(
       "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
       [username],
-      (error, row) => resolve(error ? {} : row || {}),
+      (error, row) => {
+        if (error) return reject(error);
+        resolve(row || {});
+      },
     );
   });
-};
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
 const grammarReady = new Promise((resolve) => {
@@ -3583,7 +3596,13 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                                 question: questionError ? null : question,
                                 participant: participantError
                                   ? null
-                                  : participant,
+                                  : {
+                                      ...participant,
+                                      ...(leaderboard.find(
+                                        (entry) =>
+                                          entry.username === req.session.name,
+                                      ) || {}),
+                                    },
                                 leaderboard: leaderboardError
                                   ? []
                                   : leaderboard,
