@@ -2,7 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 
-const databasePath = path.join(__dirname, "english_lab.db");
+const dataDir = process.env.DATA_DIR || __dirname;
+fs.mkdirSync(dataDir, { recursive: true });
+const databasePath = path.join(dataDir, "english_lab.db");
 const banks = ["grammar_a1_a2.json", "grammar_b1_b2.json"].flatMap((fileName) =>
   JSON.parse(fs.readFileSync(path.join(__dirname, fileName), "utf8")),
 );
