@@ -3728,99 +3728,102 @@ const teacherCategories = {
   listening: { label: "Listening", activityTypes: ["listening"] },
 };
 
-app.get("/teacher/dashboard", requireAdmin, (req, res) => {
+app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
   const categoryKey = teacherCategories[req.query.category]
     ? req.query.category
     : null;
   const category = categoryKey ? teacherCategories[categoryKey] : null;
-  db.all(
-    "SELECT username, fname, lname, goal FROM members WHERE role = 'student' ORDER BY username",
-    (error, students) => {
-      if (error) {
-        console.error("Unable to load students:", error);
-        return res.status(500).send("Unable to load student progress.");
-      }
+  if (!postgresPool) {
+    console.error("Unable to load teacher dashboard: PostgreSQL is not configured.");
+    return res.status(503).send("Teacher dashboard requires PostgreSQL.");
+  }
 
-      db.all(
-        "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
-        (progError, allProgress) => {
-          if (progError) {
-            console.error("Unable to load progress:", progError);
-            return res.status(500).send("Unable to load student progress.");
-          }
-
-          db.all(
+  try {
+    await postgresReady;
+    const studentResult = await postgresPool.query(
+      "SELECT username, fname, lname, goal FROM users WHERE role = $1 ORDER BY username",
+      ["student"],
+    );
+    const tableResult = await postgresPool.query(
+      `SELECT to_regclass('public.progress') AS progress_table,
+              to_regclass('public.writing_submissions') AS writing_table`,
+    );
+    const progressRows = tableResult.rows[0].progress_table
+      ? (
+          await postgresPool.query(
+            "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
+          )
+        ).rows
+      : [];
+    const pendingRows = tableResult.rows[0].writing_table
+      ? (
+          await postgresPool.query(
             "SELECT username, COUNT(*) AS pending FROM writing_submissions WHERE feedback IS NULL GROUP BY username",
-            (pendingError, pendingRows) => {
-              const pendingWritingByUsername = Object.fromEntries(
-                (pendingError ? [] : pendingRows).map((row) => [
-                  row.username,
-                  Number(row.pending) || 0,
-                ]),
-              );
+          )
+        ).rows
+      : [];
+    const pendingWritingByUsername = Object.fromEntries(
+      pendingRows.map((row) => [row.username, Number(row.pending) || 0]),
+    );
 
-              const enrichedStudents = students.map((student) => {
-                const studentProgress = allProgress.filter(
-                  (progressRow) => progressRow.username === student.username,
-                );
-                const filteredProgress =
-                  category && category.activityTypes
-                    ? studentProgress.filter((progressRow) =>
-                        category.activityTypes.includes(progressRow.activity_type),
-                      )
-                    : studentProgress;
-                const points = filteredProgress.reduce(
-                  (sum, progressRow) => sum + (Number(progressRow.points) || 0),
-                  0,
-                );
-                const possible_points = filteredProgress.reduce(
-                  (sum, progressRow) =>
-                    sum + (Number(progressRow.total_points) || 0),
-                  0,
-                );
-                const activities = filteredProgress.length;
-                const easy_activities = filteredProgress.filter(
-                  (progressRow) => progressRow.difficulty_level === "easy",
-                ).length;
-                const medium_activities = filteredProgress.filter(
-                  (progressRow) => progressRow.difficulty_level === "medium",
-                ).length;
-
-                return {
-                  ...student,
-                  points,
-                  possible_points,
-                  activities,
-                  pendingWriting: pendingWritingByUsername[student.username] || 0,
-                  levelBadges: [
-                    {
-                      label: "Easy",
-                      stronger: easy_activities >= medium_activities,
-                    },
-                    {
-                      label: "Medium",
-                      stronger: medium_activities > easy_activities,
-                    },
-                  ],
-                };
-              });
-
-              res.render("teacher.handlebars", {
-                categoryKey,
-                categoryLabel: category?.label,
-                categories: Object.entries(teacherCategories).map(([key, value]) => ({
-                  key,
-                  label: value.label,
-                  selected: key === categoryKey,
-                })),
-                students: enrichedStudents,
-              });
-            },
-          );
-        },
+    const enrichedStudents = studentResult.rows.map((student) => {
+      const studentProgress = progressRows.filter(
+        (progressRow) => progressRow.username === student.username,
       );
-    },
-  );
+      const filteredProgress =
+        category && category.activityTypes
+          ? studentProgress.filter((progressRow) =>
+              category.activityTypes.includes(progressRow.activity_type),
+            )
+          : studentProgress;
+      const points = filteredProgress.reduce(
+        (sum, progressRow) => sum + (Number(progressRow.points) || 0),
+        0,
+      );
+      const possible_points = filteredProgress.reduce(
+        (sum, progressRow) => sum + (Number(progressRow.total_points) || 0),
+        0,
+      );
+      const easy_activities = filteredProgress.filter(
+        (progressRow) => progressRow.difficulty_level === "easy",
+      ).length;
+      const medium_activities = filteredProgress.filter(
+        (progressRow) => progressRow.difficulty_level === "medium",
+      ).length;
+
+      return {
+        ...student,
+        points,
+        possible_points,
+        activities: filteredProgress.length,
+        pendingWriting: pendingWritingByUsername[student.username] || 0,
+        levelBadges: [
+          {
+            label: "Easy",
+            stronger: easy_activities >= medium_activities,
+          },
+          {
+            label: "Medium",
+            stronger: medium_activities > easy_activities,
+          },
+        ],
+      };
+    });
+
+    return res.render("teacher.handlebars", {
+      categoryKey,
+      categoryLabel: category?.label,
+      categories: Object.entries(teacherCategories).map(([key, value]) => ({
+        key,
+        label: value.label,
+        selected: key === categoryKey,
+      })),
+      students: enrichedStudents,
+    });
+  } catch (error) {
+    console.error("Unable to load teacher dashboard from PostgreSQL:", error);
+    return res.status(500).send("Unable to load student progress.");
+  }
 });
 
 const deleteStudent = (req, res) => {
