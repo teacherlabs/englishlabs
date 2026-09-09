@@ -22,6 +22,7 @@ const session = require("express-session");
 const connectSqlite3 = require("connect-sqlite3");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const { execFile } = require("child_process");
 //----------
 // PORT
 //----------
@@ -901,6 +902,72 @@ fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(path.join(dataDir, "uploads", "profiles"), { recursive: true });
 const db = new sqlite3.Database(path.join(dataDir, "members.sqlite3.db"));
 const grammarDb = new sqlite3.Database(path.join(dataDir, "english_lab.db"));
+const grammarReady = new Promise((resolve) => {
+  grammarDb.serialize(() => {
+    grammarDb.run(`CREATE TABLE IF NOT EXISTS chapters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      chapter_number INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      cefr_level TEXT NOT NULL
+    )`);
+    grammarDb.run(`CREATE TABLE IF NOT EXISTS grammar_topics (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      chapter_id INTEGER,
+      topic_code TEXT NOT NULL,
+      title TEXT NOT NULL,
+      explanation TEXT NOT NULL,
+      example_sentence TEXT,
+      cefr_level TEXT NOT NULL
+    )`);
+    grammarDb.run(`CREATE TABLE IF NOT EXISTS quiz_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic_id INTEGER,
+      question_text TEXT NOT NULL,
+      option_a TEXT NOT NULL,
+      option_b TEXT NOT NULL,
+      option_c TEXT,
+      option_d TEXT,
+      correct_option TEXT NOT NULL,
+      explanation TEXT,
+      cefr_level TEXT NOT NULL
+    )`);
+    grammarDb.run(`CREATE TABLE IF NOT EXISTS vocabulary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      english_word TEXT NOT NULL,
+      swedish_translation TEXT NOT NULL,
+      part_of_speech TEXT NOT NULL,
+      definition TEXT,
+      example_sentence TEXT,
+      cefr_level TEXT NOT NULL,
+      category TEXT,
+      chapter_ref INTEGER
+    )`);
+    grammarDb.get(
+      "SELECT (SELECT COUNT(*) FROM chapters) AS chapters, (SELECT COUNT(*) FROM vocabulary) AS vocabulary",
+      (error, counts) => {
+        if (error || counts.chapters > 0 || counts.vocabulary > 0) {
+          if (error) console.warn("Unable to inspect grammar database:", error);
+          return resolve();
+        }
+        execFile(
+          process.execPath,
+          [path.join(__dirname, "seed_db.js")],
+          { env: { ...process.env, DATA_DIR: dataDir } },
+          (seedError, stdout, stderr) => {
+            if (seedError) {
+              console.error("Unable to seed grammar database:", seedError);
+              if (stderr) console.error(stderr);
+            } else if (stdout) {
+              console.log(stdout.trim());
+            }
+            resolve();
+          },
+        );
+      },
+    );
+  });
+});
 if (postgresPool) {
   postgresReady = postgresPool
     .query(`
@@ -1721,10 +1788,11 @@ app.post("/vocabulary/useful-chunks", requireLogin, (req, res) => {
 });
 
 app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
-  grammarDb.all(
-    "SELECT id, english_word, swedish_translation, part_of_speech, definition, example_sentence, cefr_level FROM vocabulary ORDER BY id",
-    (error, words) => {
-      if (error) return res.status(500).send("Unable to load flashcards.");
+  grammarReady.then(() => {
+    grammarDb.all(
+      "SELECT id, english_word, swedish_translation, part_of_speech, definition, example_sentence, cefr_level FROM vocabulary ORDER BY id",
+      (error, words) => {
+        if (error) return res.status(500).send("Unable to load flashcards.");
       const selectedLevel = ["easy", "medium"].includes(req.query.level)
         ? req.query.level
         : "easy";
@@ -1744,8 +1812,9 @@ app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
         pageIntro: "Flip each card to reveal the Swedish word and examples.",
         words: shuffleArray(levelWords),
       });
-    },
-  );
+      },
+    );
+  });
 });
 
 app.get("/vocabulary/translation", requireAuthenticated, (req, res) => {

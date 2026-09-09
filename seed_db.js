@@ -1,7 +1,11 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
-const dbPath = path.join(__dirname, "english_lab.db");
+const fs = require("fs");
+
+const dataDir = process.env.DATA_DIR || __dirname;
+fs.mkdirSync(dataDir, { recursive: true });
+const dbPath = path.join(dataDir, "english_lab.db");
 const db = new sqlite3.Database(dbPath);
 
 console.log("Creating and populating english_lab.db...");
