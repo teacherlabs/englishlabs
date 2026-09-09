@@ -3768,13 +3768,15 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
 app.post("/api/progress", requireLogin, (req, res) => {
   const { activityType, chapterId, difficultyLevel, points, totalPoints } =
     req.body;
+  const username = String(req.session.name || "").trim();
+  if (!username) return res.status(401).json({ error: "Login required." });
   const safePoints = Math.max(0, Number(points) || 0);
   const safeTotal = Math.max(1, Number(totalPoints) || 1);
   const percentage = Math.round((safePoints / safeTotal) * 100);
   db.run(
     "INSERT INTO progress (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage) VALUES (?, ?, ?, ?, ?, ?, ?)",
     [
-      req.session.name,
+      username,
       activityType || "practice",
       chapterId || null,
       difficultyLevel || "",
@@ -3790,6 +3792,8 @@ app.post("/api/progress", requireLogin, (req, res) => {
 });
 
 app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
+  const username = String(req.session.name || "").trim();
+  if (!username) return res.status(401).json({ error: "Login required." });
   const difficultyLevel = ["easy", "medium"].includes(req.body.difficultyLevel)
     ? req.body.difficultyLevel
     : null;
@@ -3809,7 +3813,7 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
     DO UPDATE SET attempts = attempts + 1, last_seen = CURRENT_TIMESTAMP
   `);
   words.forEach((word) =>
-    statement.run(req.session.name, difficultyLevel, word),
+    statement.run(username, difficultyLevel, word),
   );
   statement.finalize((error) =>
     error
