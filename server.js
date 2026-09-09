@@ -4004,10 +4004,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
   const profileCategory = teacherCategories[req.query.category]
     ? req.query.category
     : "grammar";
-  db.get(
-    "SELECT username, fname, lname, goal, avatar FROM members WHERE username = ? AND role = 'student'",
-    [req.params.username],
-    (error, student) => {
+  const loadStudentDetails = (error, student) => {
       if (error || !student) return res.status(404).send("Student not found.");
       student.avatar_initial = student.username.charAt(0).toUpperCase();
       db.all(
@@ -4342,8 +4339,28 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
           );
         },
       );
-    },
-  );
+  };
+
+  if (postgresPool) {
+    postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT username, fname, lname, goal, avatar FROM users WHERE username = $1 AND role = $2",
+          [req.params.username, "student"],
+        ),
+      )
+      .then(({ rows }) => loadStudentDetails(null, rows[0]))
+      .catch((error) => {
+        console.error("Unable to load student from PostgreSQL:", error);
+        res.status(500).send("Unable to load student details.");
+      });
+  } else {
+    db.get(
+      "SELECT username, fname, lname, goal, avatar FROM members WHERE username = ? AND role = 'student'",
+      [req.params.username],
+      loadStudentDetails,
+    );
+  }
 });
 
 app.post(
