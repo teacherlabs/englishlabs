@@ -2388,42 +2388,17 @@ app.post("/signup", (req, res) => {
     });
   }
   bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
-    if (hashError)
+    if (hashError) {
+      console.error("Password hashing failed during signup:", hashError);
       return res
         .status(500)
         .render("signup.handlebars", { error: "Unable to create account." });
-    if (!postgresPool) {
-      return db.run(
-        "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
-        [
-          requestedUsername,
-          firstName,
-          lastName,
-          requestedEmail,
-          passwordHash,
-          goal || "",
-        ],
-        (sqliteError) => {
-          if (sqliteError) {
-            console.error("SQLite signup failed:", sqliteError);
-            return res.status(500).render("signup.handlebars", {
-              error: "Unable to create account.",
-            });
-          }
-          req.session.isLoggedIn = true;
-          req.session.isAdmin = false;
-          req.session.name = requestedUsername;
-          req.session.avatar = "";
-          req.session.avatar_initial = requestedUsername.charAt(0).toUpperCase();
-          res.redirect("/profile");
-        },
-      );
     }
-    let insertedPostgres = false;
-    postgresReady
-      .then(() =>
-        postgresPool.query(
-          "INSERT INTO users (username, fname, lname, email, password_hash, role, goal) VALUES ($1, $2, $3, $4, $5, 'student', $6)",
+
+    const sqliteSignup = () =>
+      new Promise((resolve, reject) => {
+        db.run(
+          "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
           [
             requestedUsername,
             firstName,
@@ -2432,25 +2407,55 @@ app.post("/signup", (req, res) => {
             passwordHash,
             goal || "",
           ],
-        ),
-      )
-      .then(() => {
-        insertedPostgres = true;
-        return new Promise((resolve, reject) => {
-          db.run(
-            "INSERT OR IGNORE INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
-            [
-              requestedUsername,
-              firstName,
-              lastName,
-              requestedEmail,
-              passwordHash,
-              goal || "",
-            ],
-            (sqliteError) => (sqliteError ? reject(sqliteError) : resolve()),
-          );
-        });
-      })
+          (sqliteError) => (sqliteError ? reject(sqliteError) : resolve()),
+        );
+      });
+
+    let postgresInserted = false;
+    const saveAccount = postgresPool
+      ? postgresReady
+          .then(() =>
+            postgresPool.query(
+              "INSERT INTO users (username, fname, lname, email, password_hash, role, goal) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+              [
+                requestedUsername,
+                firstName,
+                lastName,
+                requestedEmail,
+                passwordHash,
+                "student",
+                goal || "",
+              ],
+            ),
+          )
+          .then(() => {
+            postgresInserted = true;
+            return sqliteSignup();
+          })
+          .catch((error) => {
+            console.error("PostgreSQL signup failed:", {
+              message: error.message,
+              code: error.code,
+              detail: error.detail,
+              constraint: error.constraint,
+            });
+            if (postgresInserted) {
+              return postgresPool
+                .query("DELETE FROM users WHERE username = $1", [
+                  requestedUsername,
+                ])
+                .catch((cleanupError) => {
+                  console.error("PostgreSQL signup rollback failed:", cleanupError);
+                })
+                .then(() => {
+                  throw error;
+                });
+            }
+            throw error;
+          })
+      : sqliteSignup();
+
+    saveAccount
       .then(() => {
         req.session.isLoggedIn = true;
         req.session.isAdmin = false;
@@ -2459,20 +2464,13 @@ app.post("/signup", (req, res) => {
         req.session.avatar_initial = requestedUsername.charAt(0).toUpperCase();
         res.redirect("/profile");
       })
-      .catch((insertError) => {
-        if (insertedPostgres) {
-          postgresPool
-            .query("DELETE FROM users WHERE username = $1", [requestedUsername])
-            .catch((cleanupError) =>
-              console.error("Unable to roll back PostgreSQL signup:", cleanupError),
-            );
-        }
-        console.error("Signup persistence failed:", insertError);
-        if (insertError.code === "23505")
+      .catch((error) => {
+        console.error("Signup persistence failed:", error);
+        if (error.code === "23505" || error.code === "SQLITE_CONSTRAINT") {
           return res.status(400).render("signup.handlebars", {
-            error: "That username is already taken.",
+            error: "That username or email is already registered.",
           });
-        console.error("PostgreSQL signup failed:", insertError);
+        }
         res.status(500).render("signup.handlebars", {
           error: "Unable to create account.",
         });
