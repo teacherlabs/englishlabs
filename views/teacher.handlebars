@@ -5,8 +5,12 @@
             ·
             {{categoryLabel}}{{/if}}</h1></div></div>
     <div class="student-table"><div class="student-table-head"><span
-        >Student</span><span>Goal</span></div>{{#each students}}<a
-          class="student-row student-link"
+        >Student</span><span>Goal</span><span>Actions</span></div>{{#each students}}<div
+          class="student-row"
+          data-student-row
+          data-username="{{username}}"
+        ><a
+          class="student-row-link"
           href="/teacher/student/{{username}}?category={{@root.categoryKey}}"
         ><span class="student-row-cell student-row-student"><strong>{{#if
                 fname
@@ -19,8 +23,63 @@
           ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span>{{#if
               pendingWriting
             }}<b class="teacher-pending-badge">{{pendingWriting}}
-                awaiting feedback</b>{{/if}}</span></a>{{else}}<p
+                awaiting feedback</b>{{/if}}</span></a><button
+            class="danger-button student-delete-button"
+            type="button"
+            data-delete-student
+            data-username="{{username}}"
+            data-display-name="{{#if fname}}{{fname}} {{lname}}{{else}}{{username}}{{/if}}"
+          >Delete Student</button></div>{{else}}<p
           class="empty-state"
         >No student accounts yet.</p>{{/each}}</div>
   </section>
 </main>
+<dialog class="student-delete-dialog" data-student-delete-dialog>
+  <form method="dialog" class="student-delete-modal">
+    <h2>Remove student?</h2>
+    <p>Do you reallllyyy want to remove <strong data-delete-student-name></strong>?</p>
+    <div class="student-delete-actions">
+      <button class="notes-button" value="cancel">Cancel</button>
+      <button class="danger-button" type="button" data-confirm-delete>Yes, Remove</button>
+    </div>
+  </form>
+</dialog>
+<script>
+  (() => {
+    const dialog = document.querySelector("[data-student-delete-dialog]");
+    const studentName = dialog?.querySelector("[data-delete-student-name]");
+    const confirmButton = dialog?.querySelector("[data-confirm-delete]");
+    let selectedUsername = "";
+    document.querySelectorAll("[data-delete-student]").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedUsername = button.dataset.username || "";
+        studentName.textContent = button.dataset.displayName || selectedUsername;
+        dialog.showModal();
+      });
+    });
+    confirmButton?.addEventListener("click", async () => {
+      if (!selectedUsername) return;
+      confirmButton.disabled = true;
+      try {
+        const response = await fetch(`/api/admin/students/${encodeURIComponent(selectedUsername)}/delete`, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+        });
+        const responseText = await response.text();
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error(`Unable to remove student (HTTP ${response.status}).`);
+        }
+        if (!response.ok) throw new Error(result.error || "Unable to remove student.");
+        dialog.close();
+        document.querySelector(`[data-student-row][data-username="${CSS.escape(selectedUsername)}"]`)?.remove();
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        confirmButton.disabled = false;
+      }
+    });
+  })();
+</script>

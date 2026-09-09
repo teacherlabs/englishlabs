@@ -3739,6 +3739,57 @@ app.get("/teacher/dashboard", requireAdmin, (req, res) => {
   );
 });
 
+const deleteStudent = (req, res) => {
+  const username = String(req.params.username || "").trim();
+  if (!username || username === adminname) {
+    return res.status(400).json({ error: "The admin account cannot be deleted." });
+  }
+
+  const deleteFromPostgres = postgresPool
+    ? postgresReady.then(() =>
+        postgresPool.query("DELETE FROM users WHERE username = $1 AND role != 'admin'", [
+          username,
+        ]),
+      )
+    : Promise.resolve(null);
+
+  deleteFromPostgres
+    .then((result) => {
+      if (postgresPool && result.rowCount !== 1)
+        throw new Error("Student was not found in PostgreSQL.");
+      return new Promise((resolve, reject) => {
+        db.serialize(() => {
+          const statements = [
+            "DELETE FROM progress WHERE username = ?",
+            "DELETE FROM useful_chunk_submissions WHERE username = ?",
+            "DELETE FROM writing_submissions WHERE username = ?",
+            "DELETE FROM listening_discussion_submissions WHERE username = ?",
+            "DELETE FROM password_resets WHERE username = ?",
+            "DELETE FROM vocabulary_difficult_words WHERE username = ?",
+            "DELETE FROM lobby_quicktype_submissions WHERE username = ?",
+            "DELETE FROM lobby_participants WHERE username = ?",
+            "DELETE FROM members WHERE username = ? AND role != 'admin'",
+          ];
+          let index = 0;
+          const next = (error) => {
+            if (error) return reject(error);
+            if (index === statements.length) return resolve();
+            db.run(statements[index++], [username], next);
+          };
+          next();
+        });
+      });
+    })
+    .then(() => res.json({ deleted: true, username }))
+    .catch((error) => {
+      console.error("Unable to delete student:", error);
+      res.status(500).json({ error: "Unable to delete student." });
+    });
+};
+
+app.post("/api/admin/students/:username/delete", requireAdmin, deleteStudent);
+app.delete("/api/admin/students/:username", requireAdmin, deleteStudent);
+
 app.get("/teacher/student/:username", requireAdmin, (req, res) => {
   const profileCategory = teacherCategories[req.query.category]
     ? req.query.category

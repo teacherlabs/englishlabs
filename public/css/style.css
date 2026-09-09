@@ -1634,7 +1634,46 @@ div.profile-avatar-placeholder {
 
 .teacher-card .student-row,
 .teacher-card .student-table-head {
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1.5fr auto;
+}
+
+.student-row-link {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}
+
+.student-delete-button {
+  white-space: nowrap;
+}
+
+.student-delete-dialog {
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: #14213d;
+  box-shadow: 0 24px 80px rgba(20, 33, 61, 0.28);
+}
+
+.student-delete-dialog::backdrop {
+  background: rgba(20, 33, 61, 0.58);
+}
+
+.student-delete-modal {
+  display: grid;
+  gap: 16px;
+  min-width: min(420px, 90vw);
+  padding: 28px;
+}
+
+.student-delete-modal h2 {
+  margin: 0;
+}
+
+.student-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .student-row-cell {
