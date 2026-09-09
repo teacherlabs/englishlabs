@@ -34,6 +34,11 @@
                 src="/uploads/profiles/{{student.avatar}}?v={{student.avatar}}"
                 alt="Profile picture"
                 data-avatar-initial="{{student.avatar_initial}}"
+              />{{else if student.spritesheet}}<img
+                class="profile-avatar"
+                src="/uploads/profiles/{{student.spritesheet}}?v={{student.spritesheet}}"
+                alt="Profile picture"
+                data-avatar-initial="{{student.avatar_initial}}"
               />{{else}}<div
                 class="profile-avatar profile-avatar-placeholder"
                 aria-label="Profile picture placeholder"

@@ -3495,9 +3495,10 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
   });
 });
 
-app.post("/api/profile/character", requireProfileUser, (req, res) => {
+app.post("/api/profile/character", requireLogin, (req, res) => {
   const previewImage = String(
-    req.body.previewImage ||
+    req.body.avatar ||
+      req.body.previewImage ||
       req.body.preview ||
       req.body.previewDataUrl ||
       req.body.image ||
@@ -3505,7 +3506,10 @@ app.post("/api/profile/character", requireProfileUser, (req, res) => {
       "",
   );
   const spritesheetImage = String(
-    req.body.spritesheetImage || req.body.image || "",
+    req.body.spritesheet ||
+      req.body.spritesheetImage ||
+      req.body.image ||
+      "",
   );
   const config =
     (req.body.config || req.body.characterConfig) &&
