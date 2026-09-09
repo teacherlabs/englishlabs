@@ -3735,94 +3735,90 @@ app.get("/teacher/dashboard", requireAdmin, (req, res) => {
   const category = categoryKey ? teacherCategories[categoryKey] : null;
   db.all(
     "SELECT username, fname, lname, goal FROM members WHERE role = 'student' ORDER BY username",
-    [],
     (error, students) => {
-     if (error)
-       return res.status(500).send("Unable to load student progress.");
+      if (error) {
+        console.error("Unable to load students:", error);
+        return res.status(500).send("Unable to load student progress.");
+      }
 
-     const progressFilter = category
-       ? ` WHERE activity_type IN (${category.activityTypes
-           .map(() => "?")
-           .join(",")})`
-       : "";
-     const progressParams = category ? category.activityTypes : [];
-     db.all(
-       `SELECT username, points, total_points, difficulty_level
-        FROM progress${progressFilter}`,
-       progressParams,
-       (progressError, progressRows) => {
-         if (progressError)
-           return res.status(500).send("Unable to load student progress.");
+      db.all(
+        "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
+        (progError, allProgress) => {
+          if (progError) {
+            console.error("Unable to load progress:", progError);
+            return res.status(500).send("Unable to load student progress.");
+          }
 
-         const progressByUsername = new Map();
-         progressRows.forEach((row) => {
-           const stats = progressByUsername.get(row.username) || {
-             points: 0,
-             possible_points: 0,
-             activities: 0,
-             levels: [],
-             easy_activities: 0,
-             medium_activities: 0,
-           };
-           stats.points += Number(row.points) || 0;
-           stats.possible_points += Number(row.total_points) || 0;
-           stats.activities += 1;
-           if (row.difficulty_level) stats.levels.push(row.difficulty_level);
-           if (row.difficulty_level === "easy") stats.easy_activities += 1;
-           if (row.difficulty_level === "medium") stats.medium_activities += 1;
-           progressByUsername.set(row.username, stats);
-         });
+          db.all(
+            "SELECT username, COUNT(*) AS pending FROM writing_submissions WHERE feedback IS NULL GROUP BY username",
+            (pendingError, pendingRows) => {
+              const pendingWritingByUsername = Object.fromEntries(
+                (pendingError ? [] : pendingRows).map((row) => [
+                  row.username,
+                  Number(row.pending) || 0,
+                ]),
+              );
 
-         const renderDashboard = (pendingWritingByUsername) => {
-           res.render("teacher.handlebars", {
-             categoryKey,
-             categoryLabel: category?.label,
-             categories: Object.entries(teacherCategories).map(([key, value]) => ({
-               key,
-               label: value.label,
-               selected: key === categoryKey,
-             })),
-             students: students.map((student) => {
-               const stats = progressByUsername.get(student.username) || {
-                 points: 0,
-                 possible_points: 0,
-                 activities: 0,
-                 levels: [],
-                 easy_activities: 0,
-                 medium_activities: 0,
-               };
-               return {
-                 ...student,
-                 ...stats,
-                 levels: stats.levels.join(", "),
-                 pendingWriting: pendingWritingByUsername?.[student.username] || 0,
-                 levelBadges: [
-                   {
-                     label: "Easy",
-                     stronger: stats.easy_activities >= stats.medium_activities,
-                   },
-                   {
-                     label: "Medium",
-                     stronger: stats.medium_activities > stats.easy_activities,
-                   },
-                 ],
-               };
-             }),
-           });
-         };
-         if (categoryKey !== "writing") return renderDashboard(null);
-         db.all(
-           "SELECT username, COUNT(*) AS pending FROM writing_submissions WHERE feedback IS NULL GROUP BY username",
-           (pendingError, pendingRows) => {
-             if (pendingError) return renderDashboard(null);
-             const pendingWritingByUsername = Object.fromEntries(
-               pendingRows.map((row) => [row.username, row.pending]),
-             );
-             renderDashboard(pendingWritingByUsername);
-           },
-         );
-       },
-     );
+              const enrichedStudents = students.map((student) => {
+                const studentProgress = allProgress.filter(
+                  (progressRow) => progressRow.username === student.username,
+                );
+                const filteredProgress =
+                  category && category.activityTypes
+                    ? studentProgress.filter((progressRow) =>
+                        category.activityTypes.includes(progressRow.activity_type),
+                      )
+                    : studentProgress;
+                const points = filteredProgress.reduce(
+                  (sum, progressRow) => sum + (Number(progressRow.points) || 0),
+                  0,
+                );
+                const possible_points = filteredProgress.reduce(
+                  (sum, progressRow) =>
+                    sum + (Number(progressRow.total_points) || 0),
+                  0,
+                );
+                const activities = filteredProgress.length;
+                const easy_activities = filteredProgress.filter(
+                  (progressRow) => progressRow.difficulty_level === "easy",
+                ).length;
+                const medium_activities = filteredProgress.filter(
+                  (progressRow) => progressRow.difficulty_level === "medium",
+                ).length;
+
+                return {
+                  ...student,
+                  points,
+                  possible_points,
+                  activities,
+                  pendingWriting: pendingWritingByUsername[student.username] || 0,
+                  levelBadges: [
+                    {
+                      label: "Easy",
+                      stronger: easy_activities >= medium_activities,
+                    },
+                    {
+                      label: "Medium",
+                      stronger: medium_activities > easy_activities,
+                    },
+                  ],
+                };
+              });
+
+              res.render("teacher.handlebars", {
+                categoryKey,
+                categoryLabel: category?.label,
+                categories: Object.entries(teacherCategories).map(([key, value]) => ({
+                  key,
+                  label: value.label,
+                  selected: key === categoryKey,
+                })),
+                students: enrichedStudents,
+              });
+            },
+          );
+        },
+      );
     },
   );
 });
