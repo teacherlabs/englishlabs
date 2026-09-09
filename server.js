@@ -2393,10 +2393,33 @@ app.post("/signup", (req, res) => {
         .status(500)
         .render("signup.handlebars", { error: "Unable to create account." });
     if (!postgresPool) {
-      return res.status(500).render("signup.handlebars", {
-        error: "User database is not configured.",
-      });
+      return db.run(
+        "INSERT INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
+        [
+          requestedUsername,
+          firstName,
+          lastName,
+          requestedEmail,
+          passwordHash,
+          goal || "",
+        ],
+        (sqliteError) => {
+          if (sqliteError) {
+            console.error("SQLite signup failed:", sqliteError);
+            return res.status(500).render("signup.handlebars", {
+              error: "Unable to create account.",
+            });
+          }
+          req.session.isLoggedIn = true;
+          req.session.isAdmin = false;
+          req.session.name = requestedUsername;
+          req.session.avatar = "";
+          req.session.avatar_initial = requestedUsername.charAt(0).toUpperCase();
+          res.redirect("/profile");
+        },
+      );
     }
+    let insertedPostgres = false;
     postgresReady
       .then(() =>
         postgresPool.query(
@@ -2412,17 +2435,23 @@ app.post("/signup", (req, res) => {
         ),
       )
       .then(() => {
-        db.run(
-          "INSERT OR IGNORE INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
-          [
-            requestedUsername,
-            firstName,
-            lastName,
-            requestedEmail,
-            passwordHash,
-            goal || "",
-          ],
-        );
+        insertedPostgres = true;
+        return new Promise((resolve, reject) => {
+          db.run(
+            "INSERT OR IGNORE INTO members (username, fname, lname, email, password_hash, role, goal) VALUES (?, ?, ?, ?, ?, 'student', ?)",
+            [
+              requestedUsername,
+              firstName,
+              lastName,
+              requestedEmail,
+              passwordHash,
+              goal || "",
+            ],
+            (sqliteError) => (sqliteError ? reject(sqliteError) : resolve()),
+          );
+        });
+      })
+      .then(() => {
         req.session.isLoggedIn = true;
         req.session.isAdmin = false;
         req.session.name = requestedUsername;
@@ -2431,6 +2460,14 @@ app.post("/signup", (req, res) => {
         res.redirect("/profile");
       })
       .catch((insertError) => {
+        if (insertedPostgres) {
+          postgresPool
+            .query("DELETE FROM users WHERE username = $1", [requestedUsername])
+            .catch((cleanupError) =>
+              console.error("Unable to roll back PostgreSQL signup:", cleanupError),
+            );
+        }
+        console.error("Signup persistence failed:", insertError);
         if (insertError.code === "23505")
           return res.status(400).render("signup.handlebars", {
             error: "That username is already taken.",
@@ -3787,22 +3824,33 @@ const deleteStudent = (req, res) => {
               );
               if (exists.rows[0].table_name) {
                 if (table === characterTable) {
-                  const column = await client.query(
-                    `SELECT data_type FROM information_schema.columns
-                     WHERE table_schema = 'public' AND table_name = $1
-                       AND column_name = 'user_id'`,
+                  const columns = await client.query(
+                    `SELECT column_name, data_type FROM information_schema.columns
+                     WHERE table_schema = 'public' AND table_name = $1`,
                     [table],
                   );
-                  if (column.rows[0]?.data_type === "integer") {
+                  const userIdColumn = columns.rows.find(
+                    (column) => column.column_name === "user_id",
+                  );
+                  const usernameColumn = columns.rows.find(
+                    (column) => column.column_name === "username",
+                  );
+                  if (userIdColumn?.data_type === "integer") {
                     await client.query(
                       `DELETE FROM "${table}" WHERE user_id = (
                         SELECT id FROM users WHERE username = $1
                       )`,
                       [username],
                     );
-                  } else {
+                  } else if (userIdColumn) {
                     await client.query(
                       `DELETE FROM "${table}" WHERE user_id = $1`,
+                      [username],
+                    );
+                  }
+                  if (usernameColumn) {
+                    await client.query(
+                      `DELETE FROM "${table}" WHERE username = $1`,
                       [username],
                     );
                   }
@@ -3839,26 +3887,44 @@ const deleteStudent = (req, res) => {
           db.serialize(() => {
             db.run("BEGIN TRANSACTION", (beginError) => {
               if (beginError) return reject(beginError);
-              const statements = [
-                ...dependentTables.map(
-                  (table) => `DELETE FROM "${table}" WHERE username = ?`,
-                ),
-                `DELETE FROM "${characterTable}" WHERE user_id = ?`,
-                "DELETE FROM members WHERE username = ? AND role != 'admin'",
-              ];
-              let index = 0;
-              const next = (error) => {
-                if (error) {
-                  return db.run("ROLLBACK", () => reject(error));
+              const deleteRows = (sql, params = [username]) =>
+                new Promise((resolveRows, rejectRows) => {
+                  db.run(sql, params, (error) => {
+                    if (error && !/no such table|no such column/i.test(error.message)) {
+                      return rejectRows(error);
+                    }
+                    resolveRows();
+                  });
+                });
+              const getColumns = (table) =>
+                new Promise((resolveColumns, rejectColumns) => {
+                  db.all(`PRAGMA table_info("${table}")`, (error, rows) => {
+                    if (error) return rejectColumns(error);
+                    resolveColumns(rows.map((row) => row.name));
+                  });
+                });
+              const deleteStudentRows = async () => {
+                for (const table of dependentTables) {
+                  await deleteRows(`DELETE FROM "${table}" WHERE username = ?`);
                 }
-                if (index === statements.length) {
-                  return db.run("COMMIT", (commitError) =>
-                    commitError ? reject(commitError) : resolve(),
-                  );
+                const characterColumns = await getColumns(characterTable);
+                if (characterColumns.includes("user_id")) {
+                  await deleteRows(`DELETE FROM "${characterTable}" WHERE user_id = ?`);
                 }
-                db.run(statements[index++], [username], next);
+                if (characterColumns.includes("username")) {
+                  await deleteRows(`DELETE FROM "${characterTable}" WHERE username = ?`);
+                }
+                await deleteRows(
+                  "DELETE FROM members WHERE username = ? AND role != 'admin'",
+                );
               };
-              next();
+              deleteStudentRows()
+                .then(() => db.run("COMMIT", (commitError) =>
+                  commitError ? reject(commitError) : resolve(),
+                ))
+                .catch((error) => {
+                  db.run("ROLLBACK", () => reject(error));
+                });
             });
           });
         }),
