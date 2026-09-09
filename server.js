@@ -3398,14 +3398,32 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
 });
 
 app.post("/profile/goal", requireProfileUser, (req, res) => {
-  db.run(
-    "UPDATE members SET goal = ? WHERE username = ?",
-    [String(req.body.goal || "").trim(), req.session.name],
-    (error) => {
-      if (error) return res.status(500).redirect("/profile?goalError=1");
-      res.redirect("/profile?goalSaved=1");
-    },
-  );
+  const goal = String(req.body.goal || "").trim();
+  const saveToPostgres = postgresPool
+    ? postgresReady.then(() =>
+        postgresPool.query("UPDATE users SET goal = $1 WHERE username = $2", [
+          goal,
+          req.session.name,
+        ]),
+      )
+    : Promise.resolve(null);
+  saveToPostgres
+    .then((result) => {
+      if (postgresPool && result.rowCount !== 1)
+        throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
+      return new Promise((resolve, reject) => {
+        db.run(
+          "UPDATE members SET goal = ? WHERE username = ?",
+          [goal, req.session.name],
+          (error) => (error ? reject(error) : resolve()),
+        );
+      });
+    })
+    .then(() => res.redirect("/profile?goalSaved=1"))
+    .catch((error) => {
+      console.error("Unable to save learning goal:", error);
+      res.status(500).redirect("/profile?goalError=1");
+    });
 });
 
 app.post("/profile/background", requireProfileUser, (req, res) => {
@@ -3414,14 +3432,32 @@ app.post("/profile/background", requireProfileUser, (req, res) => {
     return res.status(400).redirect("/profile?backgroundError=1");
   }
 
-  db.run(
-    "UPDATE members SET profile_background = ? WHERE username = ?",
-    [backgroundColor.toLowerCase(), req.session.name],
-    (error) => {
-      if (error) return res.status(500).redirect("/profile?backgroundError=1");
-      res.redirect("/profile?backgroundSaved=1");
-    },
-  );
+  const normalizedBackground = backgroundColor.toLowerCase();
+  const saveToPostgres = postgresPool
+    ? postgresReady.then(() =>
+        postgresPool.query(
+          "UPDATE users SET profile_background = $1 WHERE username = $2",
+          [normalizedBackground, req.session.name],
+        ),
+      )
+    : Promise.resolve(null);
+  saveToPostgres
+    .then((result) => {
+      if (postgresPool && result.rowCount !== 1)
+        throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
+      return new Promise((resolve, reject) => {
+        db.run(
+          "UPDATE members SET profile_background = ? WHERE username = ?",
+          [normalizedBackground, req.session.name],
+          (error) => (error ? reject(error) : resolve()),
+        );
+      });
+    })
+    .then(() => res.redirect("/profile?backgroundSaved=1"))
+    .catch((error) => {
+      console.error("Unable to save profile background:", error);
+      res.status(500).redirect("/profile?backgroundError=1");
+    });
 });
 
 app.post("/profile/avatar", requireProfileUser, (req, res) => {
@@ -3561,6 +3597,7 @@ app.post("/api/profile/character", requireProfileUser, (req, res) => {
             )
             .then(() => {
               req.session.avatar = avatarFilename;
+              req.session.spritesheet = spritesheetFilename;
               res.json({
                 saved: true,
                 avatar: avatarFilename,
