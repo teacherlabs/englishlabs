@@ -2486,9 +2486,13 @@ app.post("/signup", (req, res) => {
       })
       .catch((error) => {
         console.error("Signup persistence failed:", error);
-        if (error.code === "23505" || error.code === "SQLITE_CONSTRAINT") {
+        const isDuplicate =
+          error.code === "23505" ||
+          error.code === "SQLITE_CONSTRAINT" ||
+          String(error.code || "").startsWith("SQLITE_CONSTRAINT_");
+        if (isDuplicate) {
           return res.status(400).render("signup.handlebars", {
-            error: "That username or email is already registered.",
+            error: "That username or email is already taken",
           });
         }
         res.status(500).render("signup.handlebars", {
@@ -2591,8 +2595,13 @@ app.get("/profile", requireProfileUser, (req, res) => {
               grammarDb.all(
                 "SELECT id, title FROM chapters",
                 (chapterError, chapters) => {
-                  if (chapterError)
-                    return res.status(500).send("Unable to load chapters.");
+                  if (chapterError) {
+                    console.warn(
+                      "Unable to load chapters; rendering profile without chapter names:",
+                      chapterError,
+                    );
+                    chapters = [];
+                  }
                   const chapterNames = Object.fromEntries(
                     chapters.map((chapter) => [chapter.id, chapter.title]),
                   );
