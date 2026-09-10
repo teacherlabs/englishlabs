@@ -980,6 +980,10 @@ legend {
   font-size: 12px;
 }
 
+.app-sidebar .app-account-link strong {
+  color: var(--color-background-tint);
+}
+
 .app-account-link small {
   margin-top: 2px;
   color: var(--app-muted);
@@ -4547,15 +4551,15 @@ nav ul li a:hover {
 }
 
 .hardest-words li:nth-child(1) {
-  background: #c9e4c5;
+  background: linear-gradient(135deg, #b9d7f2 0%, #dbeafe 100%);
 }
 
 .hardest-words li:nth-child(2) {
-  background: #dff2e3;
+  background: linear-gradient(135deg, #c9e2f8 0%, #e2f0ff 100%);
 }
 
 .hardest-words li:nth-child(3) {
-  background: #eef8ef;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
 }
 
 .exercise-workspace .practice-nav {
@@ -4566,8 +4570,12 @@ nav ul li a:hover {
   padding-right: 10px;
   padding-left: 10px;
   border-radius: 5px;
-  background: #fff4c7;
-  color: #14213d;
+  background: var(--color-secondary);
+  color: var(--color-background-tint);
+}
+
+.practice-nav nav a.active-exercise strong {
+  color: var(--color-background-tint);
 }
 
 .vocabulary-page {
@@ -4598,7 +4606,7 @@ nav ul li a:hover {
   gap: 4px;
   padding: 13px 15px;
   border: 1px solid #dbe2ed;
-  border-top: 4px solid #c9e4c5;
+  border-top: 4px solid var(--color-background-tint);
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.88);
   color: #14213d;
@@ -4607,10 +4615,10 @@ nav ul li a:hover {
 }
 
 .vocabulary-level:nth-child(2) {
-  border-top-color: #f3d59a;
+  border-top-color: var(--color-background-tint);
 }
 .vocabulary-level:nth-child(3) {
-  border-top-color: #e5d0ef;
+  border-top-color: var(--color-background-tint);
 }
 
 .vocabulary-level span {
@@ -4619,10 +4627,19 @@ nav ul li a:hover {
 }
 
 .vocabulary-level.selected,
-.vocabulary-level:hover {
+.vocabulary-level.selected:hover {
   border-color: #14213d;
-  border-top-color: #f3c76b;
-  background: #fff9eb;
+  border-top-color: var(--color-background-tint);
+  background: var(--color-secondary);
+  color: var(--color-background-tint);
+}
+
+.vocabulary-level.selected strong {
+  color: var(--color-background-tint);
+}
+
+.vocabulary-level.selected span {
+  color: rgba(219, 234, 254, 0.78);
 }
 
 .vocabulary-level.locked {
@@ -4633,7 +4650,7 @@ nav ul li a:hover {
 .vocabulary-level.locked:hover {
   transform: none;
   border-color: #dbe2ed;
-  border-top-color: #c9e4c5;
+  border-top-color: var(--color-background-tint);
   background: rgba(255, 255, 255, 0.88);
 }
 
@@ -4654,12 +4671,22 @@ nav ul li a:hover {
   perspective: 1000px;
   min-height: 330px;
   padding: 38px 28px;
-  border: 1px solid #dbe2ed;
-  border-top: 5px solid #b9d7f2;
+  border: 1px solid rgba(219, 234, 254, 0.4);
+  border-top: 5px solid var(--color-background-tint);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 14px 30px rgba(38, 55, 82, 0.1);
+  background: var(--color-secondary);
+  box-shadow: 0 14px 30px rgba(20, 33, 61, 0.24);
+  color: var(--color-background-tint);
   text-align: center;
+}
+
+.vocabulary-item .word-type,
+.vocabulary-item h2,
+.vocabulary-item .word-definition,
+.vocabulary-item .flip-hint,
+.vocabulary-item .vocabulary-card-back p,
+.vocabulary-item .vocabulary-card-back p span {
+  color: var(--color-background-tint);
 }
 
 .vocabulary-card-inner {
@@ -4725,9 +4752,13 @@ nav ul li a:hover {
   width: auto;
   margin: 13px 0 8px;
   padding: 0;
-  color: #14213d;
+  color: var(--color-background-tint);
   font-family: "Fredoka", sans-serif;
   font-size: 42px;
+}
+
+.app-shell .vocabulary-item h2 {
+  color: var(--color-background-tint);
 }
 
 .word-definition,
