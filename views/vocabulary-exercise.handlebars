@@ -126,11 +126,23 @@
     let totalFlipPoints = 0;
     let completed = new Set();
     let failed = [];
-    const saveDifficultWords = (words) => fetch("/api/vocabulary/difficult-words", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ difficultyLevel: selectedLevel, words }),
-    });
+    const saveDifficultWords = async (words) => {
+      const payload = {
+        difficultyLevel: ["easy", "medium"].includes(selectedLevel) ? selectedLevel : "easy",
+        words: [...new Set(words.map((word) => String(word).trim()).filter(Boolean))],
+      };
+      if (!payload.words.length) return;
+      const response = await fetch("/api/vocabulary/difficult-words", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("Unable to save difficult words.");
+      return response.json();
+    };
 
     const readResult = () => JSON.parse(localStorage.getItem(resultKey) || "null");
     const showCompletion = (result) => {
@@ -270,7 +282,7 @@
         if (!skippedWords.includes(word)) skippedWords.push(word);
         localStorage.setItem(`vocabulary-skipped-${selectedLevel}`, JSON.stringify(skippedWords.slice(-20)));
         recordSkippedWord(word);
-        saveDifficultWords([word]);
+        saveDifficultWords([word]).catch((error) => console.error(error));
         completed.add(currentIndex);
         if (completed.size === items.length) {
           finishRound();
@@ -387,7 +399,7 @@
       const wrongWordsList = document.querySelector("[data-spelling-wrong-words]");
       const recordWrongWord = (word) => {
         wrongWords.set(word, (wrongWords.get(word) || 0) + 1);
-        saveDifficultWords([word]);
+        saveDifficultWords([word]).catch((error) => console.error(error));
       };
       const showWrongWords = () => {
         if (!wrongWordsList) return;

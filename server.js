@@ -1083,6 +1083,25 @@ if (postgresPool) {
           ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ
       `),
     )
+    .then(() =>
+      postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS vocabulary_difficult_words (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          difficulty_level TEXT NOT NULL CHECK (difficulty_level IN ('easy', 'medium')),
+          word TEXT NOT NULL,
+          attempts INTEGER NOT NULL DEFAULT 1,
+          last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (username, difficulty_level, word)
+        )
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS vocabulary_difficult_words_unique
+        ON vocabulary_difficult_words (username, difficulty_level, word)
+      `),
+    )
     .catch((error) => {
       console.error("PostgreSQL user database initialization failed:", error);
       throw error;
@@ -4138,6 +4157,36 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
   if (!difficultyLevel || !words.length)
     return res.status(400).json({ error: "Invalid words." });
 
+  if (postgresPool) {
+    return postgresReady
+      .then(() => postgresPool.connect())
+      .then(async (client) => {
+        try {
+          await client.query("BEGIN");
+          for (const word of words) {
+            await client.query(
+              `INSERT INTO vocabulary_difficult_words (username, difficulty_level, word)
+               VALUES ($1, $2, $3)
+               ON CONFLICT (username, difficulty_level, word)
+               DO UPDATE SET attempts = vocabulary_difficult_words.attempts + 1, last_seen = NOW()` ,
+              [username, difficultyLevel, word],
+            );
+          }
+          await client.query("COMMIT");
+          res.json({ saved: words.length });
+        } catch (error) {
+          await client.query("ROLLBACK");
+          throw error;
+        } finally {
+          client.release();
+        }
+      })
+      .catch((error) => {
+        console.error("Unable to save difficult words:", error);
+        res.status(500).json({ error: "Unable to save difficult words." });
+      });
+  }
+
   const statement = db.prepare(`
     INSERT INTO vocabulary_difficult_words (username, difficulty_level, word)
     VALUES (?, ?, ?)
@@ -4155,6 +4204,20 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
 app.get("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
   const username = String(req.session.name || "").trim();
   if (!username) return res.status(401).json({ error: "Login required." });
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT difficulty_level, word, attempts, last_seen FROM vocabulary_difficult_words WHERE username = $1 ORDER BY attempts DESC, last_seen DESC LIMIT 20",
+          [username],
+        ),
+      )
+      .then(({ rows }) => res.json({ words: rows }))
+      .catch((error) => {
+        console.error("Unable to load difficult words:", error);
+        res.status(500).json({ error: "Unable to load difficult words." });
+      });
+  }
   db.all(
     "SELECT difficulty_level, word, attempts, last_seen FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 20",
     [username],
@@ -4236,29 +4299,12 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
         (sum, progressRow) => sum + (Number(progressRow.total_points) || 0),
         0,
       );
-      const easy_activities = filteredProgress.filter(
-        (progressRow) => progressRow.difficulty_level === "easy",
-      ).length;
-      const medium_activities = filteredProgress.filter(
-        (progressRow) => progressRow.difficulty_level === "medium",
-      ).length;
-
       return {
         ...student,
         points,
         possible_points,
         activities: filteredProgress.length,
-        pendingWriting: pendingWritingByUsername[student.username] || 0,
-        levelBadges: [
-          {
-            label: "Easy",
-            stronger: easy_activities >= medium_activities,
-          },
-          {
-            label: "Medium",
-            stronger: medium_activities > easy_activities,
-          },
-        ],
+        pendingCount: pendingWritingByUsername[student.username] || 0,
       };
     });
 
