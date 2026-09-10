@@ -11,6 +11,15 @@
           <span class="learning-goal-badge">🎯 Goal: {{#if student.goal}}{{student.goal}}{{else}}No goal set{{/if}}</span>
         </div>
       </div>
+      <form class="student-reminder-form" method="POST" action="/teacher/student/{{student.username}}/reminders">
+        <label for="studentReminderMessage">Add reminder</label>
+        <textarea id="studentReminderMessage" name="message" rows="2" maxlength="500" placeholder="Add a focus note or next step..." required></textarea>
+        <div class="student-reminder-form-footer">
+          <label for="studentReminderDueDate">Due date <span>(optional)</span></label>
+          <input id="studentReminderDueDate" name="due_date" type="date" />
+          <button class="practice-button" type="submit">Add reminder</button>
+        </div>
+      </form>
     </div>
 
     <div class="student-profile-layout">

@@ -1,4 +1,17 @@
-﻿* {
+﻿:root {
+  --color-primary: #2D4B7B;
+  --color-secondary: #14213D;
+  --color-background-tint: #DBEAFE;
+  --color-accent: #D97706;
+  --color-dark: #291D18;
+  --color-surface: #FFFFFF;
+  --color-muted: #526074;
+  --color-border: #CBD5E1;
+  --color-success: #2D4B7B;
+  --color-danger: #8F3028;
+}
+
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -739,11 +752,11 @@ legend {
 
 /* Shared learning dashboard shell */
 .app-shell {
-  --app-ink: #14213d;
-  --app-muted: #69758a;
-  --app-line: #dfe5ec;
-  --app-paper: #ffffff;
-  --app-wash: #f4f7f5;
+  --app-ink: var(--color-secondary);
+  --app-muted: var(--color-muted);
+  --app-line: var(--color-border);
+  --app-paper: var(--color-surface);
+  --app-wash: #F8FAFC;
   display: grid;
   grid-template-columns: 218px minmax(0, 1fr) 266px;
   min-height: 100dvh;
@@ -764,6 +777,53 @@ legend {
   min-height: 100dvh;
   padding: 28px 16px 18px;
   border-right: 1px solid var(--app-line);
+  background: var(--color-primary);
+  color: var(--color-background-tint);
+}
+
+.app-sidebar .app-brand,
+.app-sidebar .app-brand:hover,
+.app-sidebar .app-nav-link,
+.app-sidebar .app-nav-link:hover,
+.app-sidebar .app-nav-link:focus-visible,
+.app-sidebar .app-account-link,
+.app-sidebar .app-account-link:hover,
+.app-sidebar .app-logout-link,
+.app-sidebar .app-logout-link:hover {
+  color: var(--color-background-tint);
+}
+
+.app-sidebar .app-brand small,
+.app-sidebar .app-account-link small,
+.app-sidebar .app-nav-label {
+  color: rgba(219, 234, 254, 0.72);
+}
+
+.app-sidebar .app-brand-mark {
+  background: var(--color-background-tint);
+  color: var(--color-primary);
+}
+
+.app-sidebar .app-nav-link:hover,
+.app-sidebar .app-nav-link:focus-visible,
+.app-sidebar .app-nav-link:first-of-type {
+  background: rgba(219, 234, 254, 0.2);
+  color: var(--color-background-tint);
+}
+
+.app-sidebar .app-nav-link:first-of-type .app-nav-icon,
+.app-sidebar .app-nav-icon {
+  color: var(--color-background-tint);
+}
+
+.app-sidebar .app-sidebar-footer {
+  border-top-color: rgba(219, 234, 254, 0.25);
+}
+
+.app-sidebar .app-avatar,
+.app-sidebar .app-avatar-placeholder {
+  background: var(--color-background-tint);
+  color: var(--color-primary);
 }
 
 .app-brand {
@@ -798,8 +858,8 @@ legend {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: #f7d36a;
-  color: var(--app-ink);
+  background: var(--color-primary);
+  color: var(--color-surface);
   font-size: 12px;
   letter-spacing: 0.04em;
 }
@@ -843,13 +903,13 @@ legend {
 
 .app-nav-link:hover,
 .app-nav-link:focus-visible {
-  background: #fff4c7;
+  background: var(--color-background-tint);
   color: var(--app-ink);
 }
 
 .app-nav-link:first-of-type {
-  background: #e7f3ed;
-  color: #236044;
+  background: var(--color-background-tint);
+  color: var(--color-primary);
 }
 
 .app-nav-icon {
@@ -861,7 +921,7 @@ legend {
 }
 
 .app-nav-link:first-of-type .app-nav-icon {
-  color: #236044;
+  color: var(--color-primary);
 }
 
 .app-sidebar-footer {
@@ -968,7 +1028,7 @@ legend {
 
 .app-profile-card {
   padding: 18px;
-  background: #eef7f1;
+  background: var(--color-background-tint);
 }
 
 .app-profile-card-heading,
@@ -979,7 +1039,7 @@ legend {
 }
 
 .app-profile-card-heading a {
-  color: #236044;
+  color: var(--color-primary);
   font-size: 18px;
 }
 
@@ -989,8 +1049,8 @@ legend {
   width: 76px;
   height: 76px;
   margin: 21px 0 13px;
-  border: 4px solid #fff;
-  box-shadow: 0 5px 14px rgba(35, 96, 68, 0.12);
+  border: 4px solid var(--color-surface);
+  box-shadow: 0 5px 14px rgba(20, 33, 61, 0.12);
   color: var(--app-ink);
   font-size: 25px;
   font-weight: 800;
@@ -1037,7 +1097,7 @@ legend {
   width: 46%;
   height: 100%;
   border-radius: inherit;
-  background: #d05a3a;
+  background: var(--color-accent);
 }
 
 .app-pulse-note {
@@ -1052,7 +1112,7 @@ legend {
   display: flex;
   justify-content: space-between;
   margin-top: 16px;
-  color: #236044;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -1067,7 +1127,7 @@ legend {
 
 .app-feedback-card > :last-child {
   margin-left: auto;
-  color: #d05a3a;
+  color: var(--color-accent);
 }
 
 .app-feedback-count {
@@ -1076,7 +1136,8 @@ legend {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #f7d36a;
+  background: var(--color-accent);
+  color: var(--color-surface);
   font-size: 12px;
   font-weight: 800;
 }
@@ -1094,6 +1155,265 @@ legend {
   margin-top: 2px;
   color: var(--app-muted);
   font-size: 10px;
+}
+
+.app-calendar-card,
+.app-reminders-card {
+  padding: 16px;
+  border: 1px solid var(--app-line);
+  border-radius: 9px;
+  background: var(--app-paper);
+}
+
+.app-widget-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app-widget-heading h2 {
+  margin: 5px 0 0;
+  color: var(--app-ink);
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.app-calendar-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--color-background-tint);
+  color: var(--color-primary);
+  font-size: 17px;
+}
+
+.app-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  text-align: center;
+}
+
+.app-calendar-weekdays {
+  margin-top: 18px;
+  color: var(--app-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.app-calendar-days {
+  margin-top: 6px;
+}
+
+.app-calendar-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 24px;
+  border-radius: 5px;
+  color: var(--app-ink);
+  font-size: 10px;
+}
+
+.app-calendar-day.is-muted {
+  color: #b5bdc8;
+}
+
+.app-calendar-day.is-today {
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-weight: 800;
+}
+
+.app-calendar-day.has-reminder:not(.is-today) {
+  background: var(--color-background-tint);
+  color: var(--color-secondary);
+  font-weight: 800;
+}
+
+.app-calendar-day i {
+  position: absolute;
+  bottom: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.app-calendar-day.is-today i {
+  background: var(--color-surface);
+}
+
+.app-reminders-card .app-widget-heading {
+  align-items: center;
+}
+
+.app-reminder-count {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.app-reminders-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.app-reminder {
+  display: grid;
+  grid-template-columns: 45px minmax(0, 1fr);
+  gap: 7px;
+  padding: 9px 0;
+  border-top: 1px solid var(--app-line);
+  color: var(--app-ink);
+}
+
+.app-reminder:hover {
+  color: var(--color-accent);
+}
+
+.app-reminder-date {
+  color: var(--color-primary);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.app-reminder-copy strong,
+.app-reminder-copy small {
+  display: block;
+}
+
+.app-reminder-copy strong {
+  overflow: hidden;
+  color: var(--app-ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-reminder-copy small {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--app-muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-reminder-kind {
+  grid-column: 2;
+  width: max-content;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--color-background-tint);
+  color: var(--color-primary);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.app-student-reminders {
+  border-color: var(--color-primary);
+}
+
+.app-student-reminder {
+  position: relative;
+  grid-template-columns: 45px minmax(0, 1fr) 22px;
+  padding-right: 0;
+}
+
+.app-student-reminder .app-reminder-copy {
+  min-width: 0;
+}
+
+.app-reminder-dismiss {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-reminder-dismiss:hover,
+.app-reminder-dismiss:focus-visible {
+  background: var(--color-background-tint);
+  color: var(--color-dark);
+}
+
+.app-reminder-empty {
+  width: auto;
+  padding: 8px 0 0;
+  color: var(--app-muted) !important;
+  font-size: 11px;
+}
+
+.student-reminder-form {
+  display: grid;
+  gap: 8px;
+  min-width: 280px;
+  max-width: 420px;
+  margin-left: auto;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-tint);
+}
+
+.student-reminder-form > label,
+.student-reminder-form-footer label {
+  color: var(--color-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.student-reminder-form-footer label span {
+  color: var(--color-muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.student-reminder-form textarea,
+.student-reminder-form input[type="date"] {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background: var(--color-surface);
+  color: var(--color-secondary);
+  font: inherit;
+}
+
+.student-reminder-form-footer {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-reminder-form .practice-button {
+  padding: 9px 12px;
+  font-size: 12px;
 }
 
 @media (max-width: 1100px) {
@@ -6344,4 +6664,386 @@ legend {
   .translation-options {
     grid-template-columns: 1fr;
   }
+}
+
+/* Project-wide palette overrides. Keep component layout rules above this layer. */
+body {
+  background: var(--color-surface);
+  color: var(--color-secondary);
+}
+
+a {
+  color: var(--color-primary);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--color-accent);
+}
+
+button,
+input,
+textarea,
+select {
+  accent-color: var(--color-primary);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+header > nav,
+.practice-nav,
+.profile-card,
+.account-card,
+.grammar-card,
+.chapter-mini-card,
+.exercise-card,
+.question-card,
+.reading-section,
+.writing-submission-panel,
+.vocabulary-insights,
+.chunk-practice-panel,
+.chunk-history,
+.final-test-intro,
+.fixer-panel,
+.error-panel {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-secondary);
+}
+
+.practice-nav nav a:hover,
+.chapter-mini-card:hover,
+.chapter-mini-card.selected,
+.exercise-card:hover,
+.exercise-card.selected,
+.answer-options label:hover,
+.answer-options label:has(input:checked),
+.reading-topic-link.selected,
+.reading-topic-link.completed {
+  background: var(--color-background-tint);
+  color: var(--color-secondary);
+}
+
+.practice-button,
+.notes-button,
+.auth-primary-button,
+.answer-options button.selected,
+.answer-options button.multi-correct,
+.correction-options button,
+.reading-definition-chip,
+.drag-drop-chip,
+.sport-item {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.practice-button:hover:not(:disabled),
+.notes-button:hover:not(:disabled),
+.auth-primary-button:hover,
+.answer-options button:hover:not(:disabled),
+.correction-options button:hover,
+.reading-definition-chip:hover,
+.drag-drop-chip:hover,
+.sport-item:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-surface);
+}
+
+.practice-button:disabled,
+.notes-button:disabled {
+  background: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+
+.eyebrow,
+.card-topline,
+.topic-label,
+.question-timer,
+.profile-message-badge,
+.nav-feedback-badge {
+  color: var(--color-accent);
+}
+
+.answer-feedback.correct,
+.feedback.correct,
+.upload-success,
+.topic-completion-tick,
+.exercise-completed-badge {
+  color: var(--color-primary);
+}
+
+.answer-feedback.incorrect,
+.feedback.incorrect,
+.account-error {
+  color: var(--color-danger);
+}
+
+.profile-progress-track,
+.progress-track,
+.reading-progress-track {
+  background: var(--color-background-tint);
+}
+
+.profile-progress-track span,
+.progress-track span,
+.reading-progress-track span {
+  background: var(--color-primary);
+}
+
+.lobby-stage-wrap,
+.lobby-character-stage {
+  border-color: var(--color-secondary);
+  background: var(--color-background-tint);
+}
+
+.lobby-code,
+.lobby-code strong {
+  color: var(--color-primary);
+}
+
+.danger-button {
+  background: var(--color-dark);
+}
+
+.danger-button:hover {
+  background: var(--color-secondary);
+}
+
+footer {
+  background: var(--color-dark);
+  color: var(--color-surface);
+}
+
+/* Authenticated views: use the English Labs palette consistently. */
+.app-shell {
+  background: var(--color-surface);
+}
+
+.app-shell .practice-page,
+.app-shell .vocabulary-page,
+.app-shell .grammar-page,
+.app-shell .reading-page,
+.app-shell .lobby-page,
+.app-shell .account-page {
+  background: var(--color-surface) !important;
+  color: var(--color-secondary);
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell h5,
+.app-shell h6,
+.app-shell legend,
+.app-shell p,
+.app-shell li,
+.app-shell label,
+.app-shell strong,
+.app-shell span {
+  color: var(--color-secondary);
+}
+
+.app-shell .eyebrow,
+.app-shell .card-topline,
+.app-shell .topic-label {
+  color: var(--color-primary);
+}
+
+.app-shell .practice-nav,
+.app-shell .profile-card,
+.app-shell .profile-messages-panel,
+.app-shell .account-card,
+.app-shell .grammar-card,
+.app-shell .chapter-mini-card,
+.app-shell .exercise-card,
+.app-shell .question-card,
+.app-shell .json-exercise,
+.app-shell .paragraph-exercise,
+.app-shell .reading-preparation,
+.app-shell .reading-exercise,
+.app-shell .reading-section,
+.app-shell .listening-context,
+.app-shell .writing-tips-card,
+.app-shell .writing-submission-panel,
+.app-shell .vocabulary-insights,
+.app-shell .chunk-practice-panel,
+.app-shell .chunk-history,
+.app-shell .final-test-intro,
+.app-shell .fixer-panel,
+.app-shell .error-panel,
+.app-shell .admin-live-quiz,
+.app-shell .student-live-quiz,
+.app-shell .round-leaderboard-panel,
+.app-shell .final-results-panel,
+.app-shell .lobby-quiz-panel {
+  border-color: var(--color-border) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-secondary);
+}
+
+.app-shell .practice-nav nav a:hover,
+.app-shell .practice-nav nav a:focus-visible,
+.app-shell .chapter-mini-card:hover,
+.app-shell .chapter-mini-card.selected,
+.app-shell .exercise-card:hover,
+.app-shell .exercise-card.selected,
+.app-shell .reading-topic-link:hover,
+.app-shell .reading-topic-link.selected,
+.app-shell .reading-topic-link.completed,
+.app-shell .listening-level.is-open,
+.app-shell .answer-options label:hover,
+.app-shell .answer-options label:has(input:checked),
+.app-shell .word-card:hover,
+.app-shell .word-card.selected {
+  background: var(--color-background-tint) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-secondary) !important;
+}
+
+.app-shell .practice-button,
+.app-shell .notes-button,
+.app-shell .auth-primary-button,
+.app-shell .login-submit,
+.app-shell .answer-options button.selected,
+.app-shell .answer-options button.multi-correct,
+.app-shell .correction-options button,
+.app-shell .reading-definition-chip,
+.app-shell .drag-drop-chip,
+.app-shell .drag-drop-word-bank button,
+.app-shell .sport-item,
+.app-shell .word-card.selected {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-surface) !important;
+}
+
+.app-shell .practice-button:hover:not(:disabled),
+.app-shell .notes-button:hover:not(:disabled),
+.app-shell .answer-options button:hover:not(:disabled),
+.app-shell .correction-options button:hover,
+.app-shell .reading-definition-chip:hover,
+.app-shell .drag-drop-chip:hover,
+.app-shell .sport-item:hover {
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  color: var(--color-surface) !important;
+}
+
+.app-shell .practice-button:disabled,
+.app-shell .notes-button:disabled,
+.app-shell .answer-options button:disabled {
+  background: var(--color-border) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-muted) !important;
+}
+
+.app-shell input,
+.app-shell textarea,
+.app-shell select,
+.app-shell .written-answer,
+.app-shell .gap-fill-input {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-secondary);
+}
+
+.app-shell input:focus,
+.app-shell textarea:focus,
+.app-shell select:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid rgba(45, 75, 123, 0.22);
+}
+
+.app-shell .answer-feedback.correct,
+.app-shell .feedback.correct,
+.app-shell .upload-success,
+.app-shell .exercise-completed-badge,
+.app-shell .topic-completion-tick {
+  color: var(--color-primary) !important;
+}
+
+.app-shell .answer-feedback.incorrect,
+.app-shell .feedback.incorrect,
+.app-shell .account-error {
+  color: var(--color-dark) !important;
+}
+
+.app-shell .profile-progress-track,
+.app-shell .progress-track,
+.app-shell .reading-progress-track {
+  background: var(--color-background-tint) !important;
+}
+
+.app-shell .profile-progress-track span,
+.app-shell .progress-track span,
+.app-shell .reading-progress-track span {
+  background: var(--color-primary) !important;
+}
+
+.app-shell .lobby-stage-wrap,
+.app-shell .lobby-character-stage,
+.app-shell .admin-live-answers span,
+.app-shell .quicktype-order-list li,
+.app-shell .word-card {
+  border-color: var(--color-primary) !important;
+  background: var(--color-background-tint) !important;
+  color: var(--color-secondary) !important;
+}
+
+.app-shell .live-answer-grid button,
+.app-shell .lobby-answer-grid button {
+  background: var(--color-primary) !important;
+  color: var(--color-surface) !important;
+}
+
+.app-shell .danger-button,
+.app-shell .student-delete-button {
+  background: var(--color-dark) !important;
+  color: var(--color-surface) !important;
+}
+
+.app-shell .danger-button:hover,
+.app-shell .student-delete-button:hover {
+  background: var(--color-secondary) !important;
+}
+
+.auth-landing {
+  background: var(--color-background-tint);
+}
+
+.auth-landing-video {
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+
+.auth-landing-content h1 {
+  color: var(--color-secondary);
+  text-shadow: none;
+}
+
+.auth-landing-content > p:not(.eyebrow) {
+  color: var(--color-secondary);
+  text-shadow: none;
+}
+
+.auth-primary-button {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.auth-secondary-button {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  color: var(--color-primary);
 }

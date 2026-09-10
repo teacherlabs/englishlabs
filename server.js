@@ -1063,6 +1063,17 @@ if (postgresPool) {
         )
       `),
     )
+    .then(() =>
+      postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS student_reminders (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          message TEXT NOT NULL,
+          due_date DATE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `),
+    )
     .catch((error) => {
       console.error("PostgreSQL user database initialization failed:", error);
       throw error;
@@ -1195,6 +1206,78 @@ const usefulChunkLists = usefulChunkListsData.map((list, index) => ({
   chunks: list.chunks.map((chunk) => chunk.phrase),
 }));
 
+const dashboardWeekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const dashboardMonthFormatter = new Intl.DateTimeFormat("en", {
+  month: "long",
+  year: "numeric",
+});
+const dashboardDateFormatter = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+});
+
+const dashboardDateKey = (date) =>
+  [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+
+const buildDashboardSchedule = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const mondayOffset = (firstOfMonth.getDay() + 6) % 7;
+  const reminders = [
+    {
+      title: "Grammar final test",
+      detail: "Complete your chapter challenge",
+      href: "/practice/final-test",
+      kind: "Test",
+      offset: 2,
+    },
+    {
+      title: "Writing practice",
+      detail: "Draft your next writing response",
+      href: "/writing",
+      kind: "Task",
+      offset: 5,
+    },
+    {
+      title: "Listening checkpoint",
+      detail: "Finish one listening topic",
+      href: "/listening",
+      kind: "Activity",
+      offset: 9,
+    },
+  ].map((reminder) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + reminder.offset);
+    return {
+      ...reminder,
+      date: dashboardDateKey(date),
+      dateLabel: dashboardDateFormatter.format(date),
+    };
+  });
+  const highlightedDates = new Set(reminders.map((reminder) => reminder.date));
+  const calendarDays = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(firstOfMonth);
+    date.setDate(firstOfMonth.getDate() - mondayOffset + index);
+    const dateKey = dashboardDateKey(date);
+    return {
+      number: date.getDate(),
+      date: dateKey,
+      isCurrentMonth: date.getMonth() === today.getMonth(),
+      isToday: dateKey === dashboardDateKey(today),
+      isHighlighted: highlightedDates.has(dateKey),
+    };
+  });
+  return {
+    monthLabel: dashboardMonthFormatter.format(today),
+    weekdays: dashboardWeekdays,
+    calendarWeeks: Array.from({ length: 6 }, (_, index) =>
+      calendarDays.slice(index * 7, index * 7 + 7),
+    ),
+    reminders,
+  };
+};
+
 //----------
 // SESSIONS
 //----------
@@ -1215,6 +1298,9 @@ app.use(function (req, res, next) {
     req.session.avatarUrl = profileImageUrl(req.session.avatar);
   }
   res.locals.session = req.session;
+  res.locals.dashboardSchedule = req.session.isLoggedIn
+    ? buildDashboardSchedule()
+    : null;
   next();
 });
 
@@ -1420,6 +1506,14 @@ db.serialize(() => {
     token_hash TEXT NOT NULL UNIQUE,
     expires_at INTEGER NOT NULL,
     FOREIGN KEY (username) REFERENCES members(username)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS student_reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    message TEXT NOT NULL,
+    due_date TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES members(username) ON DELETE CASCADE
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS vocabulary_difficult_words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2784,19 +2878,33 @@ app.get("/profile", requireProfileUser, (req, res) => {
                     (feedbackError, feedbackMessages) => {
                       if (feedbackError)
                         return res.status(500).send("Unable to load messages.");
-                      res.render("profile.handlebars", {
-                        student,
-                        isAdmin: Boolean(req.session.isAdmin),
-                        progress,
-                        stats,
-                        areaProgress: buildAreaProgress(progress),
-                        passportStamps,
-                        feedbackMessages,
-                        unreadFeedbackCount: feedbackMessages.filter(
-                          (message) => !message.feedback_seen,
-                        ).length,
-                        query: req.query,
-                      });
+                      postgresPool
+                        .query(
+                          "SELECT id, message, due_date, created_at FROM student_reminders WHERE username = $1 AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",
+                          [req.session.name],
+                        )
+                        .then(({ rows: reminders }) => {
+                          res.locals.studentReminders = reminders;
+                          res.locals.studentRemindersLoaded = true;
+                          res.render("profile.handlebars", {
+                            student,
+                            isAdmin: Boolean(req.session.isAdmin),
+                            progress,
+                            stats,
+                            areaProgress: buildAreaProgress(progress),
+                            passportStamps,
+                            feedbackMessages,
+                            reminders,
+                            unreadFeedbackCount: feedbackMessages.filter(
+                              (message) => !message.feedback_seen,
+                            ).length,
+                            query: req.query,
+                          });
+                        })
+                        .catch((reminderError) => {
+                          console.error("Unable to load student reminders:", reminderError);
+                          res.status(500).send("Unable to load reminders.");
+                        });
                     },
                   );
                 },
@@ -4633,6 +4741,66 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
       loadStudentDetails,
     );
   }
+});
+
+app.post("/teacher/student/:username/reminders", requireAdmin, (req, res) => {
+  const username = String(req.params.username || "").trim();
+  const message = String(req.body.message || "").trim();
+  const dueDate = String(req.body.due_date || "").trim();
+  if (!message || message.length > 500 || (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate))) {
+    return res.redirect(`/teacher/student/${encodeURIComponent(username)}`);
+  }
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "INSERT INTO student_reminders (username, message, due_date) SELECT username, $2, NULLIF($3, '')::date FROM users WHERE username = $1 AND role = 'student'",
+          [username, message, dueDate],
+        ),
+      )
+      .then(() => res.redirect(`/teacher/student/${encodeURIComponent(username)}`))
+      .catch((error) => {
+        console.error("Unable to create student reminder:", error);
+        res.status(500).send("Unable to create reminder.");
+      });
+  }
+  db.run(
+    "INSERT INTO student_reminders (username, message, due_date) SELECT username, ?, NULLIF(?, '') FROM members WHERE username = ? AND role = 'student'",
+    [message, dueDate, username],
+    (error) => {
+      if (error) return res.status(500).send("Unable to create reminder.");
+      res.redirect(`/teacher/student/${encodeURIComponent(username)}`);
+    },
+  );
+});
+
+app.delete("/api/reminders/:id", requireLogin, (req, res) => {
+  const reminderId = Number(req.params.id);
+  if (!Number.isInteger(reminderId) || reminderId < 1)
+    return res.status(400).json({ error: "Invalid reminder." });
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "DELETE FROM student_reminders WHERE id = $1 AND username = $2 RETURNING id",
+          [reminderId, req.session.name],
+        ),
+      )
+      .then(({ rowCount }) => {
+        if (!rowCount) return res.status(404).json({ error: "Reminder not found." });
+        res.json({ deleted: true });
+      })
+      .catch(() => res.status(500).json({ error: "Unable to delete reminder." }));
+  }
+  db.run(
+    "DELETE FROM student_reminders WHERE id = ? AND username = ?",
+    [reminderId, req.session.name],
+    function (error) {
+      if (error) return res.status(500).json({ error: "Unable to delete reminder." });
+      if (!this.changes) return res.status(404).json({ error: "Reminder not found." });
+      res.json({ deleted: true });
+    },
+  );
 });
 
 app.post(
