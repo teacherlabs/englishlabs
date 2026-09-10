@@ -1473,12 +1473,25 @@ legend {
   font-size: 11px;
 }
 
+.teacher-reminder-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 18px;
+  margin: 22px 0 26px;
+}
+
+.teacher-reminder-panels > .teacher-student-reminders,
+.teacher-reminder-panels > .student-reminder-form {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
 .student-reminder-form {
   display: grid;
   gap: 8px;
-  min-width: 280px;
-  max-width: 420px;
-  margin-left: auto;
   padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -1524,8 +1537,6 @@ legend {
 }
 
 .teacher-student-reminders {
-  width: min(100%, 720px);
-  margin: 22px 0 26px;
   padding: 18px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -1598,6 +1609,12 @@ legend {
 
 .teacher-student-reminder.is-completed strong {
   text-decoration: line-through;
+}
+
+@media (max-width: 800px) {
+  .teacher-reminder-panels {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1100px) {
