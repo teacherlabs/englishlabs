@@ -16,7 +16,7 @@
       <section class="teacher-student-reminders" aria-labelledby="teacher-reminders-heading">
         <div class="student-section-heading"><h2 id="teacher-reminders-heading">Assigned reminders</h2><span>{{studentReminders.length}} total</span></div>
         <div class="teacher-student-reminder-list">
-          {{#each studentReminders}}
+          {{#each studentReminderPreview}}
             <article class="teacher-student-reminder{{#if completed_at}} is-completed{{/if}}">
               <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise</a>{{/if}}</div>
               <span>{{#if completed_at}}Completed {{completedDay}} {{completedMonth}}{{else if due_date}}Due {{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
@@ -25,6 +25,7 @@
             <p class="empty-state">No reminders assigned yet.</p>
           {{/each}}
         </div>
+        {{#if hasMoreStudentReminders}}<button class="teacher-see-all-button" type="button" data-reminders-open>See all →</button>{{/if}}
       </section>
       <form class="student-reminder-form" method="POST" action="/teacher/student/{{student.username}}/reminders">
       <label for="studentReminderMessage">Add reminder</label>
@@ -46,6 +47,23 @@
       </div>
       </form>
     </div>
+
+    {{#if hasMoreStudentReminders}}
+      <dialog class="teacher-reminders-dialog" data-reminders-dialog>
+        <div class="teacher-reminders-modal">
+          <button class="teacher-reminders-close" type="button" data-reminders-close aria-label="Close reminders">×</button>
+          <h2>Assigned reminders</h2>
+          <div class="teacher-student-reminder-list">
+            {{#each studentReminders}}
+              <article class="teacher-student-reminder{{#if completed_at}} is-completed{{/if}}">
+                <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise</a>{{/if}}</div>
+                <span>{{#if completed_at}}Completed {{completedDay}} {{completedMonth}}{{else if due_date}}Due {{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
+              </article>
+            {{/each}}
+          </div>
+        </div>
+      </dialog>
+    {{/if}}
 
     <div class="student-profile-layout">
       <nav class="student-profile-tabs" aria-label="Student progress areas">
@@ -245,9 +263,10 @@
               <span class="{{#if flipCompletions.[1]}}completed{{/if}}">Medium{{#if flipCompletions.[1]}} completed{{else}} not completed{{/if}}</span>
             </div>
             <h3>Hardest words</h3>
-            {{#if hardestWords}}
-              <ol class="admin-hardest-words">{{#each hardestWords}}<li><strong>{{word}}</strong></li>{{/each}}</ol>
-            {{else}}<p class="empty-state">No skipped words yet.</p>{{/if}}
+            <div class="difficult-words-by-level">
+              <div><strong>Easy</strong>{{#if difficultWordsEasy.length}}<ol class="admin-hardest-words">{{#each difficultWordsEasy}}<li><strong>{{word}}</strong><small>{{attempts}} attempts</small></li>{{/each}}</ol>{{else}}<p class="empty-state">None yet.</p>{{/if}}</div>
+              <div><strong>Medium</strong>{{#if difficultWordsMedium.length}}<ol class="admin-hardest-words">{{#each difficultWordsMedium}}<li><strong>{{word}}</strong><small>{{attempts}} attempts</small></li>{{/each}}</ol>{{else}}<p class="empty-state">None yet.</p>{{/if}}</div>
+            </div>
           </div>
           <div class="student-subsection-panel" id="vocabulary-translation-panel" data-student-subpanel hidden>
             <h2>Translation</h2>
@@ -280,6 +299,13 @@
 </main>
 
 <script>
+  const remindersDialog = document.querySelector("[data-reminders-dialog]");
+  document.querySelector("[data-reminders-open]")?.addEventListener("click", () => remindersDialog?.showModal());
+  document.querySelector("[data-reminders-close]")?.addEventListener("click", () => remindersDialog?.close());
+  remindersDialog?.addEventListener("click", (event) => {
+    if (event.target === remindersDialog) remindersDialog.close();
+  });
+
   const studentSectionLinks = document.querySelectorAll("[data-student-section]");
   const studentPanels = document.querySelectorAll("[data-student-panel]");
   const studentSubtabs = document.querySelectorAll("[data-student-subtabs]");

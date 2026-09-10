@@ -1065,6 +1065,42 @@ if (postgresPool) {
     )
     .then(() =>
       postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS progress (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          activity_type TEXT NOT NULL,
+          chapter_id INTEGER,
+          difficulty_level TEXT NOT NULL DEFAULT '',
+          points INTEGER NOT NULL,
+          total_points INTEGER NOT NULL,
+          percentage INTEGER NOT NULL,
+          completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS writing_submissions (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          topic_id TEXT NOT NULL,
+          topic_title TEXT NOT NULL,
+          submission_text TEXT NOT NULL,
+          submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          feedback TEXT,
+          feedback_at TIMESTAMPTZ,
+          feedback_seen BOOLEAN NOT NULL DEFAULT FALSE,
+          UNIQUE (username, topic_id)
+        );
+        CREATE TABLE IF NOT EXISTS listening_discussion_submissions (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          topic_id TEXT NOT NULL,
+          topic_title TEXT NOT NULL,
+          submission_text TEXT NOT NULL,
+          submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (username, topic_id)
+        )
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
         CREATE TABLE IF NOT EXISTS student_reminders (
           id SERIAL PRIMARY KEY,
           username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
@@ -1294,6 +1330,25 @@ app.use(function (req, res, next) {
     req.session.avatarUrl = profileImageUrl(req.session.avatar);
   }
   res.locals.session = req.session;
+  const currentPath = req.path;
+  const isActivePath = (paths) => paths.some((path) => currentPath === path || currentPath.startsWith(`${path}/`));
+  const appNavItems = [
+    { href: "/", label: "Dashboard", icon: "01", active: currentPath === "/" },
+    { href: "/practice/questions", label: "Grammar", icon: "02", active: isActivePath(["/practice", "/grammar"]) },
+    { href: "/vocabulary/flip-cards", label: "Vocabulary", icon: "03", active: isActivePath(["/vocabulary"]) },
+    { href: "/reading", label: "Reading", icon: "04", active: isActivePath(["/reading"]) },
+    { href: "/writing", label: "Writing", icon: "05", active: isActivePath(["/writing"]) },
+    { href: "/listening", label: "Listening", icon: "06", active: isActivePath(["/listening"]) },
+    { href: "/lobby", label: "Lobby", icon: "07", active: isActivePath(["/lobby"]) },
+    { href: "/quicktype", label: "QuickType", icon: "08", active: isActivePath(["/quicktype"]) },
+    { href: "/question-game", label: "Question game", icon: "09", active: isActivePath(["/question-game"]) },
+    ...(req.session.isAdmin
+      ? [{ href: "/teacher/dashboard", label: "Students", icon: "10", active: isActivePath(["/teacher"]), admin: true }]
+      : []),
+  ];
+  res.locals.appNavWorkspace = appNavItems.slice(0, 6);
+  res.locals.appNavPractice = appNavItems.slice(6);
+  res.locals.dashboardGoal = "";
   res.locals.dashboardSchedule = req.session.isLoggedIn
     ? buildDashboardSchedule()
     : null;
@@ -1321,32 +1376,35 @@ app.use((req, res, next) => {
     [req.session.name],
     (error, row) => {
       res.locals.unreadFeedbackCount = error ? 0 : row.count;
-      loadStudentReminders(req.session.name, (reminderError, reminders) => {
-        if (!reminderError) {
-          const today = new Date().toISOString().slice(0, 10);
-          res.locals.studentReminders = reminders.filter((reminder) => {
-            const dueDate = reminder.due_date
-              ? String(reminder.due_date).slice(0, 10)
-              : "";
-            return !reminder.completed_at && (!dueDate || dueDate >= today);
-          });
-          const dueDates = new Set(
-            res.locals.studentReminders
-              .map((reminder) =>
-                reminder.due_date
-                  ? String(reminder.due_date).slice(0, 10)
-                  : null,
-              )
-              .filter(Boolean),
-          );
-          res.locals.dashboardSchedule.calendarWeeks
-            .flat()
-            .forEach((day) => {
-              if (dueDates.has(day.date)) day.isHighlighted = true;
+      loadStudentGoal(req.session.name, (goalError, goal) => {
+        res.locals.dashboardGoal = goalError ? "" : goal;
+        loadStudentReminders(req.session.name, (reminderError, reminders) => {
+          if (!reminderError) {
+            const today = new Date().toISOString().slice(0, 10);
+            res.locals.studentReminders = reminders.filter((reminder) => {
+              const dueDate = reminder.due_date
+                ? String(reminder.due_date).slice(0, 10)
+                : "";
+              return !reminder.completed_at && (!dueDate || dueDate >= today);
             });
-          res.locals.studentRemindersLoaded = true;
-        }
-        next();
+            const dueDates = new Set(
+              res.locals.studentReminders
+                .map((reminder) =>
+                  reminder.due_date
+                    ? String(reminder.due_date).slice(0, 10)
+                    : null,
+                )
+                .filter(Boolean),
+            );
+            res.locals.dashboardSchedule.calendarWeeks
+              .flat()
+              .forEach((day) => {
+                if (dueDates.has(day.date)) day.isHighlighted = true;
+              });
+            res.locals.studentRemindersLoaded = true;
+          }
+          next();
+        });
       });
     },
   );
@@ -1859,10 +1917,24 @@ app.post("/api/listening/discussion", requireLogin, (req, res) => {
      ON CONFLICT(username, topic_id)
      DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP`,
     [req.session.name, topicId, topicTitle, text],
-    (error) =>
-      error
-        ? res.status(500).json({ error: "Unable to save your response." })
-        : res.json({ saved: true }),
+    async (error) => {
+      if (error) return res.status(500).json({ error: "Unable to save your response." });
+      if (postgresPool) {
+        try {
+          await postgresReady;
+          await postgresPool.query(
+            `INSERT INTO listening_discussion_submissions (username, topic_id, topic_title, submission_text)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW()`,
+            [req.session.name, topicId, topicTitle, text],
+          );
+        } catch (postgresError) {
+          console.error("Unable to mirror listening response:", postgresError);
+          return res.status(500).json({ error: "Unable to save your response." });
+        }
+      }
+      res.json({ saved: true });
+    },
   );
 });
 
@@ -1878,10 +1950,24 @@ app.post("/api/writing/submissions", requireLogin, (req, res) => {
      ON CONFLICT(username, topic_id)
      DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
     [req.session.name, topicId, topicTitle, text],
-    (error) =>
-      error
-        ? res.status(500).json({ error: "Unable to save your writing." })
-        : res.json({ saved: true }),
+    async (error) => {
+      if (error) return res.status(500).json({ error: "Unable to save your writing." });
+      if (postgresPool) {
+        try {
+          await postgresReady;
+          await postgresPool.query(
+            `INSERT INTO writing_submissions (username, topic_id, topic_title, submission_text)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW(), feedback = NULL, feedback_at = NULL, feedback_seen = FALSE`,
+            [req.session.name, topicId, topicTitle, text],
+          );
+        } catch (postgresError) {
+          console.error("Unable to mirror writing submission:", postgresError);
+          return res.status(500).json({ error: "Unable to save your writing." });
+        }
+      }
+      res.json({ saved: true });
+    },
   );
 });
 
@@ -2797,6 +2883,24 @@ function requireAdmin(req, res, next) {
     return res.status(403).send("Teacher access required.");
   next();
 }
+
+const loadStudentGoal = (username, callback) => {
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query("SELECT goal FROM users WHERE username = $1", [
+          username,
+        ]),
+      )
+      .then(({ rows }) => callback(null, rows[0]?.goal || ""))
+      .catch((error) => callback(error));
+  }
+  db.get(
+    "SELECT goal FROM members WHERE username = ?",
+    [username],
+    (error, row) => callback(error, row?.goal || ""),
+  );
+};
 
 const loadStudentReminders = (username, callback) => {
   const formatDateParts = (value, dateOnly = false) => {
@@ -4027,7 +4131,7 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
   });
 });
 
-app.post("/api/profile/character", requireLogin, (req, res) => {
+app.post("/api/profile/character", requireAuthenticated, (req, res) => {
   const previewImage = String(
     req.body.avatar ||
       req.body.previewImage ||
@@ -4145,10 +4249,23 @@ app.post("/api/progress", requireLogin, (req, res) => {
       safeTotal,
       percentage,
     ],
-    (error) =>
-      error
-        ? res.status(500).json({ error: "Unable to save progress." })
-        : res.json({ points: safePoints, totalPoints: safeTotal, percentage }),
+    async (error) => {
+      if (error) return res.status(500).json({ error: "Unable to save progress." });
+      if (postgresPool) {
+        try {
+          await postgresReady;
+          await postgresPool.query(
+            `INSERT INTO progress (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [username, activityType || "practice", chapterId || null, difficultyLevel || "", safePoints, safeTotal, percentage],
+          );
+        } catch (postgresError) {
+          console.error("Unable to mirror progress:", postgresError);
+          return res.status(500).json({ error: "Unable to save progress." });
+        }
+      }
+      res.json({ points: safePoints, totalPoints: safeTotal, percentage });
+    },
   );
 });
 
@@ -4561,6 +4678,12 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                           return res
                             .status(500)
                             .send("Unable to load difficult words.");
+                        const difficultWordsEasy = hardestWords.filter(
+                          (word) => word.difficulty_level === "easy",
+                        );
+                        const difficultWordsMedium = hardestWords.filter(
+                          (word) => word.difficulty_level === "medium",
+                        );
                         const latestSubmissionByChunk = new Map();
                         usefulChunkSubmissions.forEach((submission) => {
                           const key = `${submission.list_number}:${submission.chunk}`;
@@ -4839,6 +4962,10 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                   writingSubmissionCount:
                                     writingSubmissions.length,
                                       studentReminders,
+                                      studentReminderPreview: studentReminders.slice(0, 3),
+                                      hasMoreStudentReminders: studentReminders.length > 3,
+                                      difficultWordsEasy,
+                                      difficultWordsMedium,
                                     });
                                   },
                                 );

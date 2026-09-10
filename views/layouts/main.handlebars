@@ -44,17 +44,9 @@
           </a>
           <nav class="app-nav" aria-label="Main navigation">
             <p class="app-nav-label">Workspace</p>
-            <a href="/" class="app-nav-link"><span class="app-nav-icon">01</span>Dashboard</a>
-            <a href="/practice/questions" class="app-nav-link"><span class="app-nav-icon">02</span>Grammar</a>
-            <a href="/vocabulary/flip-cards" class="app-nav-link"><span class="app-nav-icon">03</span>Vocabulary</a>
-            <a href="/reading" class="app-nav-link"><span class="app-nav-icon">04</span>Reading</a>
-            <a href="/writing" class="app-nav-link"><span class="app-nav-icon">05</span>Writing</a>
-            <a href="/listening" class="app-nav-link"><span class="app-nav-icon">06</span>Listening</a>
+            {{#each appNavWorkspace}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span>{{label}}</a>{{/each}}
             <p class="app-nav-label app-nav-label-spaced">Practice together</p>
-            <a href="/lobby" class="app-nav-link"><span class="app-nav-icon">07</span>Lobby</a>
-            <a href="/quicktype" class="app-nav-link"><span class="app-nav-icon">08</span>QuickType</a>
-            <a href="/question-game" class="app-nav-link"><span class="app-nav-icon">09</span>Question game</a>
-            {{#if session.isAdmin}}<a href="/teacher/dashboard" class="app-nav-link"><span class="app-nav-icon">10</span>Students</a>{{/if}}
+            {{#each appNavPractice}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span>{{label}}</a>{{/each}}
           </nav>
           <div class="app-sidebar-footer">
             <a href="/profile" class="app-account-link">
@@ -70,7 +62,8 @@
             <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
             {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
             <h2>{{session.name}}</h2>
-            <p>Build your English practice rhythm.</p>
+            {{#unless session.isAdmin}}<p>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}No learning goal set yet.{{/if}}</p>{{/unless}}
+            {{#if session.isAdmin}}<a class="app-character-link" href="/character-generator">Customize character <span aria-hidden="true">→</span></a>{{/if}}
           </div>
           {{#unless session.isAdmin}}
             <div class="app-progress-card">
