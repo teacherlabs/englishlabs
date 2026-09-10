@@ -1336,8 +1336,11 @@ legend {
 
 .app-student-reminder {
   position: relative;
-  grid-template-columns: 45px minmax(0, 1fr) 22px 22px;
-  padding-right: 0;
+  grid-template-columns: 48px minmax(0, 1fr) 22px 22px;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 7px;
+  padding: 10px 0;
 }
 
 .app-reminder-link {
@@ -1349,12 +1352,65 @@ legend {
   min-width: 0;
 }
 
+.app-student-reminder .app-reminder-date {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 44px;
+  padding: 4px 3px;
+  border: 1px solid var(--color-dark);
+  border-radius: 5px;
+  color: var(--color-secondary);
+  text-align: center;
+}
+
+.app-student-reminder .app-reminder-date strong {
+  color: var(--color-secondary);
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.app-student-reminder .app-reminder-date small {
+  margin-top: 3px;
+  color: var(--color-muted);
+  font-size: 8px;
+  line-height: 1.1;
+}
+
+.app-student-reminder .app-reminder-copy {
+  align-self: center;
+}
+
+.app-student-reminder .app-reminder-copy strong {
+  overflow: visible;
+  color: var(--app-ink);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.app-reminder-category {
+  grid-column: 1 / 3;
+  width: max-content;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--color-background-tint);
+  color: var(--color-primary);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .app-reminder-done,
 .app-reminder-dismiss {
+  grid-row: 1;
   align-self: start;
 }
 
 .app-reminder-done {
+  grid-column: 3;
   display: grid;
   place-items: center;
   width: 22px;
@@ -1381,6 +1437,7 @@ legend {
 }
 
 .app-reminder-dismiss {
+  grid-column: 4;
   display: grid;
   place-items: center;
   width: 22px;

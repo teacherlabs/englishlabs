@@ -2775,6 +2775,32 @@ function requireAdmin(req, res, next) {
 }
 
 const loadStudentReminders = (username, callback) => {
+  const decorateReminders = (reminders) =>
+    reminders.map((reminder) => {
+      const dueDate = reminder.due_date
+        ? new Date(`${String(reminder.due_date).slice(0, 10)}T00:00:00`)
+        : null;
+      return {
+        ...reminder,
+        category: reminder.target_route?.includes("practice")
+          ? "Grammar"
+          : reminder.target_route?.includes("vocabulary")
+            ? "Vocabulary"
+            : reminder.target_route?.includes("reading")
+              ? "Reading"
+              : reminder.target_route?.includes("writing")
+                ? "Writing"
+                : reminder.target_route?.includes("listening")
+                  ? "Listening"
+                  : "Focus note",
+        dueDay: dueDate
+          ? `${dueDate.getDate()}${[1, 21, 31].includes(dueDate.getDate()) ? "st" : [2, 22].includes(dueDate.getDate()) ? "nd" : [3, 23].includes(dueDate.getDate()) ? "rd" : "th"}`
+          : "Open",
+        dueMonth: dueDate
+          ? dueDate.toLocaleString("en", { month: "long" })
+          : "No deadline",
+      };
+    });
   if (postgresPool) {
     return postgresReady
       .then(() =>
@@ -2783,13 +2809,13 @@ const loadStudentReminders = (username, callback) => {
           [username],
         ),
       )
-      .then(({ rows }) => callback(null, rows))
+      .then(({ rows }) => callback(null, decorateReminders(rows)))
       .catch((error) => callback(error));
   }
   db.all(
     "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = ? ORDER BY completed_at IS NOT NULL, due_date IS NULL, due_date, created_at DESC",
     [username],
-    callback,
+    (error, rows) => callback(error, rows ? decorateReminders(rows) : rows),
   );
 };
 
