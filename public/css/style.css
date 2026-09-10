@@ -1434,7 +1434,8 @@ legend {
 }
 
 .student-reminder-form textarea,
-.student-reminder-form input[type="date"] {
+.student-reminder-form input[type="date"],
+.student-reminder-form select {
   width: 100%;
   padding: 9px 10px;
   border: 1px solid var(--color-border);
@@ -1458,6 +1459,7 @@ legend {
 }
 
 .teacher-student-reminders {
+  width: min(100%, 720px);
   margin: 22px 0 26px;
   padding: 18px;
   border: 1px solid var(--color-border);

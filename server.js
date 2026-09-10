@@ -1233,38 +1233,6 @@ const buildDashboardSchedule = () => {
   today.setHours(0, 0, 0, 0);
   const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const mondayOffset = (firstOfMonth.getDay() + 6) % 7;
-  const reminders = [
-    {
-      title: "Grammar final test",
-      detail: "Complete your chapter challenge",
-      href: "/practice/final-test",
-      kind: "Test",
-      offset: 2,
-    },
-    {
-      title: "Writing practice",
-      detail: "Draft your next writing response",
-      href: "/writing",
-      kind: "Task",
-      offset: 5,
-    },
-    {
-      title: "Listening checkpoint",
-      detail: "Finish one listening topic",
-      href: "/listening",
-      kind: "Activity",
-      offset: 9,
-    },
-  ].map((reminder) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() + reminder.offset);
-    return {
-      ...reminder,
-      date: dashboardDateKey(date),
-      dateLabel: dashboardDateFormatter.format(date),
-    };
-  });
-  const highlightedDates = new Set(reminders.map((reminder) => reminder.date));
   const calendarDays = Array.from({ length: 42 }, (_, index) => {
     const date = new Date(firstOfMonth);
     date.setDate(firstOfMonth.getDate() - mondayOffset + index);
@@ -1274,7 +1242,7 @@ const buildDashboardSchedule = () => {
       date: dateKey,
       isCurrentMonth: date.getMonth() === today.getMonth(),
       isToday: dateKey === dashboardDateKey(today),
-      isHighlighted: highlightedDates.has(dateKey),
+      isHighlighted: false,
     };
   });
   return {
@@ -1283,7 +1251,7 @@ const buildDashboardSchedule = () => {
     calendarWeeks: Array.from({ length: 6 }, (_, index) =>
       calendarDays.slice(index * 7, index * 7 + 7),
     ),
-    reminders,
+    reminders: [],
   };
 };
 
@@ -1343,6 +1311,20 @@ app.use((req, res, next) => {
               : "";
             return !reminder.completed_at && (!dueDate || dueDate >= today);
           });
+          const dueDates = new Set(
+            res.locals.studentReminders
+              .map((reminder) =>
+                reminder.due_date
+                  ? String(reminder.due_date).slice(0, 10)
+                  : null,
+              )
+              .filter(Boolean),
+          );
+          res.locals.dashboardSchedule.calendarWeeks
+            .flat()
+            .forEach((day) => {
+              if (dueDates.has(day.date)) day.isHighlighted = true;
+            });
           res.locals.studentRemindersLoaded = true;
         }
         next();

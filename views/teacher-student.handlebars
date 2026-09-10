@@ -11,25 +11,6 @@
           <span class="learning-goal-badge">🎯 Goal: {{#if student.goal}}{{student.goal}}{{else}}No goal set{{/if}}</span>
         </div>
       </div>
-      <form class="student-reminder-form" method="POST" action="/teacher/student/{{student.username}}/reminders">
-        <label for="studentReminderMessage">Add reminder</label>
-        <textarea id="studentReminderMessage" name="message" rows="2" maxlength="500" placeholder="Add a focus note or next step..." required></textarea>
-        <div class="student-reminder-form-footer">
-          <label for="studentReminderDueDate">Due date <span>(optional)</span></label>
-          <input id="studentReminderDueDate" name="due_date" type="date" />
-          <label for="studentReminderRoute">Link exercise <span>(optional)</span></label>
-          <select id="studentReminderRoute" name="target_route">
-            <option value="">No link</option>
-            <option value="/practice/questions?chapter=1&exercise=ex1">Grammar: Chapter 1</option>
-            <option value="/practice/final-test">Grammar: Final test</option>
-            <option value="/vocabulary/flip-cards">Vocabulary: Flip cards</option>
-            <option value="/reading">Reading practice</option>
-            <option value="/writing">Writing practice</option>
-            <option value="/listening">Listening practice</option>
-          </select>
-          <button class="practice-button" type="submit">Add reminder</button>
-        </div>
-      </form>
     </div>
     <section class="teacher-student-reminders" aria-labelledby="teacher-reminders-heading">
       <div class="student-section-heading"><h2 id="teacher-reminders-heading">Assigned reminders</h2><span>{{studentReminders.length}} total</span></div>
@@ -44,6 +25,25 @@
         {{/each}}
       </div>
     </section>
+    <form class="student-reminder-form" method="POST" action="/teacher/student/{{student.username}}/reminders">
+      <label for="studentReminderMessage">Add reminder</label>
+      <textarea id="studentReminderMessage" name="message" rows="2" maxlength="500" placeholder="Add a focus note or next step..." required></textarea>
+      <div class="student-reminder-form-footer">
+        <label for="studentReminderDueDate">Due date <span>(optional)</span></label>
+        <input id="studentReminderDueDate" name="due_date" type="date" />
+        <label for="studentReminderRoute">Link exercise <span>(optional)</span></label>
+        <select id="studentReminderRoute" name="target_route">
+          <option value="">No link</option>
+          <option value="/practice/questions?chapter=1&amp;exercise=ex1">Grammar: Chapter 1</option>
+          <option value="/practice/final-test">Grammar: Final test</option>
+          <option value="/vocabulary/flip-cards">Vocabulary: Flip cards</option>
+          <option value="/reading">Reading practice</option>
+          <option value="/writing">Writing practice</option>
+          <option value="/listening">Listening practice</option>
+        </select>
+        <button class="practice-button" type="submit">Add reminder</button>
+      </div>
+    </form>
 
     <div class="student-profile-layout">
       <nav class="student-profile-tabs" aria-label="Student progress areas">
