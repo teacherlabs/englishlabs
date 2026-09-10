@@ -95,7 +95,14 @@
         {{/each}}
       </section>
 
-      <section class="discussion-panel"><p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2></section>
+      {{#if discussion}}
+        <section class="discussion-panel" data-writing-discussion data-topic-id="{{topic.id}}" data-topic-title="{{topic.title}}">
+          <p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2>
+          <textarea class="writing-submission-textarea" data-writing-discussion-input rows="5" placeholder="Share your response...">{{mySubmission.discussionResponse.submission_text}}</textarea>
+          <div class="writing-submission-actions"><button class="practice-button" type="button" data-writing-discussion-submit>Submit response</button><span data-writing-discussion-status></span></div>
+          {{#if mySubmission.discussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{mySubmission.discussionResponse.feedback}}</p><small>{{mySubmission.discussionResponse.feedback_at}}</small></div>{{/if}}
+        </section>
+      {{/if}}
       {{else}}
       <div class="practice-heading">
         <p class="eyebrow">Writing</p>
@@ -260,6 +267,35 @@
       zone.addEventListener("dragleave", () => zone.classList.remove("is-ready"));
       zone.addEventListener("drop", (event) => { event.preventDefault(); zone.classList.remove("is-ready"); placeSport(draggedItem, zone); draggedItem = null; });
       zone.addEventListener("click", () => { placeSport(draggedItem, zone); draggedItem = null; exercise.querySelectorAll(".sports-drop-zone").forEach((item) => item.classList.remove("is-ready")); });
+    });
+  });
+
+  document.querySelectorAll("[data-writing-discussion]").forEach((panel) => {
+    const input = panel.querySelector("[data-writing-discussion-input]");
+    const submit = panel.querySelector("[data-writing-discussion-submit]");
+    const status = panel.querySelector("[data-writing-discussion-status]");
+    submit.addEventListener("click", async () => {
+      const text = input.value.trim();
+      if (!text) {
+        status.textContent = "Write a response before submitting.";
+        return;
+      }
+      submit.disabled = true;
+      status.textContent = "Saving...";
+      try {
+        const response = await fetch("/api/writing/discussion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topicId: panel.dataset.topicId, topicTitle: panel.dataset.topicTitle, text }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to save discussion response.");
+        status.textContent = "Response submitted.";
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        submit.disabled = false;
+      }
     });
   });
 

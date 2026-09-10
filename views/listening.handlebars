@@ -124,6 +124,7 @@
             <button class="practice-button" type="button" data-discussion-submit>Submit Response</button>
             <span class="writing-submission-status" data-discussion-status>{{#if myDiscussionResponse.submitted_at}}Last submitted {{myDiscussionResponse.submitted_at}}{{/if}}</span>
           </div>
+          {{#if myDiscussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{myDiscussionResponse.feedback}}</p><small>{{myDiscussionResponse.feedback_at}}</small></div>{{/if}}
         </form>
       </section>
       {{/if}}
@@ -294,6 +295,35 @@
           status.textContent = ok ? "Response submitted." : result.error || "Unable to submit.";
         })
         .catch(() => { status.textContent = "Unable to submit."; });
+    });
+  });
+
+  document.querySelectorAll("[data-discussion-form]").forEach((form) => {
+    const input = form.querySelector("[data-discussion-input]");
+    const submit = form.querySelector("[data-discussion-submit]");
+    const status = form.querySelector("[data-discussion-status]");
+    submit.addEventListener("click", async () => {
+      const text = input.value.trim();
+      if (!text) {
+        status.textContent = "Write a response before submitting.";
+        return;
+      }
+      submit.disabled = true;
+      status.textContent = "Saving...";
+      try {
+        const response = await fetch("/api/listening/discussion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topicId: form.dataset.topicId, topicTitle: form.dataset.topicTitle, text }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to save your response.");
+        status.textContent = "Response submitted.";
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        submit.disabled = false;
+      }
     });
   });
 

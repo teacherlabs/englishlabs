@@ -1095,8 +1095,28 @@ if (postgresPool) {
           topic_title TEXT NOT NULL,
           submission_text TEXT NOT NULL,
           submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          feedback TEXT,
+          feedback_at TIMESTAMPTZ,
+          UNIQUE (username, topic_id)
+        );
+        CREATE TABLE IF NOT EXISTS writing_discussion_submissions (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+          topic_id TEXT NOT NULL,
+          topic_title TEXT NOT NULL,
+          submission_text TEXT NOT NULL,
+          submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          feedback TEXT,
+          feedback_at TIMESTAMPTZ,
           UNIQUE (username, topic_id)
         )
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
+        ALTER TABLE listening_discussion_submissions
+          ADD COLUMN IF NOT EXISTS feedback TEXT,
+          ADD COLUMN IF NOT EXISTS feedback_at TIMESTAMPTZ
       `),
     )
     .then(() =>
@@ -1630,6 +1650,22 @@ db.serialize(() => {
     topic_title TEXT NOT NULL,
     submission_text TEXT NOT NULL,
     submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    feedback TEXT,
+    feedback_at TEXT,
+    FOREIGN KEY (username) REFERENCES members(username),
+    UNIQUE (username, topic_id)
+  )`);
+  db.run("ALTER TABLE listening_discussion_submissions ADD COLUMN feedback TEXT", () => {});
+  db.run("ALTER TABLE listening_discussion_submissions ADD COLUMN feedback_at TEXT", () => {});
+  db.run(`CREATE TABLE IF NOT EXISTS writing_discussion_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    topic_id TEXT NOT NULL,
+    topic_title TEXT NOT NULL,
+    submission_text TEXT NOT NULL,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    feedback TEXT,
+    feedback_at TEXT,
     FOREIGN KEY (username) REFERENCES members(username),
     UNIQUE (username, topic_id)
   )`);
@@ -1864,7 +1900,7 @@ app.get("/listening", requireAuthenticated, (req, res) => {
       };
       if (!selectedTopic?.discussion) return renderListening(null);
       db.get(
-        "SELECT submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? AND topic_id = ?",
+        "SELECT submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = ? AND topic_id = ?",
         [req.session.name, selectedTopic.topic.id],
         (error, submission) => renderListening(error ? null : submission),
       );
@@ -1916,7 +1952,14 @@ app.get("/writing", requireAuthenticated, (req, res) => {
       db.get(
         "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? AND topic_id = ?",
         [req.session.name, selectedTopic.topic.id],
-        (error, submission) => renderWriting(error ? null : submission),
+        (error, submission) => {
+          db.get(
+            "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = ? AND topic_id = ?",
+            [req.session.name, selectedTopic.topic.id],
+            (discussionError, discussionResponse) =>
+              renderWriting(error ? null : { ...(submission || {}), discussionResponse: discussionError ? null : discussionResponse }),
+          );
+        },
       );
     },
   );
@@ -2033,6 +2076,55 @@ app.post("/api/writing/submissions", requireLogin, (req, res) => {
       }
       res.json({ saved: true });
     },
+  );
+});
+
+app.post("/api/writing/discussion", requireLogin, (req, res) => {
+  const topicId = String(req.body.topicId || "").trim();
+  const topicTitle = String(req.body.topicTitle || "").trim();
+  const text = String(req.body.text || "").trim();
+  if (!topicId || !text) return res.status(400).json({ error: "A response is required." });
+  db.run(
+    `INSERT INTO writing_discussion_submissions (username, topic_id, topic_title, submission_text)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(username, topic_id) DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
+    [req.session.name, topicId, topicTitle, text],
+    async (error) => {
+      if (error) return res.status(500).json({ error: "Unable to save discussion response." });
+      if (postgresPool) {
+        try {
+          await postgresReady;
+          await postgresPool.query(
+            `INSERT INTO writing_discussion_submissions (username, topic_id, topic_title, submission_text)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW(), feedback = NULL, feedback_at = NULL`,
+            [req.session.name, topicId, topicTitle, text],
+          );
+        } catch (postgresError) {
+          console.error("Unable to mirror writing discussion response:", postgresError);
+          return res.status(500).json({ error: "Unable to save discussion response." });
+        }
+      }
+      res.json({ saved: true });
+    },
+  );
+});
+
+app.post("/teacher/student/:username/listening-discussion/:id/feedback", requireAdmin, (req, res) => {
+  const feedback = String(req.body.feedback || "").trim();
+  db.run(
+    "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+    [feedback, req.params.id, req.params.username],
+    () => res.redirect(`/teacher/student/${encodeURIComponent(req.params.username)}?category=listening`),
+  );
+});
+
+app.post("/teacher/student/:username/writing-discussion/:id/feedback", requireAdmin, (req, res) => {
+  const feedback = String(req.body.feedback || "").trim();
+  db.run(
+    "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+    [feedback, req.params.id, req.params.username],
+    () => res.redirect(`/teacher/student/${encodeURIComponent(req.params.username)}?category=writing`),
   );
 });
 
@@ -4801,9 +4893,13 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                             };
                           });
                         db.all(
-                          "SELECT topic_id, topic_title, submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                          "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
                           [student.username],
                           (discussionError, listeningDiscussionSubmissions) => {
+                            db.all(
+                              "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                              [student.username],
+                              (writingDiscussionError, writingDiscussionSubmissions) => {
                             db.all(
                               "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
                               [student.username],
@@ -4984,6 +5080,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                         discussionError
                                           ? []
                                           : listeningDiscussionSubmissions,
+                                      writingDiscussionSubmissions: writingDiscussionError ? [] : writingDiscussionSubmissions,
                                       readingProgressLevels: groupTopicsByLevel(
                                         decoratedReadingTopics,
                                         "readingLevel",
@@ -5022,6 +5119,8 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                       difficultWordsEasy,
                                       difficultWordsMedium,
                                     });
+                              },
+                            );
                                   },
                                 );
                               },

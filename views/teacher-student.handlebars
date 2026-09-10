@@ -89,6 +89,8 @@
       </nav>
       <nav class="student-subtabs" data-student-subtabs="writing-section" aria-label="Writing progress views"{{#unless profileIsWriting}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="writing-topics-panel" aria-selected="true">Topics</button>
+        <button class="student-subsection-link" type="button" data-student-subsection="writing-submissions-panel" aria-selected="false">Writing submissions{{#if writingSubmissionCount}} <span class="section-count">{{writingSubmissionCount}}</span>{{/if}}</button>
+        <button class="student-subsection-link" type="button" data-student-subsection="writing-discussion-panel" aria-selected="false">Discussion responses{{#if writingDiscussionSubmissions.length}} <span class="section-count">{{writingDiscussionSubmissions.length}}</span>{{/if}}</button>
       </nav>
       <nav class="student-subtabs" data-student-subtabs="listening-section" aria-label="Listening progress views"{{#unless profileIsListening}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="listening-topics-panel" aria-selected="true">Topics</button>
@@ -189,12 +191,51 @@
             <h2>Discussion responses</h2>
             <div class="admin-chunk-lists">
               {{#each listeningDiscussionSubmissions}}
-                <details class="admin-chunk-list">
-                  <summary><strong>{{topic_title}}</strong><span>Submitted {{submitted_at}}</span></summary>
+                <details class="admin-chunk-list"{{#unless feedback}} open{{/unless}}>
+                  <summary><strong>{{topic_title}}</strong><span>{{#if feedback}}Feedback sent{{else}}Awaiting feedback{{/if}}</span></summary>
                   <div class="admin-chunk-statuses">
                     <article class="admin-chunk-status submitted">
+                      <div><strong>Student's response</strong><span>Submitted {{submitted_at}}</span></div>
                       <p class="writing-feedback-text">{{submission_text}}</p>
                     </article>
+                    {{#if feedback}}
+                      <article class="admin-chunk-status submitted">
+                        <div><strong>Your feedback</strong><span>Sent {{feedback_at}}</span></div>
+                        <p class="writing-feedback-text">{{feedback}}</p>
+                      </article>
+                    {{/if}}
+                    <form class="teacher-feedback-form" method="POST" action="/teacher/student/{{@root.student.username}}/listening-discussion/{{id}}/feedback">
+                      <textarea name="feedback" rows="4" placeholder="Write feedback for the student...">{{feedback}}</textarea>
+                      <button class="practice-button" type="submit">Send feedback</button>
+                    </form>
+                  </div>
+                </details>
+              {{else}}
+                <p class="empty-state">No discussion responses submitted yet.</p>
+              {{/each}}
+            </div>
+          </div>
+          <div class="student-subsection-panel" id="writing-discussion-panel">
+            <h2>Writing discussion responses</h2>
+            <div class="admin-chunk-lists">
+              {{#each writingDiscussionSubmissions}}
+                <details class="admin-chunk-list"{{#unless feedback}} open{{/unless}}>
+                  <summary><strong>{{topic_title}}</strong><span>{{#if feedback}}Feedback sent{{else}}Awaiting feedback{{/if}}</span></summary>
+                  <div class="admin-chunk-statuses">
+                    <article class="admin-chunk-status submitted">
+                      <div><strong>Student's response</strong><span>Submitted {{submitted_at}}</span></div>
+                      <p class="writing-feedback-text">{{submission_text}}</p>
+                    </article>
+                    {{#if feedback}}
+                      <article class="admin-chunk-status submitted">
+                        <div><strong>Your feedback</strong><span>Sent {{feedback_at}}</span></div>
+                        <p class="writing-feedback-text">{{feedback}}</p>
+                      </article>
+                    {{/if}}
+                    <form class="teacher-feedback-form" method="POST" action="/teacher/student/{{@root.student.username}}/writing-discussion/{{id}}/feedback">
+                      <textarea name="feedback" rows="4" placeholder="Write feedback for the student...">{{feedback}}</textarea>
+                      <button class="practice-button" type="submit">Send feedback</button>
+                    </form>
                   </div>
                 </details>
               {{else}}
