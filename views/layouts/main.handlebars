@@ -96,22 +96,22 @@
               <div class="app-reminders-list">
                 {{#each dashboardSchedule.reminders}}<a class="app-reminder" href="{{href}}"><span class="app-reminder-date">{{dateLabel}}</span><span class="app-reminder-copy"><strong>{{title}}</strong><small>{{detail}}</small></span><span class="app-reminder-kind">{{kind}}</span></a>{{/each}}
               </div>
-            </section>
-          {{/if}}
-          {{#if studentRemindersLoaded}}
-            <section class="app-reminders-card app-student-reminders" aria-labelledby="student-reminders-heading">
-              <div class="app-widget-heading"><p class="app-rail-label" id="student-reminders-heading">Focus notes</p><span class="app-reminder-count">{{studentReminders.length}}</span></div>
-              <div class="app-reminders-list">
-                {{#each studentReminders}}
-                  <article class="app-reminder app-student-reminder" data-reminder-id="{{id}}">
-                    <span class="app-reminder-date">{{#if due_date}}{{due_date}}{{else}}Open{{/if}}</span>
-                    <span class="app-reminder-copy"><strong>{{message}}</strong><small>{{#if due_date}}Deadline{{else}}Teacher note{{/if}}</small></span>
-                    <button class="app-reminder-dismiss" type="button" data-delete-reminder="{{id}}" aria-label="Delete reminder">×</button>
-                  </article>
-                {{else}}
-                  <p class="app-reminder-empty">No active focus notes.</p>
-                {{/each}}
-              </div>
+              {{#if studentRemindersLoaded}}
+                <div class="app-widget-heading app-student-reminders-heading"><p class="app-rail-label" id="student-reminders-heading">Focus notes</p><span class="app-reminder-count">{{studentReminders.length}}</span></div>
+                <div class="app-reminders-list app-student-reminders" aria-labelledby="student-reminders-heading">
+                  {{#each studentReminders}}
+                    <article class="app-reminder app-student-reminder" data-reminder-id="{{id}}">
+                      {{#if target_route}}<a class="app-reminder-link" href="{{target_route}}">{{else}}<span class="app-reminder-link">{{/if}}
+                        <span class="app-reminder-date">{{#if due_date}}{{due_date}}{{else}}Open{{/if}}</span>
+                        <span class="app-reminder-copy"><strong>{{message}}</strong><small>{{#if due_date}}Deadline{{else}}Teacher note{{/if}}</small></span>
+                      {{#if target_route}}</a>{{else}}</span>{{/if}}
+                      <button class="app-reminder-done" type="button" data-complete-reminder="{{id}}" aria-label="Mark reminder done">✓</button>
+                      <button class="app-reminder-dismiss" type="button" data-delete-reminder="{{id}}" aria-label="Delete reminder">×</button>
+                    </article>
+                  {{else}}
+                    <p class="app-reminder-empty">No active focus notes.</p>
+                  {{/each}}
+                </div>
             </section>
           {{/if}}
           {{#if unreadFeedbackCount}}

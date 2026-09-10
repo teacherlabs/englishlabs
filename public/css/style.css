@@ -777,7 +777,7 @@ legend {
   min-height: 100dvh;
   padding: 28px 16px 18px;
   border-right: 1px solid var(--app-line);
-  background: var(--color-primary);
+  background: var(--color-secondary);
   color: var(--color-background-tint);
 }
 
@@ -790,6 +790,10 @@ legend {
 .app-sidebar .app-account-link:hover,
 .app-sidebar .app-logout-link,
 .app-sidebar .app-logout-link:hover {
+  color: var(--color-background-tint);
+}
+
+.app-sidebar .app-brand > span:not(.app-brand-mark) {
   color: var(--color-background-tint);
 }
 
@@ -1332,12 +1336,48 @@ legend {
 
 .app-student-reminder {
   position: relative;
-  grid-template-columns: 45px minmax(0, 1fr) 22px;
+  grid-template-columns: 45px minmax(0, 1fr) 22px 22px;
   padding-right: 0;
+}
+
+.app-reminder-link {
+  display: contents;
+  color: inherit;
 }
 
 .app-student-reminder .app-reminder-copy {
   min-width: 0;
+}
+
+.app-reminder-done,
+.app-reminder-dismiss {
+  align-self: start;
+}
+
+.app-reminder-done {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--color-primary);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.app-reminder-done:hover,
+.app-reminder-done:focus-visible {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.app-student-reminder.is-completed {
+  opacity: 0.55;
+  text-decoration: line-through;
 }
 
 .app-reminder-dismiss {
@@ -1406,14 +1446,91 @@ legend {
 
 .student-reminder-form-footer {
   display: grid;
-  grid-template-columns: auto minmax(120px, 1fr) auto;
+  grid-template-columns: auto minmax(120px, 1fr);
   align-items: center;
   gap: 8px;
 }
 
 .student-reminder-form .practice-button {
+  grid-column: 2;
   padding: 9px 12px;
   font-size: 12px;
+}
+
+.teacher-student-reminders {
+  margin: 22px 0 26px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-tint);
+}
+
+.student-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.student-section-heading h2 {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 20px;
+}
+
+.student-section-heading > span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.teacher-student-reminder-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.teacher-student-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+
+.teacher-student-reminder strong,
+.teacher-student-reminder a,
+.teacher-student-reminder > span {
+  display: block;
+}
+
+.teacher-student-reminder strong {
+  color: var(--color-secondary);
+  font-size: 13px;
+}
+
+.teacher-student-reminder a {
+  margin-top: 4px;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.teacher-student-reminder > span {
+  flex: 0 0 auto;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.teacher-student-reminder.is-completed {
+  border-color: var(--color-primary);
+  background: #eef4fc;
+}
+
+.teacher-student-reminder.is-completed strong {
+  text-decoration: line-through;
 }
 
 @media (max-width: 1100px) {

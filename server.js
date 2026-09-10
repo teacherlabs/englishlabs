@@ -1070,8 +1070,17 @@ if (postgresPool) {
           username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
           message TEXT NOT NULL,
           due_date DATE,
+          target_route TEXT,
+          completed_at TIMESTAMPTZ,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
+        ALTER TABLE student_reminders
+          ADD COLUMN IF NOT EXISTS target_route TEXT,
+          ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ
       `),
     )
     .catch((error) => {
@@ -1325,7 +1334,19 @@ app.use((req, res, next) => {
     [req.session.name],
     (error, row) => {
       res.locals.unreadFeedbackCount = error ? 0 : row.count;
-      next();
+      loadStudentReminders(req.session.name, (reminderError, reminders) => {
+        if (!reminderError) {
+          const today = new Date().toISOString().slice(0, 10);
+          res.locals.studentReminders = reminders.filter((reminder) => {
+            const dueDate = reminder.due_date
+              ? String(reminder.due_date).slice(0, 10)
+              : "";
+            return !reminder.completed_at && (!dueDate || dueDate >= today);
+          });
+          res.locals.studentRemindersLoaded = true;
+        }
+        next();
+      });
     },
   );
 });
@@ -1512,9 +1533,13 @@ db.serialize(() => {
     username TEXT NOT NULL,
     message TEXT NOT NULL,
     due_date TEXT,
+    target_route TEXT,
+    completed_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (username) REFERENCES members(username) ON DELETE CASCADE
   )`);
+  db.run("ALTER TABLE student_reminders ADD COLUMN target_route TEXT", () => {});
+  db.run("ALTER TABLE student_reminders ADD COLUMN completed_at TEXT", () => {});
   db.run(`CREATE TABLE IF NOT EXISTS vocabulary_difficult_words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -2767,6 +2792,25 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+const loadStudentReminders = (username, callback) => {
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = $1 ORDER BY completed_at NULLS FIRST, due_date NULLS LAST, created_at DESC",
+          [username],
+        ),
+      )
+      .then(({ rows }) => callback(null, rows))
+      .catch((error) => callback(error));
+  }
+  db.all(
+    "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = ? ORDER BY completed_at IS NOT NULL, due_date IS NULL, due_date, created_at DESC",
+    [username],
+    callback,
+  );
+};
+
 app.get("/profile", requireProfileUser, (req, res) => {
   res.locals.unreadFeedbackCount = 0;
   db.run(
@@ -2880,12 +2924,26 @@ app.get("/profile", requireProfileUser, (req, res) => {
                         return res.status(500).send("Unable to load messages.");
                       postgresPool
                         .query(
-                          "SELECT id, message, due_date, created_at FROM student_reminders WHERE username = $1 AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",
+                          "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = $1 AND completed_at IS NULL AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",
                           [req.session.name],
                         )
                         .then(({ rows: reminders }) => {
                           res.locals.studentReminders = reminders;
                           res.locals.studentRemindersLoaded = true;
+                          const dueDates = new Set(
+                            reminders
+                              .map((reminder) =>
+                                reminder.due_date
+                                  ? String(reminder.due_date).slice(0, 10)
+                                  : null,
+                              )
+                              .filter(Boolean),
+                          );
+                          res.locals.dashboardSchedule.calendarWeeks
+                            .flat()
+                            .forEach((day) => {
+                              if (dueDates.has(day.date)) day.isHighlighted = true;
+                            });
                           res.render("profile.handlebars", {
                             student,
                             isAdmin: Boolean(req.session.isAdmin),
@@ -4632,7 +4690,14 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                 const finalTestRows = grammarProgress.filter(
                                   (item) => item.activity_type === "final",
                                 );
-                                res.render("teacher-student.handlebars", {
+                                loadStudentReminders(
+                                  student.username,
+                                  (remindersError, studentReminders) => {
+                                    if (remindersError)
+                                      return res
+                                        .status(500)
+                                        .send("Unable to load student reminders.");
+                                    res.render("teacher-student.handlebars", {
                                   student: {
                                     ...student,
                                     avatarUrl: student.avatarUrl,
@@ -4704,7 +4769,10 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                   ),
                                   writingSubmissionCount:
                                     writingSubmissions.length,
-                                });
+                                      studentReminders,
+                                    });
+                                  },
+                                );
                               },
                             );
                           },
@@ -4747,15 +4815,21 @@ app.post("/teacher/student/:username/reminders", requireAdmin, (req, res) => {
   const username = String(req.params.username || "").trim();
   const message = String(req.body.message || "").trim();
   const dueDate = String(req.body.due_date || "").trim();
-  if (!message || message.length > 500 || (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate))) {
+  const targetRoute = String(req.body.target_route || "").trim();
+  if (
+    !message ||
+    message.length > 500 ||
+    (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) ||
+    (targetRoute && !targetRoute.startsWith("/"))
+  ) {
     return res.redirect(`/teacher/student/${encodeURIComponent(username)}`);
   }
   if (postgresPool) {
     return postgresReady
       .then(() =>
         postgresPool.query(
-          "INSERT INTO student_reminders (username, message, due_date) SELECT username, $2, NULLIF($3, '')::date FROM users WHERE username = $1 AND role = 'student'",
-          [username, message, dueDate],
+          "INSERT INTO student_reminders (username, message, due_date, target_route) SELECT username, $2, NULLIF($3, '')::date, NULLIF($4, '') FROM users WHERE username = $1 AND role = 'student'",
+          [username, message, dueDate, targetRoute],
         ),
       )
       .then(() => res.redirect(`/teacher/student/${encodeURIComponent(username)}`))
@@ -4765,8 +4839,8 @@ app.post("/teacher/student/:username/reminders", requireAdmin, (req, res) => {
       });
   }
   db.run(
-    "INSERT INTO student_reminders (username, message, due_date) SELECT username, ?, NULLIF(?, '') FROM members WHERE username = ? AND role = 'student'",
-    [message, dueDate, username],
+    "INSERT INTO student_reminders (username, message, due_date, target_route) SELECT username, ?, NULLIF(?, ''), NULLIF(?, '') FROM members WHERE username = ? AND role = 'student'",
+    [message, dueDate, targetRoute, username],
     (error) => {
       if (error) return res.status(500).send("Unable to create reminder.");
       res.redirect(`/teacher/student/${encodeURIComponent(username)}`);
@@ -4799,6 +4873,35 @@ app.delete("/api/reminders/:id", requireLogin, (req, res) => {
       if (error) return res.status(500).json({ error: "Unable to delete reminder." });
       if (!this.changes) return res.status(404).json({ error: "Reminder not found." });
       res.json({ deleted: true });
+    },
+  );
+});
+
+app.post("/api/reminders/:id/complete", requireLogin, (req, res) => {
+  const reminderId = Number(req.params.id);
+  if (!Number.isInteger(reminderId) || reminderId < 1)
+    return res.status(400).json({ error: "Invalid reminder." });
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "UPDATE student_reminders SET completed_at = NOW() WHERE id = $1 AND username = $2 AND completed_at IS NULL RETURNING id, completed_at",
+          [reminderId, req.session.name],
+        ),
+      )
+      .then(({ rows }) => {
+        if (!rows.length) return res.status(404).json({ error: "Reminder not found." });
+        res.json({ completed: true, completedAt: rows[0].completed_at });
+      })
+      .catch(() => res.status(500).json({ error: "Unable to complete reminder." }));
+  }
+  db.run(
+    "UPDATE student_reminders SET completed_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ? AND completed_at IS NULL",
+    [reminderId, req.session.name],
+    function (error) {
+      if (error) return res.status(500).json({ error: "Unable to complete reminder." });
+      if (!this.changes) return res.status(404).json({ error: "Reminder not found." });
+      res.json({ completed: true });
     },
   );
 });

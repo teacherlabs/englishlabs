@@ -17,10 +17,33 @@
         <div class="student-reminder-form-footer">
           <label for="studentReminderDueDate">Due date <span>(optional)</span></label>
           <input id="studentReminderDueDate" name="due_date" type="date" />
+          <label for="studentReminderRoute">Link exercise <span>(optional)</span></label>
+          <select id="studentReminderRoute" name="target_route">
+            <option value="">No link</option>
+            <option value="/practice/questions?chapter=1&exercise=ex1">Grammar: Chapter 1</option>
+            <option value="/practice/final-test">Grammar: Final test</option>
+            <option value="/vocabulary/flip-cards">Vocabulary: Flip cards</option>
+            <option value="/reading">Reading practice</option>
+            <option value="/writing">Writing practice</option>
+            <option value="/listening">Listening practice</option>
+          </select>
           <button class="practice-button" type="submit">Add reminder</button>
         </div>
       </form>
     </div>
+    <section class="teacher-student-reminders" aria-labelledby="teacher-reminders-heading">
+      <div class="student-section-heading"><h2 id="teacher-reminders-heading">Assigned reminders</h2><span>{{studentReminders.length}} total</span></div>
+      <div class="teacher-student-reminder-list">
+        {{#each studentReminders}}
+          <article class="teacher-student-reminder{{#if completed_at}} is-completed{{/if}}">
+            <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise</a>{{/if}}</div>
+            <span>{{#if completed_at}}Completed {{completed_at}}{{else if due_date}}Due {{due_date}}{{else}}No deadline{{/if}}</span>
+          </article>
+        {{else}}
+          <p class="empty-state">No reminders assigned yet.</p>
+        {{/each}}
+      </div>
+    </section>
 
     <div class="student-profile-layout">
       <nav class="student-profile-tabs" aria-label="Student progress areas">
