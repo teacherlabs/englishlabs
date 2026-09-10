@@ -34,57 +34,59 @@
     />
   </head>
   <body>
-    <header>
-      <nav>
-        <ul>
-          {{#if session.isLoggedIn}}<li><a href="/">Grammar</a></li>
-            <li><a href="/reading">Reading</a></li>
-            <li><a href="/listening">Listening</a></li>
-            <li><a href="/writing">Writing</a></li>
-            <li><a href="/vocabulary/flip-cards">Vocabulary</a></li>{{/if}}
-          {{#if session.isLoggedIn}}
-            <li class="game-room-nav">
-              <span>Game Room</span>
-              <div class="game-room-nav-options">
-                <a href="/quicktype">QuickType</a>
-                <a href="/question-game">Question Game</a>
-              </div>
-            </li>
-          {{/if}}
-        </ul>
-        {{#if session.isLoggedIn}}
-          <div id="menulogin" class="user-profile-menu">
-            <span>Hi, {{session.name}}</span>
-
-            {{#if session.isAdmin}}
-              <a href="/teacher/dashboard" class="login-btn">Students</a>
-              <a href="/character-generator" class="login-btn">Custom</a>
-            {{else}}
-              <a href="/profile" class="profile-pic-link" title="View Profile">
-                {{#if session.avatar}}
-                  <img
-                    src="{{session.avatarUrl}}"
-                    alt="Profile Picture"
-                    class="nav-avatar"
-                  />
-                {{else}}
-                  <span
-                    class="nav-avatar nav-avatar-placeholder"
-                    aria-label="Profile picture placeholder"
-                  >{{session.avatar_initial}}</span>
-                {{/if}}
-                {{#if unreadFeedbackCount}}<span
-                    class="nav-feedback-badge"
-                    aria-label="{{unreadFeedbackCount}} unread teacher feedback"
-                  >{{unreadFeedbackCount}}</span>{{/if}}
-              </a>
-            {{/if}}
-
-            <a href="/logout" class="login-btn">Log out</a>
+    {{#if session.isLoggedIn}}
+      <div class="app-shell">
+        <aside class="app-sidebar">
+          <a class="app-brand" href="/">
+            <span class="app-brand-mark">EL</span>
+            <span>English Labs</span>
+            <small>Learning studio</small>
+          </a>
+          <nav class="app-nav" aria-label="Main navigation">
+            <p class="app-nav-label">Workspace</p>
+            <a href="/" class="app-nav-link"><span class="app-nav-icon">01</span>Dashboard</a>
+            <a href="/practice/questions" class="app-nav-link"><span class="app-nav-icon">02</span>Grammar</a>
+            <a href="/vocabulary/flip-cards" class="app-nav-link"><span class="app-nav-icon">03</span>Vocabulary</a>
+            <a href="/reading" class="app-nav-link"><span class="app-nav-icon">04</span>Reading</a>
+            <a href="/writing" class="app-nav-link"><span class="app-nav-icon">05</span>Writing</a>
+            <a href="/listening" class="app-nav-link"><span class="app-nav-icon">06</span>Listening</a>
+            <p class="app-nav-label app-nav-label-spaced">Practice together</p>
+            <a href="/lobby" class="app-nav-link"><span class="app-nav-icon">07</span>Lobby</a>
+            <a href="/quicktype" class="app-nav-link"><span class="app-nav-icon">08</span>QuickType</a>
+            <a href="/question-game" class="app-nav-link"><span class="app-nav-icon">09</span>Question game</a>
+            {{#if session.isAdmin}}<a href="/teacher/dashboard" class="app-nav-link"><span class="app-nav-icon">10</span>Students</a>{{/if}}
+          </nav>
+          <div class="app-sidebar-footer">
+            <a href="/profile" class="app-account-link">
+              {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="" class="app-avatar" />{{else}}<span class="app-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
+              <span><strong>{{session.name}}</strong><small>{{#if session.isAdmin}}Teacher account{{else}}Student account{{/if}}</small></span>
+            </a>
+            <a href="/logout" class="app-logout-link">Log out</a>
           </div>
-        {{/if}}
-      </nav>
-    </header>
-    {{{body}}}
+        </aside>
+        <div class="app-main">{{{body}}}</div>
+        <aside class="app-rightbar" aria-label="Profile and progress">
+          <div class="app-profile-card">
+            <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
+            {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
+            <h2>{{session.name}}</h2>
+            <p>Build your English practice rhythm.</p>
+          </div>
+          <div class="app-progress-card">
+            <p class="app-rail-label">Learning pulse</p>
+            <div class="app-pulse-row"><strong>Keep going</strong><span>Today</span></div>
+            <div class="app-pulse-track"><span></span></div>
+            <p class="app-pulse-note">Your activity and completed work live in your profile.</p>
+            <a href="/profile" class="app-rail-link">View full progress <span>→</span></a>
+          </div>
+          {{#if unreadFeedbackCount}}
+            <a href="/profile" class="app-feedback-card"><span class="app-feedback-count">{{unreadFeedbackCount}}</span><span><strong>New feedback</strong><small>Open your teacher messages</small></span><span aria-hidden="true">→</span></a>
+          {{/if}}
+        </aside>
+      </div>
+    {{else}}
+      <header><nav><ul></ul></nav></header>
+      {{{body}}}
+    {{/if}}
   </body>
 </html>
