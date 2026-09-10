@@ -1873,14 +1873,19 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
     (error, submission) => {
       if (error || !submission) return res.redirect("/writing");
       db.run(
-        "UPDATE writing_submissions SET feedback_seen = 1 WHERE id = ? AND username = ?",
-        [req.params.id, req.session.name],
-      );
-      const topic = writingTopics.find(
-        (entry) => entry.topic.id === submission.topic_id,
-      );
-      res.redirect(
-        `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
+        "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
+        [req.session.name],
+        (updateError) => {
+          if (updateError) {
+            console.error("Unable to mark feedback as seen:", updateError);
+          }
+          const topic = writingTopics.find(
+            (entry) => entry.topic.id === submission.topic_id,
+          );
+          res.redirect(
+            `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
+          );
+        },
       );
     },
   );

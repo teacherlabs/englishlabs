@@ -2680,6 +2680,28 @@ div.profile-avatar-placeholder {
   gap: 2px;
 }
 
+.student-activity-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.student-activity-summary strong {
+  color: #14213d;
+  font-size: 12px;
+}
+
+.student-activity-summary > span {
+  color: #68758a;
+  font-size: 11px;
+}
+
+.teacher-card .student-row .level-badges {
+  margin-top: 3px;
+}
+
 .progress-row small {
   color: #68758a;
   font-size: 11px;

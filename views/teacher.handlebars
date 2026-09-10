@@ -5,7 +5,7 @@
             ·
             {{categoryLabel}}{{/if}}</h1></div></div>
     <div class="student-table"><div class="student-table-head"><span
-        >Student</span><span>Goal</span><span>Actions</span></div>{{#each students}}<div
+      >Student</span><span>Activity</span><span>Actions</span></div>{{#each students}}<div
           class="student-row"
           data-student-row
           data-username="{{username}}"
@@ -20,7 +20,7 @@
                 class="student-username"
               >@{{username}}</small>{{/if}}</span><span
             class="student-row-cell student-row-goal"
-          ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span>{{#if
+          ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span><span class="student-activity-summary"><strong>{{activities}} completed</strong><span>{{points}} / {{possible_points}} points</span></span><span class="level-badges">{{#each levelBadges}}<b class="level-badge{{#if stronger}} stronger{{/if}}">{{label}}</b>{{/each}}</span>{{#if
               pendingWriting
             }}<b class="teacher-pending-badge">{{pendingWriting}}
                 awaiting feedback</b>{{/if}}</span></a><button
