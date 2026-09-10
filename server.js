@@ -424,22 +424,22 @@ const buildTopicExercise = (exercise, index) => {
       allItems: shuffleArray(categories.map((category) => category.items[0])),
     };
   }
-    if (exercise.type === "category_matching") {
-      const categories = exercise.categories.map((title) => ({
-        id: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        title,
-        items: exercise.items
-          .filter((item) => item.correct_category === title)
-          .map((item) => item.item),
-      }));
-      return {
-        ...base,
-        isSportsGrouping: true,
-        activity: { title: exercise.title, instruction: exercise.instruction },
-        categories,
-        allItems: shuffleArray(exercise.items.map((item) => item.item)),
-      };
-    }
+  if (exercise.type === "category_matching") {
+    const categories = exercise.categories.map((title) => ({
+      id: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      title,
+      items: exercise.items
+        .filter((item) => item.correct_category === title)
+        .map((item) => item.item),
+    }));
+    return {
+      ...base,
+      isSportsGrouping: true,
+      activity: { title: exercise.title, instruction: exercise.instruction },
+      categories,
+      allItems: shuffleArray(exercise.items.map((item) => item.item)),
+    };
+  }
   if (exercise.type === "ordering_stages") {
     const categories = exercise.stages.map((stage) => ({
       id: `step-${stage.order}`,
@@ -570,10 +570,12 @@ const normalizeReadingV2Preparation = (preparation, imageBase) => {
       instruction: preparation.instruction,
       isWordList: true,
       pairs: preparation.pairs,
-      shuffledDefinitions: shuffleArray(preparation.pairs.map((pair) => ({
-        definition: pair.definition,
-        forWord: pair.term,
-      }))),
+      shuffledDefinitions: shuffleArray(
+        preparation.pairs.map((pair) => ({
+          definition: pair.definition,
+          forWord: pair.term,
+        })),
+      ),
     };
   }
   if (
@@ -757,7 +759,10 @@ const normalizeReadingV2Topic = (entry, imageBase) => {
       : normalizeReadingV2Preparation(entry.preparation, imageBase),
     tips: [],
     preparationExercise: preparationExercise
-      ? buildTopicExercise({ ...preparationExercise, title: "Before you read" }, 0)
+      ? buildTopicExercise(
+          { ...preparationExercise, title: "Before you read" },
+          0,
+        )
       : null,
     exercises: entry.exercises.map(buildReadingV2Exercise),
     discussion: null,
@@ -914,7 +919,10 @@ const parseCharacterConfig = (value) => {
   try {
     return JSON.parse(value);
   } catch (error) {
-    console.warn("Unable to parse lobby character configuration:", error.message);
+    console.warn(
+      "Unable to parse lobby character configuration:",
+      error.message,
+    );
     return null;
   }
 };
@@ -1021,7 +1029,8 @@ const grammarReady = new Promise((resolve) => {
 });
 if (postgresPool) {
   postgresReady = postgresPool
-    .query(`
+    .query(
+      `
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
@@ -1033,7 +1042,8 @@ if (postgresPool) {
         goal TEXT NOT NULL DEFAULT '',
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
-    `)
+    `,
+    )
     .then(() =>
       postgresPool.query(`
         ALTER TABLE users
@@ -1214,6 +1224,7 @@ app.use(function (req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "8mb" }));
 app.use(express.static("public"));
+app.use("/backgrounds", express.static(path.join(__dirname, "backgrounds")));
 app.use("/audio1", express.static(path.join(__dirname, "audio1")));
 app.use(
   "/uploads/profiles",
@@ -1537,7 +1548,8 @@ app.get("/character-generator", requireAuthenticated, (req, res) => {
 });
 
 app.get("/api/profile/character", requireLogin, (req, res) => {
-  if (!postgresPool) return res.status(500).json({ error: "User database is not configured." });
+  if (!postgresPool)
+    return res.status(500).json({ error: "User database is not configured." });
   postgresReady
     .then(() =>
       postgresPool.query(
@@ -1847,25 +1859,25 @@ app.get("/vocabulary/flip-cards", requireAuthenticated, (req, res) => {
       "SELECT id, english_word, swedish_translation, part_of_speech, definition, example_sentence, cefr_level FROM vocabulary ORDER BY id",
       (error, words) => {
         if (error) return res.status(500).send("Unable to load flashcards.");
-      const selectedLevel = ["easy", "medium"].includes(req.query.level)
-        ? req.query.level
-        : "easy";
-      const levelFor = vocabularyLevel;
-      const levelWords = words
-        .map((word) => ({
-          ...word,
-          vocabulary_level: levelFor(word.cefr_level),
-        }))
-        .filter((word) => word.vocabulary_level === selectedLevel);
-      res.render("vocabulary-exercise.handlebars", {
-        mode: "flip",
-        isFlip: true,
-        vocabularyLevels: vocabularyLevelChoices(selectedLevel),
-        selectedLevel,
-        pageTitle: "Flip cards",
-        pageIntro: "Flip each card to reveal the Swedish word and examples.",
-        words: shuffleArray(levelWords),
-      });
+        const selectedLevel = ["easy", "medium"].includes(req.query.level)
+          ? req.query.level
+          : "easy";
+        const levelFor = vocabularyLevel;
+        const levelWords = words
+          .map((word) => ({
+            ...word,
+            vocabulary_level: levelFor(word.cefr_level),
+          }))
+          .filter((word) => word.vocabulary_level === selectedLevel);
+        res.render("vocabulary-exercise.handlebars", {
+          mode: "flip",
+          isFlip: true,
+          vocabularyLevels: vocabularyLevelChoices(selectedLevel),
+          selectedLevel,
+          pageTitle: "Flip cards",
+          pageIntro: "Flip each card to reveal the Swedish word and examples.",
+          words: shuffleArray(levelWords),
+        });
       },
     );
   });
@@ -2002,7 +2014,7 @@ app.get("/practice/questions", requireAuthenticated, (req, res) => {
         })),
       }));
       res.render("practice-questions.handlebars", {
-        pageTitle: "Chapters",
+        pageTitle: "Grammar",
         chapters: decoratedChapters,
         selectedChapter: decoratedChapters.find(
           (chapter) => chapter.id === selectedChapter?.id,
@@ -2229,10 +2241,9 @@ app.post(["/forgot-password", "/forget-password"], (req, res) => {
   }
   postgresReady
     .then(() =>
-      postgresPool.query(
-        "SELECT username FROM users WHERE LOWER(email) = $1",
-        [email],
-      ),
+      postgresPool.query("SELECT username FROM users WHERE LOWER(email) = $1", [
+        email,
+      ]),
     )
     .then(({ rows }) => {
       const member = rows[0];
@@ -2255,53 +2266,52 @@ app.post(["/forgot-password", "/forget-password"], (req, res) => {
           ),
         )
         .then(() => {
-              const gmailUser = String(process.env.GMAIL_USER || "").trim();
-              const gmailPass = String(process.env.GMAIL_PASS || "")
-                .trim()
-                .replace(/\s+/g, "");
-              const hasMailConfig = gmailUser && gmailPass;
-              if (!hasMailConfig) {
-                if (process.env.NODE_ENV !== "production") {
-                  console.log(
-                    `Password reset link for ${member.username}: ${(process.env.CLIENT_URL || `http://localhost:${port}`)}/reset-password?token=${token}`,
-                  );
-                  return res.render("forgot-password.handlebars", {
-                    message: "A development reset link was printed in the server terminal.",
-                  });
-                }
-                return res.status(500).render("forgot-password.handlebars", {
-                  error: "Password reset email is not configured yet.",
-                });
-              }
-              const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                  user: gmailUser,
-                  pass: gmailPass,
-                },
-              });
-              const resetUrl = `${process.env.CLIENT_URL || `http://localhost:${port}`}/reset-password?token=${token}`;
-              transporter.sendMail(
-                {
-                  from: gmailUser,
-                  to: email,
-                  subject: "Reset your English Labs password",
-                  text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
-                },
-                (mailError) => {
-                  if (mailError)
-                    console.error("Password reset email failed:", mailError);
-                  if (mailError)
-                    return res
-                      .status(500)
-                      .render("forgot-password.handlebars", {
-                        error: "Unable to send the reset email.",
-                      });
-                  res.render("forgot-password.handlebars", {
-                    message: genericMessage,
-                  });
-                },
+          const gmailUser = String(process.env.GMAIL_USER || "").trim();
+          const gmailPass = String(process.env.GMAIL_PASS || "")
+            .trim()
+            .replace(/\s+/g, "");
+          const hasMailConfig = gmailUser && gmailPass;
+          if (!hasMailConfig) {
+            if (process.env.NODE_ENV !== "production") {
+              console.log(
+                `Password reset link for ${member.username}: ${process.env.CLIENT_URL || `http://localhost:${port}`}/reset-password?token=${token}`,
               );
+              return res.render("forgot-password.handlebars", {
+                message:
+                  "A development reset link was printed in the server terminal.",
+              });
+            }
+            return res.status(500).render("forgot-password.handlebars", {
+              error: "Password reset email is not configured yet.",
+            });
+          }
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: gmailUser,
+              pass: gmailPass,
+            },
+          });
+          const resetUrl = `${process.env.CLIENT_URL || `http://localhost:${port}`}/reset-password?token=${token}`;
+          transporter.sendMail(
+            {
+              from: gmailUser,
+              to: email,
+              subject: "Reset your English Labs password",
+              text: `Use this link to reset your password: ${resetUrl}\n\nThe link expires in one hour.`,
+            },
+            (mailError) => {
+              if (mailError)
+                console.error("Password reset email failed:", mailError);
+              if (mailError)
+                return res.status(500).render("forgot-password.handlebars", {
+                  error: "Unable to send the reset email.",
+                });
+              res.render("forgot-password.handlebars", {
+                message: genericMessage,
+              });
+            },
+          );
         });
     })
     .catch((error) => {
@@ -2316,10 +2326,7 @@ app.get("/forget-password", (req, res) => res.redirect("/forgot-password"));
 
 app.get("/reset-password", (req, res) => {
   const token = String(req.query.token || "");
-  const tokenHash = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   if (!postgresPool) {
     return res.status(500).render("reset-password.handlebars", {
       token,
@@ -2362,10 +2369,7 @@ app.post("/reset-password", (req, res) => {
       error: "Use matching passwords with at least 8 characters.",
     });
   }
-  const tokenHash = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   if (!postgresPool) {
     return res.status(500).render("reset-password.handlebars", {
       token,
@@ -2386,17 +2390,29 @@ app.post("/reset-password", (req, res) => {
           error: "This reset link is invalid or has expired.",
         });
 
-      return new Promise((resolve, reject) => bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
-        if (hashError)
-          return reject(new Error("Unable to hash password."));
-        postgresPool
-          .query("UPDATE users SET password_hash = $1 WHERE username = $2", [passwordHash, reset.username])
-          .then(() => postgresPool.query("DELETE FROM password_resets WHERE id = $1", [reset.id]))
-          .then(() => resolve())
-          .catch(reject);
-      }));
+      return new Promise((resolve, reject) =>
+        bcrypt.hash(password, saltRounds, (hashError, passwordHash) => {
+          if (hashError) return reject(new Error("Unable to hash password."));
+          postgresPool
+            .query("UPDATE users SET password_hash = $1 WHERE username = $2", [
+              passwordHash,
+              reset.username,
+            ])
+            .then(() =>
+              postgresPool.query("DELETE FROM password_resets WHERE id = $1", [
+                reset.id,
+              ]),
+            )
+            .then(() => resolve())
+            .catch(reject);
+        }),
+      );
     })
-    .then(() => res.render("login.handlebars", { message: "Your password has been reset. You can now log in." }))
+    .then(() =>
+      res.render("login.handlebars", {
+        message: "Your password has been reset. You can now log in.",
+      }),
+    )
     .catch((error) => {
       console.error("Password update failed:", error);
       res.status(500).render("reset-password.handlebars", {
@@ -2477,20 +2493,26 @@ app.post("/login", (req, res) => {
             message: "",
           });
         }
-        bcrypt.compare(password, member.password_hash, (compareError, valid) => {
-          if (compareError || !valid)
-            return res.status(400).render("login.handlebars", {
-              error: "Username or password is incorrect.",
-              message: "",
-            });
-          req.session.isLoggedIn = true;
-          req.session.isAdmin = member.role === "admin";
-          req.session.name = member.username;
-          req.session.avatar = member.avatar || "";
-          req.session.avatarUrl = profileImageUrl(req.session.avatar);
-          req.session.avatar_initial = member.username.charAt(0).toUpperCase();
-          res.redirect("/");
-        });
+        bcrypt.compare(
+          password,
+          member.password_hash,
+          (compareError, valid) => {
+            if (compareError || !valid)
+              return res.status(400).render("login.handlebars", {
+                error: "Username or password is incorrect.",
+                message: "",
+              });
+            req.session.isLoggedIn = true;
+            req.session.isAdmin = member.role === "admin";
+            req.session.name = member.username;
+            req.session.avatar = member.avatar || "";
+            req.session.avatarUrl = profileImageUrl(req.session.avatar);
+            req.session.avatar_initial = member.username
+              .charAt(0)
+              .toUpperCase();
+            res.redirect("/");
+          },
+        );
       })
       .catch((error) => {
         console.error("PostgreSQL login failed:", error);
@@ -2589,7 +2611,10 @@ app.post("/signup", (req, res) => {
                   requestedUsername,
                 ])
                 .catch((cleanupError) => {
-                  console.error("PostgreSQL signup rollback failed:", cleanupError);
+                  console.error(
+                    "PostgreSQL signup rollback failed:",
+                    cleanupError,
+                  );
                 })
                 .then(() => {
                   throw error;
@@ -2654,7 +2679,8 @@ app.get("/profile", requireProfileUser, (req, res) => {
     "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
     [req.session.name],
   );
-  if (!postgresPool) return res.status(500).send("User database is not configured.");
+  if (!postgresPool)
+    return res.status(500).send("User database is not configured.");
   postgresReady
     .then(() =>
       postgresPool.query(
@@ -2681,13 +2707,18 @@ app.get("/profile", requireProfileUser, (req, res) => {
         student.profile_button_color,
       );
       student.avatar_initial = student.username.charAt(0).toUpperCase();
-      student.avatarUrl = profileImageUrl(student.avatar || student.spritesheet);
+      student.avatarUrl = profileImageUrl(
+        student.avatar || student.spritesheet,
+      );
       student.spritesheetUrl = profileImageUrl(student.spritesheet);
       if (student.character_config) {
         try {
           student.characterConfig = JSON.parse(student.character_config);
         } catch (error) {
-          console.warn("Unable to parse student character configuration:", error);
+          console.warn(
+            "Unable to parse student character configuration:",
+            error,
+          );
           student.characterConfig = {};
         }
       } else {
@@ -3528,38 +3559,59 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       (countError, counts) => {
                         db.all(
                           "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
-                          [updatedRoom.id, Number(updatedRoom.teacher_present) === 1 ? 1 : 0],
+                          [
+                            updatedRoom.id,
+                            Number(updatedRoom.teacher_present) === 1 ? 1 : 0,
+                          ],
                           async (leaderboardError, rawLeaderboard) => {
                             let leaderboard = rawLeaderboard || [];
-                            if (!leaderboardError && leaderboard.length && postgresPool) {
+                            if (
+                              !leaderboardError &&
+                              leaderboard.length &&
+                              postgresPool
+                            ) {
                               try {
-                                const usernames = leaderboard.map((entry) => entry.username);
-                                const { rows: profiles } = await postgresReady.then(() =>
-                                  postgresPool.query(
-                                    "SELECT username, avatar, spritesheet, character_config, role FROM users WHERE username = ANY($1::text[])",
-                                    [usernames],
-                                  ),
+                                const usernames = leaderboard.map(
+                                  (entry) => entry.username,
                                 );
+                                const { rows: profiles } =
+                                  await postgresReady.then(() =>
+                                    postgresPool.query(
+                                      "SELECT username, avatar, spritesheet, character_config, role FROM users WHERE username = ANY($1::text[])",
+                                      [usernames],
+                                    ),
+                                  );
                                 const profilesByUsername = new Map(
-                                  profiles.map((profile) => [profile.username, profile]),
+                                  profiles.map((profile) => [
+                                    profile.username,
+                                    profile,
+                                  ]),
                                 );
-                                leaderboard = leaderboard.map((entry) => {
-                                  const profile = profilesByUsername.get(entry.username);
-                                  if (!profile) return entry;
-                                  return {
-                                    ...entry,
-                                    avatar: profile.avatar,
-                                    spritesheet: profile.spritesheet,
-                                    character_config: profile.character_config,
-                                    isAdmin: profile.role === "admin" ? 1 : 0,
-                                  };
-                                }).filter(
-                                  (entry) =>
-                                    Number(updatedRoom.teacher_present) === 1 ||
-                                    Number(entry.isAdmin) !== 1,
-                                );
+                                leaderboard = leaderboard
+                                  .map((entry) => {
+                                    const profile = profilesByUsername.get(
+                                      entry.username,
+                                    );
+                                    if (!profile) return entry;
+                                    return {
+                                      ...entry,
+                                      avatar: profile.avatar,
+                                      spritesheet: profile.spritesheet,
+                                      character_config:
+                                        profile.character_config,
+                                      isAdmin: profile.role === "admin" ? 1 : 0,
+                                    };
+                                  })
+                                  .filter(
+                                    (entry) =>
+                                      Number(updatedRoom.teacher_present) ===
+                                        1 || Number(entry.isAdmin) !== 1,
+                                  );
                               } catch (error) {
-                                console.error("Unable to load lobby character profiles:", error);
+                                console.error(
+                                  "Unable to load lobby character profiles:",
+                                  error,
+                                );
                               }
                             }
                             leaderboard = leaderboard.map((entry) => ({
@@ -3778,10 +3830,7 @@ app.post("/api/profile/character", requireLogin, (req, res) => {
       "",
   );
   const spritesheetImage = String(
-    req.body.spritesheet ||
-      req.body.spritesheetImage ||
-      req.body.image ||
-      "",
+    req.body.spritesheet || req.body.spritesheetImage || req.body.image || "",
   );
   const config =
     (req.body.config || req.body.characterConfig) &&
@@ -3916,9 +3965,7 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
     ON CONFLICT(username, difficulty_level, word)
     DO UPDATE SET attempts = attempts + 1, last_seen = CURRENT_TIMESTAMP
   `);
-  words.forEach((word) =>
-    statement.run(username, difficultyLevel, word),
-  );
+  words.forEach((word) => statement.run(username, difficultyLevel, word));
   statement.finalize((error) =>
     error
       ? res.status(500).json({ error: "Unable to save difficult words." })
@@ -3935,7 +3982,9 @@ app.get("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
     (error, words) => {
       if (error) {
         console.error("Unable to load difficult words:", error);
-        return res.status(500).json({ error: "Unable to load difficult words." });
+        return res
+          .status(500)
+          .json({ error: "Unable to load difficult words." });
       }
       res.json({ words });
     },
@@ -3956,7 +4005,9 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
     : null;
   const category = categoryKey ? teacherCategories[categoryKey] : null;
   if (!postgresPool) {
-    console.error("Unable to load teacher dashboard: PostgreSQL is not configured.");
+    console.error(
+      "Unable to load teacher dashboard: PostgreSQL is not configured.",
+    );
     return res.status(503).send("Teacher dashboard requires PostgreSQL.");
   }
 
@@ -4051,7 +4102,9 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
 const deleteStudent = (req, res) => {
   const username = String(req.params.username || "").trim();
   if (!username || username === adminname) {
-    return res.status(400).json({ error: "The admin account cannot be deleted." });
+    return res
+      .status(400)
+      .json({ error: "The admin account cannot be deleted." });
   }
 
   const dependentTables = [
@@ -4125,7 +4178,10 @@ const deleteStudent = (req, res) => {
             try {
               await client.query("ROLLBACK");
             } catch (rollbackError) {
-              console.error("Unable to roll back student deletion:", rollbackError);
+              console.error(
+                "Unable to roll back student deletion:",
+                rollbackError,
+              );
             }
             throw error;
           } finally {
@@ -4144,7 +4200,10 @@ const deleteStudent = (req, res) => {
               const deleteRows = (sql, params = [username]) =>
                 new Promise((resolveRows, rejectRows) => {
                   db.run(sql, params, (error) => {
-                    if (error && !/no such table|no such column/i.test(error.message)) {
+                    if (
+                      error &&
+                      !/no such table|no such column/i.test(error.message)
+                    ) {
                       return rejectRows(error);
                     }
                     resolveRows();
@@ -4163,19 +4222,25 @@ const deleteStudent = (req, res) => {
                 }
                 const characterColumns = await getColumns(characterTable);
                 if (characterColumns.includes("user_id")) {
-                  await deleteRows(`DELETE FROM "${characterTable}" WHERE user_id = ?`);
+                  await deleteRows(
+                    `DELETE FROM "${characterTable}" WHERE user_id = ?`,
+                  );
                 }
                 if (characterColumns.includes("username")) {
-                  await deleteRows(`DELETE FROM "${characterTable}" WHERE username = ?`);
+                  await deleteRows(
+                    `DELETE FROM "${characterTable}" WHERE username = ?`,
+                  );
                 }
                 await deleteRows(
                   "DELETE FROM members WHERE username = ? AND role != 'admin'",
                 );
               };
               deleteStudentRows()
-                .then(() => db.run("COMMIT", (commitError) =>
-                  commitError ? reject(commitError) : resolve(),
-                ))
+                .then(() =>
+                  db.run("COMMIT", (commitError) =>
+                    commitError ? reject(commitError) : resolve(),
+                  ),
+                )
                 .catch((error) => {
                   db.run("ROLLBACK", () => reject(error));
                 });
@@ -4198,360 +4263,354 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     ? req.query.category
     : "grammar";
   const loadStudentDetails = (error, student) => {
-      if (error || !student) return res.status(404).send("Student not found.");
-      student.avatar_initial = student.username.charAt(0).toUpperCase();
-      student.avatarUrl = profileImageUrl(student.avatar);
-      student.spritesheetUrl = profileImageUrl(student.spritesheet);
-      if (student.character_config) {
-        try {
-          student.characterConfig =
-            typeof student.character_config === "string"
-              ? JSON.parse(student.character_config)
-              : student.character_config;
-        } catch (parseError) {
-          console.warn("Unable to parse student character configuration:", parseError);
-          student.characterConfig = {};
-        }
-      } else {
+    if (error || !student) return res.status(404).send("Student not found.");
+    student.avatar_initial = student.username.charAt(0).toUpperCase();
+    student.avatarUrl = profileImageUrl(student.avatar);
+    student.spritesheetUrl = profileImageUrl(student.spritesheet);
+    if (student.character_config) {
+      try {
+        student.characterConfig =
+          typeof student.character_config === "string"
+            ? JSON.parse(student.character_config)
+            : student.character_config;
+      } catch (parseError) {
+        console.warn(
+          "Unable to parse student character configuration:",
+          parseError,
+        );
         student.characterConfig = {};
       }
-      db.all(
-        "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
-        [student.username],
-        (progressError, progress) => {
-          if (progressError)
-            return res.status(500).send("Unable to load student details.");
-          db.all(
-            "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
-            [student.username],
-            (statsError, activityStats) => {
-              if (statsError)
-                return res
-                  .status(500)
-                  .send("Unable to load student statistics.");
-              const preparedStats = activityStats.map((stat) => ({
-                ...stat,
-                average_score: Math.round(stat.average_score || 0),
-              }));
-              const rankedStats = [...preparedStats].sort(
-                (a, b) => b.average_score - a.average_score,
-              );
-              db.all(
-                "SELECT list_number, chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                [student.username],
-                (submissionsError, usefulChunkSubmissions) => {
-                  if (submissionsError)
-                    return res
-                      .status(500)
-                      .send("Unable to load useful chunk submissions.");
-                  db.all(
-                    "SELECT DISTINCT difficulty_level FROM progress WHERE username = ? AND activity_type = 'flip-cards' AND difficulty_level IN ('easy', 'medium') ORDER BY difficulty_level",
-                    [student.username],
-                    (levelsError, flipCompletions) => {
-                      if (levelsError)
-                        return res
-                          .status(500)
-                          .send("Unable to load flip-card completions.");
-                      db.all(
-                        "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 6",
-                        [student.username],
-                        (wordsError, hardestWords) => {
-                          if (wordsError)
-                            return res
-                              .status(500)
-                              .send("Unable to load difficult words.");
-                          const latestSubmissionByChunk = new Map();
-                          usefulChunkSubmissions.forEach((submission) => {
-                            const key = `${submission.list_number}:${submission.chunk}`;
-                            if (!latestSubmissionByChunk.has(key))
-                              latestSubmissionByChunk.set(key, submission);
+    } else {
+      student.characterConfig = {};
+    }
+    db.all(
+      "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
+      [student.username],
+      (progressError, progress) => {
+        if (progressError)
+          return res.status(500).send("Unable to load student details.");
+        db.all(
+          "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
+          [student.username],
+          (statsError, activityStats) => {
+            if (statsError)
+              return res.status(500).send("Unable to load student statistics.");
+            const preparedStats = activityStats.map((stat) => ({
+              ...stat,
+              average_score: Math.round(stat.average_score || 0),
+            }));
+            const rankedStats = [...preparedStats].sort(
+              (a, b) => b.average_score - a.average_score,
+            );
+            db.all(
+              "SELECT list_number, chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? ORDER BY submitted_at DESC",
+              [student.username],
+              (submissionsError, usefulChunkSubmissions) => {
+                if (submissionsError)
+                  return res
+                    .status(500)
+                    .send("Unable to load useful chunk submissions.");
+                db.all(
+                  "SELECT DISTINCT difficulty_level FROM progress WHERE username = ? AND activity_type = 'flip-cards' AND difficulty_level IN ('easy', 'medium') ORDER BY difficulty_level",
+                  [student.username],
+                  (levelsError, flipCompletions) => {
+                    if (levelsError)
+                      return res
+                        .status(500)
+                        .send("Unable to load flip-card completions.");
+                    db.all(
+                      "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 6",
+                      [student.username],
+                      (wordsError, hardestWords) => {
+                        if (wordsError)
+                          return res
+                            .status(500)
+                            .send("Unable to load difficult words.");
+                        const latestSubmissionByChunk = new Map();
+                        usefulChunkSubmissions.forEach((submission) => {
+                          const key = `${submission.list_number}:${submission.chunk}`;
+                          if (!latestSubmissionByChunk.has(key))
+                            latestSubmissionByChunk.set(key, submission);
+                        });
+                        const usefulChunkListsForAdmin = usefulChunkLists.map(
+                          (list) => {
+                            const chunks = list.chunks.map((chunk) => {
+                              const submission = latestSubmissionByChunk.get(
+                                `${list.number}:${chunk}`,
+                              );
+                              return {
+                                chunk,
+                                submitted: Boolean(submission),
+                                sentence: submission?.sentence,
+                                submitted_at: submission?.submitted_at,
+                              };
+                            });
+                            return {
+                              number: list.number,
+                              chunks,
+                              submittedCount: chunks.filter(
+                                (chunk) => chunk.submitted,
+                              ).length,
+                              totalCount: chunks.length,
+                            };
+                          },
+                        );
+                        const listeningCompletions = progress
+                          .filter(
+                            (item) =>
+                              item.activity_type === "listening" &&
+                              item.difficulty_level.startsWith("listening:"),
+                          )
+                          .map((item) => {
+                            const [, topicId, exerciseNumber] =
+                              item.difficulty_level.split(":");
+                            const topic = listeningTopics.find(
+                              (entry) => entry.topic.id === topicId,
+                            );
+                            return {
+                              ...item,
+                              title: topic?.topic.title || "Listening topic",
+                              level: topic?.listeningLevel || "1",
+                              exerciseNumber,
+                            };
                           });
-                          const usefulChunkListsForAdmin = usefulChunkLists.map(
-                            (list) => {
-                              const chunks = list.chunks.map((chunk) => {
-                                const submission = latestSubmissionByChunk.get(
-                                  `${list.number}:${chunk}`,
-                                );
-                                return {
-                                  chunk,
-                                  submitted: Boolean(submission),
-                                  sentence: submission?.sentence,
-                                  submitted_at: submission?.submitted_at,
-                                };
-                              });
-                              return {
-                                number: list.number,
-                                chunks,
-                                submittedCount: chunks.filter(
-                                  (chunk) => chunk.submitted,
-                                ).length,
-                                totalCount: chunks.length,
-                              };
-                            },
-                          );
-                          const listeningCompletions = progress
-                            .filter(
-                              (item) =>
-                                item.activity_type === "listening" &&
-                                item.difficulty_level.startsWith("listening:"),
-                            )
-                            .map((item) => {
-                              const [, topicId, exerciseNumber] =
-                                item.difficulty_level.split(":");
-                              const topic = listeningTopics.find(
-                                (entry) => entry.topic.id === topicId,
-                              );
-                              return {
-                                ...item,
-                                title: topic?.topic.title || "Listening topic",
-                                level: topic?.listeningLevel || "1",
-                                exerciseNumber,
-                              };
-                            });
-                          const readingCompletions = progress
-                            .filter(
-                              (item) =>
-                                item.activity_type === "reading" &&
-                                item.difficulty_level.startsWith("reading:"),
-                            )
-                            .map((item) => {
-                              const [, topicId, exerciseNumber] =
-                                item.difficulty_level.split(":");
-                              const topic = readingTopics.find(
-                                (entry) => entry.topic.id === topicId,
-                              );
-                              return {
-                                ...item,
-                                title: topic?.topic.title || "Reading topic",
-                                level: topic?.readingLevel || "1",
-                                exerciseNumber,
-                              };
-                            });
-                          db.all(
-                            "SELECT topic_id, topic_title, submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                            [student.username],
-                            (
-                              discussionError,
-                              listeningDiscussionSubmissions,
-                            ) => {
-                              db.all(
-                                "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                                [student.username],
-                                (writingError, writingSubmissions) => {
-                                  if (writingError)
-                                    return res
-                                      .status(500)
-                                      .send(
-                                        "Unable to load writing submissions.",
-                                      );
-                                  const groupTopicsByLevel = (
-                                    topics,
-                                    levelKey,
-                                  ) => {
-                                    const levels = new Map();
-                                    topics.forEach((topic) => {
-                                      const level = String(
-                                        topic[levelKey] || "1",
-                                      );
-                                      if (!levels.has(level)) {
-                                        levels.set(level, {
-                                          level,
-                                          topics: [],
-                                          completed: 0,
-                                          total: 0,
-                                        });
-                                      }
-                                      const levelData = levels.get(level);
-                                      const completedExercises =
-                                        topic.exercises.filter(
-                                          (exercise) => exercise.completed,
-                                        ).length;
-                                      levelData.topics.push({
-                                        title: topic.topic.title,
-                                        status: topic.completed
-                                          ? "Completed"
-                                          : completedExercises
-                                            ? "In Progress"
-                                            : "Not Started",
-                                        statusClass: topic.completed
-                                          ? "completed"
-                                          : completedExercises
-                                            ? "in-progress"
-                                            : "not-started",
-                                        completedExercises,
-                                        totalExercises: topic.exercises.length,
+                        const readingCompletions = progress
+                          .filter(
+                            (item) =>
+                              item.activity_type === "reading" &&
+                              item.difficulty_level.startsWith("reading:"),
+                          )
+                          .map((item) => {
+                            const [, topicId, exerciseNumber] =
+                              item.difficulty_level.split(":");
+                            const topic = readingTopics.find(
+                              (entry) => entry.topic.id === topicId,
+                            );
+                            return {
+                              ...item,
+                              title: topic?.topic.title || "Reading topic",
+                              level: topic?.readingLevel || "1",
+                              exerciseNumber,
+                            };
+                          });
+                        db.all(
+                          "SELECT topic_id, topic_title, submission_text, submitted_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                          [student.username],
+                          (discussionError, listeningDiscussionSubmissions) => {
+                            db.all(
+                              "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                              [student.username],
+                              (writingError, writingSubmissions) => {
+                                if (writingError)
+                                  return res
+                                    .status(500)
+                                    .send(
+                                      "Unable to load writing submissions.",
+                                    );
+                                const groupTopicsByLevel = (
+                                  topics,
+                                  levelKey,
+                                ) => {
+                                  const levels = new Map();
+                                  topics.forEach((topic) => {
+                                    const level = String(
+                                      topic[levelKey] || "1",
+                                    );
+                                    if (!levels.has(level)) {
+                                      levels.set(level, {
+                                        level,
+                                        topics: [],
+                                        completed: 0,
+                                        total: 0,
                                       });
-                                      levelData.completed += completedExercises;
-                                      levelData.total += topic.exercises.length;
+                                    }
+                                    const levelData = levels.get(level);
+                                    const completedExercises =
+                                      topic.exercises.filter(
+                                        (exercise) => exercise.completed,
+                                      ).length;
+                                    levelData.topics.push({
+                                      title: topic.topic.title,
+                                      status: topic.completed
+                                        ? "Completed"
+                                        : completedExercises
+                                          ? "In Progress"
+                                          : "Not Started",
+                                      statusClass: topic.completed
+                                        ? "completed"
+                                        : completedExercises
+                                          ? "in-progress"
+                                          : "not-started",
+                                      completedExercises,
+                                      totalExercises: topic.exercises.length,
                                     });
-                                    return [...levels.values()].sort(
-                                      (first, second) =>
-                                        Number(first.level) -
-                                        Number(second.level),
-                                    );
-                                  };
-                                  const decoratedReadingTopics = decorateTopics(
-                                    readingTopics,
-                                    progress,
-                                    "reading",
-                                    "readingLevel",
+                                    levelData.completed += completedExercises;
+                                    levelData.total += topic.exercises.length;
+                                  });
+                                  return [...levels.values()].sort(
+                                    (first, second) =>
+                                      Number(first.level) -
+                                      Number(second.level),
                                   );
-                                  const decoratedWritingTopics = decorateTopics(
-                                    writingTopics,
-                                    progress,
-                                    "writing",
-                                    "writingLevel",
-                                  );
-                                  const decoratedListeningTopics =
-                                    decorateTopics(
-                                      listeningTopics,
-                                      progress,
-                                      "listening",
-                                      "listeningLevel",
-                                    );
-                                  const grammarProgress = progress.filter(
-                                    (item) =>
-                                      ["questions", "final"].includes(
-                                        item.activity_type,
-                                      ),
-                                  );
-                                  const grammarChapters =
-                                    practiceQuestionChapters.map((chapter) => {
-                                      const exercises = chapter.exercises.map(
-                                        (exercise, index) => {
-                                          const completion =
-                                            grammarProgress.find(
-                                              (item) =>
-                                                item.activity_type ===
-                                                  "questions" &&
-                                                item.difficulty_level ===
-                                                  `questions:${chapter.id}:${index + 1}`,
-                                            );
-                                          return {
-                                            title: exercise.title,
-                                            completed: Boolean(completion),
-                                            score: completion?.percentage,
-                                          };
-                                        },
-                                      );
-                                      return {
-                                        title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
-                                        status: exercises.every(
-                                          (exercise) => exercise.completed,
-                                        )
-                                          ? "Completed"
-                                          : exercises.some(
-                                                (exercise) =>
-                                                  exercise.completed,
-                                              )
-                                            ? "In Progress"
-                                            : "Not Started",
-                                        statusClass: exercises.every(
-                                          (exercise) => exercise.completed,
-                                        )
-                                          ? "completed"
-                                          : exercises.some(
-                                                (exercise) =>
-                                                  exercise.completed,
-                                              )
-                                            ? "in-progress"
-                                            : "not-started",
-                                        showStatus: exercises.some(
-                                          (exercise) => exercise.completed,
-                                        ),
-                                        exercises,
-                                      };
-                                    });
-                                  const finalTestRows = grammarProgress.filter(
-                                    (item) => item.activity_type === "final",
-                                  );
-                                  res.render("teacher-student.handlebars", {
-                                    student: {
-                                      ...student,
-                                      avatarUrl: student.avatarUrl,
-                                      spritesheetUrl: student.spritesheetUrl,
-                                      characterConfig: student.characterConfig,
-                                    },
-                                    profileCategory,
-                                    profileIsGrammar:
-                                      profileCategory === "grammar",
-                                    profileIsReading:
-                                      profileCategory === "reading",
-                                    profileIsActivity:
-                                      profileCategory === "grammar",
-                                    profileIsVocabulary:
-                                      profileCategory === "vocabulary",
-                                    profileIsWriting:
-                                      profileCategory === "writing",
-                                    profileIsListening:
-                                      profileCategory === "listening",
-                                    progress,
-                                    grammarStats: preparedStats.filter((stat) =>
-                                      ["questions", "final"].includes(
-                                        stat.activity_type,
-                                      ),
+                                };
+                                const decoratedReadingTopics = decorateTopics(
+                                  readingTopics,
+                                  progress,
+                                  "reading",
+                                  "readingLevel",
+                                );
+                                const decoratedWritingTopics = decorateTopics(
+                                  writingTopics,
+                                  progress,
+                                  "writing",
+                                  "writingLevel",
+                                );
+                                const decoratedListeningTopics = decorateTopics(
+                                  listeningTopics,
+                                  progress,
+                                  "listening",
+                                  "listeningLevel",
+                                );
+                                const grammarProgress = progress.filter(
+                                  (item) =>
+                                    ["questions", "final"].includes(
+                                      item.activity_type,
                                     ),
-                                    activityStats: preparedStats,
-                                    bestActivity: rankedStats[0],
-                                    needsFocus:
-                                      rankedStats[rankedStats.length - 1],
-                                    usefulChunkSubmissions,
-                                    usefulChunkSubmissionCount:
-                                      usefulChunkSubmissions.length,
-                                    usefulChunkListsForAdmin,
-                                    flipCompletions,
-                                    hardestWords,
-                                    listeningCompletions,
-                                    readingCompletions,
-                                    listeningDiscussionSubmissions:
-                                      discussionError
-                                        ? []
-                                        : listeningDiscussionSubmissions,
-                                    readingProgressLevels: groupTopicsByLevel(
-                                      decoratedReadingTopics,
-                                      "readingLevel",
-                                    ),
-                                    writingProgressLevels: groupTopicsByLevel(
-                                      decoratedWritingTopics,
-                                      "writingLevel",
-                                    ),
-                                    listeningProgressLevels: groupTopicsByLevel(
-                                      decoratedListeningTopics,
-                                      "listeningLevel",
-                                    ),
-                                    grammarChapters,
-                                    finalTestRows,
-                                    writingSubmissions: writingSubmissions.map(
-                                      (submission) => {
-                                        const topic = writingTopics.find(
-                                          (entry) =>
-                                            entry.topic.id ===
-                                            submission.topic_id,
+                                );
+                                const grammarChapters =
+                                  practiceQuestionChapters.map((chapter) => {
+                                    const exercises = chapter.exercises.map(
+                                      (exercise, index) => {
+                                        const completion = grammarProgress.find(
+                                          (item) =>
+                                            item.activity_type ===
+                                              "questions" &&
+                                            item.difficulty_level ===
+                                              `questions:${chapter.id}:${index + 1}`,
                                         );
                                         return {
-                                          ...submission,
-                                          level: topic?.writingLevel || "2",
-                                          needsFeedback: !submission.feedback,
+                                          title: exercise.title,
+                                          completed: Boolean(completion),
+                                          score: completion?.percentage,
                                         };
                                       },
-                                    ),
-                                    writingSubmissionCount:
-                                      writingSubmissions.length,
+                                    );
+                                    return {
+                                      title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                      status: exercises.every(
+                                        (exercise) => exercise.completed,
+                                      )
+                                        ? "Completed"
+                                        : exercises.some(
+                                              (exercise) => exercise.completed,
+                                            )
+                                          ? "In Progress"
+                                          : "Not Started",
+                                      statusClass: exercises.every(
+                                        (exercise) => exercise.completed,
+                                      )
+                                        ? "completed"
+                                        : exercises.some(
+                                              (exercise) => exercise.completed,
+                                            )
+                                          ? "in-progress"
+                                          : "not-started",
+                                      showStatus: exercises.some(
+                                        (exercise) => exercise.completed,
+                                      ),
+                                      exercises,
+                                    };
                                   });
-                                },
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-        },
-      );
+                                const finalTestRows = grammarProgress.filter(
+                                  (item) => item.activity_type === "final",
+                                );
+                                res.render("teacher-student.handlebars", {
+                                  student: {
+                                    ...student,
+                                    avatarUrl: student.avatarUrl,
+                                    spritesheetUrl: student.spritesheetUrl,
+                                    characterConfig: student.characterConfig,
+                                  },
+                                  profileCategory,
+                                  profileIsGrammar:
+                                    profileCategory === "grammar",
+                                  profileIsReading:
+                                    profileCategory === "reading",
+                                  profileIsActivity:
+                                    profileCategory === "grammar",
+                                  profileIsVocabulary:
+                                    profileCategory === "vocabulary",
+                                  profileIsWriting:
+                                    profileCategory === "writing",
+                                  profileIsListening:
+                                    profileCategory === "listening",
+                                  progress,
+                                  grammarStats: preparedStats.filter((stat) =>
+                                    ["questions", "final"].includes(
+                                      stat.activity_type,
+                                    ),
+                                  ),
+                                  activityStats: preparedStats,
+                                  bestActivity: rankedStats[0],
+                                  needsFocus:
+                                    rankedStats[rankedStats.length - 1],
+                                  usefulChunkSubmissions,
+                                  usefulChunkSubmissionCount:
+                                    usefulChunkSubmissions.length,
+                                  usefulChunkListsForAdmin,
+                                  flipCompletions,
+                                  hardestWords,
+                                  listeningCompletions,
+                                  readingCompletions,
+                                  listeningDiscussionSubmissions:
+                                    discussionError
+                                      ? []
+                                      : listeningDiscussionSubmissions,
+                                  readingProgressLevels: groupTopicsByLevel(
+                                    decoratedReadingTopics,
+                                    "readingLevel",
+                                  ),
+                                  writingProgressLevels: groupTopicsByLevel(
+                                    decoratedWritingTopics,
+                                    "writingLevel",
+                                  ),
+                                  listeningProgressLevels: groupTopicsByLevel(
+                                    decoratedListeningTopics,
+                                    "listeningLevel",
+                                  ),
+                                  grammarChapters,
+                                  finalTestRows,
+                                  writingSubmissions: writingSubmissions.map(
+                                    (submission) => {
+                                      const topic = writingTopics.find(
+                                        (entry) =>
+                                          entry.topic.id ===
+                                          submission.topic_id,
+                                      );
+                                      return {
+                                        ...submission,
+                                        level: topic?.writingLevel || "2",
+                                        needsFeedback: !submission.feedback,
+                                      };
+                                    },
+                                  ),
+                                  writingSubmissionCount:
+                                    writingSubmissions.length,
+                                });
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   };
 
   if (postgresPool) {
@@ -4799,7 +4858,10 @@ io.on("connection", (socket) => {
               })
               .catch((error) => {
                 console.error("Unable to load socket lobby character:", error);
-                acknowledge?.({ ok: false, error: "Unable to load your character." });
+                acknowledge?.({
+                  ok: false,
+                  error: "Unable to load your character.",
+                });
               });
           },
         );

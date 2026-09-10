@@ -54,57 +54,6 @@ legend {
 
 .lobby-quiz-panel {
   width: min(100%, 900px);
-  margin: 0 auto 16px;
-  padding: 20px;
-  border: 1px solid #dbe2ed;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 22px rgba(38, 55, 82, 0.1);
-}
-body:has(.lobby-active-session) > header,
-body.in-session-mode > header {
-  display: none;
-}
-body:has(.lobby-active-session) .lobby-page,
-body.in-session-mode .lobby-page {
-  height: 100dvh;
-  margin-top: 0;
-  padding-top: 0;
-}
-body:has(.lobby-active-session) .lobby-quiz-panel,
-body.in-session-mode .lobby-quiz-panel {
-  display: none;
-}
-.active-room-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #dbe2ed;
-}
-.active-room-controls .lobby-code {
-  margin: 0;
-}
-
-@media (min-width: 761px) {
-  .lobby-shell {
-    width: 100%;
-    max-width: none;
-  }
-
-  .lobby-stage-wrap {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.lobby-quiz-panel h1,
-.lobby-quiz-panel h2 {
-  width: auto;
-  padding: 0;
-  color: #14213d;
-  font-family: "Teachers", sans-serif;
 }
 
 .lobby-quiz-panel h1 {
@@ -1164,9 +1113,78 @@ header > nav > .auth-button {
 }
 
 .account-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #171717;
+}
+
+.auth-form-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100vh;
+  background: #171717;
+}
+
+.auth-form-video {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translate(10px, -8px) scale(0.96);
+  animation: auth-form-video-enter 0.8s ease-out both;
+}
+
+.login-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #171717;
+}
+
+body:has(.account-page) > header,
+body:has(.login-page) > header {
+  display: none;
+}
+
+.auth-form-page .account-card,
+.login-page .login-card {
+  animation: auth-form-card-enter 0.7s ease-out both;
+}
+
+@keyframes auth-form-video-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-form-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.account-page {
   min-height: calc(100vh - 100px);
   padding: 55px 20px;
-  background: linear-gradient(135deg, #edf4ff 0%, #fff9eb 52%, #eaf7f0 100%);
+  background: #171717;
 }
 
 .account-card,
@@ -1366,6 +1384,65 @@ header > nav > .auth-button {
   color: #526074;
 }
 
+.account-page .account-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(42, 27, 21, 0.88),
+    rgba(42, 27, 21, 0.72)
+  );
+  background-image: none;
+  border: 3px dotted rgba(241, 228, 204, 0.52);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #f1e4cc;
+}
+
+.account-page .account-card::after {
+  position: absolute;
+  z-index: -1;
+  top: 34%;
+  right: -8%;
+  color: rgba(241, 228, 204, 0.12);
+  content: "English Labs";
+  font-family: "Water Brush", cursive;
+  font-size: clamp(100px, 18vw, 190px);
+  line-height: 0.8;
+  white-space: nowrap;
+  transform: rotate(-12deg);
+  animation: account-calligraphy-drift 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes account-calligraphy-drift {
+  from {
+    opacity: 0.45;
+    transform: translate(-24px, 12px) rotate(-12deg) scale(0.98);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(16px, -10px) rotate(-8deg) scale(1.04);
+  }
+}
+
+.account-page .account-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.account-page .account-card h1,
+.account-page .account-card > p:not(.eyebrow),
+.account-page .account-card .eyebrow,
+.account-page .account-form label,
+.account-page .account-link {
+  color: #f1e4cc;
+}
+
 .profile-heading {
   display: flex;
   align-items: start;
@@ -1493,11 +1570,8 @@ div.profile-avatar-placeholder {
 
 .profile-color-panel {
   margin: 28px 0;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--profile-card-text, #14213d) 12%,
-    transparent
-  );
+  border: 1px solid
+    color-mix(in srgb, var(--profile-card-text, #14213d) 12%, transparent);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.35);
   overflow: hidden;
@@ -2787,11 +2861,8 @@ nav ul li a:hover {
 
 .character-settings {
   margin: 28px 0;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--profile-card-text, #14213d) 12%,
-    transparent
-  );
+  border: 1px solid
+    color-mix(in srgb, var(--profile-card-text, #14213d) 12%, transparent);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.35);
   color: var(--profile-card-text, #14213d);
@@ -4645,14 +4716,32 @@ nav ul li a:hover {
 }
 
 .auth-landing {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
-  min-height: calc(100vh - 100px);
+  min-height: 100vh;
   place-items: center;
   padding: 40px 20px;
-  background: linear-gradient(135deg, #edf4ff 0%, #fff9eb 52%, #eaf7f0 100%);
+  background: #171717;
+}
+
+body:has(.auth-landing) > header {
+  display: none;
+}
+
+.auth-landing-video {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translate(10px, -8px) scale(0.96);
 }
 
 .auth-landing-content {
+  position: relative;
   max-width: 680px;
   text-align: center;
   animation: auth-content-enter 0.9s ease-out both;
@@ -4674,10 +4763,11 @@ nav ul li a:hover {
   width: auto;
   padding: 0;
   margin: 12px 0 18px;
-  color: #14213d;
+  color: #fff;
   font-family: "Fredoka", sans-serif;
   font-size: clamp(40px, 7vw, 76px);
   line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .auth-landing-content > p:not(.eyebrow) {
@@ -4685,9 +4775,11 @@ nav ul li a:hover {
   max-width: 520px;
   margin: 0 auto;
   padding: 0;
-  color: #526074;
+  color: #fff;
   font-size: 18px;
   line-height: 1.55;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
 }
 
 .auth-landing-actions {
@@ -4697,12 +4789,27 @@ nav ul li a:hover {
   margin-top: 30px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .auth-landing-video {
+    display: none;
+  }
+
+  .auth-landing-content {
+    animation: none;
+  }
+
+  .account-page .account-card::after,
+  .account-page .account-card {
+    animation: none;
+  }
+}
+
 .login-page {
   display: grid;
-  min-height: calc(100vh - 100px);
+  min-height: 100vh;
   place-items: center;
   padding: 56px 20px;
-  background: linear-gradient(135deg, #edf4ff 0%, #fff9eb 52%, #eaf7f0 100%);
+  background: #171717;
 }
 
 .login-card {
@@ -4711,38 +4818,46 @@ nav ul li a:hover {
   width: min(440px, 100%);
   padding: 38px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 3px dotted rgba(241, 228, 204, 0.52);
   border-radius: 12px;
-  background: linear-gradient(120deg, #d9ecff, #fff0c4, #d9f1e5, #eadcf5);
-  background-size: 320% 320%;
-  box-shadow: 0 22px 60px rgba(38, 55, 82, 0.18);
-  animation: login-gradient-move 12s ease infinite;
+  background: linear-gradient(
+    135deg,
+    rgba(42, 27, 21, 0.88),
+    rgba(42, 27, 21, 0.72)
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #f1e4cc;
 }
 
 .login-card::before {
-  position: absolute;
-  z-index: -1;
-  inset: 10px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.88);
-  content: "";
+  display: none;
 }
 
-@keyframes login-gradient-move {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+.login-card::after {
+  position: absolute;
+  z-index: -1;
+  top: 32%;
+  right: -10%;
+  color: rgba(241, 228, 204, 0.12);
+  content: "English Labs";
+  font-family: "Water Brush", cursive;
+  font-size: clamp(90px, 18vw, 170px);
+  line-height: 0.8;
+  white-space: nowrap;
+  transform: rotate(-12deg);
+  animation: account-calligraphy-drift 14s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 .login-card h1 {
   width: auto;
   margin: 8px 0 24px;
   padding: 0;
-  color: #14213d;
+  color: #f1e4cc;
   font-family: "Fredoka", sans-serif;
   font-size: 46px;
   line-height: 1;
@@ -4755,7 +4870,7 @@ nav ul li a:hover {
 
 .login-form label {
   margin-top: 8px;
-  color: #14213d;
+  color: #f1e4cc;
   font-size: 14px;
   font-weight: 700;
 }
@@ -4780,15 +4895,15 @@ nav ul li a:hover {
   padding: 13px 18px;
   border: 0;
   border-radius: 5px;
-  background: #14213d;
-  color: #fff;
+  background: #f1e4cc;
+  color: #2a1b15;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
 .login-submit:hover {
-  background: #263c68;
+  background: #e5d2ae;
   transform: translateY(-2px);
 }
 
@@ -4802,6 +4917,17 @@ nav ul li a:hover {
   font-size: 13px;
 }
 
+.login-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-page .login-card .eyebrow,
+.login-page .login-card .forgot-password-link,
+.login-page .login-card .account-link {
+  color: #f1e4cc;
+}
+
 .account-card .account-link {
   display: inline-block;
   margin-top: 18px;
@@ -4809,7 +4935,8 @@ nav ul li a:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-card {
+  .login-card,
+  .login-card::after {
     animation: none;
   }
 }
@@ -4827,13 +4954,13 @@ nav ul li a:hover {
 }
 
 .auth-primary-button {
-  background: #14213d;
+  background: #291d18;
   color: #fff;
 }
 
 .auth-secondary-button {
   border: 1px solid #14213d;
-  background: #fff;
+  background: #f1e4cc;
   color: #14213d;
 }
 
@@ -4871,6 +4998,21 @@ nav ul li a:hover {
   width: auto;
   padding: 0;
   color: #526074;
+}
+
+body,
+body * {
+  font-family: "Nunito", sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+legend {
+  font-family: "Bitter", serif !important;
 }
 
 .chapter-picker {

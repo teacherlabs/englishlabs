@@ -3,6 +3,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Character customization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+      rel="stylesheet"
+    />
     <style>
       html,
       body {
@@ -11,6 +17,7 @@
         margin: 0;
         overflow: hidden;
         background: #fff8f1;
+        font-family: "Nunito", sans-serif;
       }
       iframe {
         display: block;
@@ -28,75 +35,31 @@
       title="Character customization"
     ></iframe>
     <script>
-      const editor = document.getElementById("vitruvianCharacterEditor");
-      const editorOrigin = new URL("{{studioUrl}}").origin;
-      const allowedOrigins = new Set([
-        editorOrigin,
-        "http://localhost:5173",
-        "http://localhost:3000",
-      ]);
-
-      const loadSavedCharacter = async () => {
-        const response = await fetch("/api/profile/character");
-        if (!response.ok) return;
-        const { config } = await response.json();
-        editor.contentWindow?.postMessage(
-          { type: "LOAD_LPC_CHARACTER", payload: { config } },
-          editorOrigin,
-        );
-      };
-
-      editor.addEventListener("load", () => {
-        loadSavedCharacter().catch((error) =>
-          console.error("Unable to load saved character:", error),
-        );
-      });
-
-      window.addEventListener("message", async (event) => {
-        if (
-          !allowedOrigins.has(event.origin) ||
-          event.source !== editor.contentWindow ||
-          event.data?.type !== "SAVE_LPC_CHARACTER"
-        ) {
-          return;
-        }
-
-        const payload = event.data.payload || {};
-        const avatar =
-          payload.avatar ||
-          payload.previewImage ||
-          payload.preview ||
-          payload.previewDataUrl ||
-          payload.image ||
-          payload.spritesheetImage;
-        const spritesheet =
-          payload.spritesheet ||
-          payload.spritesheetImage ||
-          payload.image;
-        if (!avatar || !spritesheet) {
-          console.error("The character studio did not provide both images.");
-          return;
-        }
-
-        try {
-          const response = await fetch("/api/profile/character", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              config: payload.config || payload.characterConfig || {},
-              avatar,
-              spritesheet,
-            }),
-          });
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(result.error || "Unable to save character.");
-          }
-          window.top.location.href = "/profile";
-        } catch (error) {
-          console.error("Unable to save character:", error);
-        }
-      });
+      const editor = document.getElementById("vitruvianCharacterEditor"); const
+      editorOrigin = new URL("{{studioUrl}}").origin; const allowedOrigins = new
+      Set([ editorOrigin, "http://localhost:5173", "http://localhost:3000", ]);
+      const loadSavedCharacter = async () => { const response = await
+      fetch("/api/profile/character"); if (!response.ok) return; const { config
+      } = await response.json(); editor.contentWindow?.postMessage( { type:
+      "LOAD_LPC_CHARACTER", payload: { config } }, editorOrigin, ); };
+      editor.addEventListener("load", () => { loadSavedCharacter().catch((error)
+      => console.error("Unable to load saved character:", error), ); });
+      window.addEventListener("message", async (event) => { if (
+      !allowedOrigins.has(event.origin) || event.source !== editor.contentWindow
+      || event.data?.type !== "SAVE_LPC_CHARACTER" ) { return; } const payload =
+      event.data.payload || {}; const avatar = payload.avatar ||
+      payload.previewImage || payload.preview || payload.previewDataUrl ||
+      payload.image || payload.spritesheetImage; const spritesheet =
+      payload.spritesheet || payload.spritesheetImage || payload.image; if
+      (!avatar || !spritesheet) { console.error("The character studio did not
+      provide both images."); return; } try { const response = await
+      fetch("/api/profile/character", { method: "POST", headers: {
+      "Content-Type": "application/json" }, body: JSON.stringify({ config:
+      payload.config || payload.characterConfig || {}, avatar, spritesheet, }),
+      }); const result = await response.json(); if (!response.ok) { throw new
+      Error(result.error || "Unable to save character."); }
+      window.top.location.href = "/profile"; } catch (error) {
+      console.error("Unable to save character:", error); } });
     </script>
   </body>
 </html>
