@@ -1,14 +1,14 @@
 ﻿:root {
-  --color-primary: #2D4B7B;
-  --color-secondary: #14213D;
-  --color-background-tint: #DBEAFE;
-  --color-accent: #D97706;
-  --color-dark: #291D18;
-  --color-surface: #FFFFFF;
+  --color-primary: #2d4b7b;
+  --color-secondary: #14213d;
+  --color-background-tint: #dbeafe;
+  --color-accent: #d97706;
+  --color-dark: #291d18;
+  --color-surface: #ffffff;
   --color-muted: #526074;
-  --color-border: #CBD5E1;
-  --color-success: #2D4B7B;
-  --color-danger: #8F3028;
+  --color-border: #cbd5e1;
+  --color-success: #2d4b7b;
+  --color-danger: #8f3028;
 }
 
 * {
@@ -769,7 +769,7 @@ legend {
   --app-muted: var(--color-muted);
   --app-line: var(--color-border);
   --app-paper: var(--color-surface);
-  --app-wash: #F8FAFC;
+  --app-wash: #f8fafc;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 266px;
   min-height: 100dvh;
@@ -4737,6 +4737,10 @@ nav ul li a:hover {
   padding: 0;
   color: #526074;
   line-height: 1.5;
+}
+
+.vocabulary-item .word-definition {
+  text-align: center;
 }
 
 .spelling-item .vocabulary-feedback {

@@ -1281,7 +1281,11 @@ const dashboardDateFormatter = new Intl.DateTimeFormat("en", {
 });
 
 const dashboardDateKey = (date) =>
-  [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
 
 const buildDashboardSchedule = () => {
   const today = new Date();
@@ -1331,19 +1335,70 @@ app.use(function (req, res, next) {
   }
   res.locals.session = req.session;
   const currentPath = req.path;
-  const isActivePath = (paths) => paths.some((path) => currentPath === path || currentPath.startsWith(`${path}/`));
+  const isActivePath = (paths) =>
+    paths.some(
+      (path) => currentPath === path || currentPath.startsWith(`${path}/`),
+    );
   const appNavItems = [
     { href: "/", label: "Dashboard", icon: "01", active: currentPath === "/" },
-    { href: "/practice/questions", label: "Grammar", icon: "02", active: isActivePath(["/practice", "/grammar"]) },
-    { href: "/vocabulary/flip-cards", label: "Vocabulary", icon: "03", active: isActivePath(["/vocabulary"]) },
-    { href: "/reading", label: "Reading", icon: "04", active: isActivePath(["/reading"]) },
-    { href: "/writing", label: "Writing", icon: "05", active: isActivePath(["/writing"]) },
-    { href: "/listening", label: "Listening", icon: "06", active: isActivePath(["/listening"]) },
-    { href: "/lobby", label: "Lobby", icon: "07", active: isActivePath(["/lobby"]) },
-    { href: "/quicktype", label: "QuickType", icon: "08", active: isActivePath(["/quicktype"]) },
-    { href: "/question-game", label: "Question game", icon: "09", active: isActivePath(["/question-game"]) },
+    {
+      href: "/practice/questions",
+      label: "Grammar",
+      icon: "02",
+      active: isActivePath(["/practice", "/grammar"]),
+    },
+    {
+      href: "/vocabulary/flip-cards",
+      label: "Vocabulary",
+      icon: "03",
+      active: isActivePath(["/vocabulary"]),
+    },
+    {
+      href: "/reading",
+      label: "Reading",
+      icon: "04",
+      active: isActivePath(["/reading"]),
+    },
+    {
+      href: "/writing",
+      label: "Writing",
+      icon: "05",
+      active: isActivePath(["/writing"]),
+    },
+    {
+      href: "/listening",
+      label: "Listening",
+      icon: "06",
+      active: isActivePath(["/listening"]),
+    },
+    {
+      href: "/lobby",
+      label: "Lobby",
+      icon: "07",
+      active: isActivePath(["/lobby"]),
+    },
+    {
+      href: "/quicktype",
+      label: "QuickType",
+      icon: "08",
+      active: isActivePath(["/quicktype"]),
+    },
+    {
+      href: "/question-game",
+      label: "Question game",
+      icon: "09",
+      active: isActivePath(["/question-game"]),
+    },
     ...(req.session.isAdmin
-      ? [{ href: "/teacher/dashboard", label: "Students", icon: "10", active: isActivePath(["/teacher"]), admin: true }]
+      ? [
+          {
+            href: "/teacher/dashboard",
+            label: "Students",
+            icon: "10",
+            active: isActivePath(["/teacher"]),
+            admin: true,
+          },
+        ]
       : []),
   ];
   res.locals.appNavWorkspace = appNavItems.slice(0, 6);
@@ -1396,11 +1451,9 @@ app.use((req, res, next) => {
                 )
                 .filter(Boolean),
             );
-            res.locals.dashboardSchedule.calendarWeeks
-              .flat()
-              .forEach((day) => {
-                if (dueDates.has(day.date)) day.isHighlighted = true;
-              });
+            res.locals.dashboardSchedule.calendarWeeks.flat().forEach((day) => {
+              if (dueDates.has(day.date)) day.isHighlighted = true;
+            });
             res.locals.studentRemindersLoaded = true;
           }
           next();
@@ -1597,8 +1650,14 @@ db.serialize(() => {
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (username) REFERENCES members(username) ON DELETE CASCADE
   )`);
-  db.run("ALTER TABLE student_reminders ADD COLUMN target_route TEXT", () => {});
-  db.run("ALTER TABLE student_reminders ADD COLUMN completed_at TEXT", () => {});
+  db.run(
+    "ALTER TABLE student_reminders ADD COLUMN target_route TEXT",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE student_reminders ADD COLUMN completed_at TEXT",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS vocabulary_difficult_words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1918,7 +1977,8 @@ app.post("/api/listening/discussion", requireLogin, (req, res) => {
      DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP`,
     [req.session.name, topicId, topicTitle, text],
     async (error) => {
-      if (error) return res.status(500).json({ error: "Unable to save your response." });
+      if (error)
+        return res.status(500).json({ error: "Unable to save your response." });
       if (postgresPool) {
         try {
           await postgresReady;
@@ -1930,7 +1990,9 @@ app.post("/api/listening/discussion", requireLogin, (req, res) => {
           );
         } catch (postgresError) {
           console.error("Unable to mirror listening response:", postgresError);
-          return res.status(500).json({ error: "Unable to save your response." });
+          return res
+            .status(500)
+            .json({ error: "Unable to save your response." });
         }
       }
       res.json({ saved: true });
@@ -1951,7 +2013,8 @@ app.post("/api/writing/submissions", requireLogin, (req, res) => {
      DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
     [req.session.name, topicId, topicTitle, text],
     async (error) => {
-      if (error) return res.status(500).json({ error: "Unable to save your writing." });
+      if (error)
+        return res.status(500).json({ error: "Unable to save your writing." });
       if (postgresPool) {
         try {
           await postgresReady;
@@ -1963,7 +2026,9 @@ app.post("/api/writing/submissions", requireLogin, (req, res) => {
           );
         } catch (postgresError) {
           console.error("Unable to mirror writing submission:", postgresError);
-          return res.status(500).json({ error: "Unable to save your writing." });
+          return res
+            .status(500)
+            .json({ error: "Unable to save your writing." });
         }
       }
       res.json({ saved: true });
@@ -2902,6 +2967,25 @@ const loadStudentGoal = (username, callback) => {
   );
 };
 
+const loadDifficultWords = (username, callback) => {
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = $1 AND difficulty_level IN ('easy', 'medium') ORDER BY attempts DESC, last_seen DESC LIMIT 20",
+          [username],
+        ),
+      )
+      .then(({ rows }) => callback(null, rows))
+      .catch((error) => callback(error));
+  }
+  db.all(
+    "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? AND difficulty_level IN ('easy', 'medium') ORDER BY attempts DESC, last_seen DESC LIMIT 20",
+    [username],
+    callback,
+  );
+};
+
 const loadStudentReminders = (username, callback) => {
   const formatDateParts = (value, dateOnly = false) => {
     if (!value) return null;
@@ -2968,7 +3052,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
   postgresReady
     .then(() =>
       postgresPool.query(
-        "SELECT username, email, goal, avatar, spritesheet, character_config, profile_background FROM users WHERE username = $1",
+        "SELECT username, email, goal, avatar, spritesheet, character_config FROM users WHERE username = $1",
         [req.session.name],
       ),
     )
@@ -2977,19 +3061,6 @@ app.get("/profile", requireProfileUser, (req, res) => {
       if (!student) return res.status(404).send("Profile not found.");
       student.avatar = student.avatar || student.spritesheet || "";
       student.avatarUrl = profileImageUrl(student.avatar);
-      const background = /^#[0-9a-fA-F]{6}$/.test(
-        student.profile_background || "",
-      )
-        ? student.profile_background
-        : "#edf4ff";
-      student.profile_background = background;
-      student.profile_text_color = getAccessibleTextColor(background);
-      student.profile_muted_color =
-        student.profile_text_color === "#14213d" ? "#475569" : "#dbeafe";
-      student.profile_button_color = darkenHexColor(background, 0.22);
-      student.profile_button_text_color = getAccessibleTextColor(
-        student.profile_button_color,
-      );
       student.avatar_initial = student.username.charAt(0).toUpperCase();
       student.avatarUrl = profileImageUrl(
         student.avatar || student.spritesheet,
@@ -3088,7 +3159,8 @@ app.get("/profile", requireProfileUser, (req, res) => {
                           res.locals.dashboardSchedule.calendarWeeks
                             .flat()
                             .forEach((day) => {
-                              if (dueDates.has(day.date)) day.isHighlighted = true;
+                              if (dueDates.has(day.date))
+                                day.isHighlighted = true;
                             });
                           res.render("profile.handlebars", {
                             student,
@@ -3106,7 +3178,10 @@ app.get("/profile", requireProfileUser, (req, res) => {
                           });
                         })
                         .catch((reminderError) => {
-                          console.error("Unable to load student reminders:", reminderError);
+                          console.error(
+                            "Unable to load student reminders:",
+                            reminderError,
+                          );
                           res.status(500).send("Unable to load reminders.");
                         });
                     },
@@ -4061,40 +4136,6 @@ app.post("/profile/goal", requireProfileUser, (req, res) => {
     });
 });
 
-app.post("/profile/background", requireProfileUser, (req, res) => {
-  const backgroundColor = String(req.body.profileBackgroundColor || "").trim();
-  if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
-    return res.status(400).redirect("/profile?backgroundError=1");
-  }
-
-  const normalizedBackground = backgroundColor.toLowerCase();
-  const saveToPostgres = postgresPool
-    ? postgresReady.then(() =>
-        postgresPool.query(
-          "UPDATE users SET profile_background = $1 WHERE username = $2",
-          [normalizedBackground, req.session.name],
-        ),
-      )
-    : Promise.resolve(null);
-  saveToPostgres
-    .then((result) => {
-      if (postgresPool && result.rowCount !== 1)
-        throw new Error(`No PostgreSQL user found for ${req.session.name}.`);
-      return new Promise((resolve, reject) => {
-        db.run(
-          "UPDATE members SET profile_background = ? WHERE username = ?",
-          [normalizedBackground, req.session.name],
-          (error) => (error ? reject(error) : resolve()),
-        );
-      });
-    })
-    .then(() => res.redirect("/profile?backgroundSaved=1"))
-    .catch((error) => {
-      console.error("Unable to save profile background:", error);
-      res.status(500).redirect("/profile?backgroundError=1");
-    });
-});
-
 app.post("/profile/avatar", requireProfileUser, (req, res) => {
   profileUpload.single("profilePicture")(req, res, (uploadError) => {
     if (uploadError || !req.file) {
@@ -4250,14 +4291,23 @@ app.post("/api/progress", requireLogin, (req, res) => {
       percentage,
     ],
     async (error) => {
-      if (error) return res.status(500).json({ error: "Unable to save progress." });
+      if (error)
+        return res.status(500).json({ error: "Unable to save progress." });
       if (postgresPool) {
         try {
           await postgresReady;
           await postgresPool.query(
             `INSERT INTO progress (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [username, activityType || "practice", chapterId || null, difficultyLevel || "", safePoints, safeTotal, percentage],
+            [
+              username,
+              activityType || "practice",
+              chapterId || null,
+              difficultyLevel || "",
+              safePoints,
+              safeTotal,
+              percentage,
+            ],
           );
         } catch (postgresError) {
           console.error("Unable to mirror progress:", postgresError);
@@ -4295,7 +4345,7 @@ app.post("/api/vocabulary/difficult-words", requireLogin, (req, res) => {
               `INSERT INTO vocabulary_difficult_words (username, difficulty_level, word)
                VALUES ($1, $2, $3)
                ON CONFLICT (username, difficulty_level, word)
-               DO UPDATE SET attempts = vocabulary_difficult_words.attempts + 1, last_seen = NOW()` ,
+               DO UPDATE SET attempts = vocabulary_difficult_words.attempts + 1, last_seen = NOW()`,
               [username, difficultyLevel, word],
             );
           }
@@ -4670,9 +4720,8 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                       return res
                         .status(500)
                         .send("Unable to load flip-card completions.");
-                    db.all(
-                      "SELECT difficulty_level, word, attempts FROM vocabulary_difficult_words WHERE username = ? ORDER BY attempts DESC, last_seen DESC LIMIT 6",
-                      [student.username],
+                    loadDifficultWords(
+                      student.username,
                       (wordsError, hardestWords) => {
                         if (wordsError)
                           return res
@@ -4888,82 +4937,88 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                     if (remindersError)
                                       return res
                                         .status(500)
-                                        .send("Unable to load student reminders.");
+                                        .send(
+                                          "Unable to load student reminders.",
+                                        );
                                     res.render("teacher-student.handlebars", {
-                                  student: {
-                                    ...student,
-                                    avatarUrl: student.avatarUrl,
-                                    spritesheetUrl: student.spritesheetUrl,
-                                    characterConfig: student.characterConfig,
-                                  },
-                                  profileCategory,
-                                  profileIsGrammar:
-                                    profileCategory === "grammar",
-                                  profileIsReading:
-                                    profileCategory === "reading",
-                                  profileIsActivity:
-                                    profileCategory === "grammar",
-                                  profileIsVocabulary:
-                                    profileCategory === "vocabulary",
-                                  profileIsWriting:
-                                    profileCategory === "writing",
-                                  profileIsListening:
-                                    profileCategory === "listening",
-                                  progress,
-                                  grammarStats: preparedStats.filter((stat) =>
-                                    ["questions", "final"].includes(
-                                      stat.activity_type,
-                                    ),
-                                  ),
-                                  activityStats: preparedStats,
-                                  bestActivity: rankedStats[0],
-                                  needsFocus:
-                                    rankedStats[rankedStats.length - 1],
-                                  usefulChunkSubmissions,
-                                  usefulChunkSubmissionCount:
-                                    usefulChunkSubmissions.length,
-                                  usefulChunkListsForAdmin,
-                                  flipCompletions,
-                                  hardestWords,
-                                  listeningCompletions,
-                                  readingCompletions,
-                                  listeningDiscussionSubmissions:
-                                    discussionError
-                                      ? []
-                                      : listeningDiscussionSubmissions,
-                                  readingProgressLevels: groupTopicsByLevel(
-                                    decoratedReadingTopics,
-                                    "readingLevel",
-                                  ),
-                                  writingProgressLevels: groupTopicsByLevel(
-                                    decoratedWritingTopics,
-                                    "writingLevel",
-                                  ),
-                                  listeningProgressLevels: groupTopicsByLevel(
-                                    decoratedListeningTopics,
-                                    "listeningLevel",
-                                  ),
-                                  grammarChapters,
-                                  finalTestRows,
-                                  writingSubmissions: writingSubmissions.map(
-                                    (submission) => {
-                                      const topic = writingTopics.find(
-                                        (entry) =>
-                                          entry.topic.id ===
-                                          submission.topic_id,
-                                      );
-                                      return {
-                                        ...submission,
-                                        level: topic?.writingLevel || "2",
-                                        needsFeedback: !submission.feedback,
-                                      };
-                                    },
-                                  ),
-                                  writingSubmissionCount:
-                                    writingSubmissions.length,
+                                      student: {
+                                        ...student,
+                                        avatarUrl: student.avatarUrl,
+                                        spritesheetUrl: student.spritesheetUrl,
+                                        characterConfig:
+                                          student.characterConfig,
+                                      },
+                                      profileCategory,
+                                      profileIsGrammar:
+                                        profileCategory === "grammar",
+                                      profileIsReading:
+                                        profileCategory === "reading",
+                                      profileIsActivity:
+                                        profileCategory === "grammar",
+                                      profileIsVocabulary:
+                                        profileCategory === "vocabulary",
+                                      profileIsWriting:
+                                        profileCategory === "writing",
+                                      profileIsListening:
+                                        profileCategory === "listening",
+                                      progress,
+                                      grammarStats: preparedStats.filter(
+                                        (stat) =>
+                                          ["questions", "final"].includes(
+                                            stat.activity_type,
+                                          ),
+                                      ),
+                                      activityStats: preparedStats,
+                                      bestActivity: rankedStats[0],
+                                      needsFocus:
+                                        rankedStats[rankedStats.length - 1],
+                                      usefulChunkSubmissions,
+                                      usefulChunkSubmissionCount:
+                                        usefulChunkSubmissions.length,
+                                      usefulChunkListsForAdmin,
+                                      flipCompletions,
+                                      hardestWords,
+                                      listeningCompletions,
+                                      readingCompletions,
+                                      listeningDiscussionSubmissions:
+                                        discussionError
+                                          ? []
+                                          : listeningDiscussionSubmissions,
+                                      readingProgressLevels: groupTopicsByLevel(
+                                        decoratedReadingTopics,
+                                        "readingLevel",
+                                      ),
+                                      writingProgressLevels: groupTopicsByLevel(
+                                        decoratedWritingTopics,
+                                        "writingLevel",
+                                      ),
+                                      listeningProgressLevels:
+                                        groupTopicsByLevel(
+                                          decoratedListeningTopics,
+                                          "listeningLevel",
+                                        ),
+                                      grammarChapters,
+                                      finalTestRows,
+                                      writingSubmissions:
+                                        writingSubmissions.map((submission) => {
+                                          const topic = writingTopics.find(
+                                            (entry) =>
+                                              entry.topic.id ===
+                                              submission.topic_id,
+                                          );
+                                          return {
+                                            ...submission,
+                                            level: topic?.writingLevel || "2",
+                                            needsFeedback: !submission.feedback,
+                                          };
+                                        }),
+                                      writingSubmissionCount:
+                                        writingSubmissions.length,
                                       studentReminders,
-                                      studentReminderPreview: studentReminders.slice(0, 3),
-                                      hasMoreStudentReminders: studentReminders.length > 3,
+                                      studentReminderPreview:
+                                        studentReminders.slice(0, 3),
+                                      hasMoreStudentReminders:
+                                        studentReminders.length > 3,
                                       difficultWordsEasy,
                                       difficultWordsMedium,
                                     });
@@ -5028,7 +5083,9 @@ app.post("/teacher/student/:username/reminders", requireAdmin, (req, res) => {
           [username, message, dueDate, targetRoute],
         ),
       )
-      .then(() => res.redirect(`/teacher/student/${encodeURIComponent(username)}`))
+      .then(() =>
+        res.redirect(`/teacher/student/${encodeURIComponent(username)}`),
+      )
       .catch((error) => {
         console.error("Unable to create student reminder:", error);
         res.status(500).send("Unable to create reminder.");
@@ -5057,17 +5114,22 @@ app.delete("/api/reminders/:id", requireLogin, (req, res) => {
         ),
       )
       .then(({ rowCount }) => {
-        if (!rowCount) return res.status(404).json({ error: "Reminder not found." });
+        if (!rowCount)
+          return res.status(404).json({ error: "Reminder not found." });
         res.json({ deleted: true });
       })
-      .catch(() => res.status(500).json({ error: "Unable to delete reminder." }));
+      .catch(() =>
+        res.status(500).json({ error: "Unable to delete reminder." }),
+      );
   }
   db.run(
     "DELETE FROM student_reminders WHERE id = ? AND username = ?",
     [reminderId, req.session.name],
     function (error) {
-      if (error) return res.status(500).json({ error: "Unable to delete reminder." });
-      if (!this.changes) return res.status(404).json({ error: "Reminder not found." });
+      if (error)
+        return res.status(500).json({ error: "Unable to delete reminder." });
+      if (!this.changes)
+        return res.status(404).json({ error: "Reminder not found." });
       res.json({ deleted: true });
     },
   );
@@ -5086,17 +5148,22 @@ app.post("/api/reminders/:id/complete", requireLogin, (req, res) => {
         ),
       )
       .then(({ rows }) => {
-        if (!rows.length) return res.status(404).json({ error: "Reminder not found." });
+        if (!rows.length)
+          return res.status(404).json({ error: "Reminder not found." });
         res.json({ completed: true, completedAt: rows[0].completed_at });
       })
-      .catch(() => res.status(500).json({ error: "Unable to complete reminder." }));
+      .catch(() =>
+        res.status(500).json({ error: "Unable to complete reminder." }),
+      );
   }
   db.run(
     "UPDATE student_reminders SET completed_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ? AND completed_at IS NULL",
     [reminderId, req.session.name],
     function (error) {
-      if (error) return res.status(500).json({ error: "Unable to complete reminder." });
-      if (!this.changes) return res.status(404).json({ error: "Reminder not found." });
+      if (error)
+        return res.status(500).json({ error: "Unable to complete reminder." });
+      if (!this.changes)
+        return res.status(404).json({ error: "Reminder not found." });
       res.json({ completed: true });
     },
   );

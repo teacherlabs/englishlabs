@@ -125,7 +125,7 @@
                 </form>
               {{else}}
                 {{#each questions}}
-                  <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}><p class="question-progress">Question {{number}} of {{../questions.length}}</p><strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>
+                  <div class="reading-question" data-answer="{{answer}}"{{#unless @first}} hidden{{/unless}}><p class="question-progress">Question {{number}} of {{../questions.length}}</p><strong>{{#if ../isTrueOrFalse}}{{statement}}{{else if ../isMultipleChoice}}{{question}}{{else}}{{sentence}}{{/if}}</strong>{{#if isMultiAnswer}}<p class="multi-answer-instruction">Choose all that apply.</p>{{/if}}
                     {{#if ../isTrueOrFalse}}<div class="answer-options"><button type="button" value="true">True</button><button type="button" value="false">False</button></div>{{else if ../isMultipleChoice}}<div class="answer-options"{{#if isMultiAnswer}} data-multi-answer="true"{{/if}}>{{#each options}}<button type="button" value="{{this}}">{{this}}</button>{{/each}}</div>{{#if isMultiAnswer}}<button class="practice-button" type="button" data-multi-submit>Check answer</button>{{/if}}{{else}}<input class="written-answer" type="text" aria-label="Your answer" autocomplete="off"><button class="practice-button" type="button" data-reading-check>Check answer</button>{{/if}}
                     <p class="answer-feedback" hidden></p>
                   </div>

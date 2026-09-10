@@ -96,39 +96,6 @@
           type="submit"
         >Save goal</button></form>
       {{#if query.goalSaved}}<p class="upload-success">Learning goal saved.</p>{{/if}}
-      <div class="profile-color-panel" data-profile-color-panel>
-        <button
-          class="profile-color-toggle"
-          type="button"
-          data-profile-color-toggle
-          aria-expanded="false"
-          aria-controls="profileBackgroundPanel"
-        >
-          <span>Profile background</span>
-          <span class="profile-color-toggle-arrow" aria-hidden="true">›</span>
-        </button>
-        <form
-          class="profile-color-form"
-          id="profileBackgroundPanel"
-          action="/profile/background"
-          method="post"
-          hidden
-        >
-          <label for="profileBackgroundColor">Choose a colour</label>
-          <div class="profile-color-controls">
-            <input
-              id="profileBackgroundColor"
-              name="profileBackgroundColor"
-              type="color"
-              value="{{student.profile_background}}"
-              aria-label="Choose your profile background colour"
-            />
-            <button class="notes-button" type="submit">Save colour</button>
-          </div>
-        </form>
-      </div>
-      {{#if query.backgroundSaved}}<p class="upload-success">Profile background saved.</p>{{/if}}
-      {{#if query.backgroundError}}<p class="account-error">Please choose a valid hex colour.</p>{{/if}}
       <h2>Progress overview</h2>
       <div class="profile-area-progress">
         {{#each areaProgress}}
@@ -174,78 +141,6 @@
         settings.hidden = !settings.hidden;
       }
     });
-  }
-
-  const profileColorToggle = document.querySelector("[data-profile-color-toggle]");
-  const profileBackgroundPanel = document.getElementById("profileBackgroundPanel");
-  const profileColorArrow = document.querySelector(".profile-color-toggle-arrow");
-
-  if (profileColorToggle && profileBackgroundPanel) {
-    profileBackgroundPanel.hidden = true;
-    profileColorToggle.setAttribute("aria-expanded", "false");
-    profileColorToggle.addEventListener("click", () => {
-      const willOpen = profileBackgroundPanel.hidden;
-      profileBackgroundPanel.hidden = !willOpen;
-      profileColorToggle.setAttribute("aria-expanded", String(willOpen));
-      if (profileColorArrow) {
-        profileColorArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
-      }
-    });
-  }
-
-  const profileColorInput = document.getElementById("profileBackgroundColor");
-  const profileCard = document.querySelector(".profile-card");
-
-  const setAccessibleProfileTheme = (hexColor) => {
-    const safeColor = /^#[0-9a-fA-F]{6}$/.test(hexColor) ? hexColor : "#edf4ff";
-    const value = safeColor.replace("#", "");
-    const red = Number.parseInt(value.slice(0, 2), 16);
-    const green = Number.parseInt(value.slice(2, 4), 16);
-    const blue = Number.parseInt(value.slice(4, 6), 16);
-    const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
-    const isLight = luminance > 0.72;
-
-    const darken = (channel) =>
-      Math.max(0, Math.round(channel * 0.78));
-    const buttonColor = `#${darken(red).toString(16).padStart(2, "0")}${darken(green).toString(16).padStart(2, "0")}${darken(blue).toString(16).padStart(2, "0")}`;
-    const progressFillColor = `#${darken(red).toString(16).padStart(2, "0")}${darken(green).toString(16).padStart(2, "0")}${darken(blue).toString(16).padStart(2, "0")}`;
-    const buttonValue = buttonColor.replace("#", "");
-    const buttonRed = Number.parseInt(buttonValue.slice(0, 2), 16);
-    const buttonGreen = Number.parseInt(buttonValue.slice(2, 4), 16);
-    const buttonBlue = Number.parseInt(buttonValue.slice(4, 6), 16);
-    const buttonLuminance = (0.2126 * buttonRed + 0.7152 * buttonGreen + 0.0722 * buttonBlue) / 255;
-
-    const textColor = isLight ? "#14213d" : "#f8fafc";
-    const mutedColor = isLight ? "#475569" : "#dbeafe";
-    const buttonTextColor = buttonLuminance > 0.72 ? "#14213d" : "#f8fafc";
-
-    if (profileCard) {
-      profileCard.style.setProperty("--profile-card-bg", safeColor);
-      profileCard.style.setProperty("--profile-card-text", textColor);
-      profileCard.style.setProperty("--profile-card-muted", mutedColor);
-      profileCard.style.setProperty("--profile-card-button-bg", buttonColor);
-      profileCard.style.setProperty("--profile-card-button-text", buttonTextColor);
-      profileCard.style.setProperty("--profile-progress-fill", progressFillColor);
-    }
-
-    document.documentElement.style.setProperty("--profile-card-bg", safeColor);
-    document.documentElement.style.setProperty("--profile-card-text", textColor);
-    document.documentElement.style.setProperty("--profile-card-muted", mutedColor);
-    document.documentElement.style.setProperty("--profile-card-button-bg", buttonColor);
-    document.documentElement.style.setProperty("--profile-card-button-text", buttonTextColor);
-    document.documentElement.style.setProperty("--profile-progress-fill", progressFillColor);
-    document.documentElement.style.setProperty("--profile-nav-fill", safeColor);
-    document.documentElement.style.setProperty("--profile-nav-text", textColor);
-  };
-
-  if (profileColorInput) {
-    profileColorInput.addEventListener("input", (event) => {
-      setAccessibleProfileTheme(event.target.value);
-    });
-  }
-
-  if (profileColorInput) {
-    setAccessibleProfileTheme(profileColorInput.value);
   }
 
   const characterFrame = document.querySelector(".character-generator-frame");
