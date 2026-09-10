@@ -2799,11 +2799,23 @@ function requireAdmin(req, res, next) {
 }
 
 const loadStudentReminders = (username, callback) => {
+  const formatDateParts = (value, dateOnly = false) => {
+    if (!value) return null;
+    const rawValue = String(value);
+    const date = dateOnly
+      ? new Date(`${rawValue.slice(0, 10)}T00:00:00`)
+      : new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    const day = date.getDate();
+    return {
+      day: `${day}${[1, 21, 31].includes(day) ? "st" : [2, 22].includes(day) ? "nd" : [3, 23].includes(day) ? "rd" : "th"}`,
+      month: date.toLocaleString("en", { month: "long" }),
+    };
+  };
   const decorateReminders = (reminders) =>
     reminders.map((reminder) => {
-      const dueDate = reminder.due_date
-        ? new Date(`${String(reminder.due_date).slice(0, 10)}T00:00:00`)
-        : null;
+      const dueDate = formatDateParts(reminder.due_date, true);
+      const completedDate = formatDateParts(reminder.completed_at);
       return {
         ...reminder,
         category: reminder.target_route?.includes("practice")
@@ -2817,12 +2829,10 @@ const loadStudentReminders = (username, callback) => {
                 : reminder.target_route?.includes("listening")
                   ? "Listening"
                   : "Focus note",
-        dueDay: dueDate
-          ? `${dueDate.getDate()}${[1, 21, 31].includes(dueDate.getDate()) ? "st" : [2, 22].includes(dueDate.getDate()) ? "nd" : [3, 23].includes(dueDate.getDate()) ? "rd" : "th"}`
-          : "Open",
-        dueMonth: dueDate
-          ? dueDate.toLocaleString("en", { month: "long" })
-          : "No deadline",
+        dueDay: dueDate?.day || "Open",
+        dueMonth: dueDate?.month || "No deadline",
+        completedDay: completedDate?.day || "",
+        completedMonth: completedDate?.month || "",
       };
     });
   if (postgresPool) {

@@ -19,7 +19,7 @@
           {{#each studentReminders}}
             <article class="teacher-student-reminder{{#if completed_at}} is-completed{{/if}}">
               <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise</a>{{/if}}</div>
-              <span>{{#if completed_at}}Completed {{completed_at}}{{else if due_date}}Due {{due_date}}{{else}}No deadline{{/if}}</span>
+              <span>{{#if completed_at}}Completed {{completedDay}} {{completedMonth}}{{else if due_date}}Due {{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
             </article>
           {{else}}
             <p class="empty-state">No reminders assigned yet.</p>

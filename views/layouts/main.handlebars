@@ -72,13 +72,15 @@
             <h2>{{session.name}}</h2>
             <p>Build your English practice rhythm.</p>
           </div>
-          <div class="app-progress-card">
-            <p class="app-rail-label">Learning pulse</p>
-            <div class="app-pulse-row"><strong>Keep going</strong><span>Today</span></div>
-            <div class="app-pulse-track"><span></span></div>
-            <p class="app-pulse-note">Your activity and completed work live in your profile.</p>
-            <a href="/profile" class="app-rail-link">View full progress <span>→</span></a>
-          </div>
+          {{#unless session.isAdmin}}
+            <div class="app-progress-card">
+              <p class="app-rail-label">Learning pulse</p>
+              <div class="app-pulse-row"><strong>Keep going</strong><span>Today</span></div>
+              <div class="app-pulse-track"><span></span></div>
+              <p class="app-pulse-note">Your activity and completed work live in your profile.</p>
+              <a href="/profile" class="app-rail-link">View full progress <span>→</span></a>
+            </div>
+          {{/unless}}
           {{#if dashboardSchedule}}
             <section class="app-calendar-card" aria-labelledby="calendar-heading">
               <div class="app-widget-heading"><div><p class="app-rail-label">Plan ahead</p><h2 id="calendar-heading">{{dashboardSchedule.monthLabel}}</h2></div><span class="app-calendar-icon" aria-hidden="true">▦</span></div>

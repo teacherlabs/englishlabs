@@ -137,6 +137,19 @@ legend {
   margin: 12px 8px 0 0;
 }
 
+.lobby-teacher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lobby-teacher-actions .practice-button,
+.lobby-teacher-actions .notes-button {
+  margin: 0;
+}
+
 .lobby-quit-form {
   margin-top: 0;
 }
@@ -7066,6 +7079,17 @@ header > nav,
 footer {
   background: var(--color-dark);
   color: var(--color-surface);
+}
+
+/* Keep avatar artwork unobstructed; the surrounding cards provide the visual surface. */
+.profile-avatar,
+.profile-avatar-placeholder,
+.student-character-preview,
+.student-avatar-placeholder,
+.app-profile-avatar,
+.app-avatar,
+.app-avatar-placeholder {
+  background: transparent;
 }
 
 /* Authenticated views: use the English Labs palette consistently. */
