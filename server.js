@@ -1602,6 +1602,31 @@ const markAllFeedbackSeen = (username) => {
   );
 };
 
+const markFeedbackMessageSeen = (sourceType, id, username) => {
+  const tableBySource = {
+    writing: "writing_submissions",
+    writing_discussion: "writing_discussion_submissions",
+    listening_discussion: "listening_discussion_submissions",
+  };
+  const table = tableBySource[sourceType];
+  if (!table) return Promise.reject(new Error("Invalid feedback source."));
+  if (postgresPool) {
+    return postgresReady.then(() =>
+      postgresPool.query(
+        `UPDATE ${table} SET feedback_seen = TRUE WHERE id = $1 AND username = $2 AND feedback IS NOT NULL`,
+        [id, username],
+      ),
+    );
+  }
+  return new Promise((resolve, reject) => {
+    db.run(
+      `UPDATE ${table} SET feedback_seen = 1 WHERE id = ? AND username = ? AND feedback IS NOT NULL`,
+      [id, username],
+      (error) => (error ? reject(error) : resolve()),
+    );
+  });
+};
+
 const clearUnreadAreaLocals = (res, area) => {
   const key = area === "writing" ? "unreadWritingCount" : "unreadListeningCount";
   res.locals[key] = 0;
@@ -2435,7 +2460,11 @@ app.get("/feedback/:sourceType/:id/open", requireLogin, (req, res) => {
   if (!table) return res.redirect("/profile");
   const redirectToTopic = (submission) => {
     if (!submission) return res.redirect("/profile");
-    markAllFeedbackSeen(req.session.name)
+    markFeedbackMessageSeen(
+      req.params.sourceType,
+      req.params.id,
+      req.session.name,
+    )
       .then(() => {
         if (req.params.sourceType === "listening_discussion") {
           return res.redirect(
