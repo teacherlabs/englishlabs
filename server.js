@@ -3433,10 +3433,15 @@ const loadDifficultWords = (username, callback) => {
 const loadStudentReminders = (username, callback) => {
   const formatDateParts = (value, dateOnly = false) => {
     if (!value) return null;
-    const rawValue = String(value);
-    const date = dateOnly
-      ? new Date(`${rawValue.slice(0, 10)}T00:00:00`)
-      : new Date(value);
+    let date;
+    if (value instanceof Date) {
+      date = new Date(value.getTime());
+    } else {
+      const rawValue = String(value);
+      date = dateOnly
+        ? new Date(`${rawValue.slice(0, 10)}T00:00:00`)
+        : new Date(value);
+    }
     if (Number.isNaN(date.getTime())) return null;
     const day = date.getDate();
     return {
