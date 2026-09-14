@@ -1978,7 +1978,49 @@ app.get("/", (req, res) => {
   if (!req.session.isLoggedIn) {
     return res.render("auth.handlebars");
   }
-  res.redirect("/practice/questions?chapter=1");
+  if (req.session.isAdmin) return res.redirect("/teacher/dashboard");
+  loadProgressForUser(
+    "SELECT activity_type, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
+    "SELECT activity_type, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
+    req.session.name,
+    (error, progress) => {
+      if (error) return res.status(500).send("Unable to load dashboard.");
+      loadFeedbackMessages(req.session.name, (feedbackError, feedbackMessages) => {
+        if (feedbackError) {
+          console.error("Unable to load dashboard feedback:", feedbackError);
+          return res.status(500).send("Unable to load dashboard feedback.");
+        }
+        const totalPoints = progress.reduce(
+          (sum, item) => sum + (Number(item.points) || 0),
+          0,
+        );
+        const averageScore = progress.length
+          ? Math.round(
+              progress.reduce(
+                (sum, item) => sum + (Number(item.percentage) || 0),
+                0,
+              ) / progress.length,
+            )
+          : 0;
+        res.render("dashboard.handlebars", {
+          dashboardStats: {
+            totalPoints,
+            completedActivities: progress.length,
+            averageScore,
+          },
+          feedbackMessages: feedbackMessages.slice(0, 3),
+          dashboardGoal: res.locals.dashboardGoal,
+          studentReminders: res.locals.studentReminders || [],
+          unreadFeedbackCount: res.locals.unreadFeedbackCount || 0,
+          student: {
+            username: req.session.name,
+            avatarUrl: req.session.avatarUrl,
+            avatarInitial: req.session.avatar_initial,
+          },
+        });
+      });
+    },
+  );
 });
 
 app.get("/character-generator", requireAuthenticated, (req, res) => {
@@ -3446,7 +3488,7 @@ const loadStudentReminders = (username, callback) => {
     const day = date.getDate();
     return {
       day: `${day}${[1, 21, 31].includes(day) ? "st" : [2, 22].includes(day) ? "nd" : [3, 23].includes(day) ? "rd" : "th"}`,
-      month: date.toLocaleString("en", { month: "long" }),
+      month: date.toLocaleString("en", { month: "short" }),
     };
   };
   const decorateReminders = (reminders) =>
