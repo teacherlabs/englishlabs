@@ -829,16 +829,22 @@ legend {
 .app-sidebar .app-nav-link:hover,
 .app-sidebar .app-nav-link:focus-visible,
 .app-sidebar .app-nav-link.is-active {
-  background: rgba(219, 234, 254, 0.2);
-  color: var(--color-background-tint);
+  background: #fff9eb;
+  border-color: #e5c76d;
+  color: var(--color-primary);
 }
 
 .app-sidebar .app-nav-link:first-of-type:not(.is-active) {
-  background: transparent;
+  background: #edf4ff;
+  border-color: #c9d9ef;
+}
+
+.app-sidebar .app-nav-link {
+  color: var(--color-primary);
 }
 
 .app-sidebar .app-nav-icon {
-  color: var(--color-background-tint);
+  color: var(--color-primary);
 }
 
 .app-sidebar .app-sidebar-footer {
@@ -922,8 +928,10 @@ legend {
   gap: 10px;
   min-height: 38px;
   padding: 8px 10px;
+  border: 1px solid #c9d9ef;
   border-radius: 7px;
-  color: #647187;
+  background: #edf4ff;
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 600;
 }
