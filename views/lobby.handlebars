@@ -218,6 +218,7 @@
       });
       lobbySocket.on("lobbyEmote", (emote) => {
         if (String(emote.roomId) !== String(roomId)) return;
+        console.log("Received emote event:", emote);
         window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
         window.lobbyEmoteStates.set(String(emote.username), {
           emote: emote.emote,
@@ -413,6 +414,8 @@
         if (button.dataset.emoteBound) return;
         button.dataset.emoteBound = "true";
         button.addEventListener("click", () => {
+          const emoteType = button.dataset.lobbyEmote;
+          console.log("Emote clicked:", emoteType);
           window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
           window.lobbyEmoteStates.set(
             String(document.querySelector("[data-player-canvas]")?.dataset.playerUsername || "{{student.username}}"),
@@ -422,10 +425,16 @@
             },
           );
           if (lobbySocket?.connected) {
+            console.log("Sending emote event:", {
+              roomId,
+              emote: emoteType,
+            });
             lobbySocket.emit("lobbyEmote", {
               roomId,
-              emote: button.dataset.lobbyEmote,
+              emote: emoteType,
             });
+          } else {
+            console.warn("Unable to send emote: lobby socket is not connected.");
           }
           if (emoteStatus) emoteStatus.textContent = `You chose ${button.textContent}.`;
         });
