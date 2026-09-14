@@ -3447,19 +3447,20 @@ const loadFeedbackMessages = (username, callback) => {
   const postgresQuery = `
     SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing' AS source_type
     FROM writing_submissions
-    WHERE username = $1 AND feedback IS NOT NULL
+    WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE
     UNION ALL
     SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing_discussion' AS source_type
     FROM writing_discussion_submissions
-    WHERE username = $1 AND feedback IS NOT NULL
+    WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE
     UNION ALL
     SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'listening_discussion' AS source_type
     FROM listening_discussion_submissions
-    WHERE username = $1 AND feedback IS NOT NULL
+    WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE
     ORDER BY feedback_at DESC
     LIMIT 5`;
   const sqliteQuery = postgresQuery
     .replace(/\$1/g, "?")
+    .replace(/feedback_seen = FALSE/g, "feedback_seen = 0")
     .replace(/TIMESTAMPTZ/g, "TEXT");
   const decorateMessages = (messages) =>
     messages.map((message) => ({

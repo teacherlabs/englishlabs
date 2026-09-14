@@ -12,11 +12,13 @@
       </button>
       <div id="profileMessagesContent" class="profile-messages-content" data-profile-messages-content hidden>
         {{#each feedbackMessages}}
-          <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
-            <strong>{{topic_title}}</strong>
-            <p>{{feedback}}</p>
-            <a class="profile-message-link" href="{{feedbackUrl}}">Go to exercise <span aria-hidden="true">→</span></a>
-          </article>
+          {{#unless this.feedback_seen}}
+            <article class="profile-message unread">
+              <strong>{{topic_title}}</strong>
+              <p>{{feedback}}</p>
+              <a class="profile-message-link" href="{{feedbackUrl}}">Go to exercise <span aria-hidden="true">→</span></a>
+            </article>
+          {{/unless}}
         {{else}}
           <p class="empty-state">No teacher feedback yet.</p>
         {{/each}}
