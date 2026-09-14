@@ -45,7 +45,7 @@
       <section class="reading-content writing-submission-panel" data-writing-submission data-topic-id="{{topic.id}}" data-topic-title="{{topic.title}}">
         <div class="reading-section-heading"><p class="eyebrow">Your turn</p><h2>{{topic.title}}</h2></div>
         <p>Write your own version below, then send it to your teacher for feedback.</p>
-        <textarea class="writing-submission-textarea" data-writing-textarea rows="10" placeholder="Start writing here...">{{mySubmission.submission_text}}</textarea>
+        <textarea id="writingSubmissionText" name="submission_text" class="writing-submission-textarea" data-writing-textarea rows="10" placeholder="Start writing here...">{{mySubmission.submission_text}}</textarea>
         <div class="writing-submission-actions">
           <button class="practice-button" type="button" data-writing-submit>Send to teacher</button>
           <span class="writing-submission-status" data-writing-status>{{#if mySubmission.submitted_at}}Last submitted {{mySubmission.submitted_at}}{{/if}}</span>
@@ -98,7 +98,7 @@
       {{#if discussion}}
         <section class="discussion-panel" data-writing-discussion data-topic-id="{{topic.id}}" data-topic-title="{{topic.title}}">
           <p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2>
-          <textarea class="writing-submission-textarea" data-writing-discussion-input rows="5" placeholder="Share your response...">{{myDiscussionResponse.submission_text}}</textarea>
+          <textarea id="writingDiscussionText" name="discussion_text" class="writing-submission-textarea" data-writing-discussion-input rows="5" placeholder="Share your response...">{{myDiscussionResponse.submission_text}}</textarea>
           <div class="writing-submission-actions"><button class="practice-button" type="button" data-writing-discussion-submit>Submit response</button><span data-writing-discussion-status></span></div>
           {{#if myDiscussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{myDiscussionResponse.feedback}}</p><small>{{myDiscussionResponse.feedback_at}}</small></div>{{/if}}
         </section>
@@ -271,11 +271,10 @@
   });
 
   document.querySelectorAll("[data-writing-discussion]").forEach((panel) => {
-    const input = panel.querySelector("[data-writing-discussion-input]");
     const submit = panel.querySelector("[data-writing-discussion-submit]");
     const status = panel.querySelector("[data-writing-discussion-status]");
     submit.addEventListener("click", async () => {
-      const text = input.value.trim();
+      const text = document.getElementById("writingDiscussionText").value.trim();
       if (!text) {
         status.textContent = "Write a response before submitting.";
         return;
