@@ -22,7 +22,25 @@
         {{else}}
           <p class="empty-state">No teacher feedback yet.</p>
         {{/each}}
+        <button type="button" class="btn-secondary" id="open-history-btn">See previous feedbacks</button>
       </div>
+      <dialog id="feedback-history-modal" class="feedback-history-modal">
+        <div class="feedback-history-heading">
+          <h2>Previous feedbacks</h2>
+          <button type="button" class="close-dialog" id="close-history-btn" aria-label="Close previous feedbacks">&times;</button>
+        </div>
+        <div class="feedback-history-list">
+          {{#each feedbackHistory}}
+            <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
+              <strong>{{topic_title}}</strong>
+              <p>{{feedback}}</p>
+              <a class="profile-message-link" href="{{feedbackUrl}}">Go to exercise <span aria-hidden="true">→</span></a>
+            </article>
+          {{else}}
+            <p class="empty-state">No teacher feedback yet.</p>
+          {{/each}}
+        </div>
+      </dialog>
     </aside>
     <section
       class="profile-card"
@@ -120,6 +138,15 @@
     if (profileMessagesArrow) {
       profileMessagesArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
     }
+  });
+
+  const feedbackHistoryModal = document.querySelector("#feedback-history-modal");
+  const openHistoryButton = document.querySelector("#open-history-btn");
+  const closeHistoryButton = document.querySelector("#close-history-btn");
+  openHistoryButton?.addEventListener("click", () => feedbackHistoryModal?.showModal());
+  closeHistoryButton?.addEventListener("click", () => feedbackHistoryModal?.close());
+  feedbackHistoryModal?.addEventListener("click", (event) => {
+    if (event.target === feedbackHistoryModal) feedbackHistoryModal.close();
   });
 
   const characterSettingsToggle = document.querySelector("[data-character-settings-toggle]");

@@ -3064,6 +3064,32 @@ div.profile-avatar-placeholder {
   text-decoration: none;
 }
 
+.feedback-history-modal {
+  width: min(620px, calc(100% - 32px));
+  max-height: min(720px, calc(100vh - 48px));
+  padding: 20px;
+  border: 1px solid #dbe2ed;
+  border-radius: 10px;
+  background: var(--profile-card-bg, #fff);
+  color: var(--profile-card-text, #14213d);
+}
+.feedback-history-modal::backdrop {
+  background: rgba(20, 33, 61, 0.45);
+}
+.feedback-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.feedback-history-heading h2 {
+  margin: 0;
+}
+.feedback-history-list {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
 @media (max-width: 600px) {
   .profile-layout {
     grid-template-columns: 1fr;

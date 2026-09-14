@@ -3491,6 +3491,37 @@ const loadFeedbackMessages = (username, callback) => {
   );
 };
 
+const loadFeedbackHistory = (username, callback) => {
+  const postgresQuery = `
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing' AS source_type
+    FROM writing_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    UNION ALL
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing_discussion' AS source_type
+    FROM writing_discussion_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    UNION ALL
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'listening_discussion' AS source_type
+    FROM listening_discussion_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    ORDER BY feedback_at DESC`;
+  const sqliteQuery = postgresQuery.replace(/\$1/g, "?");
+  const decorateMessages = (messages) =>
+    messages.map((message) => ({
+      ...message,
+      feedbackUrl: `/feedback/${message.source_type}/${message.id}/open`,
+    }));
+  if (postgresPool) {
+    return postgresReady
+      .then(() => postgresPool.query(postgresQuery, [username]))
+      .then(({ rows }) => callback(null, decorateMessages(rows)))
+      .catch((error) => callback(error));
+  }
+  db.all(sqliteQuery, [username], (error, rows) =>
+    callback(error, rows ? decorateMessages(rows) : rows),
+  );
+};
+
 app.get("/profile", requireProfileUser, (req, res) => {
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
@@ -3588,12 +3619,24 @@ app.get("/profile", requireProfileUser, (req, res) => {
                         );
                         return res.status(500).send("Unable to load messages.");
                       }
-                      postgresPool
-                        .query(
-                          "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = $1 AND completed_at IS NULL AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",
-                          [req.session.name],
-                        )
-                        .then(({ rows: reminders }) => {
+                      loadFeedbackHistory(
+                        req.session.name,
+                        (historyError, feedbackHistory) => {
+                          if (historyError) {
+                            console.error(
+                              "Unable to load feedback history:",
+                              historyError,
+                            );
+                            return res
+                              .status(500)
+                              .send("Unable to load feedback history.");
+                          }
+                          postgresPool
+                            .query(
+                              "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = $1 AND completed_at IS NULL AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",
+                              [req.session.name],
+                            )
+                            .then(({ rows: reminders }) => {
                           res.locals.studentReminders = reminders;
                           res.locals.studentRemindersLoaded = true;
                           const dueDates = new Set(
@@ -3619,20 +3662,23 @@ app.get("/profile", requireProfileUser, (req, res) => {
                             areaProgress: buildAreaProgress(progress),
                             passportStamps,
                             feedbackMessages,
+                            feedbackHistory,
                             reminders,
                             unreadFeedbackCount:
                               (res.locals.unreadWritingCount || 0) +
                               (res.locals.unreadListeningCount || 0),
                             query: req.query,
                           });
-                        })
-                        .catch((reminderError) => {
+                            })
+                            .catch((reminderError) => {
                           console.error(
                             "Unable to load student reminders:",
                             reminderError,
                           );
                           res.status(500).send("Unable to load reminders.");
-                        });
+                            });
+                        },
+                      );
                     },
                   );
                 },
