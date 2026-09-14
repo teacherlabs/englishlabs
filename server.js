@@ -784,7 +784,6 @@ const readingTopics = [
   })),
 ];
 
-const topicExerciseCount = (topic) => topic.exercises.length;
 const decorateTopics = (topics, progress, activityType, levelKey) => {
   const completions = new Map();
   progress
@@ -1018,15 +1017,28 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
         remainingLabels: remainingParts.map((part) => part.label).join(", "),
       };
     }
-    const total = area.topics.reduce(
-      (sum, topic) => sum + topicExerciseCount(topic),
-      0,
+    const exerciseKeys = new Set();
+    area.topics.forEach((topic) => {
+      const topicId = topic.topic.id;
+      if (topic.preparationExercise || topic.preparation?.isImageMatch) {
+        exerciseKeys.add(`${topicId}:0`);
+      }
+      topic.exercises.forEach((_, index) => {
+        exerciseKeys.add(`${topicId}:${index + 1}`);
+      });
+    });
+    const completedKeys = new Set(
+      progress
+        .filter(
+          (item) =>
+            item.activity_type === area.type &&
+            item.difficulty_level.startsWith(`${area.type}:`),
+        )
+        .map((item) => item.difficulty_level.slice(`${area.type}:`.length))
+        .filter((key) => exerciseKeys.has(key)),
     );
-    const completed = progress.filter(
-      (item) =>
-        item.activity_type === area.type &&
-        item.difficulty_level.startsWith(`${area.type}:`),
-    ).length;
+    const total = exerciseKeys.size;
+    const completed = completedKeys.size;
     return {
       ...area,
       percentage: total
