@@ -20,7 +20,7 @@
                 class="student-username"
               >@{{username}}</small>{{/if}}</span><span
             class="student-row-cell student-row-goal"
-          ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span><span class="student-activity-summary"><strong>{{activities}} completed</strong><span>{{points}} / {{possible_points}} points</span></span>{{#if
+          ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span>{{#if
               pendingCount
             }}<b class="teacher-pending-badge" aria-label="{{pendingCount}} pending items">{{pendingCount}}</b>{{/if}}</span></a><button
             class="danger-button student-delete-button"

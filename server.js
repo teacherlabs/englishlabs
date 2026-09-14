@@ -4974,7 +4974,15 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
     const pendingRows = tableResult.rows[0].writing_table
       ? (
           await postgresPool.query(
-            "SELECT username, COUNT(*) AS pending FROM writing_submissions WHERE feedback IS NULL GROUP BY username",
+            `SELECT username, COUNT(*) AS pending
+             FROM (
+               SELECT username FROM writing_submissions WHERE feedback IS NULL
+               UNION ALL
+               SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL
+               UNION ALL
+               SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL
+             ) AS pending_submissions
+             GROUP BY username`,
           )
         ).rows
       : [];
@@ -5584,11 +5592,23 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                             listeningDiscussionSubmissions:
                                               discussionError
                                                 ? []
-                                                : listeningDiscussionSubmissions,
+                                                : listeningDiscussionSubmissions.map(
+                                                    (submission) => ({
+                                                      ...submission,
+                                                      needsFeedback:
+                                                        !submission.feedback,
+                                                    }),
+                                                  ),
                                             writingDiscussionSubmissions:
                                               writingDiscussionError
                                                 ? []
-                                                : writingDiscussionSubmissions,
+                                                : writingDiscussionSubmissions.map(
+                                                    (submission) => ({
+                                                      ...submission,
+                                                      needsFeedback:
+                                                        !submission.feedback,
+                                                    }),
+                                                  ),
                                             readingProgressLevels:
                                               groupTopicsByLevel(
                                                 decoratedReadingTopics,
@@ -5626,7 +5646,24 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                                 },
                                               ),
                                             writingSubmissionCount:
-                                              writingSubmissions.length,
+                                              writingSubmissions.filter(
+                                                (submission) =>
+                                                  !submission.feedback,
+                                              ).length,
+                                            writingDiscussionCount:
+                                              writingDiscussionError
+                                                ? 0
+                                                : writingDiscussionSubmissions.filter(
+                                                    (submission) =>
+                                                      !submission.feedback,
+                                                  ).length,
+                                            listeningDiscussionCount:
+                                              discussionError
+                                                ? 0
+                                                : listeningDiscussionSubmissions.filter(
+                                                    (submission) =>
+                                                      !submission.feedback,
+                                                  ).length,
                                             studentReminders,
                                             studentReminderPreview:
                                               studentReminders.slice(0, 3),

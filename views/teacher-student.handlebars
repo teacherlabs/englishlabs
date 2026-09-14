@@ -71,7 +71,7 @@
         <button class="student-section-link{{#if profileIsVocabulary}} active{{/if}}" type="button" data-student-section="flip-section" aria-selected="{{#if profileIsVocabulary}}true{{else}}false{{/if}}">Vocabulary</button>
         <button class="student-section-link{{#if profileIsReading}} active{{/if}}" type="button" data-student-section="reading-section" aria-selected="{{#if profileIsReading}}true{{else}}false{{/if}}">Reading</button>
         <button class="student-section-link{{#if profileIsWriting}} active{{/if}}" type="button" data-student-section="writing-section" aria-selected="{{#if profileIsWriting}}true{{else}}false{{/if}}">Writing{{#if writingSubmissionCount}} <span class="section-count">{{writingSubmissionCount}}</span>{{/if}}</button>
-        <button class="student-section-link{{#if profileIsListening}} active{{/if}}" type="button" data-student-section="listening-section" aria-selected="{{#if profileIsListening}}true{{else}}false{{/if}}">Listening{{#if listeningCompletions.length}} <span class="section-count">{{listeningCompletions.length}}</span>{{/if}}</button>
+        <button class="student-section-link{{#if profileIsListening}} active{{/if}}" type="button" data-student-section="listening-section" aria-selected="{{#if profileIsListening}}true{{else}}false{{/if}}">Listening{{#if listeningDiscussionCount}} <span class="section-count">{{listeningDiscussionCount}}</span>{{/if}}</button>
       </nav>
 
       <nav class="student-subtabs" data-student-subtabs="activity-section" aria-label="Grammar progress views"{{#unless profileIsGrammar}} hidden{{/unless}}>
@@ -90,11 +90,11 @@
       <nav class="student-subtabs" data-student-subtabs="writing-section" aria-label="Writing progress views"{{#unless profileIsWriting}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="writing-topics-panel" aria-selected="true">Topics</button>
         <button class="student-subsection-link" type="button" data-student-subsection="writing-submissions-panel" aria-selected="false">Writing submissions{{#if writingSubmissionCount}} <span class="section-count">{{writingSubmissionCount}}</span>{{/if}}</button>
-        <button class="student-subsection-link" type="button" data-student-subsection="writing-discussion-panel" aria-selected="false">Discussion responses{{#if writingDiscussionSubmissions.length}} <span class="section-count">{{writingDiscussionSubmissions.length}}</span>{{/if}}</button>
+        <button class="student-subsection-link" type="button" data-student-subsection="writing-discussion-panel" aria-selected="false">Discussion responses{{#if writingDiscussionCount}} <span class="section-count">{{writingDiscussionCount}}</span>{{/if}}</button>
       </nav>
       <nav class="student-subtabs" data-student-subtabs="listening-section" aria-label="Listening progress views"{{#unless profileIsListening}} hidden{{/unless}}>
         <button class="student-subsection-link active" type="button" data-student-subsection="listening-topics-panel" aria-selected="true">Topics</button>
-        <button class="student-subsection-link" type="button" data-student-subsection="listening-discussion-panel" aria-selected="false">Discussion Responses{{#if listeningDiscussionSubmissions.length}} <span class="section-count">{{listeningDiscussionSubmissions.length}}</span>{{/if}}</button>
+        <button class="student-subsection-link" type="button" data-student-subsection="listening-discussion-panel" aria-selected="false">Discussion Responses{{#if listeningDiscussionCount}} <span class="section-count">{{listeningDiscussionCount}}</span>{{/if}}</button>
       </nav>
 
       <div class="student-profile-sections">
@@ -191,8 +191,8 @@
             <h2>Discussion responses</h2>
             <div class="admin-chunk-lists">
               {{#each listeningDiscussionSubmissions}}
-                <details class="admin-chunk-list"{{#unless feedback}} open{{/unless}}>
-                  <summary><strong>{{topic_title}}</strong><span>{{#if feedback}}Feedback sent{{else}}Awaiting feedback{{/if}}</span></summary>
+                <details class="admin-chunk-list"{{#if needsFeedback}} open{{/if}}>
+                  <summary><strong>{{topic_title}}</strong><span>{{#if needsFeedback}}Awaiting feedback{{else}}Feedback sent{{/if}}</span></summary>
                   <div class="admin-chunk-statuses">
                     <article class="admin-chunk-status submitted">
                       <div><strong>Student's response</strong><span>Submitted {{submitted_at}}</span></div>
@@ -271,8 +271,8 @@
             <h2>Discussion Responses (Writing)</h2>
             <div class="admin-chunk-lists">
               {{#each writingDiscussionSubmissions}}
-                <details class="admin-chunk-list"{{#unless feedback}} open{{/unless}}>
-                  <summary><strong>{{this.topic_title}}</strong><span>{{#if feedback}}Feedback sent{{else}}Awaiting feedback{{/if}}</span></summary>
+                <details class="admin-chunk-list"{{#if needsFeedback}} open{{/if}}>
+                  <summary><strong>{{this.topic_title}}</strong><span>{{#if needsFeedback}}Awaiting feedback{{else}}Feedback sent{{/if}}</span></summary>
                   <div class="admin-chunk-statuses">
                     <article class="admin-chunk-status submitted">
                       <div><strong>Student's response</strong><span>Submitted {{this.submitted_at}}</span></div>
