@@ -157,18 +157,16 @@
       const result = { points, total: items.length, percentage: Math.round((points / items.length) * 100) };
       localStorage.setItem(resultKey, JSON.stringify(result));
       showCompletion(result);
-      if (mode !== "flip") {
-        fetch("/api/progress", {
+      fetch("/api/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            activityType: mode === "spelling" ? "spelling" : "translation",
+            activityType: mode === "flip" ? "flip-cards" : mode === "spelling" ? "spelling" : "translation",
             difficultyLevel: selectedLevel,
             points,
             totalPoints: items.length,
           }),
         }).catch(() => {});
-      }
     };
 
     const previousResult = readResult() || (mode === "flip" ? JSON.parse(localStorage.getItem(storageKey(`vocabulary-last-flip-${selectedLevel}`)) || "null") : null);

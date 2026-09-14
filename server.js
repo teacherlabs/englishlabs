@@ -833,7 +833,74 @@ const loadProgressForUser = (postgresQuery, sqliteQuery, username, callback) => 
   }
   db.all(sqliteQuery, [username], callback);
 };
-const buildAreaProgress = (progress) => {
+const buildVocabularyProgress = (progress, usefulChunkSubmissions = []) => {
+  const exerciseTypes = [
+    { key: "flip-cards", label: "Flip cards" },
+    { key: "translation", label: "Translation" },
+    { key: "spelling", label: "Write the word" },
+  ];
+  const levels = ["easy", "medium"].map((level) => {
+    const completedTypes = exerciseTypes.filter((exercise) =>
+      progress.some(
+        (row) =>
+          row.activity_type === exercise.key &&
+          row.difficulty_level === level,
+      ),
+    );
+    return {
+      label: level === "easy" ? "Easy" : "Medium",
+      completed: completedTypes.length,
+      total: exerciseTypes.length,
+      unitLabel: "exercise types",
+      percentage: Math.round(
+        (completedTypes.length / exerciseTypes.length) * 100,
+      ),
+    };
+  });
+  const submittedChunks = new Set(
+    usefulChunkSubmissions.map(
+      (submission) => `${submission.list_number}:${submission.chunk}`,
+    ),
+  );
+  const completedUsefulLists = usefulChunkLists.filter((list) =>
+    list.chunks.every((chunk) =>
+      submittedChunks.has(`${list.number}:${chunk}`),
+    ),
+  );
+  const usefulChunks = {
+    label: "Useful Chunks",
+    completed: completedUsefulLists.length,
+    total: usefulChunkLists.length,
+    unitLabel: "lists",
+    percentage: usefulChunkLists.length
+      ? Math.round(
+          (completedUsefulLists.length / usefulChunkLists.length) * 100,
+        )
+      : 0,
+  };
+  const progressDetails = [usefulChunks, ...levels];
+  return {
+    key: "vocabulary",
+    label: "Vocabulary",
+    percentage: Math.round(
+      progressDetails.reduce((sum, detail) => sum + detail.percentage, 0) /
+        progressDetails.length,
+    ),
+    completed: progressDetails.filter((detail) => detail.percentage === 100)
+      .length,
+    total: progressDetails.length,
+    completedLabels: progressDetails
+      .filter((detail) => detail.percentage === 100)
+      .map((detail) => detail.label)
+      .join(", "),
+    remainingLabels: progressDetails
+      .filter((detail) => detail.percentage < 100)
+      .map((detail) => detail.label)
+      .join(", "),
+    progressDetails,
+  };
+};
+const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
   const areas = [
     {
       key: "grammar",
@@ -846,11 +913,6 @@ const buildAreaProgress = (progress) => {
     {
       key: "vocabulary",
       label: "Vocabulary",
-      rows: progress.filter((item) => item.activity_type === "flip-cards"),
-      parts: [
-        { key: "easy", label: "Easy" },
-        { key: "medium", label: "Medium" },
-      ],
     },
     {
       key: "reading",
@@ -872,6 +934,9 @@ const buildAreaProgress = (progress) => {
     },
   ];
   return areas.map((area) => {
+    if (area.key === "vocabulary") {
+      return buildVocabularyProgress(progress, usefulChunkSubmissions);
+    }
     if (area.chapters) {
       const progressDetails = area.chapters.map((chapter) => {
         const total = chapter.exercises.length;
@@ -3657,6 +3722,14 @@ const loadFeedbackHistory = (username, callback) => {
   );
 };
 
+const loadUsefulChunkSubmissions = (username, callback) => {
+  db.all(
+    "SELECT list_number, chunk FROM useful_chunk_submissions WHERE username = ?",
+    [username],
+    callback,
+  );
+};
+
 app.get("/profile", requireProfileUser, (req, res) => {
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
@@ -3744,9 +3817,16 @@ app.get("/profile", requireProfileUser, (req, res) => {
                       ? chapterNames[item.chapter_id] || item.activity_type
                       : item.activity_type;
                   });
-                  loadFeedbackMessages(
+                    loadUsefulChunkSubmissions(
                     req.session.name,
-                    (feedbackError, feedbackMessages) => {
+                      (usefulChunksError, usefulChunkSubmissions) => {
+                        if (usefulChunksError)
+                          return res
+                            .status(500)
+                            .send("Unable to load vocabulary progress.");
+                        loadFeedbackMessages(
+                          req.session.name,
+                          (feedbackError, feedbackMessages) => {
                       if (feedbackError) {
                         console.error(
                           "Unable to load feedback messages:",
@@ -3794,7 +3874,10 @@ app.get("/profile", requireProfileUser, (req, res) => {
                             isAdmin: Boolean(req.session.isAdmin),
                             progress,
                             stats,
-                            areaProgress: buildAreaProgress(progress),
+                            areaProgress: buildAreaProgress(
+                              progress,
+                              usefulChunkSubmissions,
+                            ),
                             passportStamps,
                             feedbackMessages,
                             feedbackHistory,
@@ -3812,6 +3895,8 @@ app.get("/profile", requireProfileUser, (req, res) => {
                           );
                           res.status(500).send("Unable to load reminders.");
                             });
+                            },
+                          );
                         },
                       );
                     },
