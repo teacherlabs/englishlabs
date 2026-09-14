@@ -954,6 +954,7 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
           label: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
           completed,
           total,
+          fraction: total ? completed / total : 0,
           percentage: total ? Math.round((completed / total) * 100) : 0,
         };
       });
@@ -968,9 +969,10 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
         percentage: progressDetails.length
           ? Math.round(
               progressDetails.reduce(
-                (sum, chapter) => sum + chapter.percentage,
+                (sum, chapter) => sum + chapter.fraction,
                 0,
-              ) / progressDetails.length,
+              ) *
+                (100 / progressDetails.length),
             )
           : 0,
         completed: completedChapters.length,
