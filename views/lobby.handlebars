@@ -103,6 +103,17 @@
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Waiting for the teacher to start...</h1>
+            <div class="lobby-waiting-room" data-lobby-waiting-room>
+              <p class="lobby-waiting-room-title">Everyone in the room</p>
+              <div class="lobby-waiting-players" data-lobby-waiting-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
+              <div class="lobby-emotes" aria-label="Lobby emotes">
+                <span>React</span>
+                <button type="button" data-lobby-emote="dance">Dance</button>
+                <button type="button" data-lobby-emote="cheer">Cheer</button>
+                <button type="button" data-lobby-emote="wave">Wave</button>
+              </div>
+              <p class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></p>
+            </div>
           </section>
           <section class="student-live-quiz" data-phase-countdown hidden>
             <p class="eyebrow">{{room.title}}</p><h1>Get ready: <span data-countdown>3</span></h1>
@@ -205,6 +216,19 @@
           player.username === movement.username ? { ...player, ...movement } : player,
         );
       });
+      lobbySocket.on("lobbyEmote", (emote) => {
+        if (String(emote.roomId) !== String(roomId)) return;
+        const tile = document.querySelector(
+          `[data-lobby-waiting-player="${CSS.escape(String(emote.username))}"]`,
+        );
+        if (!tile) return;
+        tile.classList.remove("is-dancing", "is-cheering", "is-waving");
+        void tile.offsetWidth;
+        tile.classList.add(`is-${emote.emote}`);
+        window.setTimeout(() => tile.classList.remove(`is-${emote.emote}`), 900);
+        const status = document.querySelector("[data-lobby-emote-status]");
+        if (status) status.textContent = `${emote.username} chose ${emote.emote}.`;
+      });
       lobbySocket.on("teacherEntered", ({ entering }) => {
         if (entranceButton) {
           entranceButton.textContent = entering ? "In Lobby" : "Enter Lobby";
@@ -229,6 +253,8 @@
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
     const playersGrid = document.querySelector("[data-lobby-players]");
+    const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
+    const emoteStatus = document.querySelector("[data-lobby-emote-status]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
@@ -349,6 +375,16 @@
             }).join("")
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
       }
+      if (waitingPlayers) {
+        waitingPlayers.innerHTML = state.leaderboard?.length
+          ? state.leaderboard.map((player) => {
+              const avatar = (player.avatarUrl || player.avatar)
+                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
+                : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
+              return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
+            }).join("")
+          : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
+      }
 
       document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
         const button = event.currentTarget;
@@ -366,6 +402,20 @@
           })
           .catch((error) => console.error(error))
           .finally(() => { button.disabled = false; });
+      });
+
+      document.querySelectorAll("[data-lobby-emote]").forEach((button) => {
+        if (button.dataset.emoteBound) return;
+        button.dataset.emoteBound = "true";
+        button.addEventListener("click", () => {
+          if (lobbySocket?.connected) {
+            lobbySocket.emit("lobbyEmote", {
+              roomId,
+              emote: button.dataset.lobbyEmote,
+            });
+          }
+          if (emoteStatus) emoteStatus.textContent = `You chose ${button.textContent}.`;
+        });
       });
 
       phaseWaiting.hidden = state.room.status !== "waiting";

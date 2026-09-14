@@ -6324,6 +6324,23 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("lobbyEmote", ({ roomId, emote } = {}) => {
+    const numericRoomId = Number(roomId);
+    const allowedEmotes = new Set(["dance", "cheer", "wave"]);
+    if (
+      !socket.data.roomId ||
+      socket.data.roomId !== numericRoomId ||
+      !allowedEmotes.has(emote)
+    ) {
+      return;
+    }
+    io.to(String(numericRoomId)).emit("lobbyEmote", {
+      roomId: numericRoomId,
+      username,
+      emote,
+    });
+  });
+
   socket.on("teacherEntrance", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
     if (!isAdmin || socket.data.roomId !== numericRoomId) {

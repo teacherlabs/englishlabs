@@ -702,6 +702,115 @@ legend {
   color: #236044;
   font-size: 13px;
 }
+.lobby-waiting-room {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #d9e2ef;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.82);
+}
+.lobby-waiting-room-title {
+  margin: 0 0 14px;
+  color: #526074;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lobby-waiting-players {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  min-height: 104px;
+}
+.lobby-waiting-player {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  min-width: 76px;
+  color: #14213d;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+.lobby-waiting-avatar {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid #d9b75f;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 5px 12px rgba(20, 33, 61, 0.14);
+}
+.lobby-waiting-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lobby-waiting-player.is-dancing {
+  animation: lobby-emote-dance 0.9s ease;
+}
+.lobby-waiting-player.is-cheering {
+  animation: lobby-emote-cheer 0.9s ease;
+}
+.lobby-waiting-player.is-waving {
+  animation: lobby-emote-wave 0.9s ease;
+}
+.lobby-emotes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+.lobby-emotes > span {
+  margin-right: 4px;
+  color: #68758a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.lobby-emotes button {
+  padding: 7px 12px;
+  border: 1px solid #b8c9df;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f3b63;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+.lobby-emotes button:hover,
+.lobby-emotes button:focus-visible {
+  border-color: #42658f;
+  background: #1f3b63;
+  color: #fff;
+}
+.lobby-emote-status {
+  min-height: 17px;
+  margin: 10px 0 0;
+  color: #68758a;
+  font-size: 11px;
+  text-align: center;
+}
+@keyframes lobby-emote-dance {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-10px) rotate(-8deg); }
+  75% { transform: translateY(-6px) rotate(8deg); }
+}
+@keyframes lobby-emote-cheer {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.16); }
+  65% { transform: scale(0.96); }
+}
+@keyframes lobby-emote-wave {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+  75% { transform: rotate(-5deg); }
+}
 .lobby-exit-modal {
   position: fixed;
   inset: 0;
@@ -827,15 +936,17 @@ legend {
 }
 
 .app-sidebar .app-nav-link:hover,
-.app-sidebar .app-nav-link:focus-visible {
+.app-sidebar .app-nav-link:focus-visible,
+.app-sidebar .app-nav-link.is-active {
   background: #1f3b63;
   border-color: #42658f;
-  color: #f8fafc;
+  color: #ffffff;
 }
 
 .app-sidebar .app-nav-link:hover .app-nav-icon,
-.app-sidebar .app-nav-link:focus-visible .app-nav-icon {
-  color: #f8fafc;
+.app-sidebar .app-nav-link:focus-visible .app-nav-icon,
+.app-sidebar .app-nav-link.is-active .app-nav-icon {
+  color: #ffffff;
 }
 
 .app-sidebar .app-nav-link:first-of-type:not(.is-active) {
