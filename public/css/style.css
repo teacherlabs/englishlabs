@@ -3064,17 +3064,48 @@ div.profile-avatar-placeholder {
   text-decoration: none;
 }
 
+#open-history-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px solid #b9d7f2;
+  border-radius: 8px;
+  background: #edf4ff;
+  color: #14213d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+#open-history-btn:hover,
+#open-history-btn:focus-visible {
+  border-color: #8fb9e3;
+  background: #dcecff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
 .feedback-history-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  box-sizing: border-box;
   width: min(620px, calc(100% - 32px));
   max-height: min(720px, calc(100vh - 48px));
+  margin: 0;
   padding: 20px;
   border: 1px solid #dbe2ed;
   border-radius: 10px;
-  background: var(--profile-card-bg, #fff);
-  color: var(--profile-card-text, #14213d);
+  background: #ffffff;
+  color: #14213d;
+  box-shadow: 0 24px 70px rgba(20, 33, 61, 0.28);
+  transform: translate(-50%, -50%);
 }
 .feedback-history-modal::backdrop {
-  background: rgba(20, 33, 61, 0.45);
+  background: rgba(20, 33, 61, 0.62);
 }
 .feedback-history-heading {
   display: flex;
