@@ -823,6 +823,16 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
     };
   });
 };
+const loadProgressForUser = (postgresQuery, sqliteQuery, username, callback) => {
+  if (postgresPool) {
+    postgresReady
+      .then(() => postgresPool.query(postgresQuery, [username]))
+      .then(({ rows }) => callback(null, rows))
+      .catch((error) => callback(error));
+    return;
+  }
+  db.all(sqliteQuery, [username], callback);
+};
 const buildAreaProgress = (progress) => {
   const areas = [
     {
@@ -1448,7 +1458,7 @@ app.use((req, res, next) => {
   if (!req.session.name || req.session.isAdmin) return next();
   db.get(
     "SELECT COUNT(*) AS count FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0",
-    [req.session.name],
+    req.session.name,
     (error, row) => {
       res.locals.unreadFeedbackCount = error ? 0 : row.count;
       loadStudentGoal(req.session.name, (goalError, goal) => {
@@ -1655,8 +1665,14 @@ db.serialize(() => {
     FOREIGN KEY (username) REFERENCES members(username),
     UNIQUE (username, topic_id)
   )`);
-  db.run("ALTER TABLE listening_discussion_submissions ADD COLUMN feedback TEXT", () => {});
-  db.run("ALTER TABLE listening_discussion_submissions ADD COLUMN feedback_at TEXT", () => {});
+  db.run(
+    "ALTER TABLE listening_discussion_submissions ADD COLUMN feedback TEXT",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE listening_discussion_submissions ADD COLUMN feedback_at TEXT",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS writing_discussion_submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1860,9 +1876,10 @@ app.get("/vocabulary", requireAuthenticated, (req, res) => {
 
 app.get("/listening", requireAuthenticated, (req, res) => {
   const selectedLevel = req.query.level === "2" ? "2" : "1";
-  db.all(
+  loadProgressForUser(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
     "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
-    [req.session.name],
+    req.session.name,
     (error, progress) => {
       if (error)
         return res.status(500).send("Unable to load listening progress.");
@@ -1910,9 +1927,10 @@ app.get("/listening", requireAuthenticated, (req, res) => {
 
 app.get("/writing", requireAuthenticated, (req, res) => {
   const selectedLevel = req.query.level === "1" ? "1" : "2";
-  db.all(
+  loadProgressForUser(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
     "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
-    [req.session.name],
+    req.session.name,
     (progressError, progress) => {
       if (progressError)
         return res.status(500).send("Unable to load writing progress.");
@@ -1957,7 +1975,16 @@ app.get("/writing", requireAuthenticated, (req, res) => {
             "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = ? AND topic_id = ?",
             [req.session.name, selectedTopic.topic.id],
             (discussionError, discussionResponse) =>
-              renderWriting(error ? null : { ...(submission || {}), discussionResponse: discussionError ? null : discussionResponse }),
+              renderWriting(
+                error
+                  ? null
+                  : {
+                      ...(submission || {}),
+                      discussionResponse: discussionError
+                        ? null
+                        : discussionResponse,
+                    },
+              ),
           );
         },
       );
@@ -1967,9 +1994,10 @@ app.get("/writing", requireAuthenticated, (req, res) => {
 
 app.get("/reading", requireAuthenticated, (req, res) => {
   const selectedLevel = req.query.level === "1" ? "1" : "2";
-  db.all(
+  loadProgressForUser(
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
     "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
-    [req.session.name],
+    req.session.name,
     (progressError, progress) => {
       if (progressError)
         return res.status(500).send("Unable to load reading progress.");
@@ -2083,14 +2111,18 @@ app.post("/api/writing/discussion", requireLogin, (req, res) => {
   const topicId = String(req.body.topicId || "").trim();
   const topicTitle = String(req.body.topicTitle || "").trim();
   const text = String(req.body.text || "").trim();
-  if (!topicId || !text) return res.status(400).json({ error: "A response is required." });
+  if (!topicId || !text)
+    return res.status(400).json({ error: "A response is required." });
   db.run(
     `INSERT INTO writing_discussion_submissions (username, topic_id, topic_title, submission_text)
      VALUES (?, ?, ?, ?)
      ON CONFLICT(username, topic_id) DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
     [req.session.name, topicId, topicTitle, text],
     async (error) => {
-      if (error) return res.status(500).json({ error: "Unable to save discussion response." });
+      if (error)
+        return res
+          .status(500)
+          .json({ error: "Unable to save discussion response." });
       if (postgresPool) {
         try {
           await postgresReady;
@@ -2101,8 +2133,13 @@ app.post("/api/writing/discussion", requireLogin, (req, res) => {
             [req.session.name, topicId, topicTitle, text],
           );
         } catch (postgresError) {
-          console.error("Unable to mirror writing discussion response:", postgresError);
-          return res.status(500).json({ error: "Unable to save discussion response." });
+          console.error(
+            "Unable to mirror writing discussion response:",
+            postgresError,
+          );
+          return res
+            .status(500)
+            .json({ error: "Unable to save discussion response." });
         }
       }
       res.json({ saved: true });
@@ -2110,23 +2147,37 @@ app.post("/api/writing/discussion", requireLogin, (req, res) => {
   );
 });
 
-app.post("/teacher/student/:username/listening-discussion/:id/feedback", requireAdmin, (req, res) => {
-  const feedback = String(req.body.feedback || "").trim();
-  db.run(
-    "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
-    [feedback, req.params.id, req.params.username],
-    () => res.redirect(`/teacher/student/${encodeURIComponent(req.params.username)}?category=listening`),
-  );
-});
+app.post(
+  "/teacher/student/:username/listening-discussion/:id/feedback",
+  requireAdmin,
+  (req, res) => {
+    const feedback = String(req.body.feedback || "").trim();
+    db.run(
+      "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+      [feedback, req.params.id, req.params.username],
+      () =>
+        res.redirect(
+          `/teacher/student/${encodeURIComponent(req.params.username)}?category=listening`,
+        ),
+    );
+  },
+);
 
-app.post("/teacher/student/:username/writing-discussion/:id/feedback", requireAdmin, (req, res) => {
-  const feedback = String(req.body.feedback || "").trim();
-  db.run(
-    "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
-    [feedback, req.params.id, req.params.username],
-    () => res.redirect(`/teacher/student/${encodeURIComponent(req.params.username)}?category=writing`),
-  );
-});
+app.post(
+  "/teacher/student/:username/writing-discussion/:id/feedback",
+  requireAdmin,
+  (req, res) => {
+    const feedback = String(req.body.feedback || "").trim();
+    db.run(
+      "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+      [feedback, req.params.id, req.params.username],
+      () =>
+        res.redirect(
+          `/teacher/student/${encodeURIComponent(req.params.username)}?category=writing`,
+        ),
+    );
+  },
+);
 
 app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
   db.get(
@@ -2365,9 +2416,10 @@ app.get("/practice/questions", requireAuthenticated, (req, res) => {
     })),
   };
 
-  db.all(
+  loadProgressForUser(
+    "SELECT difficulty_level FROM progress WHERE username = $1 AND activity_type = 'questions'",
     "SELECT difficulty_level FROM progress WHERE username = ? AND activity_type = 'questions'",
-    [req.session.name],
+    req.session.name,
     (progressError, progress) => {
       const completedKeys = new Set(
         progressError ? [] : progress.map((item) => item.difficulty_level),
@@ -4899,228 +4951,263 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                             db.all(
                               "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
                               [student.username],
-                              (writingDiscussionError, writingDiscussionSubmissions) => {
-                            db.all(
-                              "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                              [student.username],
-                              (writingError, writingSubmissions) => {
-                                if (writingError)
-                                  return res
-                                    .status(500)
-                                    .send(
-                                      "Unable to load writing submissions.",
-                                    );
-                                const groupTopicsByLevel = (
-                                  topics,
-                                  levelKey,
-                                ) => {
-                                  const levels = new Map();
-                                  topics.forEach((topic) => {
-                                    const level = String(
-                                      topic[levelKey] || "1",
-                                    );
-                                    if (!levels.has(level)) {
-                                      levels.set(level, {
-                                        level,
-                                        topics: [],
-                                        completed: 0,
-                                        total: 0,
-                                      });
-                                    }
-                                    const levelData = levels.get(level);
-                                    const completedExercises =
-                                      topic.exercises.filter(
-                                        (exercise) => exercise.completed,
-                                      ).length;
-                                    levelData.topics.push({
-                                      title: topic.topic.title,
-                                      status: topic.completed
-                                        ? "Completed"
-                                        : completedExercises
-                                          ? "In Progress"
-                                          : "Not Started",
-                                      statusClass: topic.completed
-                                        ? "completed"
-                                        : completedExercises
-                                          ? "in-progress"
-                                          : "not-started",
-                                      completedExercises,
-                                      totalExercises: topic.exercises.length,
-                                    });
-                                    levelData.completed += completedExercises;
-                                    levelData.total += topic.exercises.length;
-                                  });
-                                  return [...levels.values()].sort(
-                                    (first, second) =>
-                                      Number(first.level) -
-                                      Number(second.level),
-                                  );
-                                };
-                                const decoratedReadingTopics = decorateTopics(
-                                  readingTopics,
-                                  progress,
-                                  "reading",
-                                  "readingLevel",
-                                );
-                                const decoratedWritingTopics = decorateTopics(
-                                  writingTopics,
-                                  progress,
-                                  "writing",
-                                  "writingLevel",
-                                );
-                                const decoratedListeningTopics = decorateTopics(
-                                  listeningTopics,
-                                  progress,
-                                  "listening",
-                                  "listeningLevel",
-                                );
-                                const grammarProgress = progress.filter(
-                                  (item) =>
-                                    ["questions", "final"].includes(
-                                      item.activity_type,
-                                    ),
-                                );
-                                const grammarChapters =
-                                  practiceQuestionChapters.map((chapter) => {
-                                    const exercises = chapter.exercises.map(
-                                      (exercise, index) => {
-                                        const completion = grammarProgress.find(
-                                          (item) =>
-                                            item.activity_type ===
-                                              "questions" &&
-                                            item.difficulty_level ===
-                                              `questions:${chapter.id}:${index + 1}`,
-                                        );
-                                        return {
-                                          title: exercise.title,
-                                          completed: Boolean(completion),
-                                          score: completion?.percentage,
-                                        };
-                                      },
-                                    );
-                                    return {
-                                      title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
-                                      status: exercises.every(
-                                        (exercise) => exercise.completed,
-                                      )
-                                        ? "Completed"
-                                        : exercises.some(
-                                              (exercise) => exercise.completed,
-                                            )
-                                          ? "In Progress"
-                                          : "Not Started",
-                                      statusClass: exercises.every(
-                                        (exercise) => exercise.completed,
-                                      )
-                                        ? "completed"
-                                        : exercises.some(
-                                              (exercise) => exercise.completed,
-                                            )
-                                          ? "in-progress"
-                                          : "not-started",
-                                      showStatus: exercises.some(
-                                        (exercise) => exercise.completed,
-                                      ),
-                                      exercises,
-                                    };
-                                  });
-                                const finalTestRows = grammarProgress.filter(
-                                  (item) => item.activity_type === "final",
-                                );
-                                loadStudentReminders(
-                                  student.username,
-                                  (remindersError, studentReminders) => {
-                                    if (remindersError)
+                              (
+                                writingDiscussionError,
+                                writingDiscussionSubmissions,
+                              ) => {
+                                db.all(
+                                  "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                                  [student.username],
+                                  (writingError, writingSubmissions) => {
+                                    if (writingError)
                                       return res
                                         .status(500)
                                         .send(
-                                          "Unable to load student reminders.",
+                                          "Unable to load writing submissions.",
                                         );
-                                    res.render("teacher-student.handlebars", {
-                                      student: {
-                                        ...student,
-                                        avatarUrl: student.avatarUrl,
-                                        spritesheetUrl: student.spritesheetUrl,
-                                        characterConfig:
-                                          student.characterConfig,
-                                      },
-                                      profileCategory,
-                                      profileIsGrammar:
-                                        profileCategory === "grammar",
-                                      profileIsReading:
-                                        profileCategory === "reading",
-                                      profileIsActivity:
-                                        profileCategory === "grammar",
-                                      profileIsVocabulary:
-                                        profileCategory === "vocabulary",
-                                      profileIsWriting:
-                                        profileCategory === "writing",
-                                      profileIsListening:
-                                        profileCategory === "listening",
-                                      progress,
-                                      grammarStats: preparedStats.filter(
-                                        (stat) =>
-                                          ["questions", "final"].includes(
-                                            stat.activity_type,
-                                          ),
-                                      ),
-                                      activityStats: preparedStats,
-                                      bestActivity: rankedStats[0],
-                                      needsFocus:
-                                        rankedStats[rankedStats.length - 1],
-                                      usefulChunkSubmissions,
-                                      usefulChunkSubmissionCount:
-                                        usefulChunkSubmissions.length,
-                                      usefulChunkListsForAdmin,
-                                      flipCompletions,
-                                      hardestWords,
-                                      listeningCompletions,
-                                      readingCompletions,
-                                      listeningDiscussionSubmissions:
-                                        discussionError
-                                          ? []
-                                          : listeningDiscussionSubmissions,
-                                      writingDiscussionSubmissions: writingDiscussionError ? [] : writingDiscussionSubmissions,
-                                      readingProgressLevels: groupTopicsByLevel(
-                                        decoratedReadingTopics,
+                                    const groupTopicsByLevel = (
+                                      topics,
+                                      levelKey,
+                                    ) => {
+                                      const levels = new Map();
+                                      topics.forEach((topic) => {
+                                        const level = String(
+                                          topic[levelKey] || "1",
+                                        );
+                                        if (!levels.has(level)) {
+                                          levels.set(level, {
+                                            level,
+                                            topics: [],
+                                            completed: 0,
+                                            total: 0,
+                                          });
+                                        }
+                                        const levelData = levels.get(level);
+                                        const completedExercises =
+                                          topic.exercises.filter(
+                                            (exercise) => exercise.completed,
+                                          ).length;
+                                        levelData.topics.push({
+                                          title: topic.topic.title,
+                                          status: topic.completed
+                                            ? "Completed"
+                                            : completedExercises
+                                              ? "In Progress"
+                                              : "Not Started",
+                                          statusClass: topic.completed
+                                            ? "completed"
+                                            : completedExercises
+                                              ? "in-progress"
+                                              : "not-started",
+                                          completedExercises,
+                                          totalExercises:
+                                            topic.exercises.length,
+                                        });
+                                        levelData.completed +=
+                                          completedExercises;
+                                        levelData.total +=
+                                          topic.exercises.length;
+                                      });
+                                      return [...levels.values()].sort(
+                                        (first, second) =>
+                                          Number(first.level) -
+                                          Number(second.level),
+                                      );
+                                    };
+                                    const decoratedReadingTopics =
+                                      decorateTopics(
+                                        readingTopics,
+                                        progress,
+                                        "reading",
                                         "readingLevel",
-                                      ),
-                                      writingProgressLevels: groupTopicsByLevel(
-                                        decoratedWritingTopics,
+                                      );
+                                    const decoratedWritingTopics =
+                                      decorateTopics(
+                                        writingTopics,
+                                        progress,
+                                        "writing",
                                         "writingLevel",
-                                      ),
-                                      listeningProgressLevels:
-                                        groupTopicsByLevel(
-                                          decoratedListeningTopics,
-                                          "listeningLevel",
+                                      );
+                                    const decoratedListeningTopics =
+                                      decorateTopics(
+                                        listeningTopics,
+                                        progress,
+                                        "listening",
+                                        "listeningLevel",
+                                      );
+                                    const grammarProgress = progress.filter(
+                                      (item) =>
+                                        ["questions", "final"].includes(
+                                          item.activity_type,
                                         ),
-                                      grammarChapters,
-                                      finalTestRows,
-                                      writingSubmissions:
-                                        writingSubmissions.map((submission) => {
-                                          const topic = writingTopics.find(
-                                            (entry) =>
-                                              entry.topic.id ===
-                                              submission.topic_id,
-                                          );
+                                    );
+                                    const grammarChapters =
+                                      practiceQuestionChapters.map(
+                                        (chapter) => {
+                                          const exercises =
+                                            chapter.exercises.map(
+                                              (exercise, index) => {
+                                                const completion =
+                                                  grammarProgress.find(
+                                                    (item) =>
+                                                      item.activity_type ===
+                                                        "questions" &&
+                                                      item.difficulty_level ===
+                                                        `questions:${chapter.id}:${index + 1}`,
+                                                  );
+                                                return {
+                                                  title: exercise.title,
+                                                  completed:
+                                                    Boolean(completion),
+                                                  score: completion?.percentage,
+                                                };
+                                              },
+                                            );
                                           return {
-                                            ...submission,
-                                            level: topic?.writingLevel || "2",
-                                            needsFeedback: !submission.feedback,
+                                            title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                            status: exercises.every(
+                                              (exercise) => exercise.completed,
+                                            )
+                                              ? "Completed"
+                                              : exercises.some(
+                                                    (exercise) =>
+                                                      exercise.completed,
+                                                  )
+                                                ? "In Progress"
+                                                : "Not Started",
+                                            statusClass: exercises.every(
+                                              (exercise) => exercise.completed,
+                                            )
+                                              ? "completed"
+                                              : exercises.some(
+                                                    (exercise) =>
+                                                      exercise.completed,
+                                                  )
+                                                ? "in-progress"
+                                                : "not-started",
+                                            showStatus: exercises.some(
+                                              (exercise) => exercise.completed,
+                                            ),
+                                            exercises,
                                           };
-                                        }),
-                                      writingSubmissionCount:
-                                        writingSubmissions.length,
-                                      studentReminders,
-                                      studentReminderPreview:
-                                        studentReminders.slice(0, 3),
-                                      hasMoreStudentReminders:
-                                        studentReminders.length > 3,
-                                      difficultWordsEasy,
-                                      difficultWordsMedium,
-                                    });
-                              },
-                            );
+                                        },
+                                      );
+                                    const finalTestRows =
+                                      grammarProgress.filter(
+                                        (item) =>
+                                          item.activity_type === "final",
+                                      );
+                                    loadStudentReminders(
+                                      student.username,
+                                      (remindersError, studentReminders) => {
+                                        if (remindersError)
+                                          return res
+                                            .status(500)
+                                            .send(
+                                              "Unable to load student reminders.",
+                                            );
+                                        res.render(
+                                          "teacher-student.handlebars",
+                                          {
+                                            student: {
+                                              ...student,
+                                              avatarUrl: student.avatarUrl,
+                                              spritesheetUrl:
+                                                student.spritesheetUrl,
+                                              characterConfig:
+                                                student.characterConfig,
+                                            },
+                                            profileCategory,
+                                            profileIsGrammar:
+                                              profileCategory === "grammar",
+                                            profileIsReading:
+                                              profileCategory === "reading",
+                                            profileIsActivity:
+                                              profileCategory === "grammar",
+                                            profileIsVocabulary:
+                                              profileCategory === "vocabulary",
+                                            profileIsWriting:
+                                              profileCategory === "writing",
+                                            profileIsListening:
+                                              profileCategory === "listening",
+                                            progress,
+                                            grammarStats: preparedStats.filter(
+                                              (stat) =>
+                                                ["questions", "final"].includes(
+                                                  stat.activity_type,
+                                                ),
+                                            ),
+                                            activityStats: preparedStats,
+                                            bestActivity: rankedStats[0],
+                                            needsFocus:
+                                              rankedStats[
+                                                rankedStats.length - 1
+                                              ],
+                                            usefulChunkSubmissions,
+                                            usefulChunkSubmissionCount:
+                                              usefulChunkSubmissions.length,
+                                            usefulChunkListsForAdmin,
+                                            flipCompletions,
+                                            hardestWords,
+                                            listeningCompletions,
+                                            readingCompletions,
+                                            listeningDiscussionSubmissions:
+                                              discussionError
+                                                ? []
+                                                : listeningDiscussionSubmissions,
+                                            writingDiscussionSubmissions:
+                                              writingDiscussionError
+                                                ? []
+                                                : writingDiscussionSubmissions,
+                                            readingProgressLevels:
+                                              groupTopicsByLevel(
+                                                decoratedReadingTopics,
+                                                "readingLevel",
+                                              ),
+                                            writingProgressLevels:
+                                              groupTopicsByLevel(
+                                                decoratedWritingTopics,
+                                                "writingLevel",
+                                              ),
+                                            listeningProgressLevels:
+                                              groupTopicsByLevel(
+                                                decoratedListeningTopics,
+                                                "listeningLevel",
+                                              ),
+                                            grammarChapters,
+                                            finalTestRows,
+                                            writingSubmissions:
+                                              writingSubmissions.map(
+                                                (submission) => {
+                                                  const topic =
+                                                    writingTopics.find(
+                                                      (entry) =>
+                                                        entry.topic.id ===
+                                                        submission.topic_id,
+                                                    );
+                                                  return {
+                                                    ...submission,
+                                                    level:
+                                                      topic?.writingLevel ||
+                                                      "2",
+                                                    needsFeedback:
+                                                      !submission.feedback,
+                                                  };
+                                                },
+                                              ),
+                                            writingSubmissionCount:
+                                              writingSubmissions.length,
+                                            studentReminders,
+                                            studentReminderPreview:
+                                              studentReminders.slice(0, 3),
+                                            hasMoreStudentReminders:
+                                              studentReminders.length > 3,
+                                            difficultWordsEasy,
+                                            difficultWordsMedium,
+                                          },
+                                        );
+                                      },
+                                    );
                                   },
                                 );
                               },
