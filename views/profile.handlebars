@@ -5,7 +5,7 @@
     style="--profile-card-bg: {{student.profile_background}}; --profile-card-text: {{student.profile_text_color}}; --profile-card-muted: {{student.profile_muted_color}}; --profile-card-button-bg: {{student.profile_button_color}}; --profile-card-button-text: {{student.profile_button_text_color}}; --profile-progress-fill: {{student.profile_button_color}};"
   >
     <aside class="profile-messages-panel">
-      <button class="profile-messages-toggle" type="button" data-profile-messages-toggle aria-expanded="false" aria-controls="profileMessagesContent">
+      <button class="profile-messages-toggle{{#if unreadFeedbackCount}} has-unread{{/if}}" type="button" data-profile-messages-toggle aria-expanded="false" aria-controls="profileMessagesContent">
         <span>Messages</span>
         {{#if unreadFeedbackCount}}<span class="profile-message-badge">{{unreadFeedbackCount}}</span>{{/if}}
         <span class="profile-messages-toggle-arrow" aria-hidden="true">›</span>
@@ -99,7 +99,7 @@
       <h2>Progress overview</h2>
       <div class="profile-area-progress">
         {{#each areaProgress}}
-          <div class="profile-area-progress-row"><div class="profile-area-progress-heading"><strong>{{label}}{{#if unreadCount}} <span class="profile-area-badge">{{unreadCount}}</span>{{/if}}</strong><span>{{percentage}}% finished</span></div><div class="profile-progress-track" role="progressbar" aria-label="{{label}} progress" aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{percentage}}%"></span></div></div>
+          <div class="profile-area-progress-row"><div class="profile-area-progress-heading"><strong>{{label}}</strong><span>{{percentage}}% finished</span></div><div class="profile-progress-track" role="progressbar" aria-label="{{label}} progress" aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100"><span style="width: {{percentage}}%"></span></div></div>
         {{/each}}
       </div>
     </section>

@@ -44,9 +44,9 @@
           </a>
           <nav class="app-nav" aria-label="Main navigation">
             <p class="app-nav-label">Workspace</p>
-            {{#each appNavWorkspace}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span><span>{{label}}</span>{{#if unreadCount}}<span class="app-nav-badge">{{unreadCount}}</span>{{/if}}</a>{{/each}}
+            {{#each appNavWorkspace}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span><span>{{label}}</span></a>{{/each}}
             <p class="app-nav-label app-nav-label-spaced">Practice together</p>
-            {{#each appNavPractice}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span><span>{{label}}</span>{{#if unreadCount}}<span class="app-nav-badge">{{unreadCount}}</span>{{/if}}</a>{{/each}}
+            {{#each appNavPractice}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span><span>{{label}}</span></a>{{/each}}
           </nav>
           <div class="app-sidebar-footer">
             <a href="/profile" class="app-account-link">

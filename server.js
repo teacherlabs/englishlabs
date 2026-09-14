@@ -1502,15 +1502,6 @@ app.use((req, res, next) => {
       res.locals.unreadListeningCount = unreadListeningCount;
       res.locals.unreadFeedbackCount =
         unreadWritingCount + unreadListeningCount;
-      const writingNavItem = res.locals.appNavWorkspace.find(
-        (item) => item.href === "/writing",
-      );
-      const listeningNavItem = res.locals.appNavWorkspace.find(
-        (item) => item.href === "/listening",
-      );
-      if (writingNavItem) writingNavItem.unreadCount = unreadWritingCount;
-      if (listeningNavItem)
-        listeningNavItem.unreadCount = unreadListeningCount;
       loadStudentGoal(req.session.name, (goalError, goal) => {
         res.locals.dashboardGoal = goalError ? "" : goal;
         loadStudentReminders(req.session.name, (reminderError, reminders) => {
@@ -1577,10 +1568,6 @@ const clearUnreadAreaLocals = (res, area) => {
   res.locals.unreadFeedbackCount =
     (res.locals.unreadWritingCount || 0) +
     (res.locals.unreadListeningCount || 0);
-  const navItem = res.locals.appNavWorkspace.find(
-    (item) => item.href === `/${area}`,
-  );
-  if (navItem) navItem.unreadCount = 0;
 };
 
 app.get("/audio/eating-out", (req, res) => {
@@ -2365,21 +2352,18 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
     [req.params.id, req.session.name],
     (error, submission) => {
       if (error || !submission) return res.redirect("/writing");
-      db.run(
-        "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
-        [req.session.name],
-        (updateError) => {
-          if (updateError) {
-            console.error("Unable to mark feedback as seen:", updateError);
-          }
+      markFeedbackSeen(req.session.name, "writing")
+        .catch((updateError) => {
+          console.error("Unable to mark feedback as seen:", updateError);
+        })
+        .finally(() => {
           const topic = writingTopics.find(
             (entry) => entry.topic.id === submission.topic_id,
           );
           res.redirect(
             `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
           );
-        },
-      );
+        });
     },
   );
 });
@@ -3367,10 +3351,9 @@ const loadStudentReminders = (username, callback) => {
 
 app.get("/profile", requireProfileUser, (req, res) => {
   res.locals.unreadFeedbackCount = 0;
-  db.run(
-    "UPDATE writing_submissions SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL",
-    [req.session.name],
-  );
+  markFeedbackSeen(req.session.name, "writing").catch((error) => {
+    console.error("Unable to mark profile feedback as seen:", error);
+  });
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
   postgresReady
@@ -3491,15 +3474,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
                             isAdmin: Boolean(req.session.isAdmin),
                             progress,
                             stats,
-                            areaProgress: buildAreaProgress(progress).map((area) => ({
-                              ...area,
-                              unreadCount:
-                                area.key === "writing"
-                                  ? res.locals.unreadWritingCount || 0
-                                  : area.key === "listening"
-                                    ? res.locals.unreadListeningCount || 0
-                                    : 0,
-                            })),
+                            areaProgress: buildAreaProgress(progress),
                             passportStamps,
                             feedbackMessages,
                             reminders,

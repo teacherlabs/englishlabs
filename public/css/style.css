@@ -955,26 +955,6 @@ legend {
   letter-spacing: 0.04em;
 }
 
-.app-nav-badge,
-.profile-area-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.app-nav-badge {
-  margin-left: auto;
-}
-
 .app-nav-link:first-of-type .app-nav-icon {
   color: var(--color-primary);
 }
@@ -2999,6 +2979,11 @@ div.profile-avatar-placeholder {
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+}
+
+.profile-messages-toggle.has-unread {
+  background: #fff9eb;
+  border-color: #e5c76d;
 }
 .profile-messages-toggle-arrow {
   margin-left: auto;
