@@ -238,22 +238,37 @@
       })
       .then(({ ok, result, spritesheetImage }) => {
         if (!ok) throw new Error(result.error || "Unable to save character.");
+        if (!result.saved || !result.avatar) {
+          throw new Error("The character was not saved.");
+        }
         localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
         localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
         localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
-        if (!result.avatar) throw new Error("The server did not return the saved avatar.");
         const avatarUrl = result.avatar.startsWith("data:image/")
           ? result.avatar
           : `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
-        document.querySelectorAll(".profile-avatar, .nav-avatar").forEach((profileAvatar) => {
-          if (profileAvatar.tagName === "IMG") profileAvatar.src = avatarUrl;
-          else {
-            const image = document.createElement("img");
-            image.className = profileAvatar.classList.contains("nav-avatar") ? "nav-avatar" : "profile-avatar";
-            image.src = avatarUrl;
-            image.alt = "Profile picture";
-            profileAvatar.replaceWith(image);
+        document.querySelectorAll(
+          ".profile-avatar, .nav-avatar, .app-avatar, .app-profile-avatar, .dashboard-avatar",
+        ).forEach((profileAvatar) => {
+          if (profileAvatar.tagName === "IMG") {
+            profileAvatar.src = avatarUrl;
+            return;
           }
+          if (!profileAvatar.classList.contains("app-avatar-placeholder")) return;
+          const image = document.createElement("img");
+          image.className = profileAvatar.className
+            .replace("app-avatar-placeholder", "")
+            .trim();
+          image.src = avatarUrl;
+          image.alt = "Profile picture";
+          profileAvatar.replaceWith(image);
+        });
+        document.querySelectorAll(".profile-avatar-placeholder").forEach((placeholder) => {
+          const image = document.createElement("img");
+          image.className = "profile-avatar";
+          image.src = avatarUrl;
+          image.alt = "Profile picture";
+          placeholder.replaceWith(image);
         });
         if (characterSaved) characterSaved.hidden = false;
         if (characterError) characterError.hidden = true;
