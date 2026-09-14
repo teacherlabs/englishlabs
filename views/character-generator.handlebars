@@ -59,7 +59,7 @@
       }); const result = await response.json(); if (!response.ok) { throw new
       Error(result.error || "Unable to save character."); }
       if (!result.saved || !result.avatar) { throw new Error("The character was not saved."); }
-      window.top.location.href = "/profile"; } catch (error) {
+      window.top.location.reload(); } catch (error) {
       console.error("Unable to save character:", error); } });
     </script>
   </body>
