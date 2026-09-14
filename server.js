@@ -804,6 +804,7 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
       }
     });
   return topics.map((topic) => {
+    const preparationCompletion = completions.get(`${topic.topic.id}:0`);
     const exercises = topic.exercises.map((exercise, index) => {
       const completion = completions.get(`${topic.topic.id}:${index + 1}`);
       return {
@@ -815,6 +816,14 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
     });
     return {
       ...topic,
+      preparation: topic.preparation
+        ? {
+            ...topic.preparation,
+            completed: Boolean(preparationCompletion),
+            savedPoints: preparationCompletion?.points,
+            savedTotal: preparationCompletion?.total_points,
+          }
+        : topic.preparation,
       exercises,
       completed:
         exercises.length > 0 &&

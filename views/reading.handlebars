@@ -36,7 +36,7 @@
               </div>
             {{/if}}
             {{#if preparation.isImageMatch}}
-              <div class="reading-drag-drop" data-drag-drop>
+              <div class="reading-drag-drop" data-drag-drop data-topic-id="{{topic.id}}" data-exercise-number="0" data-completed="{{#if preparation.completed}}true{{else}}false{{/if}}" data-saved-points="{{preparation.savedPoints}}" data-saved-total="{{preparation.savedTotal}}">
                 <div class="drag-drop-images">
                   {{#each preparation.items}}
                     <div class="drag-drop-target" data-drop-zone data-answer="{{word}}">
@@ -273,6 +273,15 @@
   document.querySelectorAll("[data-drag-drop]").forEach((activity) => {
     const feedback = activity.querySelector("[data-drag-drop-feedback]");
     let selectedChip = null;
+    if (activity.dataset.completed === "true") {
+      feedback.hidden = false;
+      feedback.className = "drag-drop-feedback correct";
+      feedback.textContent = `Completed: ${activity.dataset.savedPoints} / ${activity.dataset.savedTotal}`;
+      activity.querySelectorAll("button").forEach((button) => {
+        button.disabled = true;
+        button.draggable = false;
+      });
+    }
 
     const checkComplete = () => {
       const zones = [...activity.querySelectorAll("[data-drop-zone]")];
@@ -289,6 +298,18 @@
       feedback.hidden = false;
       feedback.className = `drag-drop-feedback ${correctCount === zones.length ? "correct" : "incorrect"}`;
       feedback.textContent = `You matched ${correctCount} / ${zones.length} correctly.`;
+      if (correctCount === zones.length) {
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            activityType: "reading",
+            difficultyLevel: `reading:${activity.dataset.topicId}:${activity.dataset.exerciseNumber}`,
+            points: correctCount,
+            totalPoints: zones.length,
+          }),
+        });
+      }
     };
 
     const placeChip = (chip, zone) => {
