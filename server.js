@@ -2347,24 +2347,39 @@ app.post(
 );
 
 app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
+  const redirectToWriting = (submission) => {
+    if (!submission) return res.redirect("/writing");
+    markFeedbackSeen(req.session.name, "writing")
+      .catch((updateError) => {
+        console.error("Unable to mark feedback as seen:", updateError);
+      })
+      .finally(() => {
+        const topic = writingTopics.find(
+          (entry) => entry.topic.id === submission.topic_id,
+        );
+        res.redirect(
+          `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
+        );
+      });
+  };
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          "SELECT topic_id FROM writing_submissions WHERE id = $1 AND username = $2",
+          [req.params.id, req.session.name],
+        ),
+      )
+      .then(({ rows }) => redirectToWriting(rows[0]))
+      .catch((error) => {
+        console.error("Unable to open writing feedback:", error);
+        res.redirect("/writing");
+      });
+  }
   db.get(
     "SELECT topic_id FROM writing_submissions WHERE id = ? AND username = ?",
     [req.params.id, req.session.name],
-    (error, submission) => {
-      if (error || !submission) return res.redirect("/writing");
-      markFeedbackSeen(req.session.name, "writing")
-        .catch((updateError) => {
-          console.error("Unable to mark feedback as seen:", updateError);
-        })
-        .finally(() => {
-          const topic = writingTopics.find(
-            (entry) => entry.topic.id === submission.topic_id,
-          );
-          res.redirect(
-            `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
-          );
-        });
-    },
+    (error, submission) => redirectToWriting(error ? null : submission),
   );
 });
 
@@ -3349,11 +3364,46 @@ const loadStudentReminders = (username, callback) => {
   );
 };
 
+const loadFeedbackMessages = (username, callback) => {
+  const postgresQuery = `
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing' AS source_type
+    FROM writing_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    UNION ALL
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'writing_discussion' AS source_type
+    FROM writing_discussion_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    UNION ALL
+    SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen, 'listening_discussion' AS source_type
+    FROM listening_discussion_submissions
+    WHERE username = $1 AND feedback IS NOT NULL
+    ORDER BY feedback_at DESC
+    LIMIT 5`;
+  const sqliteQuery = postgresQuery
+    .replace(/\$1/g, "?")
+    .replace(/TIMESTAMPTZ/g, "TEXT");
+  const decorateMessages = (messages) =>
+    messages.map((message) => ({
+      ...message,
+      feedbackUrl:
+        message.source_type === "listening_discussion"
+          ? `/listening?topic=${encodeURIComponent(message.topic_id)}`
+          : message.source_type === "writing"
+            ? `/writing/feedback/${message.id}/open`
+            : `/writing?topic=${encodeURIComponent(message.topic_id)}`,
+    }));
+  if (postgresPool) {
+    return postgresReady
+      .then(() => postgresPool.query(postgresQuery, [username]))
+      .then(({ rows }) => callback(null, decorateMessages(rows)))
+      .catch((error) => callback(error));
+  }
+  db.all(sqliteQuery, [username], (error, rows) =>
+    callback(error, rows ? decorateMessages(rows) : rows),
+  );
+};
+
 app.get("/profile", requireProfileUser, (req, res) => {
-  res.locals.unreadFeedbackCount = 0;
-  markFeedbackSeen(req.session.name, "writing").catch((error) => {
-    console.error("Unable to mark profile feedback as seen:", error);
-  });
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
   postgresReady
@@ -3440,12 +3490,16 @@ app.get("/profile", requireProfileUser, (req, res) => {
                       ? chapterNames[item.chapter_id] || item.activity_type
                       : item.activity_type;
                   });
-                  db.all(
-                    "SELECT id, topic_id, topic_title, feedback, feedback_at, feedback_seen FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL ORDER BY feedback_at DESC LIMIT 3",
-                    [req.session.name],
+                  loadFeedbackMessages(
+                    req.session.name,
                     (feedbackError, feedbackMessages) => {
-                      if (feedbackError)
+                      if (feedbackError) {
+                        console.error(
+                          "Unable to load feedback messages:",
+                          feedbackError,
+                        );
                         return res.status(500).send("Unable to load messages.");
+                      }
                       postgresPool
                         .query(
                           "SELECT id, message, due_date, target_route, completed_at, created_at FROM student_reminders WHERE username = $1 AND completed_at IS NULL AND (due_date IS NULL OR due_date >= CURRENT_DATE) ORDER BY due_date NULLS LAST, created_at DESC",

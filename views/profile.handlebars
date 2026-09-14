@@ -15,7 +15,7 @@
           <article class="profile-message{{#unless feedback_seen}} unread{{/unless}}">
             <strong>{{topic_title}}</strong>
             <p>{{feedback}}</p>
-            <a class="profile-message-link" href="/writing/feedback/{{id}}/open">Go to exercise <span aria-hidden="true">→</span></a>
+            <a class="profile-message-link" href="{{feedbackUrl}}">Go to exercise <span aria-hidden="true">→</span></a>
           </article>
         {{else}}
           <p class="empty-state">No teacher feedback yet.</p>
