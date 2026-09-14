@@ -281,25 +281,6 @@
 
   document.querySelectorAll("[data-discussion-form]").forEach((form) => {
     const input = form.querySelector("[data-discussion-input]");
-    const status = form.querySelector("[data-discussion-status]");
-    form.querySelector("[data-discussion-submit]").addEventListener("click", () => {
-      const text = input.value.trim();
-      if (!text) return;
-      fetch("/api/listening/discussion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topicId: form.dataset.topicId, topicTitle: form.dataset.topicTitle, text }),
-      })
-        .then((response) => response.json().then((result) => ({ ok: response.ok, result })))
-        .then(({ ok, result }) => {
-          status.textContent = ok ? "Response submitted." : result.error || "Unable to submit.";
-        })
-        .catch(() => { status.textContent = "Unable to submit."; });
-    });
-  });
-
-  document.querySelectorAll("[data-discussion-form]").forEach((form) => {
-    const input = form.querySelector("[data-discussion-input]");
     const submit = form.querySelector("[data-discussion-submit]");
     const status = form.querySelector("[data-discussion-status]");
     submit.addEventListener("click", async () => {
