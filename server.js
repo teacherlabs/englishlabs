@@ -1916,6 +1916,20 @@ app.get("/listening", requireAuthenticated, (req, res) => {
         });
       };
       if (!selectedTopic?.discussion) return renderListening(null);
+      if (postgresPool) {
+        return postgresReady
+          .then(() =>
+            postgresPool.query(
+              "SELECT submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = $1 AND topic_id = $2",
+              [req.session.name, selectedTopic.topic.id],
+            ),
+          )
+          .then(({ rows }) => renderListening(rows[0] || null))
+          .catch((error) => {
+            console.error("Unable to load listening discussion response:", error);
+            renderListening(null);
+          });
+      }
       db.get(
         "SELECT submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = ? AND topic_id = ?",
         [req.session.name, selectedTopic.topic.id],
@@ -1967,6 +1981,31 @@ app.get("/writing", requireAuthenticated, (req, res) => {
         });
       };
       if (!selectedTopic) return renderWriting(null);
+      if (postgresPool) {
+        return postgresReady
+          .then(() =>
+            Promise.all([
+              postgresPool.query(
+                "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = $1 AND topic_id = $2",
+                [req.session.name, selectedTopic.topic.id],
+              ),
+              postgresPool.query(
+                "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = $1 AND topic_id = $2",
+                [req.session.name, selectedTopic.topic.id],
+              ),
+            ]),
+          )
+          .then(([submissionResult, discussionResult]) =>
+            renderWriting({
+              ...(submissionResult.rows[0] || {}),
+              discussionResponse: discussionResult.rows[0] || null,
+            }),
+          )
+          .catch((error) => {
+            console.error("Unable to load writing submissions:", error);
+            renderWriting(null);
+          });
+      }
       db.get(
         "SELECT submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? AND topic_id = ?",
         [req.session.name, selectedTopic.topic.id],
@@ -2152,6 +2191,24 @@ app.post(
   requireAdmin,
   (req, res) => {
     const feedback = String(req.body.feedback || "").trim();
+    if (postgresPool) {
+      return postgresReady
+        .then(() =>
+          postgresPool.query(
+            "UPDATE listening_discussion_submissions SET feedback = $1, feedback_at = NOW() WHERE id = $2 AND username = $3",
+            [feedback, req.params.id, req.params.username],
+          ),
+        )
+        .then(() =>
+          res.redirect(
+            `/teacher/student/${encodeURIComponent(req.params.username)}?category=listening`,
+          ),
+        )
+        .catch((error) => {
+          console.error("Unable to save listening feedback:", error);
+          res.status(500).send("Unable to save feedback.");
+        });
+    }
     db.run(
       "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
       [feedback, req.params.id, req.params.username],
@@ -2168,6 +2225,24 @@ app.post(
   requireAdmin,
   (req, res) => {
     const feedback = String(req.body.feedback || "").trim();
+    if (postgresPool) {
+      return postgresReady
+        .then(() =>
+          postgresPool.query(
+            "UPDATE writing_discussion_submissions SET feedback = $1, feedback_at = NOW() WHERE id = $2 AND username = $3",
+            [feedback, req.params.id, req.params.username],
+          ),
+        )
+        .then(() =>
+          res.redirect(
+            `/teacher/student/${encodeURIComponent(req.params.username)}?category=writing`,
+          ),
+        )
+        .catch((error) => {
+          console.error("Unable to save writing discussion feedback:", error);
+          res.status(500).send("Unable to save feedback.");
+        });
+    }
     db.run(
       "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
       [feedback, req.params.id, req.params.username],
@@ -4804,6 +4879,61 @@ const deleteStudent = (req, res) => {
 app.post("/api/admin/students/:username/delete", requireAdmin, deleteStudent);
 app.delete("/api/admin/students/:username", requireAdmin, deleteStudent);
 
+const loadTeacherSubmissionDetails = (username, callback) => {
+  const listeningQuery =
+    "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = $1 ORDER BY submitted_at DESC";
+  const writingDiscussionQuery =
+    "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = $1 ORDER BY submitted_at DESC";
+  const writingQuery =
+    "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = $1 ORDER BY submitted_at DESC";
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        Promise.all([
+          postgresPool.query(listeningQuery, [username]),
+          postgresPool.query(writingDiscussionQuery, [username]),
+          postgresPool.query(writingQuery, [username]),
+        ]),
+      )
+      .then(([listeningResult, writingDiscussionResult, writingResult]) =>
+        callback(
+          null,
+          listeningResult.rows,
+          null,
+          writingDiscussionResult.rows,
+          null,
+          writingResult.rows,
+        ),
+      )
+      .catch((error) => callback(error, [], error, [], error, []));
+  }
+  db.all(
+    listeningQuery.replace(/\$1/g, "?"),
+    [username],
+    (discussionError, listeningSubmissions) => {
+      db.all(
+        writingDiscussionQuery.replace(/\$1/g, "?"),
+        [username],
+        (writingDiscussionError, writingDiscussionSubmissions) => {
+          db.all(
+            writingQuery.replace(/\$1/g, "?"),
+            [username],
+            (writingError, writingSubmissions) =>
+              callback(
+                discussionError,
+                listeningSubmissions,
+                writingDiscussionError,
+                writingDiscussionSubmissions,
+                writingError,
+                writingSubmissions,
+              ),
+          );
+        },
+      );
+    },
+  );
+};
+
 app.get("/teacher/student/:username", requireAdmin, (req, res) => {
   const profileCategory = teacherCategories[req.query.category]
     ? req.query.category
@@ -4944,21 +5074,16 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                               exerciseNumber,
                             };
                           });
-                        db.all(
-                          "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM listening_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                          [student.username],
-                          (discussionError, listeningDiscussionSubmissions) => {
-                            db.all(
-                              "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_discussion_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                              [student.username],
-                              (
-                                writingDiscussionError,
-                                writingDiscussionSubmissions,
-                              ) => {
-                                db.all(
-                                  "SELECT id, topic_id, topic_title, submission_text, submitted_at, feedback, feedback_at FROM writing_submissions WHERE username = ? ORDER BY submitted_at DESC",
-                                  [student.username],
-                                  (writingError, writingSubmissions) => {
+                        loadTeacherSubmissionDetails(
+                          student.username,
+                          (
+                            discussionError,
+                            listeningDiscussionSubmissions,
+                            writingDiscussionError,
+                            writingDiscussionSubmissions,
+                            writingError,
+                            writingSubmissions,
+                          ) => {
                                     if (writingError)
                                       return res
                                         .status(500)
@@ -5208,10 +5333,6 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                         );
                                       },
                                     );
-                                  },
-                                );
-                              },
-                            );
                           },
                         );
                       },
@@ -5362,6 +5483,20 @@ app.post(
     const feedback = String(req.body.feedback || "").trim();
     if (!feedback)
       return res.redirect(`/teacher/student/${req.params.username}`);
+    if (postgresPool) {
+      return postgresReady
+        .then(() =>
+          postgresPool.query(
+            "UPDATE writing_submissions SET feedback = $1, feedback_at = NOW(), feedback_seen = FALSE WHERE id = $2 AND username = $3",
+            [feedback, req.params.id, req.params.username],
+          ),
+        )
+        .then(() => res.redirect(`/teacher/student/${req.params.username}`))
+        .catch((error) => {
+          console.error("Unable to save writing feedback:", error);
+          res.status(500).send("Unable to save feedback.");
+        });
+    }
     db.run(
       "UPDATE writing_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP, feedback_seen = 0 WHERE id = ? AND username = ?",
       [feedback, req.params.id, req.params.username],
