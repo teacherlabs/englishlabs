@@ -218,6 +218,11 @@
       });
       lobbySocket.on("lobbyEmote", (emote) => {
         if (String(emote.roomId) !== String(roomId)) return;
+        window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
+        window.lobbyEmoteStates.set(String(emote.username), {
+          emote: emote.emote,
+          startedAt: performance.now(),
+        });
         const tile = document.querySelector(
           `[data-lobby-waiting-player="${CSS.escape(String(emote.username))}"]`,
         );
@@ -408,6 +413,14 @@
         if (button.dataset.emoteBound) return;
         button.dataset.emoteBound = "true";
         button.addEventListener("click", () => {
+          window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
+          window.lobbyEmoteStates.set(
+            String(document.querySelector("[data-player-canvas]")?.dataset.playerUsername || "{{student.username}}"),
+            {
+              emote: button.dataset.lobbyEmote,
+              startedAt: performance.now(),
+            },
+          );
           if (lobbySocket?.connected) {
             lobbySocket.emit("lobbyEmote", {
               roomId,
@@ -594,12 +607,34 @@
     const pressedKeys = new Set();
     const remoteImages = new Map();
     const remotePositions = new Map();
+    const emoteStates = window.lobbyEmoteStates || new Map();
     const LERP_FACTOR = 0.18;
     let pointerPosition = null;
     let lastSyncAt = 0;
     let lastSyncedState = "";
     const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
+    const getEmoteSpriteState = (username, direction, frame, now) => {
+      const state = emoteStates.get(String(username));
+      if (!state) return { direction, frame };
+      const elapsed = now - state.startedAt;
+      if (elapsed >= 2200) {
+        emoteStates.delete(String(username));
+        return { direction, frame };
+      }
+      const step = elapsed / 110;
+      if (state.emote === "dance") {
+        return { direction: step % 2 < 1 ? 2 : 0, frame: step % 8 };
+      }
+      if (state.emote === "cheer") {
+        return {
+          direction: Math.floor(step) % 2 ? 0 : 2,
+          frame: Math.floor(step) % 9,
+        };
+      }
+      return { direction: 1, frame: Math.floor(step) % 6 };
+    };
     const drawPlayer = () => {
+      const now = timestampNow();
       player.isMoving = pressedKeys.size > 0;
       if (player.isMoving) {
         const activeKey = [...pressedKeys][pressedKeys.size - 1];
@@ -682,7 +717,15 @@
       };
       resizeCanvas();
       if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
-      if (player.isLoaded && player.isPresent) drawSprite(player.image, player.x, player.y, player.direction, player.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
+      if (player.isLoaded && player.isPresent) {
+        const animatedPlayer = getEmoteSpriteState(
+          playerCanvas.dataset.playerUsername,
+          player.direction,
+          player.frame,
+          now,
+        );
+        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
+      }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
         if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
@@ -708,7 +751,13 @@
           remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
           remoteImages.set(remoteKey, { key: remoteSpritesheet, image: remoteImage });
         }
-        drawSprite(remoteImage, remotePosition.x, remotePosition.y, Number(remotePlayer.direction) || 2, Number(remotePlayer.frame) || 0, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
+        const animatedRemote = getEmoteSpriteState(
+          remotePlayer.username,
+          Number(remotePlayer.direction) || 2,
+          Number(remotePlayer.frame) || 0,
+          now,
+        );
+        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
