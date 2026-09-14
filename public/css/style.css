@@ -1067,6 +1067,11 @@ legend {
 }
 
 .app-profile-card {
+  position: sticky;
+  top: 2rem;
+  z-index: 2;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
   padding: 18px;
   background: var(--color-background-tint);
 }
