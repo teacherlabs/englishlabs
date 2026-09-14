@@ -124,7 +124,7 @@
             <button class="practice-button" type="button" data-discussion-submit>Submit Response</button>
             <span class="writing-submission-status" data-discussion-status>{{#if myDiscussionResponse.submitted_at}}Last submitted {{myDiscussionResponse.submitted_at}}{{/if}}</span>
           </div>
-          {{#if myDiscussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{myDiscussionResponse.feedback}}</p><small>{{myDiscussionResponse.feedback_at}}</small></div>{{/if}}
+          {{#if myDiscussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{myDiscussionResponse.feedback}}</p></div>{{/if}}
         </form>
       </section>
       {{/if}}
