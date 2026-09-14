@@ -36,10 +36,11 @@
     ></iframe>
     <script>
       const editor = document.getElementById("vitruvianCharacterEditor"); const
-      editorOrigin = new URL("{{studioUrl}}").origin; const allowedOrigins = new
+      apiUrl = new URL("/api/profile/character", window.location.origin).href;
+      const editorOrigin = new URL("{{studioUrl}}").origin; const allowedOrigins = new
       Set([ editorOrigin, "http://localhost:5173", "http://localhost:3000", ]);
       const loadSavedCharacter = async () => { const response = await
-      fetch("/api/profile/character"); if (!response.ok) return; const { config
+      fetch(apiUrl, { credentials: "same-origin" }); if (!response.ok) return; const { config
       } = await response.json(); editor.contentWindow?.postMessage( { type:
       "LOAD_LPC_CHARACTER", payload: { config } }, editorOrigin, ); };
       editor.addEventListener("load", () => { loadSavedCharacter().catch((error)
@@ -53,11 +54,12 @@
       payload.spritesheet || payload.spritesheetImage || payload.image; if
       (!avatar || !spritesheet) { console.error("The character studio did not
       provide both images."); return; } try { const response = await
-      fetch("/api/profile/character", { method: "POST", headers: {
+      fetch(apiUrl, { method: "POST", credentials: "same-origin", headers: {
       "Content-Type": "application/json" }, body: JSON.stringify({ config:
       payload.config || payload.characterConfig || {}, avatar, spritesheet, }),
-      }); const result = await response.json(); if (!response.ok) { throw new
-      Error(result.error || "Unable to save character."); }
+      }); const result = await response.json(); if (!response.ok) { console.error(
+      "Character save failed:", { url: apiUrl, status: response.status, result, });
+      throw new Error(result.error || `Unable to save character (${response.status}).`); }
       if (!result.saved || !result.avatar) { throw new Error("The character was not saved."); }
       window.top.location.reload(); } catch (error) {
       console.error("Unable to save character:", error); } });
