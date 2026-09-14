@@ -1323,16 +1323,23 @@ legend {
 }
 
 .app-reminder {
+  position: relative;
   display: grid;
   grid-template-columns: 45px minmax(0, 1fr);
   gap: 7px;
-  padding: 9px 0;
-  border-top: 1px solid var(--app-line);
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
   color: var(--app-ink);
+  box-shadow: 0 3px 10px rgba(20, 33, 61, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .app-reminder:hover {
   color: var(--color-accent);
+  box-shadow: 0 8px 18px rgba(20, 33, 61, 0.12);
+  transform: translateY(-1px);
 }
 
 .app-reminder-date {
@@ -1382,7 +1389,6 @@ legend {
 }
 
 .app-student-reminder {
-  position: relative;
   grid-template-columns: 48px minmax(0, 1fr) 22px 22px;
   grid-template-rows: auto auto;
   column-gap: 8px;
@@ -1440,11 +1446,11 @@ legend {
 .app-reminder-category {
   grid-column: 1 / 3;
   width: max-content;
-  padding: 2px 6px;
-  border-radius: 3px;
-  background: var(--color-background-tint);
-  color: var(--color-primary);
-  font-size: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1463,10 +1469,10 @@ legend {
   width: 22px;
   height: 22px;
   padding: 0;
-  border: 1px solid var(--color-primary);
+  border: 1px solid #93c5fd;
   border-radius: 50%;
-  background: transparent;
-  color: var(--color-primary);
+  background: #eff6ff;
+  color: #1d4ed8;
   cursor: pointer;
   font-size: 12px;
   font-weight: 800;
@@ -1474,8 +1480,11 @@ legend {
 
 .app-reminder-done:hover,
 .app-reminder-done:focus-visible {
-  background: var(--color-primary);
-  color: var(--color-surface);
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+  outline: none;
+  transform: scale(1.05);
 }
 
 .app-student-reminder.is-completed {
@@ -1490,9 +1499,9 @@ legend {
   width: 22px;
   height: 22px;
   padding: 0;
-  border: 0;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  background: transparent;
+  background: #f8fafc;
   color: var(--app-muted);
   cursor: pointer;
   font-size: 18px;
@@ -1501,8 +1510,11 @@ legend {
 
 .app-reminder-dismiss:hover,
 .app-reminder-dismiss:focus-visible {
-  background: var(--color-background-tint);
-  color: var(--color-dark);
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  outline: none;
+  transform: scale(1.05);
 }
 
 .app-reminder-empty {
@@ -1611,10 +1623,17 @@ legend {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 11px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-surface);
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(20, 33, 61, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.teacher-student-reminder:hover {
+  box-shadow: 0 8px 18px rgba(20, 33, 61, 0.12);
+  transform: translateY(-1px);
 }
 
 .teacher-student-reminder strong,
@@ -1626,6 +1645,7 @@ legend {
 .teacher-student-reminder strong {
   color: var(--color-secondary);
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .teacher-student-reminder a {
@@ -1639,6 +1659,7 @@ legend {
   flex: 0 0 auto;
   color: var(--color-muted);
   font-size: 11px;
+  line-height: 1.4;
 }
 
 .teacher-student-reminder.is-completed {
