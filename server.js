@@ -2379,16 +2379,17 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
   const redirectToWriting = (submission) => {
     if (!submission) return res.redirect("/writing");
     markAllFeedbackSeen(req.session.name)
-      .catch((updateError) => {
-        console.error("Unable to mark feedback as seen:", updateError);
-      })
-      .finally(() => {
+      .then(() => {
         const topic = writingTopics.find(
           (entry) => entry.topic.id === submission.topic_id,
         );
         res.redirect(
           `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
         );
+      })
+      .catch((updateError) => {
+        console.error("Unable to mark feedback as seen:", updateError);
+        res.status(500).send("Unable to mark feedback as seen.");
       });
 
   };
@@ -2424,10 +2425,7 @@ app.get("/feedback/:sourceType/:id/open", requireLogin, (req, res) => {
   const redirectToTopic = (submission) => {
     if (!submission) return res.redirect("/profile");
     markAllFeedbackSeen(req.session.name)
-      .catch((error) => {
-        console.error("Unable to mark feedback as seen:", error);
-      })
-      .finally(() => {
+      .then(() => {
         if (req.params.sourceType === "listening_discussion") {
           return res.redirect(
             `/listening?topic=${encodeURIComponent(submission.topic_id)}`,
@@ -2439,6 +2437,10 @@ app.get("/feedback/:sourceType/:id/open", requireLogin, (req, res) => {
         res.redirect(
           `/writing?level=${topic?.writingLevel || "2"}&topic=${encodeURIComponent(submission.topic_id)}`,
         );
+      })
+      .catch((error) => {
+        console.error("Unable to mark feedback as seen:", error);
+        res.status(500).send("Unable to mark feedback as seen.");
       });
   };
   if (postgresPool) {
