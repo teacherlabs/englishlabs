@@ -1568,14 +1568,25 @@ const markAllFeedbackSeen = (username) => {
     "writing_discussion_submissions",
     "listening_discussion_submissions",
   ];
-  const postgresQuery = tables
-    .map(
-      (table) =>
-        `UPDATE ${table} SET feedback_seen = TRUE WHERE username = $1 AND feedback IS NOT NULL`,
-    )
-    .join("; ");
   if (postgresPool) {
-    return postgresReady.then(() => postgresPool.query(postgresQuery, [username]));
+    return postgresReady.then(async () => {
+      const client = await postgresPool.connect();
+      try {
+        await client.query("BEGIN");
+        for (const table of tables) {
+          await client.query(
+            `UPDATE ${table} SET feedback_seen = TRUE WHERE username = $1 AND feedback IS NOT NULL`,
+            [username],
+          );
+        }
+        await client.query("COMMIT");
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      } finally {
+        client.release();
+      }
+    });
   }
   return Promise.all(
     tables.map(
