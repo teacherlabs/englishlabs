@@ -1562,6 +1562,35 @@ const markFeedbackSeen = (username, area) => {
   );
 };
 
+const markAllFeedbackSeen = (username) => {
+  const tables = [
+    "writing_submissions",
+    "writing_discussion_submissions",
+    "listening_discussion_submissions",
+  ];
+  const postgresQuery = tables
+    .map(
+      (table) =>
+        `UPDATE ${table} SET feedback_seen = TRUE WHERE username = $1 AND feedback IS NOT NULL`,
+    )
+    .join("; ");
+  if (postgresPool) {
+    return postgresReady.then(() => postgresPool.query(postgresQuery, [username]));
+  }
+  return Promise.all(
+    tables.map(
+      (table) =>
+        new Promise((resolve, reject) => {
+          db.run(
+            `UPDATE ${table} SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL`,
+            [username],
+            (error) => (error ? reject(error) : resolve()),
+          );
+        }),
+    ),
+  );
+};
+
 const clearUnreadAreaLocals = (res, area) => {
   const key = area === "writing" ? "unreadWritingCount" : "unreadListeningCount";
   res.locals[key] = 0;
@@ -2349,7 +2378,7 @@ app.post(
 app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
   const redirectToWriting = (submission) => {
     if (!submission) return res.redirect("/writing");
-    markFeedbackSeen(req.session.name, "writing")
+    markAllFeedbackSeen(req.session.name)
       .catch((updateError) => {
         console.error("Unable to mark feedback as seen:", updateError);
       })
@@ -2361,6 +2390,7 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
           `/writing?level=${topic?.writingLevel || "2"}&topic=${submission.topic_id}`,
         );
       });
+
   };
   if (postgresPool) {
     return postgresReady
@@ -2380,6 +2410,55 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
     "SELECT topic_id FROM writing_submissions WHERE id = ? AND username = ?",
     [req.params.id, req.session.name],
     (error, submission) => redirectToWriting(error ? null : submission),
+  );
+});
+
+app.get("/feedback/:sourceType/:id/open", requireLogin, (req, res) => {
+  const tableBySource = {
+    writing: "writing_submissions",
+    writing_discussion: "writing_discussion_submissions",
+    listening_discussion: "listening_discussion_submissions",
+  };
+  const table = tableBySource[req.params.sourceType];
+  if (!table) return res.redirect("/profile");
+  const redirectToTopic = (submission) => {
+    if (!submission) return res.redirect("/profile");
+    markAllFeedbackSeen(req.session.name)
+      .catch((error) => {
+        console.error("Unable to mark feedback as seen:", error);
+      })
+      .finally(() => {
+        if (req.params.sourceType === "listening_discussion") {
+          return res.redirect(
+            `/listening?topic=${encodeURIComponent(submission.topic_id)}`,
+          );
+        }
+        const topic = writingTopics.find(
+          (entry) => entry.topic.id === submission.topic_id,
+        );
+        res.redirect(
+          `/writing?level=${topic?.writingLevel || "2"}&topic=${encodeURIComponent(submission.topic_id)}`,
+        );
+      });
+  };
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          `SELECT topic_id FROM ${table} WHERE id = $1 AND username = $2`,
+          [req.params.id, req.session.name],
+        ),
+      )
+      .then(({ rows }) => redirectToTopic(rows[0]))
+      .catch((error) => {
+        console.error("Unable to open feedback:", error);
+        res.redirect("/profile");
+      });
+  }
+  db.get(
+    `SELECT topic_id FROM ${table} WHERE id = ? AND username = ?`,
+    [req.params.id, req.session.name],
+    (error, submission) => redirectToTopic(error ? null : submission),
   );
 });
 
@@ -3385,12 +3464,7 @@ const loadFeedbackMessages = (username, callback) => {
   const decorateMessages = (messages) =>
     messages.map((message) => ({
       ...message,
-      feedbackUrl:
-        message.source_type === "listening_discussion"
-          ? `/listening?topic=${encodeURIComponent(message.topic_id)}`
-          : message.source_type === "writing"
-            ? `/writing/feedback/${message.id}/open`
-            : `/writing?topic=${encodeURIComponent(message.topic_id)}`,
+      feedbackUrl: `/feedback/${message.source_type}/${message.id}/open`,
     }));
   if (postgresPool) {
     return postgresReady
