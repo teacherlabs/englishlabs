@@ -108,6 +108,7 @@
                     <h3>{{title}}</h3>
                     {{#if showStatus}}<span class="status-pill {{statusClass}}">{{status}}</span>{{/if}}
                   </div>
+                  <p>{{completedExercises}} / {{totalExercises}} exercises completed ({{percentage}}%)</p>
                   <ul class="student-topic-meta">
                     {{#each exercises}}
                       <li>

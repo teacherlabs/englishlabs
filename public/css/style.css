@@ -2082,6 +2082,22 @@ legend {
   font-size: 12px;
   line-height: 1.4;
 }
+.profile-progress-details {
+  display: grid;
+  gap: 4px;
+}
+.profile-progress-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #68758a;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.profile-progress-detail-row span:last-child {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
 
 @media (max-width: 600px) {
   .profile-layout {

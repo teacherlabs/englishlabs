@@ -841,10 +841,7 @@ const buildAreaProgress = (progress) => {
       rows: progress.filter((item) =>
         ["questions", "final"].includes(item.activity_type),
       ),
-      parts: [
-        { key: "questions", label: "Chapters" },
-        { key: "final", label: "Final Test" },
-      ],
+      chapters: practiceQuestionChapters,
     },
     {
       key: "vocabulary",
@@ -875,6 +872,51 @@ const buildAreaProgress = (progress) => {
     },
   ];
   return areas.map((area) => {
+    if (area.chapters) {
+      const progressDetails = area.chapters.map((chapter) => {
+        const total = chapter.exercises.length;
+        const completedExercises = new Set(
+          area.rows
+            .filter(
+          (row) =>
+            row.activity_type === "questions" &&
+            row.difficulty_level.startsWith(`questions:${chapter.id}:`),
+            )
+            .map((row) => row.difficulty_level),
+        );
+        const completed = completedExercises.size;
+        return {
+          label: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+          completed,
+          total,
+          percentage: total ? Math.round((completed / total) * 100) : 0,
+        };
+      });
+      const completedChapters = progressDetails.filter(
+        (chapter) => chapter.percentage === 100,
+      );
+      const remainingChapters = progressDetails.filter(
+        (chapter) => chapter.percentage < 100,
+      );
+      return {
+        ...area,
+        percentage: progressDetails.length
+          ? Math.round(
+              progressDetails.reduce(
+                (sum, chapter) => sum + chapter.percentage,
+                0,
+              ) / progressDetails.length,
+            )
+          : 0,
+        completed: completedChapters.length,
+        total: progressDetails.length,
+        completedLabels: completedChapters.map((chapter) => chapter.label).join(", "),
+        remainingLabels: remainingChapters.length
+          ? `${remainingChapters.length} chapter${remainingChapters.length === 1 ? "" : "s"} remaining`
+          : "",
+        progressDetails,
+      };
+    }
     if (area.parts) {
       const completedKeys = new Set(
         area.rows.map((row) =>
@@ -5567,6 +5609,20 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                                             );
                                           return {
                                             title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                            completedExercises: exercises.filter(
+                                              (exercise) => exercise.completed,
+                                            ).length,
+                                            totalExercises: exercises.length,
+                                            percentage: exercises.length
+                                              ? Math.round(
+                                                  (exercises.filter(
+                                                    (exercise) =>
+                                                      exercise.completed,
+                                                  ).length /
+                                                    exercises.length) *
+                                                    100,
+                                                )
+                                              : 0,
                                             status: exercises.every(
                                               (exercise) => exercise.completed,
                                             )
