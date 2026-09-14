@@ -3765,21 +3765,26 @@ app.get("/profile", requireProfileUser, (req, res) => {
       } else {
         student.characterConfig = {};
       }
-      db.all(
+      loadProgressForUser(
+        "SELECT * FROM progress WHERE username = $1 ORDER BY completed_at DESC",
         "SELECT * FROM progress WHERE username = ? ORDER BY completed_at DESC",
-        [req.session.name],
+        req.session.name,
         (progressError, progress) => {
           if (progressError)
             return res.status(500).send("Unable to load progress.");
-          db.get(
-            "SELECT COALESCE(SUM(points), 0) AS points, COALESCE(SUM(total_points), 0) AS possible_points, COUNT(*) AS activities, COALESCE(AVG(percentage), 0) AS average_score FROM progress WHERE username = ?",
-            [req.session.name],
-            (statsError, stats) => {
-              if (statsError)
-                return res
-                  .status(500)
-                  .send("Unable to load progress statistics.");
-              stats.average_score = Math.round(stats.average_score || 0);
+          const stats = progress.reduce(
+            (summary, item) => ({
+              points: summary.points + Number(item.points || 0),
+              possible_points:
+                summary.possible_points + Number(item.total_points || 0),
+              activities: summary.activities + 1,
+              average_score: summary.average_score + Number(item.percentage || 0),
+            }),
+            { points: 0, possible_points: 0, activities: 0, average_score: 0 },
+          );
+          stats.average_score = stats.activities
+            ? Math.round(stats.average_score / stats.activities)
+            : 0;
               const passportStamps = [
                 { title: "First steps", earned: progress.length > 0 },
                 {
@@ -3897,8 +3902,6 @@ app.get("/profile", requireProfileUser, (req, res) => {
                           );
                           res.status(500).send("Unable to load reminders.");
                             });
-                            },
-                          );
                         },
                       );
                     },
@@ -4996,41 +4999,39 @@ app.post("/api/progress", requireLogin, (req, res) => {
   const safePoints = Math.max(0, Number(points) || 0);
   const safeTotal = Math.max(1, Number(totalPoints) || 1);
   const percentage = Math.round((safePoints / safeTotal) * 100);
+  const values = [
+    username,
+    activityType || "practice",
+    chapterId || null,
+    difficultyLevel || "",
+    safePoints,
+    safeTotal,
+    percentage,
+  ];
+  if (postgresPool) {
+    return postgresReady
+      .then(() =>
+        postgresPool.query(
+          `INSERT INTO progress
+             (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          values,
+        ),
+      )
+      .then(() =>
+        res.json({ points: safePoints, totalPoints: safeTotal, percentage }),
+      )
+      .catch((error) => {
+        console.error("Unable to save progress to PostgreSQL:", error);
+        res.status(500).json({ error: "Unable to save progress." });
+      });
+  }
   db.run(
     "INSERT INTO progress (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [
-      username,
-      activityType || "practice",
-      chapterId || null,
-      difficultyLevel || "",
-      safePoints,
-      safeTotal,
-      percentage,
-    ],
-    async (error) => {
+    values,
+    (error) => {
       if (error)
         return res.status(500).json({ error: "Unable to save progress." });
-      if (postgresPool) {
-        try {
-          await postgresReady;
-          await postgresPool.query(
-            `INSERT INTO progress (username, activity_type, chapter_id, difficulty_level, points, total_points, percentage)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [
-              username,
-              activityType || "practice",
-              chapterId || null,
-              difficultyLevel || "",
-              safePoints,
-              safeTotal,
-              percentage,
-            ],
-          );
-        } catch (postgresError) {
-          console.error("Unable to mirror progress:", postgresError);
-          return res.status(500).json({ error: "Unable to save progress." });
-        }
-      }
       res.json({ points: safePoints, totalPoints: safeTotal, percentage });
     },
   );
