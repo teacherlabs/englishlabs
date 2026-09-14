@@ -238,7 +238,7 @@
             {{else}}<p class="empty-state">No writing progress recorded yet.</p>{{/each}}
           </div>
 
-          <div class="student-subsection-panel" id="writing-submissions-panel">
+          <div class="student-subsection-panel" id="writing-submissions-panel" data-student-subpanel hidden>
             <h2>Writing submissions</h2>
             <div class="admin-chunk-lists">
               {{#each writingSubmissions}}
@@ -267,7 +267,7 @@
             </div>
           </div>
 
-          <div class="student-subsection-panel" id="writing-discussion-panel">
+          <div class="student-subsection-panel" id="writing-discussion-panel" data-student-subpanel hidden>
             <h2>Discussion Responses (Writing)</h2>
             <div class="admin-chunk-lists">
               {{#each writingDiscussionSubmissions}}
