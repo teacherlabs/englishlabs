@@ -1960,7 +1960,7 @@ app.get("/writing", requireAuthenticated, (req, res) => {
             topic.topic.id === req.query.topic &&
             topic.writingLevel === selectedLevel,
         ) || decorated.find((topic) => topic.writingLevel === selectedLevel);
-      const renderWriting = (mySubmission) => {
+      const renderWriting = (mySubmission, myDiscussionResponse) => {
         res.render("writing.handlebars", {
           writingLevels: ["1", "2"].map((level) => ({
             number: level,
@@ -1978,9 +1978,10 @@ app.get("/writing", requireAuthenticated, (req, res) => {
           exercises: selectedTopic?.exercises,
           discussion: selectedTopic?.discussion,
           mySubmission,
+          myDiscussionResponse,
         });
       };
-      if (!selectedTopic) return renderWriting(null);
+      if (!selectedTopic) return renderWriting(null, null);
       if (postgresPool) {
         return postgresReady
           .then(() =>
@@ -1996,14 +1997,14 @@ app.get("/writing", requireAuthenticated, (req, res) => {
             ]),
           )
           .then(([submissionResult, discussionResult]) =>
-            renderWriting({
-              ...(submissionResult.rows[0] || {}),
-              discussionResponse: discussionResult.rows[0] || null,
-            }),
+            renderWriting(
+              submissionResult.rows[0] || null,
+              discussionResult.rows[0] || null,
+            ),
           )
           .catch((error) => {
             console.error("Unable to load writing submissions:", error);
-            renderWriting(null);
+            renderWriting(null, null);
           });
       }
       db.get(
@@ -2015,14 +2016,8 @@ app.get("/writing", requireAuthenticated, (req, res) => {
             [req.session.name, selectedTopic.topic.id],
             (discussionError, discussionResponse) =>
               renderWriting(
-                error
-                  ? null
-                  : {
-                      ...(submission || {}),
-                      discussionResponse: discussionError
-                        ? null
-                        : discussionResponse,
-                    },
+                error ? null : submission || null,
+                discussionError ? null : discussionResponse || null,
               ),
           );
         },

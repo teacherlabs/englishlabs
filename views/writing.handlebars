@@ -98,9 +98,9 @@
       {{#if discussion}}
         <section class="discussion-panel" data-writing-discussion data-topic-id="{{topic.id}}" data-topic-title="{{topic.title}}">
           <p class="eyebrow">Discuss</p><h2>{{discussion.question}}</h2>
-          <textarea class="writing-submission-textarea" data-writing-discussion-input rows="5" placeholder="Share your response...">{{mySubmission.discussionResponse.submission_text}}</textarea>
+          <textarea class="writing-submission-textarea" data-writing-discussion-input rows="5" placeholder="Share your response...">{{myDiscussionResponse.submission_text}}</textarea>
           <div class="writing-submission-actions"><button class="practice-button" type="button" data-writing-discussion-submit>Submit response</button><span data-writing-discussion-status></span></div>
-          {{#if mySubmission.discussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{mySubmission.discussionResponse.feedback}}</p><small>{{mySubmission.discussionResponse.feedback_at}}</small></div>{{/if}}
+          {{#if myDiscussionResponse.feedback}}<div class="writing-feedback-card"><p class="eyebrow">Teacher reply</p><p class="writing-feedback-text">{{myDiscussionResponse.feedback}}</p><small>{{myDiscussionResponse.feedback_at}}</small></div>{{/if}}
         </section>
       {{/if}}
       {{else}}
