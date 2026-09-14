@@ -2077,6 +2077,11 @@ legend {
   border-radius: inherit;
   background: var(--profile-progress-fill, #5ca66d);
 }
+.profile-progress-detail {
+  color: #68758a;
+  font-size: 12px;
+  line-height: 1.4;
+}
 
 @media (max-width: 600px) {
   .profile-layout {

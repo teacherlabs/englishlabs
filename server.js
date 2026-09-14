@@ -841,13 +841,19 @@ const buildAreaProgress = (progress) => {
       rows: progress.filter((item) =>
         ["questions", "final"].includes(item.activity_type),
       ),
-      total: null,
+      parts: [
+        { key: "questions", label: "Chapters" },
+        { key: "final", label: "Final Test" },
+      ],
     },
     {
       key: "vocabulary",
       label: "Vocabulary",
       rows: progress.filter((item) => item.activity_type === "flip-cards"),
-      total: null,
+      parts: [
+        { key: "easy", label: "Easy" },
+        { key: "medium", label: "Medium" },
+      ],
     },
     {
       key: "reading",
@@ -869,18 +875,29 @@ const buildAreaProgress = (progress) => {
     },
   ];
   return areas.map((area) => {
-    if (!area.topics) {
-      const percentage = area.rows.length
-        ? Math.round(
-            area.rows.reduce((sum, row) => sum + row.percentage, 0) /
-              area.rows.length,
-          )
-        : 0;
+    if (area.parts) {
+      const completedKeys = new Set(
+        area.rows.map((row) =>
+          area.key === "vocabulary"
+            ? row.difficulty_level
+            : row.activity_type,
+        ),
+      );
+      const completedParts = area.parts.filter((part) =>
+        completedKeys.has(part.key),
+      );
+      const remainingParts = area.parts.filter(
+        (part) => !completedKeys.has(part.key),
+      );
       return {
         ...area,
-        percentage,
-        completed: area.rows.length,
-        total: area.rows.length || 1,
+        percentage: Math.round(
+          (completedParts.length / area.parts.length) * 100,
+        ),
+        completed: completedParts.length,
+        total: area.parts.length,
+        completedLabels: completedParts.map((part) => part.label).join(", "),
+        remainingLabels: remainingParts.map((part) => part.label).join(", "),
       };
     }
     const total = area.topics.reduce(
