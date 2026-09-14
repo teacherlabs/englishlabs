@@ -232,7 +232,7 @@
                         <p class="writing-feedback-text">{{feedback}}</p>
                       </article>
                     {{/if}}
-                    <form class="teacher-feedback-form" method="POST" action="/teacher/student/{{@root.student.username}}/writing-discussion/{{id}}/feedback">
+                    <form class="teacher-feedback-form" method="POST" action="/teacher/student/{{../student.username}}/writing-discussion/{{this.id}}/feedback">
                       <textarea name="feedback" rows="4" placeholder="Write feedback for the student...">{{feedback}}</textarea>
                       <button class="practice-button" type="submit">Send feedback</button>
                     </form>
