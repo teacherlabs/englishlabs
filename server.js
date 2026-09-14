@@ -1107,6 +1107,7 @@ if (postgresPool) {
           submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           feedback TEXT,
           feedback_at TIMESTAMPTZ,
+          feedback_seen BOOLEAN NOT NULL DEFAULT FALSE,
           UNIQUE (username, topic_id)
         );
         CREATE TABLE IF NOT EXISTS writing_discussion_submissions (
@@ -1118,6 +1119,7 @@ if (postgresPool) {
           submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           feedback TEXT,
           feedback_at TIMESTAMPTZ,
+          feedback_seen BOOLEAN NOT NULL DEFAULT FALSE,
           UNIQUE (username, topic_id)
         )
       `),
@@ -1126,7 +1128,20 @@ if (postgresPool) {
       postgresPool.query(`
         ALTER TABLE listening_discussion_submissions
           ADD COLUMN IF NOT EXISTS feedback TEXT,
-          ADD COLUMN IF NOT EXISTS feedback_at TIMESTAMPTZ
+          ADD COLUMN IF NOT EXISTS feedback_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS feedback_seen BOOLEAN NOT NULL DEFAULT FALSE
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
+        ALTER TABLE writing_submissions
+          ADD COLUMN IF NOT EXISTS feedback_seen BOOLEAN NOT NULL DEFAULT FALSE
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
+        ALTER TABLE writing_discussion_submissions
+          ADD COLUMN IF NOT EXISTS feedback_seen BOOLEAN NOT NULL DEFAULT FALSE
       `),
     )
     .then(() =>
@@ -1456,11 +1471,46 @@ app.use("/reading1", express.static(path.join(__dirname, "reading1")));
 app.use("/reading2", express.static(path.join(__dirname, "reading2")));
 app.use((req, res, next) => {
   if (!req.session.name || req.session.isAdmin) return next();
-  db.get(
-    "SELECT COUNT(*) AS count FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0",
-    req.session.name,
-    (error, row) => {
-      res.locals.unreadFeedbackCount = error ? 0 : row.count;
+  const loadUnreadCounts = (callback) => {
+    if (postgresPool) {
+      return postgresReady
+        .then(() =>
+          postgresPool.query(
+            `SELECT
+               (SELECT COUNT(*) FROM writing_submissions WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE)
+               + (SELECT COUNT(*) FROM writing_discussion_submissions WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE) AS writing_count,
+               (SELECT COUNT(*) FROM listening_discussion_submissions WHERE username = $1 AND feedback IS NOT NULL AND feedback_seen = FALSE) AS listening_count`,
+            [req.session.name],
+          ),
+        )
+        .then(({ rows }) => callback(null, rows[0]))
+        .catch((error) => callback(error));
+    }
+    db.get(
+      `SELECT
+         (SELECT COUNT(*) FROM writing_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0)
+         + (SELECT COUNT(*) FROM writing_discussion_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0) AS writing_count,
+         (SELECT COUNT(*) FROM listening_discussion_submissions WHERE username = ? AND feedback IS NOT NULL AND feedback_seen = 0) AS listening_count`,
+      [req.session.name, req.session.name, req.session.name],
+      callback,
+    );
+  };
+  loadUnreadCounts((error, row) => {
+      const unreadWritingCount = error ? 0 : Number(row.writing_count || 0);
+      const unreadListeningCount = error ? 0 : Number(row.listening_count || 0);
+      res.locals.unreadWritingCount = unreadWritingCount;
+      res.locals.unreadListeningCount = unreadListeningCount;
+      res.locals.unreadFeedbackCount =
+        unreadWritingCount + unreadListeningCount;
+      const writingNavItem = res.locals.appNavWorkspace.find(
+        (item) => item.href === "/writing",
+      );
+      const listeningNavItem = res.locals.appNavWorkspace.find(
+        (item) => item.href === "/listening",
+      );
+      if (writingNavItem) writingNavItem.unreadCount = unreadWritingCount;
+      if (listeningNavItem)
+        listeningNavItem.unreadCount = unreadListeningCount;
       loadStudentGoal(req.session.name, (goalError, goal) => {
         res.locals.dashboardGoal = goalError ? "" : goal;
         loadStudentReminders(req.session.name, (reminderError, reminders) => {
@@ -1492,6 +1542,47 @@ app.use((req, res, next) => {
     },
   );
 });
+
+const markFeedbackSeen = (username, area) => {
+  const tables =
+    area === "writing"
+      ? ["writing_submissions", "writing_discussion_submissions"]
+      : ["listening_discussion_submissions"];
+  const postgresQuery = tables
+    .map(
+      (table) =>
+        `UPDATE ${table} SET feedback_seen = TRUE WHERE username = $1 AND feedback IS NOT NULL`,
+    )
+    .join("; ");
+  if (postgresPool) {
+    return postgresReady.then(() => postgresPool.query(postgresQuery, [username]));
+  }
+  return Promise.all(
+    tables.map(
+      (table) =>
+        new Promise((resolve, reject) => {
+          db.run(
+            `UPDATE ${table} SET feedback_seen = 1 WHERE username = ? AND feedback IS NOT NULL`,
+            [username],
+            (error) => (error ? reject(error) : resolve()),
+          );
+        }),
+    ),
+  );
+};
+
+const clearUnreadAreaLocals = (res, area) => {
+  const key = area === "writing" ? "unreadWritingCount" : "unreadListeningCount";
+  res.locals[key] = 0;
+  res.locals.unreadFeedbackCount =
+    (res.locals.unreadWritingCount || 0) +
+    (res.locals.unreadListeningCount || 0);
+  const navItem = res.locals.appNavWorkspace.find(
+    (item) => item.href === `/${area}`,
+  );
+  if (navItem) navItem.unreadCount = 0;
+};
+
 app.get("/audio/eating-out", (req, res) => {
   res.sendFile(path.join(__dirname, "audio1", "A2_eating_out.mp3"));
 });
@@ -1646,6 +1737,7 @@ db.serialize(() => {
     submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     feedback TEXT,
     feedback_at TEXT,
+    feedback_seen INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (username) REFERENCES members(username),
     UNIQUE (username, topic_id)
   )`);
@@ -1662,6 +1754,7 @@ db.serialize(() => {
     submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     feedback TEXT,
     feedback_at TEXT,
+    feedback_seen INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (username) REFERENCES members(username),
     UNIQUE (username, topic_id)
   )`);
@@ -1673,6 +1766,10 @@ db.serialize(() => {
     "ALTER TABLE listening_discussion_submissions ADD COLUMN feedback_at TEXT",
     () => {},
   );
+  db.run(
+    "ALTER TABLE listening_discussion_submissions ADD COLUMN feedback_seen INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS writing_discussion_submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1682,9 +1779,14 @@ db.serialize(() => {
     submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     feedback TEXT,
     feedback_at TEXT,
+    feedback_seen INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (username) REFERENCES members(username),
     UNIQUE (username, topic_id)
   )`);
+  db.run(
+    "ALTER TABLE writing_discussion_submissions ADD COLUMN feedback_seen INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
   db.run(`CREATE TABLE IF NOT EXISTS password_resets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -1875,6 +1977,10 @@ app.get("/vocabulary", requireAuthenticated, (req, res) => {
 });
 
 app.get("/listening", requireAuthenticated, (req, res) => {
+  clearUnreadAreaLocals(res, "listening");
+  markFeedbackSeen(req.session.name, "listening").catch((error) => {
+    console.error("Unable to mark listening feedback as seen:", error);
+  });
   const selectedLevel = req.query.level === "2" ? "2" : "1";
   loadProgressForUser(
     "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
@@ -1940,6 +2046,10 @@ app.get("/listening", requireAuthenticated, (req, res) => {
 });
 
 app.get("/writing", requireAuthenticated, (req, res) => {
+  clearUnreadAreaLocals(res, "writing");
+  markFeedbackSeen(req.session.name, "writing").catch((error) => {
+    console.error("Unable to mark writing feedback as seen:", error);
+  });
   const selectedLevel = req.query.level === "1" ? "1" : "2";
   loadProgressForUser(
     "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
@@ -2079,7 +2189,7 @@ app.post("/api/listening/discussion", requireLogin, (req, res) => {
     `INSERT INTO listening_discussion_submissions (username, topic_id, topic_title, submission_text)
      VALUES (?, ?, ?, ?)
      ON CONFLICT(username, topic_id)
-     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP`,
+     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback_seen = 0`,
     [req.session.name, topicId, topicTitle, text],
     async (error) => {
       if (error)
@@ -2090,7 +2200,7 @@ app.post("/api/listening/discussion", requireLogin, (req, res) => {
           await postgresPool.query(
             `INSERT INTO listening_discussion_submissions (username, topic_id, topic_title, submission_text)
              VALUES ($1, $2, $3, $4)
-             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW()`,
+             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW(), feedback_seen = FALSE`,
             [req.session.name, topicId, topicTitle, text],
           );
         } catch (postgresError) {
@@ -2115,7 +2225,7 @@ app.post("/api/writing/submissions", requireLogin, (req, res) => {
     `INSERT INTO writing_submissions (username, topic_id, topic_title, submission_text)
      VALUES (?, ?, ?, ?)
      ON CONFLICT(username, topic_id)
-     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL`,
+     DO UPDATE SET submission_text = excluded.submission_text, submitted_at = CURRENT_TIMESTAMP, feedback = NULL, feedback_at = NULL, feedback_seen = 0`,
     [req.session.name, topicId, topicTitle, text],
     async (error) => {
       if (error)
@@ -2163,7 +2273,7 @@ app.post("/api/writing/discussion", requireLogin, (req, res) => {
           await postgresPool.query(
             `INSERT INTO writing_discussion_submissions (username, topic_id, topic_title, submission_text)
              VALUES ($1, $2, $3, $4)
-             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW(), feedback = NULL, feedback_at = NULL`,
+             ON CONFLICT (username, topic_id) DO UPDATE SET submission_text = EXCLUDED.submission_text, submitted_at = NOW(), feedback = NULL, feedback_at = NULL, feedback_seen = FALSE`,
             [req.session.name, topicId, topicTitle, text],
           );
         } catch (postgresError) {
@@ -2190,7 +2300,7 @@ app.post(
       return postgresReady
         .then(() =>
           postgresPool.query(
-            "UPDATE listening_discussion_submissions SET feedback = $1, feedback_at = NOW() WHERE id = $2 AND username = $3",
+            "UPDATE listening_discussion_submissions SET feedback = $1, feedback_at = NOW(), feedback_seen = FALSE WHERE id = $2 AND username = $3",
             [feedback, req.params.id, req.params.username],
           ),
         )
@@ -2205,7 +2315,7 @@ app.post(
         });
     }
     db.run(
-      "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+      "UPDATE listening_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP, feedback_seen = 0 WHERE id = ? AND username = ?",
       [feedback, req.params.id, req.params.username],
       () =>
         res.redirect(
@@ -2224,7 +2334,7 @@ app.post(
       return postgresReady
         .then(() =>
           postgresPool.query(
-            "UPDATE writing_discussion_submissions SET feedback = $1, feedback_at = NOW() WHERE id = $2 AND username = $3",
+            "UPDATE writing_discussion_submissions SET feedback = $1, feedback_at = NOW(), feedback_seen = FALSE WHERE id = $2 AND username = $3",
             [feedback, req.params.id, req.params.username],
           ),
         )
@@ -2239,7 +2349,7 @@ app.post(
         });
     }
     db.run(
-      "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP WHERE id = ? AND username = ?",
+      "UPDATE writing_discussion_submissions SET feedback = ?, feedback_at = CURRENT_TIMESTAMP, feedback_seen = 0 WHERE id = ? AND username = ?",
       [feedback, req.params.id, req.params.username],
       () =>
         res.redirect(
@@ -3381,13 +3491,21 @@ app.get("/profile", requireProfileUser, (req, res) => {
                             isAdmin: Boolean(req.session.isAdmin),
                             progress,
                             stats,
-                            areaProgress: buildAreaProgress(progress),
+                            areaProgress: buildAreaProgress(progress).map((area) => ({
+                              ...area,
+                              unreadCount:
+                                area.key === "writing"
+                                  ? res.locals.unreadWritingCount || 0
+                                  : area.key === "listening"
+                                    ? res.locals.unreadListeningCount || 0
+                                    : 0,
+                            })),
                             passportStamps,
                             feedbackMessages,
                             reminders,
-                            unreadFeedbackCount: feedbackMessages.filter(
-                              (message) => !message.feedback_seen,
-                            ).length,
+                            unreadFeedbackCount:
+                              (res.locals.unreadWritingCount || 0) +
+                              (res.locals.unreadListeningCount || 0),
                             query: req.query,
                           });
                         })
