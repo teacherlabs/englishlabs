@@ -51,7 +51,7 @@
           </nav>
           <div class="app-sidebar-footer">
             <a href="/profile" class="app-account-link">
-              {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="" class="app-avatar" />{{else}}<span class="app-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
+              {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="" class="app-avatar profile-avatar-img" />{{else}}<span class="app-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
               <span><strong>{{session.name}}</strong><small>{{#if session.isAdmin}}Teacher account{{else}}Student account{{/if}}</small></span>
             </a>
             <a href="/logout" class="app-logout-link">Log out</a>
@@ -61,7 +61,7 @@
         <aside class="app-rightbar" aria-label="Profile and progress">
           <div class="app-profile-card">
             <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
-            {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
+            {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar profile-avatar-img" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
             <h2>{{session.name}}</h2>
             {{#unless session.isAdmin}}<p>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}No learning goal set yet.{{/if}}</p>{{/unless}}
             {{#if session.isAdmin}}<a class="app-character-link" href="/character-generator">Customize character <span aria-hidden="true">→</span></a>{{/if}}

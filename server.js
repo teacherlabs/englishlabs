@@ -6351,7 +6351,7 @@ io.on("connection", (socket) => {
 
   socket.on("lobbyEmote", ({ roomId, emote } = {}) => {
     const numericRoomId = Number(roomId);
-    const allowedEmotes = new Set(["dance", "cheer", "wave"]);
+    const allowedEmotes = new Set(["dance", "cheer", "wave", "think"]);
     if (
       !socket.data.roomId ||
       socket.data.roomId !== numericRoomId ||

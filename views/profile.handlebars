@@ -50,12 +50,12 @@
         <div class="profile-identity">
           <div class="profile-avatar-wrap">
             {{#if student.avatar}}<img
-                class="profile-avatar"
+                class="profile-avatar profile-avatar-img"
                 src="{{student.avatarUrl}}"
                 alt="Profile picture"
                 data-avatar-initial="{{student.avatar_initial}}"
               />{{else if student.spritesheet}}<img
-                class="profile-avatar"
+                class="profile-avatar profile-avatar-img"
                 src="{{student.avatarUrl}}"
                 alt="Profile picture"
                 data-avatar-initial="{{student.avatar_initial}}"
@@ -265,7 +265,7 @@
         });
         document.querySelectorAll(".profile-avatar-placeholder").forEach((placeholder) => {
           const image = document.createElement("img");
-          image.className = "profile-avatar";
+          image.className = "profile-avatar profile-avatar-img";
           image.src = avatarUrl;
           image.alt = "Profile picture";
           placeholder.replaceWith(image);

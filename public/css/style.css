@@ -732,41 +732,6 @@ legend {
   min-width: 76px;
   color: #14213d;
   font-size: 12px;
-  transition: transform 0.2s ease;
-}
-.lobby-emote-bubble {
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  z-index: 2;
-  padding: 5px 9px;
-  border: 1px solid #d9e2ef;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.16);
-  color: #1f3b63;
-  font-size: 11px;
-  font-weight: 800;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 8px) scale(0.9);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.lobby-emote-bubble.is-visible {
-  opacity: 1;
-  transform: translate(-50%, 0) scale(1);
-}
-.lobby-emote-bubble::after {
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  border-right: 1px solid #d9e2ef;
-  border-bottom: 1px solid #d9e2ef;
-  background: #fff;
-  content: "";
-  transform: translateX(-50%) rotate(45deg);
 }
 .lobby-waiting-avatar {
   display: grid;
@@ -788,23 +753,9 @@ legend {
   animation: none !important;
   background-position: initial;
 }
-.lobby-waiting-sprite {
-  display: block;
-  width: 64px;
-  height: 64px;
-  background-repeat: no-repeat;
-  background-position: 0 -128px;
-  background-size: 576px 256px;
-  image-rendering: pixelated;
-}
-.lobby-waiting-player .lobby-waiting-sprite.is-dancing {
-  animation: lobby-sprite-dance 0.9s steps(1, end);
-}
-.lobby-waiting-player .lobby-waiting-sprite.is-cheering {
-  animation: lobby-sprite-cheer 0.9s steps(1, end);
-}
-.lobby-waiting-player .lobby-waiting-sprite.is-waving {
-  animation: lobby-sprite-wave 0.9s steps(1, end);
+.profile-avatar-img {
+  animation: none !important;
+  background-position: initial !important;
 }
 .lobby-emotes {
   display: flex;
@@ -842,27 +793,6 @@ legend {
   color: #68758a;
   font-size: 11px;
   text-align: center;
-}
-@keyframes lobby-sprite-dance {
-  0% { background-position: 0 -128px; }
-  25% { background-position: -64px -128px; }
-  50% { background-position: -128px -128px; }
-  75% { background-position: -192px -128px; }
-  100% { background-position: 0 -128px; }
-}
-@keyframes lobby-sprite-cheer {
-  0% { background-position: 0 0; }
-  25% { background-position: -64px 0; }
-  50% { background-position: -128px 0; }
-  75% { background-position: -192px 0; }
-  100% { background-position: 0 -128px; }
-}
-@keyframes lobby-sprite-wave {
-  0% { background-position: 0 -64px; }
-  25% { background-position: -64px -64px; }
-  50% { background-position: -128px -64px; }
-  75% { background-position: -192px -64px; }
-  100% { background-position: 0 -128px; }
 }
 .lobby-exit-modal {
   position: fixed;

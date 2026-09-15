@@ -110,8 +110,8 @@
                 <button type="button" data-lobby-emote="dance">Dance</button>
                 <button type="button" data-lobby-emote="cheer">Cheer</button>
                 <button type="button" data-lobby-emote="wave">Wave</button>
+                <button type="button" data-lobby-emote="think">Think</button>
               </div>
-              <p class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></p>
             </div>
           </section>
           <section class="student-live-quiz" data-phase-countdown hidden>
@@ -181,24 +181,24 @@
         states.delete(String(username));
       } else {
         const step = elapsed / 110;
-        if (state.emote === "dance") return { direction: 2, frame: Math.floor(step) % 9 };
-        if (state.emote === "cheer") return { direction: 0, frame: Math.floor(step) % 9 };
-        return { direction: 1, frame: Math.floor(step) % 6 };
+        const emoteFrames = {
+          cheer: { direction: 0, start: 0, count: 9 },
+          wave: { direction: 1, start: 0, count: 6 },
+          dance: { direction: 2, start: 0, count: 9 },
+          think: { direction: 3, start: 0, count: 6 },
+        };
+        const animation = emoteFrames[state.emote];
+        if (animation) {
+          return {
+            direction: animation.direction,
+            frame: animation.start + Math.floor(step) % animation.count,
+          };
+        }
+        return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
       }
     }
     return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
   };
-  const animateWaitingRoomSprites = (now) => {
-    document.querySelectorAll(".lobby-waiting-room [data-lobby-waiting-sprite]").forEach((sprite) => {
-      const username = sprite.closest("[data-lobby-waiting-player]")?.dataset.lobbyWaitingPlayer;
-      const player = (window.lobbyPlayers || []).find((entry) => String(entry.username) === String(username));
-      if (!username || !player) return;
-      const animated = getLobbySpriteFrame(username, player.direction, player.frame, now);
-      sprite.style.backgroundPosition = `${-Math.floor(animated.frame) * 64}px ${-Math.floor(animated.direction) * 64}px`;
-    });
-    window.requestAnimationFrame(animateWaitingRoomSprites);
-  };
-  window.requestAnimationFrame(animateWaitingRoomSprites);
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
     document.querySelector(".lobby-page")?.classList.add("lobby-active-session");
@@ -257,30 +257,6 @@
           emote: emote.emote,
           startedAt: performance.now(),
         });
-        const tile = document.querySelector(
-          `[data-lobby-waiting-player="${CSS.escape(String(emote.username))}"]`,
-        );
-        if (!tile) return;
-        const sprite = tile.querySelector("[data-lobby-waiting-sprite]");
-        const bubble = tile.querySelector("[data-lobby-emote-bubble]");
-        const emoteLabels = { dance: "💃 Dance!", cheer: "🎉 Cheer!", wave: "👋 Wave!" };
-        sprite?.classList.remove("is-dancing", "is-cheering", "is-waving");
-        bubble?.classList.remove("is-visible");
-        void tile.offsetWidth;
-        sprite?.classList.add(`is-${emote.emote}`);
-        if (bubble) {
-          bubble.textContent = emoteLabels[emote.emote] || emote.emote;
-          bubble.classList.add("is-visible");
-        }
-        window.setTimeout(
-          () => {
-            sprite?.classList.remove(`is-${emote.emote}`);
-            bubble?.classList.remove("is-visible");
-          },
-          2600,
-        );
-        const status = document.querySelector("[data-lobby-emote-status]");
-        if (status) status.textContent = `${emote.username} chose ${emote.emote}.`;
       });
       lobbySocket.on("teacherEntered", ({ entering }) => {
         if (entranceButton) {
@@ -307,7 +283,6 @@
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
     const playersGrid = document.querySelector("[data-lobby-players]");
     const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
-    const emoteStatus = document.querySelector("[data-lobby-emote-status]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
@@ -424,23 +399,12 @@
       if (waitingPlayers) {
         waitingPlayers.innerHTML = state.leaderboard?.length
           ? state.leaderboard.map((player) => {
-              const avatar = (player.spritesheetUrl || player.spritesheet)
-                ? `<span class="lobby-waiting-sprite" data-lobby-waiting-sprite data-spritesheet="${escapeHtml(lobbyImageSrc(player.spritesheetUrl || player.spritesheet))}" role="img" aria-label="${escapeHtml(player.username)}'s character"></span>`
-                : (player.avatarUrl || player.avatar)
+              const avatar = (player.avatarUrl || player.avatar)
                 ? `<img class="profile-avatar-img" src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
-              return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><span class="lobby-emote-bubble" data-lobby-emote-bubble aria-live="polite"></span><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
+              return `<article class="lobby-waiting-player"><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
             }).join("")
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
-        waitingPlayers.querySelectorAll("[data-spritesheet]").forEach((sprite) => {
-          sprite.style.backgroundImage = `url("${sprite.dataset.spritesheet}")`;
-        });
-        const activeEmotes = window.lobbyEmoteStates || new Map();
-        waitingPlayers.querySelectorAll("[data-lobby-waiting-player]").forEach((tile) => {
-          const state = activeEmotes.get(tile.dataset.lobbyWaitingPlayer);
-          if (!state || performance.now() - state.startedAt >= 2200) return;
-          tile.querySelector("[data-lobby-waiting-sprite]")?.classList.add(`is-${state.emote}`);
-        });
       }
 
       document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
