@@ -229,15 +229,25 @@
         );
         if (!tile) return;
         const sprite = tile.querySelector("[data-lobby-waiting-sprite]");
+        const bubble = tile.querySelector("[data-lobby-emote-bubble]");
+        const emoteLabels = { dance: "💃 Dance!", cheer: "🎉 Cheer!", wave: "👋 Wave!" };
         tile.classList.remove("is-dancing", "is-cheering", "is-waving");
         sprite?.classList.remove("is-dancing", "is-cheering", "is-waving");
+        bubble?.classList.remove("is-visible");
         void tile.offsetWidth;
         tile.classList.add(`is-${emote.emote}`);
         sprite?.classList.add(`is-${emote.emote}`);
-        window.setTimeout(() => tile.classList.remove(`is-${emote.emote}`), 900);
+        if (bubble) {
+          bubble.textContent = emoteLabels[emote.emote] || emote.emote;
+          bubble.classList.add("is-visible");
+        }
+        window.setTimeout(() => tile.classList.remove(`is-${emote.emote}`), 2200);
         window.setTimeout(
-          () => sprite?.classList.remove(`is-${emote.emote}`),
-          900,
+          () => {
+            sprite?.classList.remove(`is-${emote.emote}`);
+            bubble?.classList.remove("is-visible");
+          },
+          2600,
         );
         const status = document.querySelector("[data-lobby-emote-status]");
         if (status) status.textContent = `${emote.username} chose ${emote.emote}.`;
@@ -396,7 +406,7 @@
                 : (player.avatarUrl || player.avatar)
                 ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
-              return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
+              return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><span class="lobby-emote-bubble" data-lobby-emote-bubble aria-live="polite"></span><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
             }).join("")
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
         waitingPlayers.querySelectorAll("[data-spritesheet]").forEach((sprite) => {

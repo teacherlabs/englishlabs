@@ -725,6 +725,7 @@ legend {
   min-height: 104px;
 }
 .lobby-waiting-player {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 7px;
@@ -732,6 +733,45 @@ legend {
   color: #14213d;
   font-size: 12px;
   transition: transform 0.2s ease;
+}
+.lobby-emote-bubble {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  z-index: 2;
+  padding: 5px 9px;
+  border: 1px solid #d9e2ef;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.16);
+  color: #1f3b63;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px) scale(0.9);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.lobby-emote-bubble.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+.lobby-emote-bubble::after {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-right: 1px solid #d9e2ef;
+  border-bottom: 1px solid #d9e2ef;
+  background: #fff;
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+.lobby-waiting-player.is-dancing,
+.lobby-waiting-player.is-cheering,
+.lobby-waiting-player.is-waving {
+  animation-duration: 2.2s;
 }
 .lobby-waiting-avatar {
   display: grid;
