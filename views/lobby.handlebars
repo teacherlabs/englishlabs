@@ -42,7 +42,7 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
           <div class="lobby-teacher-actions">
@@ -98,7 +98,7 @@
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
           <button class="notes-button lobby-sound-enable" type="button" data-lobby-sound-enable hidden>Enable lobby sound</button>
-          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
+          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
@@ -190,7 +190,7 @@
     return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
   };
   const animateWaitingRoomSprites = (now) => {
-    document.querySelectorAll("[data-lobby-waiting-sprite]").forEach((sprite) => {
+    document.querySelectorAll(".lobby-waiting-room [data-lobby-waiting-sprite]").forEach((sprite) => {
       const username = sprite.closest("[data-lobby-waiting-player]")?.dataset.lobbyWaitingPlayer;
       const player = (window.lobbyPlayers || []).find((entry) => String(entry.username) === String(username));
       if (!username || !player) return;
@@ -358,7 +358,7 @@
       if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
       finalResultsList.innerHTML = students.map((player, index) => {
         const avatar = (player.avatarUrl || player.avatar)
-        ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
+        ? `<img class="profile-avatar-img" src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
           : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
         return `<li class="final-results-row${index === 0 ? " final-results-winner" : ""}"><div class="final-results-avatar">${avatar}</div><span class="final-results-name">${index + 1}. ${escapeHtml(player.username)}</span><strong class="final-results-score">${player.score}</strong></li>`;
       }).join("");
@@ -416,7 +416,7 @@
         playersGrid.innerHTML = state.leaderboard?.length
           ? state.leaderboard.map((player) => {
               const avatar = (player.avatarUrl || player.avatar)
-                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
+                ? `<img class="profile-avatar-img" src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
               return `<div class="lobby-player-tile"><div class="lobby-player-avatar">${avatar}</div><span class="lobby-player-name">${escapeHtml(player.username)}</span><strong class="lobby-player-score">${player.score}</strong></div>`;
             }).join("")
@@ -428,7 +428,7 @@
               const avatar = (player.spritesheetUrl || player.spritesheet)
                 ? `<span class="lobby-waiting-sprite" data-lobby-waiting-sprite data-spritesheet="${escapeHtml(lobbyImageSrc(player.spritesheetUrl || player.spritesheet))}" role="img" aria-label="${escapeHtml(player.username)}'s character"></span>`
                 : (player.avatarUrl || player.avatar)
-                ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
+                ? `<img class="profile-avatar-img" src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
               return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><span class="lobby-emote-bubble" data-lobby-emote-bubble aria-live="polite"></span><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
             }).join("")
@@ -661,10 +661,10 @@
     frameCanvas.width = playerCanvas.width;
     frameCanvas.height = playerCanvas.height;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_SIZE = 52;
+    const RENDER_SIZE = 78;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 160, y: 190, speed: 3, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: 310, y: 380, speed: 4, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const pressedKeys = new Set();
     const remoteImages = new Map();
     const remotePositions = new Map();
@@ -776,8 +776,8 @@
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
         if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
-        const targetX = Number(remotePlayer.x) || 160;
-        const targetY = Number(remotePlayer.y) || 190;
+        const targetX = Number(remotePlayer.x) || 310;
+        const targetY = Number(remotePlayer.y) || 380;
         const previousPosition = remotePositions.get(remoteKey);
         const remotePosition = previousPosition || { x: targetX, y: targetY };
         remotePosition.targetX = targetX;

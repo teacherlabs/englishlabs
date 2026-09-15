@@ -3994,6 +3994,27 @@ const finalizeRoundIfNeeded = (room, callback) => {
   );
 };
 
+const insertLobbyParticipant = (roomId, username, callback) => {
+  db.get(
+    "SELECT COUNT(*) AS participant_count FROM lobby_participants WHERE room_id = ?",
+    [roomId],
+    (countError, row) => {
+      if (countError) return callback(countError);
+      const slot = Number(row?.participant_count) || 0;
+      const columns = 5;
+      const xPositions = [100, 220, 340, 460, 560];
+      const yPositions = [140, 240, 340];
+      const x = xPositions[slot % columns];
+      const y = yPositions[Math.floor(slot / columns) % yPositions.length];
+      db.run(
+        "INSERT OR IGNORE INTO lobby_participants (room_id, username, x, y) VALUES (?, ?, ?, ?)",
+        [roomId, username, x, y],
+        callback,
+      );
+    },
+  );
+};
+
 app.get("/lobby", requireAuthenticated, (req, res) => {
   const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
   const renderLobby = (room, questions = [], participant = null) => {
@@ -4123,9 +4144,9 @@ app.get("/quicktype", requireAuthenticated, (req, res) => {
     function (error) {
       if (error)
         return res.status(500).send("Unable to create QuickType room.");
-      db.run(
-        "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
-        [this.lastID, req.session.name],
+      insertLobbyParticipant(
+        this.lastID,
+        req.session.name,
         (participantError) =>
           participantError
             ? res.status(500).send("Unable to join QuickType room.")
@@ -4145,9 +4166,9 @@ app.get("/question-game", requireAuthenticated, (req, res) => {
     function (error) {
       if (error)
         return res.status(500).send("Unable to create Question Game room.");
-      db.run(
-        "INSERT INTO lobby_participants (room_id, username) VALUES (?, ?)",
-        [this.lastID, req.session.name],
+      insertLobbyParticipant(
+        this.lastID,
+        req.session.name,
         (participantError) =>
           participantError
             ? res.status(500).send("Unable to join Question Game room.")
@@ -4168,9 +4189,9 @@ app.post("/lobby/rooms", requireAdmin, (req, res) => {
     [code, title, mode],
     function (error) {
       if (error) return res.status(500).send("Unable to create room.");
-      db.run(
-        "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
-        [this.lastID, req.session.name],
+      insertLobbyParticipant(
+        this.lastID,
+        req.session.name,
         (participantError) =>
           participantError
             ? res.status(500).send("Unable to join teacher to room.")
@@ -4385,9 +4406,9 @@ app.post("/lobby/join", requireLogin, (req, res) => {
     [code],
     (error, room) => {
       if (error || !room) return res.status(400).redirect("/lobby?error=code");
-      db.run(
-        "INSERT OR IGNORE INTO lobby_participants (room_id, username) VALUES (?, ?)",
-        [room.id, req.session.name],
+      insertLobbyParticipant(
+        room.id,
+        req.session.name,
         () =>
           res.redirect(
             `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
@@ -6298,8 +6319,8 @@ io.on("connection", (socket) => {
   socket.on("playerMove", (data = {}) => {
     const roomId = Number(data.roomId);
     if (!socket.data.roomId || socket.data.roomId !== roomId) return;
-    const x = Math.max(0, Math.min(310, Number(data.x) || 0));
-    const y = Math.max(60, Math.min(210, Number(data.y) || 60));
+    const x = Math.max(0, Math.min(620, Number(data.x) || 0));
+    const y = Math.max(60, Math.min(420, Number(data.y) || 60));
     const direction = [0, 1, 2, 3].includes(Number(data.direction))
       ? Number(data.direction)
       : 2;

@@ -496,7 +496,7 @@ legend {
 .lobby-character-stage {
   width: 100%;
   min-width: 0;
-  min-height: 310px;
+  min-height: 420px;
   margin: 0;
   padding: 10px;
   border: 0;
@@ -545,7 +545,7 @@ legend {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 310 / 210;
+  aspect-ratio: 620 / 420;
   object-fit: contain;
   outline: 0;
   image-rendering: pixelated;
@@ -783,6 +783,10 @@ legend {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.lobby-waiting-avatar img.profile-avatar-img {
+  animation: none !important;
+  background-position: initial;
 }
 .lobby-waiting-sprite {
   display: block;
