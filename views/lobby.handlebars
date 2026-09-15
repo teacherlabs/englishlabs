@@ -172,6 +172,43 @@
     return `/uploads/profiles/${encodeURIComponent(source)}`;
   }
   window.lobbyImageSrc = lobbyImageSrc;
+  const lobbyAnimationLayouts = {
+    walk: { columns: 8, rows: 4 },
+    slash: { columns: 6, rows: 4 },
+    shoot: { columns: 13, rows: 4 },
+    spell: { columns: 7, rows: 4 },
+    thrust: { columns: 8, rows: 4 },
+    idle: { columns: 1, rows: 4 },
+    hurt: { columns: 6, rows: 1 },
+  };
+  const getLobbyAnimationLayout = (image, animation = "walk") => {
+    const configured = lobbyAnimationLayouts[animation] || lobbyAnimationLayouts.walk;
+    const frameSize = image.naturalWidth >= configured.columns * 192 &&
+      image.naturalHeight >= configured.rows * 192 ? 192 :
+      image.naturalWidth >= configured.columns * 128 &&
+      image.naturalHeight >= configured.rows * 128 ? 128 : 64;
+    return {
+      animation,
+      frameWidth: frameSize,
+      frameHeight: frameSize,
+      columns: Math.min(configured.columns, Math.max(1, Math.floor(image.naturalWidth / frameSize))),
+      rows: Math.min(configured.rows, Math.max(1, Math.floor(image.naturalHeight / frameSize))),
+    };
+  };
+  const logLobbySpriteLayout = (image, layout, frame, direction) => {
+    const debugKey = `${layout.animation}:${layout.frameWidth}:${layout.columns}:${direction}:${frame}`;
+    if (image.dataset.lobbyLayoutLogged === debugKey) return;
+    image.dataset.lobbyLayoutLogged = debugKey;
+    console.debug("Lobby sprite debug:", {
+      selectedItem: image.dataset.lobbySelectedItem || "saved-character",
+      animation: layout.animation,
+      sheetDimensions: `${image.naturalWidth}x${image.naturalHeight}`,
+      frameSize: `${layout.frameWidth}x${layout.frameHeight}`,
+      frameCount: layout.columns,
+      directionRow: direction,
+      currentFrame: frame,
+    });
+  };
   const getLobbySpriteFrame = (username, direction, frame, now) => {
     const states = window.lobbyEmoteStates || new Map();
     const state = states.get(String(username));
@@ -182,9 +219,9 @@
       } else {
         const step = elapsed / 110;
         const emoteFrames = {
-          cheer: { direction: 0, start: 0, count: 9 },
+          cheer: { direction: 0, start: 0, count: 8 },
           wave: { direction: 1, start: 0, count: 6 },
-          dance: { direction: 2, start: 0, count: 9 },
+          dance: { direction: 2, start: 0, count: 8 },
           think: { direction: 3, start: 0, count: 6 },
         };
         const animation = emoteFrames[state.emote];
@@ -643,7 +680,7 @@
       if (player.isMoving) {
         const activeKey = [...pressedKeys][pressedKeys.size - 1];
         player.direction = directionByKey[activeKey];
-        player.frame = (player.frame + 0.2) % 9;
+        player.frame = (player.frame + 0.2) % 8;
         const movement = [...pressedKeys].reduce((result, key) => {
           if (key === "ArrowUp" || key === "w") result.y -= 1;
           if (key === "ArrowDown" || key === "s") result.y += 1;
@@ -659,16 +696,22 @@
       }
 
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-      const drawSprite = (image, x, y, direction, frame, username, isAdmin) => {
+      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk") => {
         if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
+        const layout = getLobbyAnimationLayout(image, animation);
+        const safeDirection = Math.max(0, Math.min(layout.rows - 1, Math.floor(direction)));
+        const safeFrame = Math.max(0, Math.min(layout.columns - 1, Math.floor(frame)));
+        const sx = safeFrame * layout.frameWidth;
+        const sy = safeDirection * layout.frameHeight;
+        logLobbySpriteLayout(image, layout, safeFrame, safeDirection);
         const drawX = Math.floor(x - (RENDER_SIZE / 2));
         const drawY = Math.floor(y - RENDER_SIZE);
         frameContext.drawImage(
           image,
-          Math.floor(frame) * 64,
-          direction * 64,
-          64,
-          64,
+          sx,
+          sy,
+          layout.frameWidth,
+          layout.frameHeight,
           drawX,
           drawY,
           RENDER_SIZE,
@@ -732,7 +775,8 @@
           player.frame,
           now,
         );
-        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true");
+        const ownAnimation = window.lobbyEmoteStates?.get(ownUsername)?.emote || "walk";
+        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", ownAnimation);
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
@@ -765,7 +809,8 @@
           Number(remotePlayer.frame) || 0,
           now,
         );
-        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1);
+        const remoteAnimation = window.lobbyEmoteStates?.get(String(remotePlayer.username))?.emote || "walk";
+        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1, remoteAnimation);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
