@@ -166,6 +166,12 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const lobbyImageSrc = (value) => {
+    const source = String(value || "");
+    if (!source) return "";
+    if (source.startsWith("data:image/") || source.startsWith("/") || source.startsWith("http")) return source;
+    return `/uploads/profiles/${encodeURIComponent(source)}`;
+  };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
     document.querySelector(".lobby-page")?.classList.add("lobby-active-session");
@@ -322,13 +328,6 @@
         ? students.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
         : "<li>No scores yet.</li>";
     };
-    const lobbyImageSrc = (value) => {
-      const source = String(value || "");
-      if (!source) return "";
-      if (source.startsWith("data:image/") || source.startsWith("/") || source.startsWith("http")) return source;
-      return `/uploads/profiles/${encodeURIComponent(source)}`;
-    };
-
     const renderFinalResults = (players) => {
       const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
       if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
