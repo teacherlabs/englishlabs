@@ -768,11 +768,6 @@ legend {
   content: "";
   transform: translateX(-50%) rotate(45deg);
 }
-.lobby-waiting-player.is-dancing,
-.lobby-waiting-player.is-cheering,
-.lobby-waiting-player.is-waving {
-  animation-duration: 2.2s;
-}
 .lobby-waiting-avatar {
   display: grid;
   width: 68px;
@@ -798,29 +793,11 @@ legend {
   background-size: 576px 256px;
   image-rendering: pixelated;
 }
-.lobby-waiting-player.is-dancing {
-  animation: lobby-emote-dance 0.9s ease;
-}
-.lobby-waiting-player.is-dancing .lobby-waiting-avatar {
-  animation: lobby-emote-dance 0.9s ease;
-}
 .lobby-waiting-sprite.is-dancing {
   animation: lobby-sprite-dance 0.9s steps(1, end);
 }
-.lobby-waiting-player.is-cheering {
-  animation: lobby-emote-cheer 0.9s ease;
-}
-.lobby-waiting-player.is-cheering .lobby-waiting-avatar {
-  animation: lobby-emote-cheer 0.9s ease;
-}
 .lobby-waiting-sprite.is-cheering {
   animation: lobby-sprite-cheer 0.9s steps(1, end);
-}
-.lobby-waiting-player.is-waving {
-  animation: lobby-emote-wave 0.9s ease;
-}
-.lobby-waiting-player.is-waving .lobby-waiting-avatar {
-  animation: lobby-emote-wave 0.9s ease;
 }
 .lobby-waiting-sprite.is-waving {
   animation: lobby-sprite-wave 0.9s steps(1, end);
