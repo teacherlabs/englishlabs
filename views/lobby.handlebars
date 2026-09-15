@@ -180,6 +180,10 @@
     thrust: { columns: 8, rows: 4 },
     idle: { columns: 1, rows: 4 },
     hurt: { columns: 6, rows: 1 },
+    dance: { columns: 8, rows: 4 },
+    cheer: { columns: 8, rows: 4 },
+    wave: { columns: 6, rows: 4 },
+    think: { columns: 6, rows: 4 },
   };
   const getLobbyAnimationLayout = (image, animation = "walk") => {
     const configured = lobbyAnimationLayouts[animation] || lobbyAnimationLayouts.walk;
@@ -229,12 +233,13 @@
           return {
             direction: animation.direction,
             frame: animation.start + Math.floor(step) % animation.count,
+            animation: state.emote,
           };
         }
-        return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
+        return { direction: Number(direction) || 2, frame: Number(frame) || 0, animation: "walk" };
       }
     }
-    return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
+    return { direction: Number(direction) || 2, frame: Number(frame) || 0, animation: "walk" };
   };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
@@ -775,8 +780,7 @@
           player.frame,
           now,
         );
-        const ownAnimation = window.lobbyEmoteStates?.get(ownUsername)?.emote || "walk";
-        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", ownAnimation);
+        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation);
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
@@ -809,8 +813,7 @@
           Number(remotePlayer.frame) || 0,
           now,
         );
-        const remoteAnimation = window.lobbyEmoteStates?.get(String(remotePlayer.username))?.emote || "walk";
-        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1, remoteAnimation);
+        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1, animatedRemote.animation);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
