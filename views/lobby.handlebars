@@ -34,7 +34,6 @@
       </div>
     {{else}}
       {{#unless participant}}<h1>Join a quiz</h1><form class="lobby-form" action="/lobby/join" method="post"><label for="room-code">Enter the 4-digit code</label><input id="room-code" name="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" /><button class="practice-button" type="submit">Join room</button></form>{{/unless}}
-      {{#if participant}}<p class="lobby-joined-note">You joined {{room.title}}. The quiz appears in the lobby below.</p>{{/if}}
     {{/if}}
   </section>
   <section class="lobby-shell">
@@ -819,6 +818,15 @@
     const timestampNow = () => performance.now();
 
     window.addEventListener("keydown", (event) => {
+      const activeElement = document.activeElement;
+      if (
+        activeElement?.tagName === "INPUT" ||
+        activeElement?.tagName === "TEXTAREA" ||
+        activeElement?.isContentEditable
+      ) {
+        pressedKeys.clear();
+        return;
+      }
       if (!(event.key in directionByKey)) return;
       event.preventDefault();
       pressedKeys.add(event.key);
