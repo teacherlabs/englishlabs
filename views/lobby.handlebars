@@ -616,18 +616,18 @@
     const pressedKeys = new Set();
     const remoteImages = new Map();
     const remotePositions = new Map();
-    const emoteStates = window.lobbyEmoteStates || new Map();
     const LERP_FACTOR = 0.18;
     let pointerPosition = null;
     let lastSyncAt = 0;
     let lastSyncedState = "";
     const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
     const getEmoteSpriteState = (username, direction, frame, now) => {
-      const state = emoteStates.get(String(username));
+      const states = window.lobbyEmoteStates || new Map();
+      const state = states.get(String(username));
       if (!state) return { direction, frame };
       const elapsed = now - state.startedAt;
       if (elapsed >= 2200) {
-        emoteStates.delete(String(username));
+        states.delete(String(username));
         return { direction, frame };
       }
       const step = elapsed / 110;

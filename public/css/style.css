@@ -752,10 +752,19 @@ legend {
 .lobby-waiting-player.is-dancing {
   animation: lobby-emote-dance 0.9s ease;
 }
+.lobby-waiting-player.is-dancing .lobby-waiting-avatar {
+  animation: lobby-emote-dance 0.9s ease;
+}
 .lobby-waiting-player.is-cheering {
   animation: lobby-emote-cheer 0.9s ease;
 }
+.lobby-waiting-player.is-cheering .lobby-waiting-avatar {
+  animation: lobby-emote-cheer 0.9s ease;
+}
 .lobby-waiting-player.is-waving {
+  animation: lobby-emote-wave 0.9s ease;
+}
+.lobby-waiting-player.is-waving .lobby-waiting-avatar {
   animation: lobby-emote-wave 0.9s ease;
 }
 .lobby-emotes {
