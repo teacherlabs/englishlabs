@@ -98,7 +98,7 @@
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
           <button class="notes-button lobby-sound-enable" type="button" data-lobby-sound-enable hidden>Enable lobby sound</button>
-          {{#if student.spritesheet}}<div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="/uploads/profiles/{{student.spritesheet}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>{{/if}}
+          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="310" height="210" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
@@ -173,6 +173,33 @@
     return `/uploads/profiles/${encodeURIComponent(source)}`;
   }
   window.lobbyImageSrc = lobbyImageSrc;
+  const getLobbySpriteFrame = (username, direction, frame, now) => {
+    const states = window.lobbyEmoteStates || new Map();
+    const state = states.get(String(username));
+    if (state) {
+      const elapsed = now - state.startedAt;
+      if (elapsed >= 2200) {
+        states.delete(String(username));
+      } else {
+        const step = elapsed / 110;
+        if (state.emote === "dance") return { direction: step % 2 < 1 ? 2 : 0, frame: step % 8 };
+        if (state.emote === "cheer") return { direction: Math.floor(step) % 2 ? 0 : 2, frame: Math.floor(step) % 9 };
+        return { direction: 1, frame: Math.floor(step) % 6 };
+      }
+    }
+    return { direction: Number(direction) || 2, frame: Number(frame) || 0 };
+  };
+  const animateWaitingRoomSprites = (now) => {
+    document.querySelectorAll("[data-lobby-waiting-sprite]").forEach((sprite) => {
+      const username = sprite.closest("[data-lobby-waiting-player]")?.dataset.lobbyWaitingPlayer;
+      const player = (window.lobbyPlayers || []).find((entry) => String(entry.username) === String(username));
+      if (!username || !player) return;
+      const animated = getLobbySpriteFrame(username, player.direction, player.frame, now);
+      sprite.style.backgroundPosition = `${-Math.floor(animated.frame) * 64}px ${-Math.floor(animated.direction) * 64}px`;
+    });
+    window.requestAnimationFrame(animateWaitingRoomSprites);
+  };
+  window.requestAnimationFrame(animateWaitingRoomSprites);
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
     document.querySelector(".lobby-page")?.classList.add("lobby-active-session");
