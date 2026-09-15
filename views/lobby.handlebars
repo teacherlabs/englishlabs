@@ -166,12 +166,13 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
-  const lobbyImageSrc = (value) => {
+  function lobbyImageSrc(value) {
     const source = String(value || "");
     if (!source) return "";
     if (source.startsWith("data:image/") || source.startsWith("/") || source.startsWith("http")) return source;
     return `/uploads/profiles/${encodeURIComponent(source)}`;
-  };
+  }
+  window.lobbyImageSrc = lobbyImageSrc;
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
     document.querySelector(".lobby-page")?.classList.add("lobby-active-session");
@@ -785,7 +786,7 @@
         let remoteImage = cachedRemote?.key === remoteSpritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
           remoteImage = new Image();
-          const remoteSource = lobbyImageSrc(remoteSpritesheet);
+          const remoteSource = window.lobbyImageSrc(remoteSpritesheet);
           remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
           remoteImages.set(remoteKey, { key: remoteSpritesheet, image: remoteImage });
         }
