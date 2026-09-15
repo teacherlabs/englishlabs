@@ -265,17 +265,14 @@
         const sprite = tile.querySelector("[data-lobby-waiting-sprite]");
         const bubble = tile.querySelector("[data-lobby-emote-bubble]");
         const emoteLabels = { dance: "💃 Dance!", cheer: "🎉 Cheer!", wave: "👋 Wave!" };
-        tile.classList.remove("is-dancing", "is-cheering", "is-waving");
         sprite?.classList.remove("is-dancing", "is-cheering", "is-waving");
         bubble?.classList.remove("is-visible");
         void tile.offsetWidth;
-        tile.classList.add(`is-${emote.emote}`);
         sprite?.classList.add(`is-${emote.emote}`);
         if (bubble) {
           bubble.textContent = emoteLabels[emote.emote] || emote.emote;
           bubble.classList.add("is-visible");
         }
-        window.setTimeout(() => tile.classList.remove(`is-${emote.emote}`), 2200);
         window.setTimeout(
           () => {
             sprite?.classList.remove(`is-${emote.emote}`);
@@ -443,9 +440,7 @@
         waitingPlayers.querySelectorAll("[data-lobby-waiting-player]").forEach((tile) => {
           const state = activeEmotes.get(tile.dataset.lobbyWaitingPlayer);
           if (!state || performance.now() - state.startedAt >= 2200) return;
-          const emoteClass = `is-${state.emote}`;
-          tile.classList.add(emoteClass);
-          tile.querySelector("[data-lobby-waiting-sprite]")?.classList.add(emoteClass);
+          tile.querySelector("[data-lobby-waiting-sprite]")?.classList.add(`is-${state.emote}`);
         });
       }
 

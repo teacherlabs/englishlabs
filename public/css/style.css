@@ -793,13 +793,13 @@ legend {
   background-size: 576px 256px;
   image-rendering: pixelated;
 }
-.lobby-waiting-sprite.is-dancing {
+.lobby-waiting-player .lobby-waiting-sprite.is-dancing {
   animation: lobby-sprite-dance 0.9s steps(1, end);
 }
-.lobby-waiting-sprite.is-cheering {
+.lobby-waiting-player .lobby-waiting-sprite.is-cheering {
   animation: lobby-sprite-cheer 0.9s steps(1, end);
 }
-.lobby-waiting-sprite.is-waving {
+.lobby-waiting-player .lobby-waiting-sprite.is-waving {
   animation: lobby-sprite-wave 0.9s steps(1, end);
 }
 .lobby-emotes {
@@ -838,22 +838,6 @@ legend {
   color: #68758a;
   font-size: 11px;
   text-align: center;
-}
-@keyframes lobby-emote-dance {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  25% { transform: translateY(-10px) rotate(-8deg); }
-  75% { transform: translateY(-6px) rotate(8deg); }
-}
-@keyframes lobby-emote-cheer {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(1.16); }
-  65% { transform: scale(0.96); }
-}
-@keyframes lobby-emote-wave {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-7deg); }
-  50% { transform: rotate(7deg); }
-  75% { transform: rotate(-5deg); }
 }
 @keyframes lobby-sprite-dance {
   0% { background-position: 0 -128px; }
