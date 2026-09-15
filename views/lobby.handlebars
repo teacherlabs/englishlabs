@@ -228,10 +228,17 @@
           `[data-lobby-waiting-player="${CSS.escape(String(emote.username))}"]`,
         );
         if (!tile) return;
+        const sprite = tile.querySelector("[data-lobby-waiting-sprite]");
         tile.classList.remove("is-dancing", "is-cheering", "is-waving");
+        sprite?.classList.remove("is-dancing", "is-cheering", "is-waving");
         void tile.offsetWidth;
         tile.classList.add(`is-${emote.emote}`);
+        sprite?.classList.add(`is-${emote.emote}`);
         window.setTimeout(() => tile.classList.remove(`is-${emote.emote}`), 900);
+        window.setTimeout(
+          () => sprite?.classList.remove(`is-${emote.emote}`),
+          900,
+        );
         const status = document.querySelector("[data-lobby-emote-status]");
         if (status) status.textContent = `${emote.username} chose ${emote.emote}.`;
       });
@@ -384,12 +391,25 @@
       if (waitingPlayers) {
         waitingPlayers.innerHTML = state.leaderboard?.length
           ? state.leaderboard.map((player) => {
-              const avatar = (player.avatarUrl || player.avatar)
+              const avatar = (player.spritesheetUrl || player.spritesheet)
+                ? `<span class="lobby-waiting-sprite" data-lobby-waiting-sprite data-spritesheet="${escapeHtml(lobbyImageSrc(player.spritesheetUrl || player.spritesheet))}" role="img" aria-label="${escapeHtml(player.username)}'s character"></span>`
+                : (player.avatarUrl || player.avatar)
                 ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
                 : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
               return `<article class="lobby-waiting-player" data-lobby-waiting-player="${escapeHtml(player.username)}"><div class="lobby-waiting-avatar">${avatar}</div><strong>${escapeHtml(player.username)}</strong></article>`;
             }).join("")
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
+        waitingPlayers.querySelectorAll("[data-spritesheet]").forEach((sprite) => {
+          sprite.style.backgroundImage = `url("${sprite.dataset.spritesheet}")`;
+        });
+        const activeEmotes = window.lobbyEmoteStates || new Map();
+        waitingPlayers.querySelectorAll("[data-lobby-waiting-player]").forEach((tile) => {
+          const state = activeEmotes.get(tile.dataset.lobbyWaitingPlayer);
+          if (!state || performance.now() - state.startedAt >= 2200) return;
+          const emoteClass = `is-${state.emote}`;
+          tile.classList.add(emoteClass);
+          tile.querySelector("[data-lobby-waiting-sprite]")?.classList.add(emoteClass);
+        });
       }
 
       document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
