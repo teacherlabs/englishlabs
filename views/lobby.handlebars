@@ -182,8 +182,8 @@
         states.delete(String(username));
       } else {
         const step = elapsed / 110;
-        if (state.emote === "dance") return { direction: step % 2 < 1 ? 2 : 0, frame: step % 8 };
-        if (state.emote === "cheer") return { direction: Math.floor(step) % 2 ? 0 : 2, frame: Math.floor(step) % 9 };
+        if (state.emote === "dance") return { direction: 2, frame: Math.floor(step) % 9 };
+        if (state.emote === "cheer") return { direction: 0, frame: Math.floor(step) % 9 };
         return { direction: 1, frame: Math.floor(step) % 6 };
       }
     }
@@ -678,27 +678,8 @@
     let lastSyncAt = 0;
     let lastSyncedState = "";
     const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
-    const getEmoteSpriteState = (username, direction, frame, now) => {
-      const states = window.lobbyEmoteStates || new Map();
-      const state = states.get(String(username));
-      if (!state) return { direction, frame };
-      const elapsed = now - state.startedAt;
-      if (elapsed >= 2200) {
-        states.delete(String(username));
-        return { direction, frame };
-      }
-      const step = elapsed / 110;
-      if (state.emote === "dance") {
-        return { direction: step % 2 < 1 ? 2 : 0, frame: step % 8 };
-      }
-      if (state.emote === "cheer") {
-        return {
-          direction: Math.floor(step) % 2 ? 0 : 2,
-          frame: Math.floor(step) % 9,
-        };
-      }
-      return { direction: 1, frame: Math.floor(step) % 6 };
-    };
+    const getEmoteSpriteState = (username, direction, frame, now) =>
+      getLobbySpriteFrame(username, direction, frame, now);
     const drawPlayer = () => {
       const now = timestampNow();
       player.isMoving = pressedKeys.size > 0;
@@ -783,18 +764,22 @@
       };
       resizeCanvas();
       if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
-      if (player.isLoaded && player.isPresent) {
+      const ownUsername = String(playerCanvas.dataset.playerUsername || "");
+      const hasRemoteSelf = (window.lobbyPlayers || []).some(
+        (remotePlayer) => String(remotePlayer.username) === ownUsername,
+      );
+      if (player.isLoaded && player.isPresent && !hasRemoteSelf) {
         const animatedPlayer = getEmoteSpriteState(
-          playerCanvas.dataset.playerUsername,
+          ownUsername,
           player.direction,
           player.frame,
           now,
         );
-        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, playerCanvas.dataset.playerUsername, playerCanvas.dataset.playerAdmin === "true");
+        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true");
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
-        if (remotePlayer.username === playerCanvas.dataset.playerUsername || !remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
+        if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
         const targetX = Number(remotePlayer.x) || 160;
         const targetY = Number(remotePlayer.y) || 190;
