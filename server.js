@@ -1569,18 +1569,22 @@ app.use(function (req, res, next) {
       icon: "07",
       active: isActivePath(["/lobby"]),
     },
-    {
-      href: "/quicktype",
-      label: "QuickType",
-      icon: "08",
-      active: isActivePath(["/quicktype"]),
-    },
-    {
-      href: "/question-game",
-      label: "Question game",
-      icon: "09",
-      active: isActivePath(["/question-game"]),
-    },
+    ...(req.session.isAdmin
+      ? [
+          {
+            href: "/quicktype",
+            label: "QuickType",
+            icon: "08",
+            active: isActivePath(["/quicktype"]),
+          },
+          {
+            href: "/question-game",
+            label: "Question game",
+            icon: "09",
+            active: isActivePath(["/question-game"]),
+          },
+        ]
+      : []),
     ...(req.session.isAdmin
       ? [
           {

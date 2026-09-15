@@ -656,7 +656,6 @@
   if (playerCanvas) {
     const playerContext = playerCanvas.getContext("2d");
     playerContext.imageSmoothingEnabled = false;
-    const playerMode = playerCanvas.dataset.mode;
     const frameCanvas = document.createElement("canvas");
     frameCanvas.width = playerCanvas.width;
     frameCanvas.height = playerCanvas.height;
@@ -808,7 +807,7 @@
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
       const syncState = `${player.x},${player.y},${player.direction},${player.frame.toFixed(2)}`;
-      if (playerMode === "quicktype" && player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
+      if (player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
         lastSyncAt = timestampNow();
         lastSyncedState = syncState;
         const movement = { roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame };
