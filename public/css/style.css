@@ -1396,7 +1396,9 @@ legend {
   background: #ffffff;
   color: var(--app-ink);
   box-shadow: 0 3px 10px rgba(20, 33, 61, 0.06);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .app-reminder:hover {
@@ -1621,7 +1623,11 @@ legend {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(118, 207, 232, 0.55) 0%, rgba(118, 207, 232, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(118, 207, 232, 0.55) 0%,
+    rgba(118, 207, 232, 0) 70%
+  );
   content: "";
   pointer-events: none;
 }
@@ -1961,7 +1967,9 @@ legend {
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 3px 10px rgba(20, 33, 61, 0.06);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .teacher-student-reminder:hover {
@@ -3435,7 +3443,10 @@ div.profile-avatar-placeholder {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 #open-history-btn:hover,
 #open-history-btn:focus-visible {
@@ -7340,6 +7351,59 @@ legend {
   font-size: 30px;
   line-height: 1;
   cursor: pointer;
+}
+
+/* Shared card language across the application. */
+:where(
+  .account-card,
+  .login-card,
+  .profile-card,
+  .profile-messages-panel,
+  .grammar-card,
+  .chapter-mini-card,
+  .exercise-card,
+  .question-card,
+  .fixer-panel,
+  .error-panel,
+  .listening-player-panel,
+  .discussion-panel,
+  .writing-feedback-card,
+  .writing-tips-card,
+  .writing-submission-panel,
+  .lobby-quiz-panel,
+  .round-leaderboard-panel,
+  .final-results-panel,
+  .word-card,
+  .vocabulary-item,
+  .app-profile-card,
+  .app-feedback-card,
+  .app-calendar-card,
+  .app-reminders-card,
+  .app-reminder,
+  .dashboard-welcome,
+  .dashboard-panel,
+  .dashboard-stat-card,
+  .dashboard-shortcut,
+  .dashboard-reminder,
+  .dashboard-feedback,
+  .student-profile-card,
+  .teacher-card,
+  .teacher-student-reminders,
+  .student-reminder-form,
+  .student-subsection-panel,
+  .student-topic-card,
+  .student-profile-section,
+  .student-summary-grid article,
+  .useful-submissions-card,
+  .chunk-practice-panel,
+  .chunk-guide-card,
+  .admin-live-quiz,
+  .student-live-quiz
+) {
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
 }
 
 .dialog-description {

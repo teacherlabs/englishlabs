@@ -2131,8 +2131,8 @@ app.get("/", (req, res) => {
   }
   if (req.session.isAdmin) return res.redirect("/teacher/dashboard");
   loadProgressForUser(
-    "SELECT activity_type, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
-    "SELECT activity_type, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = $1 ORDER BY completed_at DESC",
+    "SELECT activity_type, difficulty_level, points, total_points, percentage FROM progress WHERE username = ? ORDER BY completed_at DESC",
     req.session.name,
     (error, progress) => {
       if (error) return res.status(500).send("Unable to load dashboard.");
@@ -2153,12 +2153,23 @@ app.get("/", (req, res) => {
               ) / progress.length,
             )
           : 0;
+        const dashboardAreaProgress = buildAreaProgress(progress);
+        const dashboardProgress = Object.fromEntries(
+          dashboardAreaProgress
+            .filter((area) =>
+              ["reading", "grammar", "writing", "listening"].includes(
+                area.key,
+              ),
+            )
+            .map((area) => [area.key, area.percentage]),
+        );
         res.render("dashboard.handlebars", {
           dashboardStats: {
             totalPoints,
             completedActivities: progress.length,
             averageScore,
           },
+          dashboardProgress,
           feedbackMessages: feedbackMessages.slice(0, 3),
           dashboardGoal: res.locals.dashboardGoal,
           studentReminders: res.locals.studentReminders || [],

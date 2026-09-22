@@ -7,23 +7,38 @@
         <p>Keep building your English confidence, one focused step at a time.</p>
         <div class="dashboard-goal">
           <span class="dashboard-label">Learning goal</span>
-          <strong>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}Set a learning goal in your profile.{{/if}}</strong>
+          <strong>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}Set a learning
+              goal in your profile.{{/if}}</strong>
         </div>
       </div>
       {{#if student.avatarUrl}}
-        <img class="dashboard-avatar" src="{{student.avatarUrl}}" alt="{{student.username}}'s avatar" />
+        <img
+          class="dashboard-avatar"
+          src="{{student.avatarUrl}}"
+          alt="{{student.username}}'s avatar"
+        />
       {{else}}
-        <div class="dashboard-avatar dashboard-avatar-placeholder">{{student.avatarInitial}}</div>
+        <div
+          class="dashboard-avatar dashboard-avatar-placeholder"
+        >{{student.avatarInitial}}</div>
       {{/if}}
     </section>
 
-    <section class="dashboard-panel dashboard-reminders-panel" aria-labelledby="dashboard-reminders-heading">
-      <div class="dashboard-panel-heading"><div><p class="eyebrow">Stay on track</p><h2 id="dashboard-reminders-heading">Active reminders</h2></div><a href="/profile">See all</a></div>
+    <section
+      class="dashboard-panel dashboard-reminders-panel"
+      aria-labelledby="dashboard-reminders-heading"
+    >
+      <div class="dashboard-panel-heading"><div><p class="eyebrow">Stay on track</p><h2
+            id="dashboard-reminders-heading"
+          >Active reminders</h2></div><a href="/profile">See all</a></div>
       <div class="dashboard-reminder-list">
         {{#each studentReminders}}
           <article class="dashboard-reminder">
-            <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise →</a>{{/if}}</div>
-            <span class="dashboard-reminder-date">{{#if dueDay}}{{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
+            <div><strong>{{message}}</strong>{{#if target_route}}<a
+                  href="{{target_route}}"
+                >Open linked exercise →</a>{{/if}}</div>
+            <span class="dashboard-reminder-date">{{#if dueDay}}{{dueDay}}
+                {{dueMonth}}{{else}}No deadline{{/if}}</span>
           </article>
         {{else}}
           <p class="empty-state">No active reminders.</p>
@@ -32,34 +47,84 @@
     </section>
   </div>
 
-  <section class="dashboard-shortcuts" aria-labelledby="dashboard-shortcuts-heading">
+  <section
+    class="dashboard-shortcuts"
+    aria-labelledby="dashboard-shortcuts-heading"
+  >
     <h2 id="dashboard-shortcuts-heading" class="visually-hidden">Quick shortcuts</h2>
     <div class="dashboard-shortcut-grid">
-      <a href="/reading" class="dashboard-shortcut"><span class="dashboard-shortcut-icon" aria-hidden="true">▤</span><strong>Reading</strong><span>Explore new texts</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
-      <a href="/practice/questions?chapter=1" class="dashboard-shortcut"><span class="dashboard-shortcut-icon" aria-hidden="true">✎</span><strong>Grammar</strong><span>Practise the essentials</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
-      <a href="/writing" class="dashboard-shortcut"><span class="dashboard-shortcut-icon" aria-hidden="true">✒</span><strong>Writing</strong><span>Put ideas into words</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
-      <a href="/listening" class="dashboard-shortcut"><span class="dashboard-shortcut-icon" aria-hidden="true">◖</span><strong>Listening</strong><span>Train your ear</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/reading" class="dashboard-shortcut"><span
+          class="dashboard-shortcut-icon"
+          aria-hidden="true"
+        >▤</span><strong>Reading</strong><span>{{dashboardProgress.reading}}%</span><span
+          class="dashboard-card-arrow"
+          aria-hidden="true"
+        >↗</span></a>
+      <a href="/practice/questions?chapter=1" class="dashboard-shortcut"><span
+          class="dashboard-shortcut-icon"
+          aria-hidden="true"
+        >✎</span><strong>Grammar</strong><span>{{dashboardProgress.grammar}}%</span><span
+          class="dashboard-card-arrow"
+          aria-hidden="true"
+        >↗</span></a>
+      <a href="/writing" class="dashboard-shortcut"><span
+          class="dashboard-shortcut-icon"
+          aria-hidden="true"
+        >✒</span><strong>Writing</strong><span>{{dashboardProgress.writing}}%</span><span
+          class="dashboard-card-arrow"
+          aria-hidden="true"
+        >↗</span></a>
+      <a href="/listening" class="dashboard-shortcut"><span
+          class="dashboard-shortcut-icon"
+          aria-hidden="true"
+        >◖</span><strong>Listening</strong><span>{{dashboardProgress.listening}}%</span><span
+          class="dashboard-card-arrow"
+          aria-hidden="true"
+        >↗</span></a>
     </div>
   </section>
 
   <div class="dashboard-bottom-grid">
-    <section class="dashboard-panel" aria-labelledby="dashboard-feedback-heading">
-      <div class="dashboard-panel-heading"><div><p class="eyebrow">Teacher messages</p><h2 id="dashboard-feedback-heading">Latest feedback</h2></div><a href="/profile">See all{{#if unreadFeedbackCount}} ({{unreadFeedbackCount}} new){{/if}}</a></div>
+    <section
+      class="dashboard-panel"
+      aria-labelledby="dashboard-feedback-heading"
+    >
+      <div class="dashboard-panel-heading"><div><p class="eyebrow">Teacher
+            messages</p><h2 id="dashboard-feedback-heading">Latest feedback</h2></div><a
+          href="/profile"
+        >See all{{#if unreadFeedbackCount}}
+            ({{unreadFeedbackCount}}
+            new){{/if}}</a></div>
       <div class="dashboard-feedback-list">
         {{#each feedbackMessages}}
-          <article class="dashboard-feedback"><strong>{{topic_title}}</strong><p>{{feedback}}</p><a href="{{feedbackUrl}}">Open feedback →</a></article>
+          <article class="dashboard-feedback"><strong>{{topic_title}}</strong><p
+            >{{feedback}}</p><a href="{{feedbackUrl}}">Open feedback →</a></article>
         {{else}}
           <p class="empty-state">No new feedback messages.</p>
         {{/each}}
       </div>
     </section>
 
-    <section class="dashboard-panel dashboard-stats-panel" aria-labelledby="dashboard-stats-heading">
-      <div class="dashboard-panel-heading"><div><p class="eyebrow">At a glance</p><h2 id="dashboard-stats-heading">Your stats</h2></div></div>
+    <section
+      class="dashboard-panel dashboard-stats-panel"
+      aria-labelledby="dashboard-stats-heading"
+    >
+      <div class="dashboard-panel-heading"><div><p class="eyebrow">At a glance</p><h2
+            id="dashboard-stats-heading"
+          >Your stats</h2></div></div>
       <div class="dashboard-stat-grid">
-        <article class="dashboard-stat-card"><span class="dashboard-stat-icon">★</span><strong>{{dashboardStats.totalPoints}}</strong><span>Total points</span></article>
-        <article class="dashboard-stat-card"><span class="dashboard-stat-icon">✓</span><strong>{{dashboardStats.completedActivities}}</strong><span>Activities completed</span></article>
-        <article class="dashboard-stat-card"><span class="dashboard-stat-icon">%</span><strong>{{dashboardStats.averageScore}}%</strong><span>Average score</span></article>
+        <article class="dashboard-stat-card"><span
+            class="dashboard-stat-icon"
+          >★</span><strong>{{dashboardStats.totalPoints}}</strong><span>Total
+            points</span></article>
+        <article class="dashboard-stat-card"><span
+            class="dashboard-stat-icon"
+          >✓</span><strong>{{dashboardStats.completedActivities}}</strong><span
+          >Activities completed</span></article>
+        <article class="dashboard-stat-card"><span
+            class="dashboard-stat-icon"
+          >%</span><strong>{{dashboardStats.averageScore}}%</strong><span
+          >Average score</span></article>
       </div>
     </section>
   </div>
