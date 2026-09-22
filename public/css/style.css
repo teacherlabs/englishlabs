@@ -908,6 +908,16 @@ legend {
   color: var(--color-background-tint);
 }
 
+.app-sidebar .app-brand-logo {
+  display: block;
+  grid-column: 1 / -1;
+  width: min(100%, 132px);
+  height: 76px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+  background: #ffffff;
+}
+
 .app-sidebar .app-brand small,
 .app-sidebar .app-account-link small,
 .app-sidebar .app-nav-label {
@@ -993,9 +1003,8 @@ legend {
 
 .app-brand {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  justify-items: center;
   align-items: center;
-  column-gap: 10px;
   margin: 0 8px 42px;
   color: var(--app-ink);
   font-family: "Teachers", sans-serif;
@@ -6705,7 +6714,7 @@ legend {
   margin: 32px auto 0;
   padding: 4px 2px 14px;
   overflow-x: auto;
-  scrollbar-color: #f3c76b transparent;
+  scrollbar-color: var(--color-primary) transparent;
 }
 
 .chapter-mini-card {
