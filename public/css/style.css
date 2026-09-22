@@ -1777,6 +1777,7 @@ legend {
   display: block;
   color: #14213d;
   font-weight: 700;
+  font-size: 14px;
   line-height: 1.45;
 }
 .dashboard-reminder-date {
@@ -1816,7 +1817,7 @@ legend {
   display: grid;
   gap: 5px;
   min-height: 116px;
-  padding: 16px 58px 16px 16px;
+  padding: 16px 58px 60px 16px;
   border: 2px solid #14213d;
   border-radius: 20px;
   background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
