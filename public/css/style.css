@@ -5406,8 +5406,8 @@ nav ul li a:hover {
   border: 1px solid #c9e4c5;
   border-radius: 5px;
   padding: 11px 15px;
-  background: #eef8ef;
-  color: #236044;
+  background: var(--color-primary);
+  color: var(--color-surface);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -5425,7 +5425,7 @@ nav ul li a:hover {
 }
 
 .hint-button:hover {
-  background: #dff2e3;
+  background: var(--color-secondary);
   box-shadow: 0 4px 10px rgba(38, 55, 82, 0.12);
   transform: translateY(-2px);
 }
@@ -5438,8 +5438,9 @@ nav ul li a:hover {
 .spelling-hint {
   min-height: 20px;
   margin-top: 10px;
-  color: #236044;
+  color: var(--color-surface);
   font-size: 13px;
+  margin-left: 200px;
 }
 
 .sentence-input {
