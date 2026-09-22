@@ -59,6 +59,20 @@
         </aside>
         <div class="app-main">{{{body}}}</div>
         <aside class="app-rightbar" aria-label="Profile and progress">
+          <div class="candle-sidebar-wrapper" style="display: flex; justify-content: center; padding: 10px 0;">
+            <div class="rpg-candle-container" id="rpgCandle">
+              <div class="candle-glow"></div>
+              <span class="candle-tooltip candle-tooltip-light">Light</span>
+              <span class="candle-tooltip candle-tooltip-extinguish">Extinguish</span>
+              <div class="candle-holder">
+                <div class="candle-body">
+                  <div class="candle-wick"></div>
+                  <div class="candle-flame"></div>
+                </div>
+                <div class="candle-base"></div>
+              </div>
+            </div>
+          </div>
           <div class="app-profile-card">
             <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
             {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar profile-avatar-img" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
@@ -105,6 +119,15 @@
         </aside>
       </div>
       <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const candle = document.getElementById("rpgCandle");
+          if (candle) {
+            candle.addEventListener("click", () => {
+              candle.classList.toggle("is-lit");
+            });
+          }
+        });
+
         document.querySelectorAll("[data-complete-reminder]").forEach((button) => {
           button.addEventListener("click", async () => {
             if (!window.confirm("Mark this reminder as done?")) return;
