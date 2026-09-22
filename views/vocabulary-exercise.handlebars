@@ -338,7 +338,7 @@
       let translationQueue = items.map((item, itemIndex) => itemIndex);
       let failedTranslationItems = [];
       const resetTranslationItem = (item) => {
-        item.classList.remove("celebrate-correct", "celebrate-incorrect");
+        item.classList.remove("celebrate-correct", "celebrate-incorrect", "answer-correct", "answer-incorrect");
         item.querySelector("[data-vocabulary-next]").hidden = true;
         item.querySelectorAll("[data-translation-option]").forEach((option) => {
           option.disabled = false;
@@ -373,13 +373,13 @@
         item.querySelector("[data-vocabulary-feedback]").textContent = correct ? "Correct!" : `Not quite. The answer is ${item.dataset.swedish}.`;
         if (!correct) {
           button.classList.add("is-wrong");
-          item.classList.add("celebrate-incorrect");
+          item.classList.add("celebrate-incorrect", "answer-incorrect");
           failedTranslationItems.push(itemIndex);
           itemNextButton.hidden = false;
           itemNextButton.textContent = "Next word";
           return;
         }
-        item.classList.add("celebrate-correct");
+        item.classList.add("celebrate-correct", "answer-correct");
         points += 1;
         scoreDisplay.textContent = `Points: ${points} / ${items.length}`;
         window.setTimeout(moveNextTranslation, 1500);
@@ -455,7 +455,8 @@
             recordWrongWord(item.dataset.english);
             item.dataset.attempts = Number(item.dataset.attempts || 0) + 1;
             feedback.textContent = "Not quite. Check the spelling and try again.";
-            item.classList.add("celebrate-incorrect");
+            item.classList.remove("answer-correct");
+            item.classList.add("celebrate-incorrect", "answer-incorrect");
             window.setTimeout(() => item.classList.remove("celebrate-incorrect"), 500);
             if (Number(item.dataset.attempts) >= 2) {
               hintText.textContent = `Hint: the word is “${item.dataset.english.trim()}”.`;
@@ -470,7 +471,8 @@
           input.disabled = true;
           checkButton.disabled = true;
           item.classList.remove("celebrate-incorrect");
-          item.classList.add("celebrate-correct");
+          item.classList.remove("answer-incorrect");
+          item.classList.add("celebrate-correct", "answer-correct");
           feedback.textContent = "Correct! You can continue to the next word.";
           scoreDisplay.textContent = `Points: ${points} / ${items.length}`;
           skipButton.hidden = true;
@@ -481,14 +483,14 @@
           if (event.key === "Enter") checkButton.click();
         });
         cardNextButton.addEventListener("click", () => {
-          item.classList.remove("celebrate-correct");
+          item.classList.remove("celebrate-correct", "answer-correct", "answer-incorrect");
           if (!item.dataset.completed && !skippedItems.includes(item)) skippedItems.push(item);
           spellingQueue.shift();
           spellingPosition += 1;
           moveToNextSpelling();
         });
         skipButton.addEventListener("click", () => {
-          item.classList.remove("celebrate-correct");
+          item.classList.remove("celebrate-correct", "answer-correct", "answer-incorrect");
           recordWrongWord(item.dataset.english);
           if (!skippedItems.includes(item)) skippedItems.push(item);
           spellingQueue.shift();
@@ -515,7 +517,7 @@
       items.forEach((item) => item.querySelector("[data-sentence-check]").addEventListener("click", () => {
         const input = item.querySelector(".sentence-input");
         const hasSentence = input.value.trim().length >= 5;
-        if (hasSentence) item.classList.add("celebrate-correct");
+        if (hasSentence) item.classList.add("celebrate-correct", "answer-correct");
         if (hasSentence && !item.dataset.scored) points += 1;
         if (hasSentence) item.dataset.scored = "true";
         scoreDisplay.textContent = `Points: ${points} / ${items.length}`;

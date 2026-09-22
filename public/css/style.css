@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --color-primary: #2d4b7b;
   --color-secondary: #14213d;
   --color-background-tint: #dbeafe;
@@ -5095,7 +5095,7 @@ nav ul li a:hover {
 
 .vocabulary-counter,
 .word-type {
-  color: #d05a3a;
+  color: #14213d;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -5110,13 +5110,20 @@ nav ul li a:hover {
   perspective: 1000px;
   min-height: 330px;
   padding: 38px 28px;
-  border: 1px solid rgba(219, 234, 254, 0.4);
-  border-top: 5px solid var(--color-background-tint);
-  border-radius: 8px;
-  background: var(--color-secondary);
-  box-shadow: 0 14px 30px rgba(20, 33, 61, 0.24);
-  color: var(--color-background-tint);
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
+  color: #14213d;
   text-align: center;
+}
+
+.vocabulary-item.answer-correct {
+  border-color: #2a9d8f;
+}
+
+.vocabulary-item.answer-incorrect {
+  border-color: #e76f51;
 }
 
 .vocabulary-item .word-type,
@@ -5125,7 +5132,7 @@ nav ul li a:hover {
 .vocabulary-item .flip-hint,
 .vocabulary-item .vocabulary-card-back p,
 .vocabulary-item .vocabulary-card-back p span {
-  color: var(--color-background-tint);
+  color: #14213d;
 }
 
 .vocabulary-card-inner {
@@ -5197,7 +5204,7 @@ nav ul li a:hover {
 }
 
 .app-shell .vocabulary-item h2 {
-  color: var(--color-background-tint);
+  color: #14213d;
 }
 
 .word-definition,
@@ -5403,11 +5410,12 @@ nav ul li a:hover {
 }
 
 .hint-button {
-  border: 1px solid #c9e4c5;
+  border: 2px solid #14213d;
   border-radius: 5px;
   padding: 11px 15px;
-  background: var(--color-primary);
-  color: var(--color-surface);
+  background: #14213d;
+  box-shadow: 4px 4px 0 #14213d;
+  color: #fff;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -5425,8 +5433,8 @@ nav ul li a:hover {
 }
 
 .hint-button:hover {
-  background: var(--color-secondary);
-  box-shadow: 0 4px 10px rgba(38, 55, 82, 0.12);
+  background: #2d4b7b;
+  box-shadow: 2px 2px 0 #14213d;
   transform: translateY(-2px);
 }
 
@@ -5438,7 +5446,7 @@ nav ul li a:hover {
 .spelling-hint {
   min-height: 20px;
   margin-top: 10px;
-  color: var(--color-surface);
+  color: #14213d;
   font-size: 13px;
   margin-left: 200px;
 }
@@ -7996,6 +8004,49 @@ footer {
     #eef4fc 70%
   ) !important;
   box-shadow: 4px 4px 0 #14213d !important;
+}
+
+.app-shell .vocabulary-item {
+  border: 2px solid #14213d !important;
+  border-radius: 20px !important;
+  background: radial-gradient(
+    circle at center,
+    #d4f0fc 0%,
+    #eef4fc 70%
+  ) !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+  color: #14213d !important;
+}
+
+.app-shell .vocabulary-item.answer-correct {
+  border-color: #2a9d8f !important;
+}
+
+.app-shell .vocabulary-item.answer-incorrect {
+  border-color: #e76f51 !important;
+}
+
+.app-shell .vocabulary-counter {
+  color: #14213d !important;
+}
+
+.app-shell .vocabulary-exercise .practice-button,
+.app-shell .vocabulary-exercise .notes-button,
+.app-shell .vocabulary-exercise .hint-button,
+.app-shell .vocabulary-exercise .swipe-button {
+  border: 2px solid #14213d !important;
+  border-radius: 5px;
+  background: #14213d !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+  color: #fff !important;
+}
+
+.app-shell .vocabulary-exercise .practice-button:hover:not(:disabled),
+.app-shell .vocabulary-exercise .notes-button:hover:not(:disabled),
+.app-shell .vocabulary-exercise .hint-button:hover,
+.app-shell .vocabulary-exercise .swipe-button:hover {
+  background: #2d4b7b !important;
+  box-shadow: 2px 2px 0 #14213d !important;
 }
 
 .chapter-mini-card,
