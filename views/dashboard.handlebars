@@ -21,9 +21,9 @@
       <div><p class="eyebrow">At a glance</p><h2 id="dashboard-stats-heading">Your progress</h2></div>
     </div>
     <div class="dashboard-stat-grid">
-      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">★</span><strong>{{dashboardStats.totalPoints}}</strong><span>Total points</span></article>
-      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">✓</span><strong>{{dashboardStats.completedActivities}}</strong><span>Activities completed</span></article>
-      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">%</span><strong>{{dashboardStats.averageScore}}%</strong><span>Average score</span></article>
+      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">★</span><strong>{{dashboardStats.totalPoints}}</strong><span>Total points</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></article>
+      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">✓</span><strong>{{dashboardStats.completedActivities}}</strong><span>Activities completed</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></article>
+      <article class="dashboard-stat-card"><span class="dashboard-stat-icon">%</span><strong>{{dashboardStats.averageScore}}%</strong><span>Average score</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></article>
     </div>
   </section>
 
@@ -34,7 +34,7 @@
         {{#each studentReminders}}
           <article class="dashboard-reminder">
             <div><strong>{{message}}</strong>{{#if target_route}}<a href="{{target_route}}">Open linked exercise →</a>{{/if}}</div>
-            <span>{{#if dueDay}}{{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
+            <span class="dashboard-reminder-date">{{#if dueDay}}{{dueDay}} {{dueMonth}}{{else}}No deadline{{/if}}</span>
           </article>
         {{else}}
           <p class="empty-state">No active reminders.</p>
@@ -57,12 +57,12 @@
   <section class="dashboard-panel dashboard-shortcuts" aria-labelledby="dashboard-shortcuts-heading">
     <div class="dashboard-panel-heading"><div><p class="eyebrow">Choose your next step</p><h2 id="dashboard-shortcuts-heading">Quick shortcuts</h2></div></div>
     <div class="dashboard-shortcut-grid">
-      <a href="/practice/questions?chapter=1" class="dashboard-shortcut"><strong>Grammar</strong><span>Practise the essentials →</span></a>
-      <a href="/vocabulary" class="dashboard-shortcut"><strong>Vocabulary</strong><span>Grow your word bank →</span></a>
-      <a href="/reading" class="dashboard-shortcut"><strong>Reading</strong><span>Explore new texts →</span></a>
-      <a href="/writing" class="dashboard-shortcut"><strong>Writing</strong><span>Put ideas into words →</span></a>
-      <a href="/listening" class="dashboard-shortcut"><strong>Listening</strong><span>Train your ear →</span></a>
-      <a href="/lobby" class="dashboard-shortcut"><strong>Lobby</strong><span>Practise together →</span></a>
+      <a href="/practice/questions?chapter=1" class="dashboard-shortcut"><strong>Grammar</strong><span>Practise the essentials</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/vocabulary" class="dashboard-shortcut"><strong>Vocabulary</strong><span>Grow your word bank</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/reading" class="dashboard-shortcut"><strong>Reading</strong><span>Explore new texts</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/writing" class="dashboard-shortcut"><strong>Writing</strong><span>Put ideas into words</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/listening" class="dashboard-shortcut"><strong>Listening</strong><span>Train your ear</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
+      <a href="/lobby" class="dashboard-shortcut"><strong>Lobby</strong><span>Practise together</span><span class="dashboard-card-arrow" aria-hidden="true">↗</span></a>
     </div>
   </section>
 </main>

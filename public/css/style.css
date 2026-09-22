@@ -1665,19 +1665,21 @@ legend {
   margin-top: 12px;
 }
 .dashboard-stat-card {
+  position: relative;
   display: grid;
   gap: 4px;
   padding: 18px;
-  border: 1px solid var(--app-line);
-  border-radius: 12px;
-  background: var(--app-paper);
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
 }
 .dashboard-stat-card strong {
-  color: var(--app-ink);
+  color: #14213d;
   font-size: 28px;
+  font-weight: 700;
 }
-.dashboard-stat-card > span:last-child,
-.dashboard-reminder > span {
+.dashboard-stat-card > span:last-child {
   color: var(--app-muted);
   font-size: 12px;
 }
@@ -1691,6 +1693,10 @@ legend {
 }
 .dashboard-panel {
   padding: 20px;
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
 }
 .dashboard-panel-heading a,
 .dashboard-feedback a,
@@ -1715,14 +1721,30 @@ legend {
 }
 .dashboard-reminder {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: #fcd39d;
 }
 .dashboard-reminder strong,
 .dashboard-feedback strong {
   display: block;
-  color: var(--app-ink);
+  color: #14213d;
+  font-weight: 700;
   line-height: 1.45;
+}
+.dashboard-reminder-date {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #d89b55;
+  color: #14213d;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 .dashboard-feedback p {
   margin: 5px 0 8px;
@@ -1737,24 +1759,64 @@ legend {
   margin-top: 16px;
 }
 .dashboard-shortcut {
+  position: relative;
   display: grid;
   gap: 5px;
-  padding: 16px;
-  border: 1px solid #dbeafe;
-  border-radius: 12px;
-  background: #f8fbff;
-  color: var(--app-ink);
+  min-height: 116px;
+  padding: 16px 58px 16px 16px;
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
+  color: #14213d;
+  font-weight: 700;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 .dashboard-shortcut:hover,
 .dashboard-shortcut:focus-visible {
-  box-shadow: 0 8px 18px rgba(20, 33, 61, 0.12);
   transform: translateY(-2px);
 }
 .dashboard-shortcut span {
-  color: var(--app-muted);
+  color: #14213d;
   font-size: 12px;
+  font-weight: 400;
+}
+.dashboard-card-arrow {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: #14213d;
+  color: #fff !important;
+  font-size: 20px !important;
+  font-weight: 400 !important;
+  line-height: 1;
+}
+
+@media (max-width: 700px) {
+  .dashboard-page {
+    padding: 20px 16px;
+  }
+
+  .dashboard-stat-grid,
+  .dashboard-content-grid,
+  .dashboard-shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-welcome {
+    align-items: flex-start;
+    padding: 22px;
+  }
+
+  .dashboard-panel {
+    padding: 18px;
+  }
 }
 
 .teacher-reminder-panels {
