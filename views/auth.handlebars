@@ -9,6 +9,7 @@
   >
     <source src="/backgrounds/mainpage.mp4" type="video/mp4" />
   </video>
+  <div class="auth-landing-grid" aria-hidden="true"></div>
   <section class="auth-landing-content">
     <p class="eyebrow">English Labs</p>
     <h1>Welcome to Melisa's dungeon</h1>
@@ -20,3 +21,21 @@
     </div>
   </section>
 </main>
+
+<script>
+  (() => { const grid = document.querySelector(".auth-landing-grid"); if (!grid)
+  return; let resizeFrame; let fadeTimers = new WeakMap(); const buildGrid = ()
+  => { const cellSize = 34; const columns = Math.ceil(window.innerWidth /
+  cellSize); const rows = Math.ceil(window.innerHeight / cellSize);
+  grid.style.setProperty("--grid-columns", columns); grid.replaceChildren(); for
+  (let index = 0; index < columns * rows; index += 1) { const cell =
+  document.createElement("span"); cell.className = "auth-landing-grid-cell";
+  cell.addEventListener("pointerenter", () => {
+  clearTimeout(fadeTimers.get(cell)); cell.classList.remove("is-fading");
+  cell.classList.add("is-active"); }); cell.addEventListener("pointerleave", ()
+  => { cell.classList.remove("is-active"); cell.classList.add("is-fading");
+  const timer = setTimeout(() => cell.classList.remove("is-fading"), 260);
+  fadeTimers.set(cell, timer); }); grid.append(cell); } }; buildGrid();
+  window.addEventListener("resize", () => { cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(buildGrid); }); })();
+</script>

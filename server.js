@@ -831,7 +831,12 @@ const decorateTopics = (topics, progress, activityType, levelKey) => {
     };
   });
 };
-const loadProgressForUser = (postgresQuery, sqliteQuery, username, callback) => {
+const loadProgressForUser = (
+  postgresQuery,
+  sqliteQuery,
+  username,
+  callback,
+) => {
   if (postgresPool) {
     postgresReady
       .then(() => postgresPool.query(postgresQuery, [username]))
@@ -851,8 +856,7 @@ const buildVocabularyProgress = (progress, usefulChunkSubmissions = []) => {
     const completedTypes = exerciseTypes.filter((exercise) =>
       progress.some(
         (row) =>
-          row.activity_type === exercise.key &&
-          row.difficulty_level === level,
+          row.activity_type === exercise.key && row.difficulty_level === level,
       ),
     );
     return {
@@ -951,9 +955,9 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
         const completedExercises = new Set(
           area.rows
             .filter(
-          (row) =>
-            row.activity_type === "questions" &&
-            row.difficulty_level.startsWith(`questions:${chapter.id}:`),
+              (row) =>
+                row.activity_type === "questions" &&
+                row.difficulty_level.startsWith(`questions:${chapter.id}:`),
             )
             .map((row) => row.difficulty_level),
         );
@@ -985,7 +989,9 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
           : 0,
         completed: completedChapters.length,
         total: progressDetails.length,
-        completedLabels: completedChapters.map((chapter) => chapter.label).join(", "),
+        completedLabels: completedChapters
+          .map((chapter) => chapter.label)
+          .join(", "),
         remainingLabels: remainingChapters.length
           ? `${remainingChapters.length} chapter${remainingChapters.length === 1 ? "" : "s"} remaining`
           : "",
@@ -995,9 +1001,7 @@ const buildAreaProgress = (progress, usefulChunkSubmissions = []) => {
     if (area.parts) {
       const completedKeys = new Set(
         area.rows.map((row) =>
-          area.key === "vocabulary"
-            ? row.difficulty_level
-            : row.activity_type,
+          area.key === "vocabulary" ? row.difficulty_level : row.activity_type,
         ),
       );
       const completedParts = area.parts.filter((part) =>
@@ -1647,42 +1651,40 @@ app.use((req, res, next) => {
     );
   };
   loadUnreadCounts((error, row) => {
-      const unreadWritingCount = error ? 0 : Number(row.writing_count || 0);
-      const unreadListeningCount = error ? 0 : Number(row.listening_count || 0);
-      res.locals.unreadWritingCount = unreadWritingCount;
-      res.locals.unreadListeningCount = unreadListeningCount;
-      res.locals.unreadFeedbackCount =
-        unreadWritingCount + unreadListeningCount;
-      loadStudentGoal(req.session.name, (goalError, goal) => {
-        res.locals.dashboardGoal = goalError ? "" : goal;
-        loadStudentReminders(req.session.name, (reminderError, reminders) => {
-          if (!reminderError) {
-            const today = new Date().toISOString().slice(0, 10);
-            res.locals.studentReminders = reminders.filter((reminder) => {
-              const dueDate = reminder.due_date
-                ? String(reminder.due_date).slice(0, 10)
-                : "";
-              return !reminder.completed_at && (!dueDate || dueDate >= today);
-            });
-            const dueDates = new Set(
-              res.locals.studentReminders
-                .map((reminder) =>
-                  reminder.due_date
-                    ? String(reminder.due_date).slice(0, 10)
-                    : null,
-                )
-                .filter(Boolean),
-            );
-            res.locals.dashboardSchedule.calendarWeeks.flat().forEach((day) => {
-              if (dueDates.has(day.date)) day.isHighlighted = true;
-            });
-            res.locals.studentRemindersLoaded = true;
-          }
-          next();
-        });
+    const unreadWritingCount = error ? 0 : Number(row.writing_count || 0);
+    const unreadListeningCount = error ? 0 : Number(row.listening_count || 0);
+    res.locals.unreadWritingCount = unreadWritingCount;
+    res.locals.unreadListeningCount = unreadListeningCount;
+    res.locals.unreadFeedbackCount = unreadWritingCount + unreadListeningCount;
+    loadStudentGoal(req.session.name, (goalError, goal) => {
+      res.locals.dashboardGoal = goalError ? "" : goal;
+      loadStudentReminders(req.session.name, (reminderError, reminders) => {
+        if (!reminderError) {
+          const today = new Date().toISOString().slice(0, 10);
+          res.locals.studentReminders = reminders.filter((reminder) => {
+            const dueDate = reminder.due_date
+              ? String(reminder.due_date).slice(0, 10)
+              : "";
+            return !reminder.completed_at && (!dueDate || dueDate >= today);
+          });
+          const dueDates = new Set(
+            res.locals.studentReminders
+              .map((reminder) =>
+                reminder.due_date
+                  ? String(reminder.due_date).slice(0, 10)
+                  : null,
+              )
+              .filter(Boolean),
+          );
+          res.locals.dashboardSchedule.calendarWeeks.flat().forEach((day) => {
+            if (dueDates.has(day.date)) day.isHighlighted = true;
+          });
+          res.locals.studentRemindersLoaded = true;
+        }
+        next();
       });
-    },
-  );
+    });
+  });
 });
 
 const markFeedbackSeen = (username, area) => {
@@ -1697,7 +1699,9 @@ const markFeedbackSeen = (username, area) => {
     )
     .join("; ");
   if (postgresPool) {
-    return postgresReady.then(() => postgresPool.query(postgresQuery, [username]));
+    return postgresReady.then(() =>
+      postgresPool.query(postgresQuery, [username]),
+    );
   }
   return Promise.all(
     tables.map(
@@ -1779,7 +1783,8 @@ const markFeedbackMessageSeen = (sourceType, id, username) => {
 };
 
 const clearUnreadAreaLocals = (res, area) => {
-  const key = area === "writing" ? "unreadWritingCount" : "unreadListeningCount";
+  const key =
+    area === "writing" ? "unreadWritingCount" : "unreadListeningCount";
   res.locals[key] = 0;
   res.locals.unreadFeedbackCount =
     (res.locals.unreadWritingCount || 0) +
@@ -2136,51 +2141,54 @@ app.get("/", (req, res) => {
     req.session.name,
     (error, progress) => {
       if (error) return res.status(500).send("Unable to load dashboard.");
-      loadFeedbackMessages(req.session.name, (feedbackError, feedbackMessages) => {
-        if (feedbackError) {
-          console.error("Unable to load dashboard feedback:", feedbackError);
-          return res.status(500).send("Unable to load dashboard feedback.");
-        }
-        const totalPoints = progress.reduce(
-          (sum, item) => sum + (Number(item.points) || 0),
-          0,
-        );
-        const averageScore = progress.length
-          ? Math.round(
-              progress.reduce(
-                (sum, item) => sum + (Number(item.percentage) || 0),
-                0,
-              ) / progress.length,
-            )
-          : 0;
-        const dashboardAreaProgress = buildAreaProgress(progress);
-        const dashboardProgress = Object.fromEntries(
-          dashboardAreaProgress
-            .filter((area) =>
-              ["reading", "grammar", "writing", "listening"].includes(
-                area.key,
-              ),
-            )
-            .map((area) => [area.key, area.percentage]),
-        );
-        res.render("dashboard.handlebars", {
-          dashboardStats: {
-            totalPoints,
-            completedActivities: progress.length,
-            averageScore,
-          },
-          dashboardProgress,
-          feedbackMessages: feedbackMessages.slice(0, 3),
-          dashboardGoal: res.locals.dashboardGoal,
-          studentReminders: res.locals.studentReminders || [],
-          unreadFeedbackCount: res.locals.unreadFeedbackCount || 0,
-          student: {
-            username: req.session.name,
-            avatarUrl: req.session.avatarUrl,
-            avatarInitial: req.session.avatar_initial,
-          },
-        });
-      });
+      loadFeedbackMessages(
+        req.session.name,
+        (feedbackError, feedbackMessages) => {
+          if (feedbackError) {
+            console.error("Unable to load dashboard feedback:", feedbackError);
+            return res.status(500).send("Unable to load dashboard feedback.");
+          }
+          const totalPoints = progress.reduce(
+            (sum, item) => sum + (Number(item.points) || 0),
+            0,
+          );
+          const averageScore = progress.length
+            ? Math.round(
+                progress.reduce(
+                  (sum, item) => sum + (Number(item.percentage) || 0),
+                  0,
+                ) / progress.length,
+              )
+            : 0;
+          const dashboardAreaProgress = buildAreaProgress(progress);
+          const dashboardProgress = Object.fromEntries(
+            dashboardAreaProgress
+              .filter((area) =>
+                ["reading", "grammar", "writing", "listening"].includes(
+                  area.key,
+                ),
+              )
+              .map((area) => [area.key, area.percentage]),
+          );
+          res.render("dashboard.handlebars", {
+            dashboardStats: {
+              totalPoints,
+              completedActivities: progress.length,
+              averageScore,
+            },
+            dashboardProgress,
+            feedbackMessages: feedbackMessages.slice(0, 3),
+            dashboardGoal: res.locals.dashboardGoal,
+            studentReminders: res.locals.studentReminders || [],
+            unreadFeedbackCount: res.locals.unreadFeedbackCount || 0,
+            student: {
+              username: req.session.name,
+              avatarUrl: req.session.avatarUrl,
+              avatarInitial: req.session.avatar_initial,
+            },
+          });
+        },
+      );
     },
   );
 });
@@ -2288,7 +2296,10 @@ app.get("/listening", requireAuthenticated, (req, res) => {
           )
           .then(({ rows }) => renderListening(rows[0] || null))
           .catch((error) => {
-            console.error("Unable to load listening discussion response:", error);
+            console.error(
+              "Unable to load listening discussion response:",
+              error,
+            );
             renderListening(null);
           });
       }
@@ -2631,7 +2642,6 @@ app.get("/writing/feedback/:id/open", requireLogin, (req, res) => {
         console.error("Unable to mark feedback as seen:", updateError);
         res.status(500).send("Unable to mark feedback as seen.");
       });
-
   };
   if (postgresPool) {
     return postgresReady
@@ -3814,62 +3824,61 @@ app.get("/profile", requireProfileUser, (req, res) => {
               possible_points:
                 summary.possible_points + Number(item.total_points || 0),
               activities: summary.activities + 1,
-              average_score: summary.average_score + Number(item.percentage || 0),
+              average_score:
+                summary.average_score + Number(item.percentage || 0),
             }),
             { points: 0, possible_points: 0, activities: 0, average_score: 0 },
           );
           stats.average_score = stats.activities
             ? Math.round(stats.average_score / stats.activities)
             : 0;
-              const passportStamps = [
-                { title: "First steps", earned: progress.length > 0 },
-                {
-                  title: "Grammar explorer",
-                  earned: progress.some(
-                    (item) => item.activity_type === "questions",
-                  ),
-                },
-                {
-                  title: "Vocabulary traveler",
-                  earned: progress.some((item) =>
-                    item.activity_type.includes("flip"),
-                  ),
-                },
-                {
-                  title: "Final test",
-                  earned: progress.some(
-                    (item) => item.activity_type === "final",
-                  ),
-                },
-              ];
-              grammarDb.all(
-                "SELECT id, title FROM chapters",
-                (chapterError, chapters) => {
-                  if (chapterError) {
-                    console.warn(
-                      "Unable to load chapters; rendering profile without chapter names:",
-                      chapterError,
-                    );
-                    chapters = [];
-                  }
-                  const chapterNames = Object.fromEntries(
-                    chapters.map((chapter) => [chapter.id, chapter.title]),
-                  );
-                  progress.forEach((item) => {
-                    item.display_activity = item.chapter_id
-                      ? chapterNames[item.chapter_id] || item.activity_type
-                      : item.activity_type;
-                  });
-                    loadUsefulChunkSubmissions(
+          const passportStamps = [
+            { title: "First steps", earned: progress.length > 0 },
+            {
+              title: "Grammar explorer",
+              earned: progress.some(
+                (item) => item.activity_type === "questions",
+              ),
+            },
+            {
+              title: "Vocabulary traveler",
+              earned: progress.some((item) =>
+                item.activity_type.includes("flip"),
+              ),
+            },
+            {
+              title: "Final test",
+              earned: progress.some((item) => item.activity_type === "final"),
+            },
+          ];
+          grammarDb.all(
+            "SELECT id, title FROM chapters",
+            (chapterError, chapters) => {
+              if (chapterError) {
+                console.warn(
+                  "Unable to load chapters; rendering profile without chapter names:",
+                  chapterError,
+                );
+                chapters = [];
+              }
+              const chapterNames = Object.fromEntries(
+                chapters.map((chapter) => [chapter.id, chapter.title]),
+              );
+              progress.forEach((item) => {
+                item.display_activity = item.chapter_id
+                  ? chapterNames[item.chapter_id] || item.activity_type
+                  : item.activity_type;
+              });
+              loadUsefulChunkSubmissions(
+                req.session.name,
+                (usefulChunksError, usefulChunkSubmissions) => {
+                  if (usefulChunksError)
+                    return res
+                      .status(500)
+                      .send("Unable to load vocabulary progress.");
+                  loadFeedbackMessages(
                     req.session.name,
-                      (usefulChunksError, usefulChunkSubmissions) => {
-                        if (usefulChunksError)
-                          return res
-                            .status(500)
-                            .send("Unable to load vocabulary progress.");
-                        loadFeedbackMessages(
-                          req.session.name,
-                          (feedbackError, feedbackMessages) => {
+                    (feedbackError, feedbackMessages) => {
                       if (feedbackError) {
                         console.error(
                           "Unable to load feedback messages:",
@@ -3895,48 +3904,48 @@ app.get("/profile", requireProfileUser, (req, res) => {
                               [req.session.name],
                             )
                             .then(({ rows: reminders }) => {
-                          res.locals.studentReminders = reminders;
-                          res.locals.studentRemindersLoaded = true;
-                          const dueDates = new Set(
-                            reminders
-                              .map((reminder) =>
-                                reminder.due_date
-                                  ? String(reminder.due_date).slice(0, 10)
-                                  : null,
-                              )
-                              .filter(Boolean),
-                          );
-                          res.locals.dashboardSchedule.calendarWeeks
-                            .flat()
-                            .forEach((day) => {
-                              if (dueDates.has(day.date))
-                                day.isHighlighted = true;
-                            });
-                          res.render("profile.handlebars", {
-                            student,
-                            isAdmin: Boolean(req.session.isAdmin),
-                            progress,
-                            stats,
-                            areaProgress: buildAreaProgress(
-                              progress,
-                              usefulChunkSubmissions,
-                            ),
-                            passportStamps,
-                            feedbackMessages,
-                            feedbackHistory,
-                            reminders,
-                            unreadFeedbackCount:
-                              (res.locals.unreadWritingCount || 0) +
-                              (res.locals.unreadListeningCount || 0),
-                            query: req.query,
-                          });
+                              res.locals.studentReminders = reminders;
+                              res.locals.studentRemindersLoaded = true;
+                              const dueDates = new Set(
+                                reminders
+                                  .map((reminder) =>
+                                    reminder.due_date
+                                      ? String(reminder.due_date).slice(0, 10)
+                                      : null,
+                                  )
+                                  .filter(Boolean),
+                              );
+                              res.locals.dashboardSchedule.calendarWeeks
+                                .flat()
+                                .forEach((day) => {
+                                  if (dueDates.has(day.date))
+                                    day.isHighlighted = true;
+                                });
+                              res.render("profile.handlebars", {
+                                student,
+                                isAdmin: Boolean(req.session.isAdmin),
+                                progress,
+                                stats,
+                                areaProgress: buildAreaProgress(
+                                  progress,
+                                  usefulChunkSubmissions,
+                                ),
+                                passportStamps,
+                                feedbackMessages,
+                                feedbackHistory,
+                                reminders,
+                                unreadFeedbackCount:
+                                  (res.locals.unreadWritingCount || 0) +
+                                  (res.locals.unreadListeningCount || 0),
+                                query: req.query,
+                              });
                             })
                             .catch((reminderError) => {
-                          console.error(
-                            "Unable to load student reminders:",
-                            reminderError,
-                          );
-                          res.status(500).send("Unable to load reminders.");
+                              console.error(
+                                "Unable to load student reminders:",
+                                reminderError,
+                              );
+                              res.status(500).send("Unable to load reminders.");
                             });
                         },
                       );
@@ -4421,13 +4430,10 @@ app.post("/lobby/join", requireLogin, (req, res) => {
     [code],
     (error, room) => {
       if (error || !room) return res.status(400).redirect("/lobby?error=code");
-      insertLobbyParticipant(
-        room.id,
-        req.session.name,
-        () =>
-          res.redirect(
-            `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
-          ),
+      insertLobbyParticipant(room.id, req.session.name, () =>
+        res.redirect(
+          `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
+        ),
       );
     },
   );
@@ -5648,298 +5654,247 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
                             writingError,
                             writingSubmissions,
                           ) => {
-                                    if (writingError)
-                                      return res
-                                        .status(500)
-                                        .send(
-                                          "Unable to load writing submissions.",
-                                        );
-                                    const groupTopicsByLevel = (
-                                      topics,
-                                      levelKey,
-                                    ) => {
-                                      const levels = new Map();
-                                      topics.forEach((topic) => {
-                                        const level = String(
-                                          topic[levelKey] || "1",
-                                        );
-                                        if (!levels.has(level)) {
-                                          levels.set(level, {
-                                            level,
-                                            topics: [],
-                                            completed: 0,
-                                            total: 0,
-                                          });
-                                        }
-                                        const levelData = levels.get(level);
-                                        const completedExercises =
-                                          topic.exercises.filter(
-                                            (exercise) => exercise.completed,
-                                          ).length;
-                                        levelData.topics.push({
-                                          title: topic.topic.title,
-                                          status: topic.completed
-                                            ? "Completed"
-                                            : completedExercises
-                                              ? "In Progress"
-                                              : "Not Started",
-                                          statusClass: topic.completed
-                                            ? "completed"
-                                            : completedExercises
-                                              ? "in-progress"
-                                              : "not-started",
-                                          completedExercises,
-                                          totalExercises:
-                                            topic.exercises.length,
-                                        });
-                                        levelData.completed +=
-                                          completedExercises;
-                                        levelData.total +=
-                                          topic.exercises.length;
-                                      });
-                                      return [...levels.values()].sort(
-                                        (first, second) =>
-                                          Number(first.level) -
-                                          Number(second.level),
-                                      );
-                                    };
-                                    const decoratedReadingTopics =
-                                      decorateTopics(
-                                        readingTopics,
-                                        progress,
-                                        "reading",
-                                        "readingLevel",
-                                      );
-                                    const decoratedWritingTopics =
-                                      decorateTopics(
-                                        writingTopics,
-                                        progress,
-                                        "writing",
-                                        "writingLevel",
-                                      );
-                                    const decoratedListeningTopics =
-                                      decorateTopics(
-                                        listeningTopics,
-                                        progress,
-                                        "listening",
-                                        "listeningLevel",
-                                      );
-                                    const grammarProgress = progress.filter(
+                            if (writingError)
+                              return res
+                                .status(500)
+                                .send("Unable to load writing submissions.");
+                            const groupTopicsByLevel = (topics, levelKey) => {
+                              const levels = new Map();
+                              topics.forEach((topic) => {
+                                const level = String(topic[levelKey] || "1");
+                                if (!levels.has(level)) {
+                                  levels.set(level, {
+                                    level,
+                                    topics: [],
+                                    completed: 0,
+                                    total: 0,
+                                  });
+                                }
+                                const levelData = levels.get(level);
+                                const completedExercises =
+                                  topic.exercises.filter(
+                                    (exercise) => exercise.completed,
+                                  ).length;
+                                levelData.topics.push({
+                                  title: topic.topic.title,
+                                  status: topic.completed
+                                    ? "Completed"
+                                    : completedExercises
+                                      ? "In Progress"
+                                      : "Not Started",
+                                  statusClass: topic.completed
+                                    ? "completed"
+                                    : completedExercises
+                                      ? "in-progress"
+                                      : "not-started",
+                                  completedExercises,
+                                  totalExercises: topic.exercises.length,
+                                });
+                                levelData.completed += completedExercises;
+                                levelData.total += topic.exercises.length;
+                              });
+                              return [...levels.values()].sort(
+                                (first, second) =>
+                                  Number(first.level) - Number(second.level),
+                              );
+                            };
+                            const decoratedReadingTopics = decorateTopics(
+                              readingTopics,
+                              progress,
+                              "reading",
+                              "readingLevel",
+                            );
+                            const decoratedWritingTopics = decorateTopics(
+                              writingTopics,
+                              progress,
+                              "writing",
+                              "writingLevel",
+                            );
+                            const decoratedListeningTopics = decorateTopics(
+                              listeningTopics,
+                              progress,
+                              "listening",
+                              "listeningLevel",
+                            );
+                            const grammarProgress = progress.filter((item) =>
+                              ["questions", "final"].includes(
+                                item.activity_type,
+                              ),
+                            );
+                            const grammarChapters =
+                              practiceQuestionChapters.map((chapter) => {
+                                const exercises = chapter.exercises.map(
+                                  (exercise, index) => {
+                                    const completion = grammarProgress.find(
                                       (item) =>
-                                        ["questions", "final"].includes(
-                                          item.activity_type,
+                                        item.activity_type === "questions" &&
+                                        item.difficulty_level ===
+                                          `questions:${chapter.id}:${index + 1}`,
+                                    );
+                                    return {
+                                      title: exercise.title,
+                                      completed: Boolean(completion),
+                                      score: completion?.percentage,
+                                    };
+                                  },
+                                );
+                                return {
+                                  title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                  completedExercises: exercises.filter(
+                                    (exercise) => exercise.completed,
+                                  ).length,
+                                  totalExercises: exercises.length,
+                                  percentage: exercises.length
+                                    ? Math.round(
+                                        (exercises.filter(
+                                          (exercise) => exercise.completed,
+                                        ).length /
+                                          exercises.length) *
+                                          100,
+                                      )
+                                    : 0,
+                                  status: exercises.every(
+                                    (exercise) => exercise.completed,
+                                  )
+                                    ? "Completed"
+                                    : exercises.some(
+                                          (exercise) => exercise.completed,
+                                        )
+                                      ? "In Progress"
+                                      : "Not Started",
+                                  statusClass: exercises.every(
+                                    (exercise) => exercise.completed,
+                                  )
+                                    ? "completed"
+                                    : exercises.some(
+                                          (exercise) => exercise.completed,
+                                        )
+                                      ? "in-progress"
+                                      : "not-started",
+                                  showStatus: exercises.some(
+                                    (exercise) => exercise.completed,
+                                  ),
+                                  exercises,
+                                };
+                              });
+                            const finalTestRows = grammarProgress.filter(
+                              (item) => item.activity_type === "final",
+                            );
+                            loadStudentReminders(
+                              student.username,
+                              (remindersError, studentReminders) => {
+                                if (remindersError)
+                                  return res
+                                    .status(500)
+                                    .send("Unable to load student reminders.");
+                                res.render("teacher-student.handlebars", {
+                                  student: {
+                                    ...student,
+                                    avatarUrl: student.avatarUrl,
+                                    spritesheetUrl: student.spritesheetUrl,
+                                    characterConfig: student.characterConfig,
+                                  },
+                                  profileCategory,
+                                  profileIsGrammar:
+                                    profileCategory === "grammar",
+                                  profileIsReading:
+                                    profileCategory === "reading",
+                                  profileIsActivity:
+                                    profileCategory === "grammar",
+                                  profileIsVocabulary:
+                                    profileCategory === "vocabulary",
+                                  profileIsWriting:
+                                    profileCategory === "writing",
+                                  profileIsListening:
+                                    profileCategory === "listening",
+                                  progress,
+                                  grammarStats: preparedStats.filter((stat) =>
+                                    ["questions", "final"].includes(
+                                      stat.activity_type,
+                                    ),
+                                  ),
+                                  activityStats: preparedStats,
+                                  bestActivity: rankedStats[0],
+                                  needsFocus:
+                                    rankedStats[rankedStats.length - 1],
+                                  usefulChunkSubmissions,
+                                  usefulChunkSubmissionCount:
+                                    usefulChunkSubmissions.length,
+                                  usefulChunkListsForAdmin,
+                                  flipCompletions,
+                                  hardestWords,
+                                  listeningCompletions,
+                                  readingCompletions,
+                                  listeningDiscussionSubmissions:
+                                    discussionError
+                                      ? []
+                                      : listeningDiscussionSubmissions.map(
+                                          (submission) => ({
+                                            ...submission,
+                                            needsFeedback: !submission.feedback,
+                                          }),
                                         ),
-                                    );
-                                    const grammarChapters =
-                                      practiceQuestionChapters.map(
-                                        (chapter) => {
-                                          const exercises =
-                                            chapter.exercises.map(
-                                              (exercise, index) => {
-                                                const completion =
-                                                  grammarProgress.find(
-                                                    (item) =>
-                                                      item.activity_type ===
-                                                        "questions" &&
-                                                      item.difficulty_level ===
-                                                        `questions:${chapter.id}:${index + 1}`,
-                                                  );
-                                                return {
-                                                  title: exercise.title,
-                                                  completed:
-                                                    Boolean(completion),
-                                                  score: completion?.percentage,
-                                                };
-                                              },
-                                            );
-                                          return {
-                                            title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
-                                            completedExercises: exercises.filter(
-                                              (exercise) => exercise.completed,
-                                            ).length,
-                                            totalExercises: exercises.length,
-                                            percentage: exercises.length
-                                              ? Math.round(
-                                                  (exercises.filter(
-                                                    (exercise) =>
-                                                      exercise.completed,
-                                                  ).length /
-                                                    exercises.length) *
-                                                    100,
-                                                )
-                                              : 0,
-                                            status: exercises.every(
-                                              (exercise) => exercise.completed,
-                                            )
-                                              ? "Completed"
-                                              : exercises.some(
-                                                    (exercise) =>
-                                                      exercise.completed,
-                                                  )
-                                                ? "In Progress"
-                                                : "Not Started",
-                                            statusClass: exercises.every(
-                                              (exercise) => exercise.completed,
-                                            )
-                                              ? "completed"
-                                              : exercises.some(
-                                                    (exercise) =>
-                                                      exercise.completed,
-                                                  )
-                                                ? "in-progress"
-                                                : "not-started",
-                                            showStatus: exercises.some(
-                                              (exercise) => exercise.completed,
-                                            ),
-                                            exercises,
-                                          };
-                                        },
+                                  writingDiscussionSubmissions:
+                                    writingDiscussionError
+                                      ? []
+                                      : writingDiscussionSubmissions.map(
+                                          (submission) => ({
+                                            ...submission,
+                                            needsFeedback: !submission.feedback,
+                                          }),
+                                        ),
+                                  readingProgressLevels: groupTopicsByLevel(
+                                    decoratedReadingTopics,
+                                    "readingLevel",
+                                  ),
+                                  writingProgressLevels: groupTopicsByLevel(
+                                    decoratedWritingTopics,
+                                    "writingLevel",
+                                  ),
+                                  listeningProgressLevels: groupTopicsByLevel(
+                                    decoratedListeningTopics,
+                                    "listeningLevel",
+                                  ),
+                                  grammarChapters,
+                                  finalTestRows,
+                                  writingSubmissions: writingSubmissions.map(
+                                    (submission) => {
+                                      const topic = writingTopics.find(
+                                        (entry) =>
+                                          entry.topic.id ===
+                                          submission.topic_id,
                                       );
-                                    const finalTestRows =
-                                      grammarProgress.filter(
-                                        (item) =>
-                                          item.activity_type === "final",
-                                      );
-                                    loadStudentReminders(
-                                      student.username,
-                                      (remindersError, studentReminders) => {
-                                        if (remindersError)
-                                          return res
-                                            .status(500)
-                                            .send(
-                                              "Unable to load student reminders.",
-                                            );
-                                        res.render(
-                                          "teacher-student.handlebars",
-                                          {
-                                            student: {
-                                              ...student,
-                                              avatarUrl: student.avatarUrl,
-                                              spritesheetUrl:
-                                                student.spritesheetUrl,
-                                              characterConfig:
-                                                student.characterConfig,
-                                            },
-                                            profileCategory,
-                                            profileIsGrammar:
-                                              profileCategory === "grammar",
-                                            profileIsReading:
-                                              profileCategory === "reading",
-                                            profileIsActivity:
-                                              profileCategory === "grammar",
-                                            profileIsVocabulary:
-                                              profileCategory === "vocabulary",
-                                            profileIsWriting:
-                                              profileCategory === "writing",
-                                            profileIsListening:
-                                              profileCategory === "listening",
-                                            progress,
-                                            grammarStats: preparedStats.filter(
-                                              (stat) =>
-                                                ["questions", "final"].includes(
-                                                  stat.activity_type,
-                                                ),
-                                            ),
-                                            activityStats: preparedStats,
-                                            bestActivity: rankedStats[0],
-                                            needsFocus:
-                                              rankedStats[
-                                                rankedStats.length - 1
-                                              ],
-                                            usefulChunkSubmissions,
-                                            usefulChunkSubmissionCount:
-                                              usefulChunkSubmissions.length,
-                                            usefulChunkListsForAdmin,
-                                            flipCompletions,
-                                            hardestWords,
-                                            listeningCompletions,
-                                            readingCompletions,
-                                            listeningDiscussionSubmissions:
-                                              discussionError
-                                                ? []
-                                                : listeningDiscussionSubmissions.map(
-                                                    (submission) => ({
-                                                      ...submission,
-                                                      needsFeedback:
-                                                        !submission.feedback,
-                                                    }),
-                                                  ),
-                                            writingDiscussionSubmissions:
-                                              writingDiscussionError
-                                                ? []
-                                                : writingDiscussionSubmissions.map(
-                                                    (submission) => ({
-                                                      ...submission,
-                                                      needsFeedback:
-                                                        !submission.feedback,
-                                                    }),
-                                                  ),
-                                            readingProgressLevels:
-                                              groupTopicsByLevel(
-                                                decoratedReadingTopics,
-                                                "readingLevel",
-                                              ),
-                                            writingProgressLevels:
-                                              groupTopicsByLevel(
-                                                decoratedWritingTopics,
-                                                "writingLevel",
-                                              ),
-                                            listeningProgressLevels:
-                                              groupTopicsByLevel(
-                                                decoratedListeningTopics,
-                                                "listeningLevel",
-                                              ),
-                                            grammarChapters,
-                                            finalTestRows,
-                                            writingSubmissions:
-                                              writingSubmissions.map(
-                                                (submission) => {
-                                                  const topic =
-                                                    writingTopics.find(
-                                                      (entry) =>
-                                                        entry.topic.id ===
-                                                        submission.topic_id,
-                                                    );
-                                                  return {
-                                                    ...submission,
-                                                    level:
-                                                      topic?.writingLevel ||
-                                                      "2",
-                                                    needsFeedback:
-                                                      !submission.feedback,
-                                                  };
-                                                },
-                                              ),
-                                            writingSubmissionCount:
-                                              writingSubmissions.filter(
-                                                (submission) =>
-                                                  !submission.feedback,
-                                              ).length,
-                                            writingDiscussionCount:
-                                              writingDiscussionError
-                                                ? 0
-                                                : writingDiscussionSubmissions.filter(
-                                                    (submission) =>
-                                                      !submission.feedback,
-                                                  ).length,
-                                            listeningDiscussionCount:
-                                              discussionError
-                                                ? 0
-                                                : listeningDiscussionSubmissions.filter(
-                                                    (submission) =>
-                                                      !submission.feedback,
-                                                  ).length,
-                                            studentReminders,
-                                            studentReminderPreview:
-                                              studentReminders.slice(0, 3),
-                                            hasMoreStudentReminders:
-                                              studentReminders.length > 3,
-                                            difficultWordsEasy,
-                                            difficultWordsMedium,
-                                          },
-                                        );
-                                      },
-                                    );
+                                      return {
+                                        ...submission,
+                                        level: topic?.writingLevel || "2",
+                                        needsFeedback: !submission.feedback,
+                                      };
+                                    },
+                                  ),
+                                  writingSubmissionCount:
+                                    writingSubmissions.filter(
+                                      (submission) => !submission.feedback,
+                                    ).length,
+                                  writingDiscussionCount: writingDiscussionError
+                                    ? 0
+                                    : writingDiscussionSubmissions.filter(
+                                        (submission) => !submission.feedback,
+                                      ).length,
+                                  listeningDiscussionCount: discussionError
+                                    ? 0
+                                    : listeningDiscussionSubmissions.filter(
+                                        (submission) => !submission.feedback,
+                                      ).length,
+                                  studentReminders,
+                                  studentReminderPreview:
+                                    studentReminders.slice(0, 3),
+                                  hasMoreStudentReminders:
+                                    studentReminders.length > 3,
+                                  difficultWordsEasy,
+                                  difficultWordsMedium,
+                                });
+                              },
+                            );
                           },
                         );
                       },
