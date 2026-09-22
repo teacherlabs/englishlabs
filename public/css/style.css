@@ -83,6 +83,7 @@ legend {
   display: grid;
   gap: 8px;
   max-width: 680px;
+  padding: 30px;
 }
 
 .lobby-form label {
@@ -1373,7 +1374,7 @@ legend {
   height: 20px;
   padding: 0 5px;
   border-radius: 10px;
-  background: var(--color-accent);
+  background: var(--color-secondary);
   color: var(--color-surface);
   font-size: 10px;
   font-weight: 800;
@@ -5622,7 +5623,7 @@ nav ul li a:hover {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 13px 0;
+  padding: 13px 15px;
   border: 0;
   background: transparent;
   color: #14213d;
