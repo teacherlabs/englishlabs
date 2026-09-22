@@ -7917,6 +7917,53 @@ footer {
   background: var(--color-secondary) !important;
 }
 
+/* Keep chapter and exercise cards on the shared card treatment. */
+.app-shell .chapter-mini-card,
+.app-shell .exercise-card,
+.app-shell .question-card,
+.app-shell .fixer-panel,
+.app-shell .error-panel {
+  border: 2px solid #14213d !important;
+  border-radius: 20px !important;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%) !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+}
+
+.app-shell .chapter-mini-card:hover,
+.app-shell .chapter-mini-card.selected,
+.app-shell .exercise-card:hover,
+.app-shell .exercise-card.selected,
+.app-shell .question-card:hover,
+.app-shell .fixer-panel:hover,
+.app-shell .error-panel:hover {
+  border-color: #14213d !important;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%) !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+}
+
+.chapter-mini-card,
+.exercise-card,
+.question-card,
+.fixer-panel,
+.error-panel {
+  border: 2px solid #14213d !important;
+  border-radius: 20px !important;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%) !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+}
+
+.chapter-mini-card:hover,
+.chapter-mini-card.selected,
+.exercise-card:hover,
+.exercise-card.selected,
+.question-card:hover,
+.fixer-panel:hover,
+.error-panel:hover {
+  border-color: #14213d !important;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%) !important;
+  box-shadow: 4px 4px 0 #14213d !important;
+}
+
 .auth-landing {
   background: var(--color-background-tint);
 }
