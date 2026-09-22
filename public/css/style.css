@@ -8069,7 +8069,7 @@ footer {
 
 .candle-tooltip {
   position: absolute;
-  top: 6px;
+  top: calc(100% + 8px);
   left: 50%;
   padding: 4px 7px;
   border: 1px solid #14213d;
@@ -8081,7 +8081,9 @@ footer {
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   white-space: nowrap;
 }
 
@@ -8093,6 +8095,12 @@ footer {
 
 .rpg-candle-container.is-lit .candle-tooltip-light {
   opacity: 0;
+}
+
+.app-sidebar-footer .candle-sidebar-wrapper {
+  position: relative;
+  min-height: 126px;
+  overflow: visible;
 }
 
 /* Det varma, pulserande skenet runt ljuset när det är tänt */

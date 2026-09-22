@@ -11,6 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
@@ -50,6 +51,20 @@
             {{#each appNavPractice}}<a href="{{href}}" class="app-nav-link{{#if active}} is-active{{/if}}"{{#if active}} aria-current="page"{{/if}}><span class="app-nav-icon">{{icon}}</span><span>{{label}}</span></a>{{/each}}
           </nav>
           <div class="app-sidebar-footer">
+            <div class="candle-sidebar-wrapper" style="display: flex; justify-content: center; padding: 10px 0;">
+              <div class="rpg-candle-container" id="rpgCandle">
+                <div class="candle-glow"></div>
+                <span class="candle-tooltip candle-tooltip-light">Light</span>
+                <span class="candle-tooltip candle-tooltip-extinguish">Extinguish</span>
+                <div class="candle-holder">
+                  <div class="candle-body">
+                    <div class="candle-wick"></div>
+                    <div class="candle-flame"></div>
+                  </div>
+                  <div class="candle-base"></div>
+                </div>
+              </div>
+            </div>
             <a href="/profile" class="app-account-link">
               {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="" class="app-avatar profile-avatar-img" />{{else}}<span class="app-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
               <span><strong>{{session.name}}</strong><small>{{#if session.isAdmin}}Teacher account{{else}}Student account{{/if}}</small></span>
@@ -59,20 +74,6 @@
         </aside>
         <div class="app-main">{{{body}}}</div>
         <aside class="app-rightbar" aria-label="Profile and progress">
-          <div class="candle-sidebar-wrapper" style="display: flex; justify-content: center; padding: 10px 0;">
-            <div class="rpg-candle-container" id="rpgCandle">
-              <div class="candle-glow"></div>
-              <span class="candle-tooltip candle-tooltip-light">Light</span>
-              <span class="candle-tooltip candle-tooltip-extinguish">Extinguish</span>
-              <div class="candle-holder">
-                <div class="candle-body">
-                  <div class="candle-wick"></div>
-                  <div class="candle-flame"></div>
-                </div>
-                <div class="candle-base"></div>
-              </div>
-            </div>
-          </div>
           <div class="app-profile-card">
             <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
             {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar profile-avatar-img" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
@@ -122,8 +123,25 @@
         document.addEventListener("DOMContentLoaded", () => {
           const candle = document.getElementById("rpgCandle");
           if (candle) {
+            const candleStorageKey = "rpgCandleLit";
+            try {
+              if (localStorage.getItem(candleStorageKey) === "true") {
+                candle.classList.add("is-lit");
+              }
+            } catch (error) {
+              console.warn("Unable to restore candle state.", error);
+            }
+
             candle.addEventListener("click", () => {
               candle.classList.toggle("is-lit");
+              try {
+                localStorage.setItem(
+                  candleStorageKey,
+                  String(candle.classList.contains("is-lit")),
+                );
+              } catch (error) {
+                console.warn("Unable to save candle state.", error);
+              }
             });
           }
         });
