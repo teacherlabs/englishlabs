@@ -29,7 +29,7 @@
     >
       <div class="dashboard-panel-heading"><div><p class="eyebrow">Stay on track</p><h2
             id="dashboard-reminders-heading"
-          >Active reminders</h2></div><a href="/profile">See all</a></div>
+          >Active reminders</h2></div></div>
       <div class="dashboard-reminder-list">
         {{#each studentReminders}}
           <article class="dashboard-reminder">
@@ -65,6 +65,14 @@
           aria-hidden="true"
         >✎</span><strong>Grammar</strong><span
         >{{dashboardProgress.grammar}}%</span><span
+          class="dashboard-card-arrow"
+          aria-hidden="true"
+        >↗</span></a>
+      <a href="/vocabulary" class="dashboard-shortcut"><span
+          class="dashboard-shortcut-icon"
+          aria-hidden="true"
+        >Aa</span><strong>Vocabulary</strong><span
+        >{{dashboardProgress.vocabulary}}%</span><span
           class="dashboard-card-arrow"
           aria-hidden="true"
         >↗</span></a>

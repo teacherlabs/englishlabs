@@ -922,9 +922,24 @@ legend {
 .app-sidebar .app-nav-link:hover,
 .app-sidebar .app-nav-link:focus-visible,
 .app-sidebar .app-nav-link.is-active {
+  position: relative;
   background: #1f3b63;
-  border-color: #42658f;
+  border-color: #79c9e8;
   color: #ffffff;
+}
+
+.app-sidebar .app-nav-link.is-active {
+  box-shadow: inset 4px 0 0 #79c9e8;
+  font-weight: 800;
+}
+
+.app-sidebar .app-nav-link.is-active::before {
+  width: 4px;
+  height: 22px;
+  margin-left: -10px;
+  border-radius: 0 3px 3px 0;
+  background: #79c9e8;
+  content: "";
 }
 
 .app-sidebar .app-nav-link:hover .app-nav-icon,
@@ -1644,6 +1659,8 @@ legend {
 }
 .dashboard-welcome h1 {
   font-size: clamp(24px, 3vw, 32px);
+  font-family: "Bitter", serif;
+  font-weight: 800;
   white-space: nowrap;
 }
 .dashboard-welcome-copy > p:not(.eyebrow) {
@@ -1752,7 +1769,7 @@ legend {
   gap: 12px;
   padding: 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 20px;
   background: #fcd39d;
 }
 .dashboard-reminder strong,
@@ -1792,7 +1809,7 @@ legend {
   border: 0;
 }
 .dashboard-shortcut-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .dashboard-shortcut {
   position: relative;

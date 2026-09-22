@@ -2164,7 +2164,7 @@ app.get("/", (req, res) => {
           const dashboardProgress = Object.fromEntries(
             dashboardAreaProgress
               .filter((area) =>
-                ["reading", "grammar", "writing", "listening"].includes(
+                ["reading", "grammar", "vocabulary", "writing", "listening"].includes(
                   area.key,
                 ),
               )
