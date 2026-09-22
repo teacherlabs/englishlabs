@@ -23,19 +23,45 @@
 </main>
 
 <script>
-  (() => { const grid = document.querySelector(".auth-landing-grid"); if (!grid)
-  return; let resizeFrame; let fadeTimers = new WeakMap(); const buildGrid = ()
-  => { const cellSize = 34; const columns = Math.ceil(window.innerWidth /
-  cellSize); const rows = Math.ceil(window.innerHeight / cellSize);
-  grid.style.setProperty("--grid-columns", columns); grid.replaceChildren(); for
-  (let index = 0; index < columns * rows; index += 1) { const cell =
-  document.createElement("span"); cell.className = "auth-landing-grid-cell";
-  cell.addEventListener("pointerenter", () => {
-  clearTimeout(fadeTimers.get(cell)); cell.classList.remove("is-fading");
-  cell.classList.add("is-active"); }); cell.addEventListener("pointerleave", ()
-  => { cell.classList.remove("is-active"); cell.classList.add("is-fading");
-  const timer = setTimeout(() => cell.classList.remove("is-fading"), 260);
-  fadeTimers.set(cell, timer); }); grid.append(cell); } }; buildGrid();
-  window.addEventListener("resize", () => { cancelAnimationFrame(resizeFrame);
-  resizeFrame = requestAnimationFrame(buildGrid); }); })();
+  (function initializeLandingGrid() {
+    var grid = document.querySelector(".auth-landing-grid");
+    if (!grid) return;
+
+    var resizeFrame;
+    var fadeTimers = new WeakMap();
+
+    function buildGrid() {
+      var cellSize = 34;
+      var columns = Math.ceil(window.innerWidth / cellSize);
+      var rows = Math.ceil(window.innerHeight / cellSize);
+      grid.style.setProperty("--grid-columns", columns);
+      grid.replaceChildren();
+
+      for (var index = 0; index < columns * rows; index += 1) {
+        var cell = document.createElement("span");
+        cell.className = "auth-landing-grid-cell";
+        cell.addEventListener("pointerenter", function handlePointerEnter() {
+          clearTimeout(fadeTimers.get(this));
+          this.classList.remove("is-fading");
+          this.classList.add("is-active");
+        });
+        cell.addEventListener("pointerleave", function handlePointerLeave() {
+          var currentCell = this;
+          currentCell.classList.remove("is-active");
+          currentCell.classList.add("is-fading");
+          var timer = setTimeout(function clearFade() {
+            currentCell.classList.remove("is-fading");
+          }, 800);
+          fadeTimers.set(currentCell, timer);
+        });
+        grid.append(cell);
+      }
+    }
+
+    buildGrid();
+    window.addEventListener("resize", function handleResize() {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(buildGrid);
+    });
+  })();
 </script>
