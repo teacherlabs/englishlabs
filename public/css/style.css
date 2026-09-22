@@ -975,6 +975,12 @@ legend {
   color: #eef4fc !important;
 }
 
+.app-shell .app-sidebar .app-nav-link:hover > span:not(.app-nav-icon),
+.app-shell .app-sidebar .app-nav-link:focus-visible > span:not(.app-nav-icon),
+.app-shell .app-sidebar .app-nav-link.is-active > span:not(.app-nav-icon) {
+  color: #eef4fc !important;
+}
+
 .app-sidebar .app-sidebar-footer {
   border-top-color: rgba(219, 234, 254, 0.25);
 }
