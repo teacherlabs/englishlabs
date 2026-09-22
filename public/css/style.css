@@ -961,6 +961,20 @@ legend {
   color: var(--color-primary);
 }
 
+.app-shell .app-sidebar .app-nav-link:hover,
+.app-shell .app-sidebar .app-nav-link:focus-visible,
+.app-shell .app-sidebar .app-nav-link.is-active {
+  background: #1f3b63 !important;
+  border-color: #79c9e8 !important;
+  color: #ffffff !important;
+}
+
+.app-shell .app-sidebar .app-nav-link:hover .app-nav-icon,
+.app-shell .app-sidebar .app-nav-link:focus-visible .app-nav-icon,
+.app-shell .app-sidebar .app-nav-link.is-active .app-nav-icon {
+  color: #eef4fc !important;
+}
+
 .app-sidebar .app-sidebar-footer {
   border-top-color: rgba(219, 234, 254, 0.25);
 }
@@ -1395,6 +1409,11 @@ legend {
   font-weight: 800;
 }
 
+.app-shell .app-reminder-count {
+  background: #14213d !important;
+  color: #eef4fc !important;
+}
+
 .app-reminders-list {
   display: grid;
   gap: 8px;
@@ -1768,9 +1787,10 @@ legend {
   justify-content: space-between;
   gap: 12px;
   padding: 10px;
-  border: 0;
+  border: 2px solid #14213d;
   border-radius: 20px;
-  background: #fcd39d;
+  background: #d4f0fc;
+  box-shadow: 4px 4px 0 #14213d;
 }
 .dashboard-reminder strong,
 .dashboard-feedback strong {
@@ -1784,7 +1804,7 @@ legend {
   flex: 0 0 auto;
   padding: 8px 10px;
   border-radius: 999px;
-  background: #d89b55;
+  background: #b9d7f2;
   color: #14213d;
   font-size: 11px;
   font-weight: 700;
