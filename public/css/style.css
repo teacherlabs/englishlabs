@@ -353,9 +353,7 @@ legend {
   height: 100%;
   overflow: auto;
   padding: 18px;
-  border: 3px solid #14213d;
-  background: #dce9e7;
-  box-shadow: 12px 12px 0 rgba(20, 33, 61, 0.12);
+
 }
 .teacher-lobby-stage-wrap {
   grid-template-columns: minmax(0, 1fr) 420px;
