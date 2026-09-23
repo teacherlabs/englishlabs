@@ -33,7 +33,7 @@
                 <button class="practice-button" type="submit" data-create-game disabled>Create game</button>
               </form>
               {{/unless}}
-            {{else}}<form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
+            {{else}}<div class="lobby-question-actions"><button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create New Quiz</button><span>or add a question manually</span></div><form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
             {{#if questions}}{{#unless isQuicktype}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/unless}}{{/if}}
           {{else}}
             <p class="admin-live-note">The live game appears in the lobby below.</p>
@@ -44,6 +44,27 @@
       {{#unless participant}}<h1>Join a quiz</h1><form class="lobby-form" action="/lobby/join" method="post"><label for="room-code">Enter the 4-digit code</label><input id="room-code" name="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" /><button class="practice-button" type="submit">Join room</button></form>{{/unless}}
     {{/if}}
   </section>
+  {{#if isAdmin}}{{#if room}}{{#unless isQuicktype}}
+  <div class="quiz-selector-modal" data-quiz-selector hidden>
+    <section class="quiz-selector-dialog" role="dialog" aria-modal="true" aria-labelledby="quiz-selector-title">
+      <div class="quiz-selector-heading"><div><p class="eyebrow">Quiz library</p><h2 id="quiz-selector-title">Choose a quiz</h2></div><button type="button" class="quiz-selector-close" data-quiz-selector-close aria-label="Close quiz selector">&times;</button></div>
+      <div class="quiz-selector-grid" data-quiz-selector-grid><p class="admin-live-note">Loading quizzes...</p></div>
+    </section>
+  </div>
+  <div class="quiz-selector-modal" data-quiz-creator hidden>
+    <section class="quiz-selector-dialog quiz-creator-dialog" role="dialog" aria-modal="true" aria-labelledby="quiz-creator-title">
+      <div class="quiz-selector-heading"><div><p class="eyebrow">Quiz library</p><h2 id="quiz-creator-title">Create New Quiz</h2></div><button type="button" class="quiz-selector-close" data-quiz-creator-close aria-label="Close quiz creator">&times;</button></div>
+      <form data-quiz-creator-form>
+        <label class="quiz-creator-label" for="new-quiz-title">Quiz title</label>
+        <input id="new-quiz-title" class="quiz-creator-title-input" name="title" maxlength="100" placeholder="Friday grammar challenge" required />
+        <div class="quiz-creator-questions" data-quiz-creator-questions></div>
+        <button type="button" class="notes-button" data-add-quiz-question>+ Add Question</button>
+        <p class="quiz-selector-error" data-quiz-creator-error hidden></p>
+        <button class="practice-button quiz-creator-save" type="submit">Save Quiz to Database</button>
+      </form>
+    </section>
+  </div>
+  {{/unless}}{{/if}}
   <section class="lobby-shell">
     {{#if isAdmin}}
       {{#if room}}
@@ -921,6 +942,108 @@
       });
     }
   }
+
+  const chooseQuizButton = document.querySelector("[data-choose-quiz]");
+  const quizSelector = document.querySelector("[data-quiz-selector]");
+  const quizSelectorGrid = document.querySelector("[data-quiz-selector-grid]");
+  const quizSelectorClose = document.querySelector("[data-quiz-selector-close]");
+  const roomIdForQuizSelection = document.querySelector("[data-lobby-phase]")?.dataset.roomId;
+  const closeQuizSelector = () => {
+    if (quizSelector) quizSelector.hidden = true;
+  };
+  const renderQuizCards = (quizzes) => {
+    if (!quizSelectorGrid) return;
+    quizSelectorGrid.innerHTML = quizzes.length
+      ? quizzes.map((quiz) => `<button class="quiz-selector-card" type="button" data-quiz-id="${escapeHtml(quiz.quiz_id)}"><strong>${escapeHtml(quiz.topic_title)}</strong><span>${escapeHtml(quiz.chapter_title)}${quiz.cefr_level ? ` · ${escapeHtml(quiz.cefr_level)}` : ""}</span><small>${quiz.question_count} questions</small></button>`).join("")
+      : "<p class=\"admin-live-note\">No pre-made quizzes are available.</p>";
+    quizSelectorGrid.querySelectorAll("[data-quiz-id]").forEach((card) => {
+      card.addEventListener("click", async () => {
+        card.disabled = true;
+        card.classList.add("is-loading");
+        try {
+          const response = await fetch("/api/lobby/select-quiz", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roomId: roomIdForQuizSelection, quizId: card.dataset.quizId }),
+          });
+          if (!response.ok) throw new Error("Unable to select quiz");
+          window.location.reload();
+        } catch (error) {
+          card.disabled = false;
+          card.classList.remove("is-loading");
+          if (quizSelectorGrid) quizSelectorGrid.insertAdjacentHTML("afterbegin", "<p class=\"quiz-selector-error\">Unable to load that quiz. Please try again.</p>");
+        }
+      });
+    });
+  };
+  chooseQuizButton?.addEventListener("click", async () => {
+    if (!quizSelector) return;
+    quizSelector.hidden = false;
+    if (quizSelectorGrid) quizSelectorGrid.innerHTML = "<p class=\"admin-live-note\">Loading quizzes...</p>";
+    try {
+      const response = await fetch("/api/lobby/quizzes");
+      if (!response.ok) throw new Error("Unable to load quizzes");
+      const data = await response.json();
+      renderQuizCards(data.quizzes || []);
+    } catch (error) {
+      if (quizSelectorGrid) quizSelectorGrid.innerHTML = "<p class=\"quiz-selector-error\">Unable to load the quiz library.</p>";
+    }
+  });
+  quizSelectorClose?.addEventListener("click", closeQuizSelector);
+  quizSelector?.addEventListener("click", (event) => { if (event.target === quizSelector) closeQuizSelector(); });
+
+  const createQuizButton = document.querySelector("[data-create-quiz]");
+  const quizCreator = document.querySelector("[data-quiz-creator]");
+  const quizCreatorClose = document.querySelector("[data-quiz-creator-close]");
+  const quizCreatorForm = document.querySelector("[data-quiz-creator-form]");
+  const quizCreatorQuestions = document.querySelector("[data-quiz-creator-questions]");
+  const quizCreatorError = document.querySelector("[data-quiz-creator-error]");
+  let quizQuestionIndex = 0;
+  const addQuizQuestion = () => {
+    if (!quizCreatorQuestions) return;
+    const index = quizQuestionIndex++;
+    quizCreatorQuestions.insertAdjacentHTML("beforeend", `<fieldset class="quiz-creator-question"><legend>Question ${index + 1}</legend><textarea name="question_${index}" placeholder="Question text" rows="2" required></textarea><div class="quiz-creator-answer-grid">${["a", "b", "c", "d"].map((letter) => `<label><input type="radio" name="correct_${index}" value="${letter}"${letter === "a" ? " checked" : ""} /><span>Correct</span><input name="answer_${index}_${letter}" placeholder="Option ${letter.toUpperCase()}" required /></label>`).join("")}</div></fieldset>`);
+  };
+  const closeQuizCreator = () => {
+    if (quizCreator) quizCreator.hidden = true;
+  };
+  createQuizButton?.addEventListener("click", () => {
+    if (!quizCreator) return;
+    quizCreator.hidden = false;
+    if (!quizCreatorQuestions?.children.length) addQuizQuestion();
+  });
+  document.querySelector("[data-add-quiz-question]")?.addEventListener("click", addQuizQuestion);
+  quizCreatorClose?.addEventListener("click", closeQuizCreator);
+  quizCreator?.addEventListener("click", (event) => { if (event.target === quizCreator) closeQuizCreator(); });
+  quizCreatorForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (quizCreatorError) quizCreatorError.hidden = true;
+    const formData = new FormData(quizCreatorForm);
+    const questions = [...quizCreatorQuestions.querySelectorAll(".quiz-creator-question")].map((question, index) => ({
+      text: formData.get(`question_${index}`),
+      answer_a: formData.get(`answer_${index}_a`),
+      answer_b: formData.get(`answer_${index}_b`),
+      answer_c: formData.get(`answer_${index}_c`),
+      answer_d: formData.get(`answer_${index}_d`),
+      correct: formData.get(`correct_${index}`),
+    }));
+    const saveButton = quizCreatorForm.querySelector("[type=submit]");
+    saveButton.disabled = true;
+    try {
+      const response = await fetch("/api/lobby/quizzes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: formData.get("title"), questions }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to save quiz.");
+      closeQuizCreator();
+      chooseQuizButton?.click();
+    } catch (error) {
+      if (quizCreatorError) {
+        quizCreatorError.textContent = error.message;
+        quizCreatorError.hidden = false;
+      }
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
 
   const exitModal = document.getElementById("lobby-exit-modal");
   if (exitModal && lobbyPhase) {

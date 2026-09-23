@@ -2052,6 +2052,24 @@ db.serialize(() => {
     correct_answer TEXT NOT NULL,
     FOREIGN KEY (room_id) REFERENCES lobby_rooms(id)
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_saved_quizzes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_saved_quiz_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quiz_id INTEGER NOT NULL,
+    question_order INTEGER NOT NULL,
+    question_text TEXT NOT NULL,
+    answer_a TEXT NOT NULL,
+    answer_b TEXT NOT NULL,
+    answer_c TEXT NOT NULL,
+    answer_d TEXT NOT NULL,
+    correct_answer TEXT NOT NULL,
+    FOREIGN KEY (quiz_id) REFERENCES lobby_saved_quizzes(id) ON DELETE CASCADE
+  )`);
   db.run(`CREATE TABLE IF NOT EXISTS lobby_participants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_id INTEGER NOT NULL,
@@ -4298,6 +4316,158 @@ app.post("/lobby/questions", requireAdmin, (req, res) => {
           error
             ? res.status(500).send("Unable to add question.")
             : res.redirect("/lobby"),
+      );
+    },
+  );
+});
+
+app.get("/api/lobby/quizzes", requireAdmin, (req, res) => {
+  grammarDb.all(
+    `SELECT grammar_topics.id AS topic_id,
+            grammar_topics.title AS topic_title,
+            chapters.title AS chapter_title,
+            grammar_topics.cefr_level,
+            COUNT(quiz_questions.id) AS question_count
+     FROM grammar_topics
+     JOIN chapters ON grammar_topics.chapter_id = chapters.id
+     JOIN quiz_questions ON quiz_questions.topic_id = grammar_topics.id
+     GROUP BY grammar_topics.id
+     HAVING COUNT(quiz_questions.id) > 0
+     ORDER BY chapters.chapter_number, grammar_topics.title COLLATE NOCASE`,
+    (error, grammarQuizzes) => {
+      if (error) return res.status(500).json({ error: "Unable to load quiz library." });
+      db.all(
+        `SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
+                lobby_saved_quizzes.title AS topic_title,
+                'Teacher-created quiz' AS chapter_title,
+                '' AS cefr_level,
+                COUNT(lobby_saved_quiz_questions.id) AS question_count
+         FROM lobby_saved_quizzes
+         JOIN lobby_saved_quiz_questions ON lobby_saved_quiz_questions.quiz_id = lobby_saved_quizzes.id
+         GROUP BY lobby_saved_quizzes.id
+         ORDER BY lobby_saved_quizzes.created_at DESC`,
+        (savedError, savedQuizzes) => {
+          if (savedError) return res.status(500).json({ error: "Unable to load saved quizzes." });
+          res.json({
+            quizzes: [
+              ...grammarQuizzes.map((quiz) => ({ ...quiz, quiz_id: `grammar:${quiz.topic_id}` })),
+              ...savedQuizzes,
+            ],
+          });
+        },
+      );
+    },
+  );
+});
+
+app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
+  const title = String(req.body.title || "").trim().slice(0, 100);
+  const questions = Array.isArray(req.body.questions) ? req.body.questions : [];
+  if (!title || !questions.length || questions.length > 50) {
+    return res.status(400).json({ error: "Add a title and between 1 and 50 questions." });
+  }
+  const normalizedQuestions = questions.map((question) => ({
+    text: String(question.text || "").trim(),
+    answers: ["a", "b", "c", "d"].map((key) => String(question[`answer_${key}`] || "").trim()),
+    correct: String(question.correct || "").toLowerCase(),
+  }));
+  if (normalizedQuestions.some((question) => !question.text || question.answers.some((answer) => !answer) || !["a", "b", "c", "d"].includes(question.correct))) {
+    return res.status(400).json({ error: "Every question needs four answers and a correct answer." });
+  }
+  db.run(
+    "INSERT INTO lobby_saved_quizzes (title, created_by) VALUES (?, ?)",
+    [title, req.session.name],
+    function (quizError) {
+      if (quizError) return res.status(500).json({ error: "Unable to save quiz." });
+      const quizId = this.lastID;
+      const saveQuestion = (index) => {
+        if (index >= normalizedQuestions.length) return res.status(201).json({ id: quizId, title });
+        const question = normalizedQuestions[index];
+        db.run(
+          `INSERT INTO lobby_saved_quiz_questions
+           (quiz_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [quizId, index + 1, question.text, ...question.answers, question.correct],
+          (questionError) => questionError
+            ? res.status(500).json({ error: "Unable to save quiz questions." })
+            : saveQuestion(index + 1),
+        );
+      };
+      saveQuestion(0);
+    },
+  );
+});
+
+app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
+  const roomId = Number(req.body.roomId);
+  const quizId = String(req.body.quizId || "");
+  const [quizSource, quizValue] = quizId.split(":");
+  const topicId = quizSource === "grammar" ? Number(quizValue) : 0;
+  const savedQuizId = quizSource === "custom" ? Number(quizValue) : 0;
+  if (!roomId || (!topicId && !savedQuizId)) return res.status(400).json({ error: "Invalid quiz selection." });
+
+  db.get(
+    `SELECT lobby_rooms.id, lobby_rooms.mode, lobby_rooms.status
+     FROM lobby_rooms
+     JOIN lobby_participants ON lobby_participants.room_id = lobby_rooms.id
+     WHERE lobby_rooms.id = ? AND lobby_participants.username = ?`,
+    [roomId, req.session.name],
+    (roomError, room) => {
+      if (roomError) return res.status(500).json({ error: "Unable to load room." });
+      if (!room || room.mode !== "lobby" || room.status !== "waiting") {
+        return res.status(400).json({ error: "Quiz selection is only available before the game starts." });
+      }
+      const loadQuestions = (title, questions) => {
+        if (!title || !questions?.length) return res.status(404).json({ error: "Quiz not found or has no questions." });
+        db.run("DELETE FROM lobby_questions WHERE room_id = ?", [roomId], (deleteError) => {
+          if (deleteError) return res.status(500).json({ error: "Unable to replace room questions." });
+          const insertQuestion = (index) => {
+            if (index >= questions.length) {
+              return db.run("UPDATE lobby_rooms SET title = ?, current_question = 0 WHERE id = ?", [title.slice(0, 100), roomId], (updateError) => updateError ? res.status(500).json({ error: "Unable to update room title." }) : res.json({ title, questionCount: questions.length }));
+            }
+            const question = questions[index];
+            db.run(
+              `INSERT INTO lobby_questions
+               (room_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [roomId, index + 1, question.question_text, question.option_a || question.answer_a, question.option_b || question.answer_b, question.option_c || question.answer_c || "-", question.option_d || question.answer_d || "-", String(question.correct_option || question.correct_answer).toLowerCase()],
+              (insertError) => insertError ? res.status(500).json({ error: "Unable to save quiz questions." }) : insertQuestion(index + 1),
+            );
+          };
+          insertQuestion(0);
+        });
+      };
+      if (savedQuizId) {
+        return db.get("SELECT title FROM lobby_saved_quizzes WHERE id = ?", [savedQuizId], (titleError, savedQuiz) => {
+          if (titleError) return res.status(500).json({ error: "Unable to load saved quiz." });
+          db.all("SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer FROM lobby_saved_quiz_questions WHERE quiz_id = ? ORDER BY question_order", [savedQuizId], (questionsError, questions) => {
+            if (questionsError) return res.status(500).json({ error: "Unable to load saved quiz questions." });
+            loadQuestions(savedQuiz?.title, questions);
+          });
+        });
+      }
+      grammarDb.get(
+        `SELECT grammar_topics.title AS topic_title,
+                chapters.title AS chapter_title
+         FROM grammar_topics
+         JOIN chapters ON grammar_topics.chapter_id = chapters.id
+         WHERE grammar_topics.id = ?`,
+        [topicId],
+        (topicError, topic) => {
+          if (topicError) return res.status(500).json({ error: "Unable to load quiz topic." });
+          if (!topic) return res.status(404).json({ error: "Quiz not found." });
+          grammarDb.all(
+            `SELECT question_text, option_a, option_b, option_c, option_d, correct_option
+             FROM quiz_questions
+             WHERE topic_id = ?
+             ORDER BY id`,
+            [topicId],
+            (questionsError, questions) => {
+              if (questionsError || !questions.length) return res.status(404).json({ error: "Quiz has no questions." });
+              loadQuestions(`${topic.chapter_title}: ${topic.topic_title}`, questions);
+            },
+          );
+        },
       );
     },
   );
