@@ -1,4 +1,12 @@
 <main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
+  <div class="lobby-settings" data-lobby-settings>
+    <button class="lobby-settings-toggle" type="button" data-lobby-settings-toggle aria-expanded="false" aria-controls="lobby-settings-menu" aria-label="Open lobby settings" title="Lobby settings">&#9881;</button>
+    <div class="lobby-settings-menu" id="lobby-settings-menu" data-lobby-settings-menu hidden>
+      <p class="lobby-settings-title">Room settings</p>
+      <button type="button" class="lobby-settings-action" data-lobby-sound-toggle><span aria-hidden="true">&#9835;</span><span data-lobby-sound-label>Sound on</span></button>
+      <a class="lobby-settings-action lobby-settings-leave" href="/">Leave lobby</a>
+    </div>
+  </div>
   <section class="lobby-quiz-panel">
     {{#if isAdmin}}
       <div class="lobby-admin-tools">
@@ -335,15 +343,32 @@
     }
     let entranceAudioUnlocked = false;
     let pendingEntranceSound = false;
+    let soundEnabled = localStorage.getItem("english-labs-lobby-sound") !== "off";
+    const soundToggle = document.querySelector("[data-lobby-sound-toggle]");
+    const soundLabel = document.querySelector("[data-lobby-sound-label]");
+    const updateSoundControl = () => {
+      if (soundLabel) soundLabel.textContent = soundEnabled ? "Sound on" : "Sound off";
+      if (soundToggle) soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+      if (!soundEnabled && teacherEntranceSound) {
+        teacherEntranceSound.pause();
+        teacherEntranceSound.currentTime = 0;
+      }
+    };
+    updateSoundControl();
+    soundToggle?.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem("english-labs-lobby-sound", soundEnabled ? "on" : "off");
+      updateSoundControl();
+    });
     const unlockEntranceAudio = () => {
-      if (!teacherEntranceSound) return;
+      if (!teacherEntranceSound || !soundEnabled) return;
       teacherEntranceSound.play().then(() => {
         entranceAudioUnlocked = true;
         teacherEntranceSound.pause();
         teacherEntranceSound.currentTime = 0;
         if (pendingEntranceSound) {
           pendingEntranceSound = false;
-          teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
+          if (soundEnabled) teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
         }
         if (soundEnableButton) soundEnableButton.hidden = true;
         window.removeEventListener("click", unlockEntranceAudio);
@@ -410,7 +435,7 @@
         if (role !== "admin") {
           teacherEntranceSound.currentTime = 0;
           if (entranceAudioUnlocked) {
-            teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
+            if (soundEnabled) teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
           } else {
             pendingEntranceSound = true;
           }
@@ -863,6 +888,43 @@
     const scopedSpritesheetKey = `userSpritesheet_${playerCanvas.dataset.playerUserId || playerCanvas.dataset.playerUsername}`;
     loadPlayerImage(localStorage.getItem(scopedSpritesheetKey) || playerCanvas.dataset.spritesheetImage);
     window.requestAnimationFrame(drawPlayer);
+  }
+
+  const lobbySettings = document.querySelector("[data-lobby-settings]");
+  const lobbySettingsToggle = document.querySelector("[data-lobby-settings-toggle]");
+  const lobbySettingsMenu = document.querySelector("[data-lobby-settings-menu]");
+  if (lobbySettings && lobbySettingsToggle && lobbySettingsMenu) {
+    const closeLobbySettings = () => {
+      lobbySettingsMenu.hidden = true;
+      lobbySettingsToggle.setAttribute("aria-expanded", "false");
+    };
+    lobbySettingsToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = !lobbySettingsMenu.hidden;
+      lobbySettingsMenu.hidden = isOpen;
+      lobbySettingsToggle.setAttribute("aria-expanded", String(!isOpen));
+    });
+    document.addEventListener("click", (event) => {
+      if (!lobbySettings.contains(event.target)) closeLobbySettings();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeLobbySettings();
+    });
+    if (!lobbyPhase) {
+      const soundToggle = lobbySettings.querySelector("[data-lobby-sound-toggle]");
+      const soundLabel = lobbySettings.querySelector("[data-lobby-sound-label]");
+      const updateJoinSoundControl = () => {
+        const soundEnabled = localStorage.getItem("english-labs-lobby-sound") !== "off";
+        if (soundLabel) soundLabel.textContent = soundEnabled ? "Sound on" : "Sound off";
+        if (soundToggle) soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+      };
+      updateJoinSoundControl();
+      soundToggle?.addEventListener("click", () => {
+        const soundEnabled = localStorage.getItem("english-labs-lobby-sound") !== "off";
+        localStorage.setItem("english-labs-lobby-sound", soundEnabled ? "off" : "on");
+        updateJoinSoundControl();
+      });
+    }
   }
 
   const exitModal = document.getElementById("lobby-exit-modal");

@@ -54,15 +54,120 @@ legend {
 }
 
 .lobby-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   height: calc(100dvh - 90px);
   overflow: hidden;
   padding: 12px 20px 20px;
+  background: #dce9e7;
+}
+
+.app-shell:has(.lobby-page) {
+  display: block;
+  min-height: 100dvh;
+  background: #dce9e7;
+}
+
+.app-shell:has(.lobby-page) .app-sidebar,
+.app-shell:has(.lobby-page) .app-rightbar {
+  display: none;
+}
+
+.app-shell:has(.lobby-page) .app-main {
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
 }
 
 .lobby-shell {
   width: 100%;
   height: 100%;
   margin: 0 auto;
+}
+
+.lobby-settings {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 25;
+}
+
+.lobby-settings-toggle {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #14213d;
+  border-radius: 50%;
+  background: #fffdf7;
+  box-shadow: 3px 3px 0 #14213d;
+  color: #14213d;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.lobby-settings-toggle:hover,
+.lobby-settings-toggle:focus-visible {
+  background: #f3d59a;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.lobby-settings-menu {
+  display: grid;
+  min-width: 190px;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: #fffdf7;
+  box-shadow: 4px 4px 0 #14213d;
+}
+
+.lobby-settings-menu[hidden] {
+  display: none;
+}
+
+.lobby-settings-title {
+  margin: 2px 8px 5px;
+  color: #68758a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lobby-settings-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #14213d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lobby-settings-action:hover,
+.lobby-settings-action:focus-visible {
+  background: #d4f0fc;
+  outline: none;
+}
+
+.lobby-settings-leave {
+  color: #8f3028;
 }
 
 .lobby-quiz-panel {
@@ -75,6 +180,7 @@ legend {
 
 .lobby-join-page {
   display: flex;
+  flex-wrap: wrap;
   min-height: calc(100dvh - 84px);
   align-items: center;
   justify-content: center;
@@ -8057,6 +8163,29 @@ footer {
   border-color: var(--color-primary) !important;
   background: var(--color-background-tint) !important;
   color: var(--color-secondary) !important;
+}
+
+.app-shell:has(.lobby-page) .lobby-page {
+  min-height: 100dvh;
+  height: 100dvh;
+  background: #dce9e7 !important;
+}
+
+.app-shell:has(.lobby-page) .lobby-quiz-panel,
+.app-shell:has(.lobby-page) .lobby-stage-wrap,
+.app-shell:has(.lobby-page) .teacher-control-sidebar,
+.app-shell:has(.lobby-page) .student-live-quiz,
+.app-shell:has(.lobby-page) .admin-live-quiz,
+.app-shell:has(.lobby-page) .round-leaderboard-panel,
+.app-shell:has(.lobby-page) .final-results-panel {
+  border: 2px solid #14213d !important;
+  border-radius: 20px;
+  box-shadow: 4px 4px 0 #14213d;
+}
+
+.app-shell:has(.lobby-page) .lobby-stage-wrap {
+  width: min(1440px, 100%);
+  margin: 0 auto;
 }
 
 .app-shell .live-answer-grid button,
