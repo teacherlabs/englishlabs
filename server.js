@@ -4057,7 +4057,7 @@ const insertLobbyParticipant = (roomId, username, callback) => {
   );
 };
 
-app.get("/lobby", requireAuthenticated, (req, res) => {
+app.get("/lobby", requireAuthenticated, async (req, res) => {
   const failLobby = (error) => {
     const lobbyError = error instanceof Error ? error : new Error(String(error));
     console.error("LOBBY CRASH ERROR:", lobbyError);
@@ -4070,6 +4070,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
   };
 
   try {
+    await grammarReady;
     const query = req.query || {};
     const sessionName = String(req.session?.name || "").trim();
     const isAdmin = Boolean(req.session?.isAdmin);
