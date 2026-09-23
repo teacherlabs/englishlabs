@@ -298,7 +298,7 @@ legend {
   padding: 9px 12px;
   border: 0;
   border-radius: 5px;
-  background: #8f3028;
+  background: var(--color-primary);
   color: #fff;
   cursor: pointer;
   font: inherit;
@@ -307,7 +307,7 @@ legend {
 }
 
 .danger-button:hover {
-  background: #6f211c;
+  background: var(--color-primary-hover);
 }
 
 .live-question {
@@ -7976,6 +7976,7 @@ header > nav,
 .lobby-code,
 .lobby-code strong {
   color: var(--color-primary);
+  padding-left;
 }
 
 .danger-button {
@@ -8207,6 +8208,40 @@ footer {
 .app-shell:has(.lobby-student-page) .lobby-stage-wrap {
   background: transparent !important;
   border-color: #14213d !important;
+}
+
+.app-shell:has(.lobby-student-page) .lobby-character-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  padding: 0;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+.app-shell:has(.lobby-student-page) .lobby-character-stage canvas,
+.app-shell:has(.lobby-student-page) .lobby-page canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  object-fit: fill;
+  pointer-events: none;
+}
+
+.app-shell:has(.lobby-student-page) .lobby-stage-wrap,
+.app-shell:has(.lobby-student-page) .lobby-student-main,
+.app-shell:has(.lobby-student-page) .lobby-settings {
+  position: relative;
+  z-index: 1;
 }
 
 .app-shell:has(.lobby-student-page) .student-live-quiz,

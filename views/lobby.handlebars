@@ -58,10 +58,12 @@
           </div>
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
          {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
+          {{#if isQuicktype}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">Teacher control</p>
-            {{#if isQuicktype}}<h2>Word <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2><p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p><button type="button" class="practice-button" data-activate-word{{#unless questions}} disabled{{/unless}}>Activate word</button>{{else}}<h2>Ready when you are</h2><p class="admin-live-note">Add questions on the left, then start the quiz.</p>{{/if}}
+            <h2>Word <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2><p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p><button type="button" class="practice-button" data-activate-word{{#unless questions}} disabled{{/unless}}>Activate word</button>
           </section>
+          {{/if}}
           <section class="admin-live-quiz" data-phase-countdown hidden>
             <p class="eyebrow">Get ready</p><h2>Starting in <span data-countdown>3</span></h2>
             <p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p>
@@ -515,7 +517,7 @@
         });
       });
 
-      phaseWaiting.hidden = state.room.status !== "waiting";
+      if (phaseWaiting) phaseWaiting.hidden = state.room.status !== "waiting";
       phaseRunning.hidden = state.room.status !== "running";
       if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
       phaseLeaderboard.hidden = state.room.status !== "leaderboard";
