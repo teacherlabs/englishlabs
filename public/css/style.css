@@ -562,6 +562,9 @@ legend {
   height: 100%;
   overflow: auto;
   padding: 18px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 .teacher-lobby-stage-wrap {
   grid-template-columns: minmax(0, 1fr) 420px;
@@ -8409,6 +8412,15 @@ footer {
 .app-shell:has(.lobby-page) .lobby-stage-wrap {
   width: min(1440px, 100%);
   margin: 0 auto;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app-shell:has(.lobby-page) .lobby-character-stage {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app-shell:has(.lobby-student-page) .lobby-stage-wrap {
