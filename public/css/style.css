@@ -313,7 +313,9 @@ legend {
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: transform 0.16s ease, background 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease;
 }
 
 .quiz-selector-card:hover,
@@ -560,7 +562,6 @@ legend {
   height: 100%;
   overflow: auto;
   padding: 18px;
-
 }
 .teacher-lobby-stage-wrap {
   grid-template-columns: minmax(0, 1fr) 420px;
@@ -8181,7 +8182,7 @@ header > nav,
 .lobby-code,
 .lobby-code strong {
   color: var(--color-primary);
-  padding-left;
+  padding-left: 30px;
 }
 
 .danger-button {

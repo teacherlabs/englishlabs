@@ -5515,10 +5515,76 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
     : null;
   const category = categoryKey ? teacherCategories[categoryKey] : null;
   if (!postgresPool) {
-    console.error(
-      "Unable to load teacher dashboard: PostgreSQL is not configured.",
+    return db.all(
+      "SELECT username, fname, lname, goal FROM members WHERE role = ? ORDER BY username",
+      ["student"],
+      (studentError, students) => {
+        if (studentError) {
+          console.error("Unable to load SQLite teacher students:", studentError);
+          return res.status(500).send(`Teacher dashboard database error: ${studentError.message}`);
+        }
+        db.all(
+          "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
+          (progressError, progressRows) => {
+            if (progressError) {
+              console.error("Unable to load SQLite teacher progress:", progressError);
+              return res.status(500).send(`Teacher dashboard database error: ${progressError.message}`);
+            }
+            db.all(
+              `SELECT username FROM writing_submissions WHERE feedback IS NULL
+               UNION ALL SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL
+               UNION ALL SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL`,
+              (pendingError, pendingRows) => {
+                if (pendingError) {
+                  console.error("Unable to load SQLite pending feedback:", pendingError);
+                  return res.status(500).send(`Teacher dashboard database error: ${pendingError.message}`);
+                }
+                const pendingWritingByUsername = pendingRows.reduce(
+                  (counts, row) => ({
+                    ...counts,
+                    [row.username]: (counts[row.username] || 0) + 1,
+                  }),
+                  {},
+                );
+                const enrichedStudents = students.map((student) => {
+                  const studentProgress = progressRows.filter(
+                    (progressRow) => progressRow.username === student.username,
+                  );
+                  const filteredProgress = category
+                    ? studentProgress.filter((progressRow) =>
+                        category.activityTypes.includes(progressRow.activity_type),
+                      )
+                    : studentProgress;
+                  return {
+                    ...student,
+                    points: filteredProgress.reduce(
+                      (sum, progressRow) => sum + (Number(progressRow.points) || 0),
+                      0,
+                    ),
+                    possible_points: filteredProgress.reduce(
+                      (sum, progressRow) => sum + (Number(progressRow.total_points) || 0),
+                      0,
+                    ),
+                    activities: filteredProgress.length,
+                    pendingCount: pendingWritingByUsername[student.username] || 0,
+                  };
+                });
+                return res.render("teacher.handlebars", {
+                  categoryKey,
+                  categoryLabel: category?.label,
+                  categories: Object.entries(teacherCategories).map(([key, value]) => ({
+                    key,
+                    label: value.label,
+                    selected: key === categoryKey,
+                  })),
+                  students: enrichedStudents,
+                });
+              },
+            );
+          },
+        );
+      },
     );
-    return res.status(503).send("Teacher dashboard requires PostgreSQL.");
   }
 
   try {
