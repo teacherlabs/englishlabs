@@ -2131,6 +2131,89 @@ db.serialize(() => {
   );
 });
 
+// The lobby can be the first authenticated request after a cold deploy.
+// Keep its schema initialization explicit and awaitable before serving it.
+const lobbyTablesReady = new Promise((resolve, reject) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS lobby_rooms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      mode TEXT NOT NULL DEFAULT 'lobby',
+      status TEXT NOT NULL DEFAULT 'waiting',
+      current_question INTEGER NOT NULL DEFAULT 0,
+      question_started_at INTEGER,
+      last_event TEXT,
+      teacher_present INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS lobby_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      question_order INTEGER NOT NULL,
+      question_text TEXT NOT NULL,
+      answer_a TEXT NOT NULL,
+      answer_b TEXT NOT NULL,
+      answer_c TEXT NOT NULL,
+      answer_d TEXT NOT NULL,
+      correct_answer TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS lobby_saved_quizzes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS lobby_saved_quiz_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      quiz_id INTEGER NOT NULL,
+      question_order INTEGER NOT NULL,
+      question_text TEXT NOT NULL,
+      answer_a TEXT NOT NULL,
+      answer_b TEXT NOT NULL,
+      answer_c TEXT NOT NULL,
+      answer_d TEXT NOT NULL,
+      correct_answer TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS lobby_participants (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      username TEXT NOT NULL,
+      answer TEXT,
+      score INTEGER NOT NULL DEFAULT 0,
+      x REAL NOT NULL DEFAULT 160,
+      y REAL NOT NULL DEFAULT 190,
+      direction INTEGER NOT NULL DEFAULT 2,
+      frame REAL NOT NULL DEFAULT 0,
+      UNIQUE (room_id, username)
+    );
+    CREATE TABLE IF NOT EXISTS lobby_quicktype_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      question_order INTEGER NOT NULL,
+      prompt TEXT NOT NULL,
+      target_word TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS lobby_quicktype_submissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      question_order INTEGER NOT NULL,
+      username TEXT NOT NULL,
+      submitted_word TEXT NOT NULL,
+      is_correct INTEGER NOT NULL DEFAULT 0,
+      points INTEGER NOT NULL DEFAULT 0,
+      submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (room_id, question_order, username)
+    );
+  `, (error) => {
+    if (error) {
+      console.error("Lobby schema initialization error:", error);
+      return reject(error);
+    }
+    resolve();
+  });
+});
+
 //------------
 // VIEW ENGINE
 //------------
@@ -4070,7 +4153,7 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
   };
 
   try {
-    await grammarReady;
+    await Promise.all([grammarReady, lobbyTablesReady]);
     const query = req.query || {};
     const sessionName = String(req.session?.name || "").trim();
     const isAdmin = Boolean(req.session?.isAdmin);
