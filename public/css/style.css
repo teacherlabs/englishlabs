@@ -4033,6 +4033,7 @@ div.profile-avatar-placeholder {
 
 .student-subsection-panel.active {
   animation: student-section-in 180ms ease-out;
+  padding: 10px;
 }
 
 .student-progress-grid {
@@ -4278,7 +4279,7 @@ div.profile-avatar-placeholder {
 }
 
 .student-profile-section h2 {
-  margin: 18px 30px 0 0;
+  margin: 18px 30px 10px 5px;
 }
 
 .student-section-summary {
@@ -8206,6 +8207,34 @@ footer {
 .app-shell:has(.lobby-student-page) .lobby-stage-wrap {
   background: transparent !important;
   border-color: #14213d !important;
+}
+
+.app-shell:has(.lobby-student-page) .student-live-quiz,
+.app-shell:has(.lobby-student-page) .round-leaderboard-panel,
+.app-shell:has(.lobby-student-page) .final-results-panel,
+.app-shell:has(.lobby-student-page) .lobby-leaderboard {
+  border: 2px solid #b98842 !important;
+  border-radius: 20px !important;
+  background: rgba(20, 33, 61, 0.75) !important;
+  box-shadow: 4px 4px 0px #14213d !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fffdf7 !important;
+}
+
+.app-shell:has(.lobby-student-page) .student-live-quiz h1,
+.app-shell:has(.lobby-student-page) .student-live-quiz h2,
+.app-shell:has(.lobby-student-page) .student-live-quiz h3,
+.app-shell:has(.lobby-student-page) .student-live-quiz p,
+.app-shell:has(.lobby-student-page) .student-live-quiz span,
+.app-shell:has(.lobby-student-page) .round-leaderboard-panel h2,
+.app-shell:has(.lobby-student-page) .round-leaderboard-panel p,
+.app-shell:has(.lobby-student-page) .round-leaderboard-panel li,
+.app-shell:has(.lobby-student-page) .final-results-panel h2,
+.app-shell:has(.lobby-student-page) .final-results-panel li,
+.app-shell:has(.lobby-student-page) .lobby-leaderboard h2,
+.app-shell:has(.lobby-student-page) .lobby-leaderboard p {
+  color: #fffdf7 !important;
 }
 
 .app-shell .live-answer-grid button,
