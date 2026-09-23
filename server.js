@@ -4064,6 +4064,12 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
       "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
       [req.session.name],
       (memberError, member) => {
+        if (memberError) {
+          console.error("Lobby member database error:", memberError);
+          return res
+            .status(500)
+            .send(`Lobby database error: ${memberError.message}`);
+        }
         let characterConfig = {
           skin: "#f6c89f",
           hair: "#2b1b16",
@@ -4131,8 +4137,12 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           grammarDb.all(
             "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
             (vocabularyError, vocabularyWords) => {
-              if (vocabularyError)
-                return res.status(500).send("Unable to load vocabulary.");
+              if (vocabularyError) {
+                console.error("Lobby vocabulary database error:", vocabularyError);
+                return res
+                  .status(500)
+                  .send(`Lobby database error: ${vocabularyError.message}`);
+              }
               res.render("lobby.handlebars", {
                 ...renderData,
                 vocabularyWords,
@@ -4153,7 +4163,10 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
     ? [requestedMode]
     : [Number(req.query.roomId), requestedMode];
   db.get(roomQuery, roomParams, (roomError, room) => {
-    if (roomError) return res.status(500).send("Unable to load lobby.");
+    if (roomError) {
+      console.error("Lobby room database error:", roomError);
+      return res.status(500).send(`Lobby database error: ${roomError.message}`);
+    }
     if (!room) return renderLobby(null);
     finalizeRoundIfNeeded(room, (updatedRoom) => {
       const questionQuery =
@@ -4161,15 +4174,24 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
           : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
       db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
-        if (questionError)
-          return res.status(500).send("Unable to load lobby questions.");
+        if (questionError) {
+          console.error("Lobby questions database error:", questionError);
+          return res
+            .status(500)
+            .send(`Lobby database error: ${questionError.message}`);
+        }
         db.get(
           "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
           [updatedRoom.id, req.session.name],
-          (participantError, participant) =>
-            participantError
-              ? res.status(500).send("Unable to load lobby participant.")
-              : renderLobby(updatedRoom, questions, participant),
+          (participantError, participant) => {
+            if (participantError) {
+              console.error("Lobby participant database error:", participantError);
+              return res
+                .status(500)
+                .send(`Lobby database error: ${participantError.message}`);
+            }
+            return renderLobby(updatedRoom, questions, participant);
+          },
         );
       });
     });
