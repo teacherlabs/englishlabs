@@ -4058,17 +4058,28 @@ const insertLobbyParticipant = (roomId, username, callback) => {
 };
 
 app.get("/lobby", requireAuthenticated, (req, res) => {
-  const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
-  const renderLobby = (room, questions = [], participant = null) => {
+  const failLobby = (error) => {
+    const lobbyError = error instanceof Error ? error : new Error(String(error));
+    console.error("LOBBY CRASH ERROR:", lobbyError);
+    if (!res.headersSent) {
+      return res
+        .status(500)
+        .send(`Lobby Server Error: ${lobbyError.message}`);
+    }
+    return undefined;
+  };
+
+  try {
+    const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
+    const renderLobby = (room, questions = [], participant = null) => {
+      try {
     db.get(
       "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
       [req.session.name],
       (memberError, member) => {
+        try {
         if (memberError) {
-          console.error("Lobby member database error:", memberError);
-          return res
-            .status(500)
-            .send(`Lobby database error: ${memberError.message}`);
+          return failLobby(memberError);
         }
         let characterConfig = {
           skin: "#f6c89f",
@@ -4138,10 +4149,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
             "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
             (vocabularyError, vocabularyWords) => {
               if (vocabularyError) {
-                console.error("Lobby vocabulary database error:", vocabularyError);
-                return res
-                  .status(500)
-                  .send(`Lobby database error: ${vocabularyError.message}`);
+                return failLobby(vocabularyError);
               }
               res.render("lobby.handlebars", {
                 ...renderData,
@@ -4152,9 +4160,15 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         } else {
           res.render("lobby.handlebars", renderData);
         }
+        } catch (error) {
+          return failLobby(error);
+        }
       },
     );
-  };
+      } catch (error) {
+        return failLobby(error);
+      }
+    };
   if (!req.session.isAdmin && !req.query.roomId) return renderLobby(null);
   const roomQuery = req.session.isAdmin
     ? "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1"
@@ -4163,9 +4177,9 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
     ? [requestedMode]
     : [Number(req.query.roomId), requestedMode];
   db.get(roomQuery, roomParams, (roomError, room) => {
+    try {
     if (roomError) {
-      console.error("Lobby room database error:", roomError);
-      return res.status(500).send(`Lobby database error: ${roomError.message}`);
+      return failLobby(roomError);
     }
     if (!room) return renderLobby(null);
     finalizeRoundIfNeeded(room, (updatedRoom) => {
@@ -4174,28 +4188,36 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
           : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
       db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
+        try {
         if (questionError) {
-          console.error("Lobby questions database error:", questionError);
-          return res
-            .status(500)
-            .send(`Lobby database error: ${questionError.message}`);
+          return failLobby(questionError);
         }
         db.get(
           "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
           [updatedRoom.id, req.session.name],
           (participantError, participant) => {
+            try {
             if (participantError) {
-              console.error("Lobby participant database error:", participantError);
-              return res
-                .status(500)
-                .send(`Lobby database error: ${participantError.message}`);
+              return failLobby(participantError);
             }
             return renderLobby(updatedRoom, questions, participant);
+            } catch (error) {
+              return failLobby(error);
+            }
           },
         );
+        } catch (error) {
+          return failLobby(error);
+        }
       });
     });
+    } catch (error) {
+      return failLobby(error);
+    }
   });
+  } catch (error) {
+    return failLobby(error);
+  }
 });
 
 app.get("/quicktype", requireAuthenticated, (req, res) => {
