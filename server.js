@@ -5389,26 +5389,28 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
     );
     const tableResult = await postgresPool.query(
       `SELECT to_regclass('public.progress') AS progress_table,
-              to_regclass('public.writing_submissions') AS writing_table`,
+              to_regclass('public.writing_submissions') AS writing_table,
+              to_regclass('public.writing_discussion_submissions') AS writing_discussion_table,
+              to_regclass('public.listening_discussion_submissions') AS listening_discussion_table`,
     );
-    const progressRows = tableResult.rows[0].progress_table
+    const availableTables = tableResult.rows[0];
+    const progressRows = availableTables.progress_table
       ? (
           await postgresPool.query(
             "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
           )
         ).rows
       : [];
-    const pendingRows = tableResult.rows[0].writing_table
+    const pendingSources = [
+      availableTables.writing_table && "SELECT username FROM writing_submissions WHERE feedback IS NULL",
+      availableTables.writing_discussion_table && "SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL",
+      availableTables.listening_discussion_table && "SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL",
+    ].filter(Boolean);
+    const pendingRows = pendingSources.length
       ? (
           await postgresPool.query(
             `SELECT username, COUNT(*) AS pending
-             FROM (
-               SELECT username FROM writing_submissions WHERE feedback IS NULL
-               UNION ALL
-               SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL
-               UNION ALL
-               SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL
-             ) AS pending_submissions
+             FROM (${pendingSources.join(" UNION ALL ")}) AS pending_submissions
              GROUP BY username`,
           )
         ).rows
