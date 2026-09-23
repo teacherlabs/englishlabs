@@ -4070,12 +4070,18 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
   };
 
   try {
-    const requestedMode = req.query.mode === "quicktype" ? "quicktype" : "lobby";
+    const query = req.query || {};
+    const sessionName = String(req.session?.name || "").trim();
+    const isAdmin = Boolean(req.session?.isAdmin);
+    const requestedMode = query.mode === "quicktype" ? "quicktype" : "lobby";
     const renderLobby = (room, questions = [], participant = null) => {
       try {
+    room = room || null;
+    questions = Array.isArray(questions) ? questions : [];
+    participant = participant || null;
     db.get(
       "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
-      [req.session.name],
+      [sessionName],
       (memberError, member) => {
         try {
         if (memberError) {
@@ -4103,8 +4109,8 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         };
         const renderData = {
           student: {
-            username: req.session.name,
-            id: req.session.name,
+            username: sessionName,
+            id: sessionName,
             avatar: member?.avatar || "",
             spritesheet: member?.spritesheet || member?.avatar || "",
             avatarUrl: profileImageUrl(member?.avatar),
@@ -4113,7 +4119,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
             ),
             characterConfig,
           },
-          isAdmin: Boolean(req.session.isAdmin),
+          isAdmin,
           socketUrl: process.env.VITE_SOCKET_URL || "",
           room,
           questions,
@@ -4148,17 +4154,19 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           grammarDb.all(
             "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
             (vocabularyError, vocabularyWords) => {
-              if (vocabularyError) {
-                return failLobby(vocabularyError);
+              try {
+                if (vocabularyError) return failLobby(vocabularyError);
+                return res.render("lobby.handlebars", {
+                  ...renderData,
+                  vocabularyWords: vocabularyWords || [],
+                });
+              } catch (error) {
+                return failLobby(error);
               }
-              res.render("lobby.handlebars", {
-                ...renderData,
-                vocabularyWords,
-              });
             },
           );
         } else {
-          res.render("lobby.handlebars", renderData);
+          return res.render("lobby.handlebars", renderData);
         }
         } catch (error) {
           return failLobby(error);
@@ -4169,13 +4177,13 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         return failLobby(error);
       }
     };
-  if (!req.session.isAdmin && !req.query.roomId) return renderLobby(null);
-  const roomQuery = req.session.isAdmin
+  if (!isAdmin && !query.roomId) return renderLobby(null);
+  const roomQuery = isAdmin
     ? "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1"
     : "SELECT * FROM lobby_rooms WHERE id = ? AND mode = ?";
-  const roomParams = req.session.isAdmin
+  const roomParams = isAdmin
     ? [requestedMode]
-    : [Number(req.query.roomId), requestedMode];
+    : [Number(query.roomId), requestedMode];
   db.get(roomQuery, roomParams, (roomError, room) => {
     try {
     if (roomError) {
@@ -4183,9 +4191,10 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
     }
     if (!room) return renderLobby(null);
     finalizeRoundIfNeeded(room, (updatedRoom) => {
+      try {
       const questionQuery =
         updatedRoom.mode === "quicktype"
-          ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
+          ? `SELECT id, question_order, prompt AS question_text${isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
           : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
       db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
         try {
@@ -4194,7 +4203,7 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
         }
         db.get(
           "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
-          [updatedRoom.id, req.session.name],
+          [updatedRoom.id, sessionName],
           (participantError, participant) => {
             try {
             if (participantError) {
@@ -4210,6 +4219,9 @@ app.get("/lobby", requireAuthenticated, (req, res) => {
           return failLobby(error);
         }
       });
+      } catch (error) {
+        return failLobby(error);
+      }
     });
     } catch (error) {
       return failLobby(error);
