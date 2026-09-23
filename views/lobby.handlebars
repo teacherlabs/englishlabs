@@ -1,4 +1,4 @@
-<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}" data-user-id="{{student.id}}">
+<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
   <section class="lobby-quiz-panel">
     {{#if isAdmin}}
       <div class="lobby-admin-tools">

@@ -106,7 +106,7 @@
                 <article class="student-topic-card status-{{statusClass}}">
                   <div class="student-topic-header">
                     <h3>{{title}}</h3>
-                    {{#if showStatus}}<span class="status-pill {{statusClass}}">{{status}}</span>{{/if}}
+                    {{#if showStatus}}<span class="student-topic-status {{statusClass}}" title="{{status}}" aria-label="{{status}}" role="img"></span>{{/if}}
                   </div>
                   <p>{{completedExercises}} / {{totalExercises}} exercises completed ({{percentage}}%)</p>
                   <ul class="student-topic-meta">
@@ -114,9 +114,9 @@
                       <li>
                         <span>{{title}}</span>
                         {{#if completed}}
-                          <strong class="status-pill completed" title="Completed" aria-label="Completed">Completed</strong>
+                          <span class="student-topic-status completed" title="Completed" aria-label="Completed" role="img"></span>
                         {{else}}
-                          <strong class="status-pill not-started" title="Not started" aria-label="Not started">Not Started</strong>
+                          <span class="student-topic-status not-started" title="Not started" aria-label="Not started" role="img"></span>
                         {{/if}}
                       </li>
                     {{/each}}
@@ -157,7 +157,7 @@
                     <article class="student-topic-card status-{{statusClass}}">
                       <div class="student-topic-header">
                         <h4>{{title}}</h4>
-                        <span class="status-pill {{statusClass}}">{{status}}</span>
+                        <span class="student-topic-status {{statusClass}}" title="{{status}}" aria-label="{{status}}" role="img"></span>
                       </div>
                       <p>{{completedExercises}} / {{totalExercises}} exercises completed</p>
                     </article>
@@ -179,7 +179,7 @@
                     <article class="student-topic-card status-{{statusClass}}">
                       <div class="student-topic-header">
                         <h4>{{title}}</h4>
-                        <span class="status-pill {{statusClass}}">{{status}}</span>
+                        <span class="student-topic-status {{statusClass}}" title="{{status}}" aria-label="{{status}}" role="img"></span>
                       </div>
                       <p>{{completedExercises}} / {{totalExercises}} exercises completed</p>
                     </article>
@@ -229,7 +229,7 @@
                     <article class="student-topic-card status-{{statusClass}}">
                       <div class="student-topic-header">
                         <h4>{{title}}</h4>
-                        <span class="status-pill {{statusClass}}">{{status}}</span>
+                        <span class="student-topic-status {{statusClass}}" title="{{status}}" aria-label="{{status}}" role="img"></span>
                       </div>
                       <p>{{completedExercises}} / {{totalExercises}} exercises completed</p>
                     </article>
