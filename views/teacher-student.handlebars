@@ -114,9 +114,9 @@
                       <li>
                         <span>{{title}}</span>
                         {{#if completed}}
-                          <strong class="status-pill completed">Completed</strong>
+                          <strong class="status-pill completed" title="Completed" aria-label="Completed">Completed</strong>
                         {{else}}
-                          <strong class="status-pill not-started">Not Started</strong>
+                          <strong class="status-pill not-started" title="Not started" aria-label="Not started">Not Started</strong>
                         {{/if}}
                       </li>
                     {{/each}}

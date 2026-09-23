@@ -67,6 +67,10 @@ legend {
 
 .lobby-quiz-panel {
   width: min(100%, 900px);
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0px #14213d;
 }
 
 .lobby-quiz-panel h1 {
@@ -4033,6 +4037,30 @@ div.profile-avatar-placeholder {
   text-align: left;
 }
 
+.student-topic-meta .status-pill {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  min-height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: none;
+  font-size: 0;
+}
+
+.student-topic-meta .status-pill.completed {
+  background: #2e8b57;
+}
+
+.student-topic-meta .status-pill.in-progress {
+  background: #d97706;
+}
+
+.student-topic-meta .status-pill.not-started {
+  background: #8996a8;
+}
+
 .student-topic-card p,
 .student-summary-panel article span {
   margin: 0;
@@ -4110,7 +4138,7 @@ div.profile-avatar-placeholder {
 }
 
 .student-profile-section h2 {
-  margin-top: 18px;
+  margin: 18px 30px 0 0;
 }
 
 .student-section-summary {
@@ -7899,8 +7927,7 @@ footer {
 .app-shell .admin-live-quiz,
 .app-shell .student-live-quiz,
 .app-shell .round-leaderboard-panel,
-.app-shell .final-results-panel,
-.app-shell .lobby-quiz-panel {
+.app-shell .final-results-panel {
   border-color: var(--color-border) !important;
   background: var(--color-surface) !important;
   color: var(--color-secondary);
