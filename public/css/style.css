@@ -64,6 +64,16 @@ legend {
   background: #dce9e7;
 }
 
+.lobby-student-page {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background-color: #24150f;
+  background-image: url("/img/lobbyroombg.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
 .app-shell:has(.lobby-page) {
   display: block;
   min-height: 100dvh;
@@ -189,6 +199,13 @@ legend {
 
 .lobby-join-page .lobby-quiz-panel {
   margin: 0;
+}
+
+.lobby-student-page.lobby-join-page .lobby-quiz-panel {
+  width: min(440px, calc(100vw - 40px));
+  margin: auto;
+  padding: 30px;
+  background: rgba(255, 253, 247, 0.96);
 }
 
 .lobby-quiz-panel h1 {
@@ -4689,12 +4706,6 @@ nav ul li a:hover {
   animation: teacher-entrance-toast-in 0.35s ease-out;
 }
 
-.lobby-sound-enable {
-  position: relative;
-  z-index: 20;
-  margin: 0 0 12px;
-}
-
 .teacher-entrance-toast.is-leaving {
   animation: teacher-entrance-toast-out 0.35s ease-in forwards;
 }
@@ -8168,7 +8179,10 @@ footer {
 .app-shell:has(.lobby-page) .lobby-page {
   min-height: 100dvh;
   height: 100dvh;
-  background: #dce9e7 !important;
+  background-color: #24150f !important;
+  background-image: url("/img/lobbyroombg.jpg") !important;
+  background-position: center !important;
+  background-size: cover !important;
 }
 
 .app-shell:has(.lobby-page) .lobby-quiz-panel,
@@ -8186,6 +8200,11 @@ footer {
 .app-shell:has(.lobby-page) .lobby-stage-wrap {
   width: min(1440px, 100%);
   margin: 0 auto;
+}
+
+.app-shell:has(.lobby-student-page) .lobby-stage-wrap {
+  background: transparent !important;
+  border-color: #14213d !important;
 }
 
 .app-shell .live-answer-grid button,

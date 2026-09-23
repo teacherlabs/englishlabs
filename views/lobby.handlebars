@@ -1,4 +1,4 @@
-<main class="lobby-page{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
+<main class="lobby-page{{#unless isAdmin}} lobby-student-page{{/unless}}{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
   <div class="lobby-settings" data-lobby-settings>
     <button class="lobby-settings-toggle" type="button" data-lobby-settings-toggle aria-expanded="false" aria-controls="lobby-settings-menu" aria-label="Open lobby settings" title="Lobby settings">&#9881;</button>
     <div class="lobby-settings-menu" id="lobby-settings-menu" data-lobby-settings-menu hidden>
@@ -104,7 +104,6 @@
       {{#if participant}}
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
-          <button class="notes-button lobby-sound-enable" type="button" data-lobby-sound-enable hidden>Enable lobby sound</button>
           <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
@@ -336,7 +335,6 @@
     const entranceButton = document.querySelector("[data-teacher-entrance]");
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
-    const soundEnableButton = document.querySelector("[data-lobby-sound-enable]");
     if (teacherEntranceSound) {
       teacherEntranceSound.preload = "auto";
       teacherEntranceSound.load();
@@ -370,7 +368,6 @@
           pendingEntranceSound = false;
           if (soundEnabled) teacherEntranceSound.play().catch((error) => console.warn("Teacher entrance audio playback was blocked:", error));
         }
-        if (soundEnableButton) soundEnableButton.hidden = true;
         window.removeEventListener("click", unlockEntranceAudio);
         window.removeEventListener("keydown", unlockEntranceAudio);
       }).catch(() => {});
@@ -378,10 +375,6 @@
     if (role !== "admin") {
       window.addEventListener("click", unlockEntranceAudio);
       window.addEventListener("keydown", unlockEntranceAudio);
-      if (soundEnableButton) {
-        soundEnableButton.hidden = false;
-        soundEnableButton.addEventListener("click", unlockEntranceAudio);
-      }
     }
     let currentQuestionNumber = Number(questionNumberEl.textContent) || 0;
     let previousRoomStatus = "waiting";
