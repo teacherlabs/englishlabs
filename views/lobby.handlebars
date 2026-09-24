@@ -190,6 +190,20 @@
     </div>
   </div>
 </div>
+<div class="winner-celebration-modal" data-winner-celebration hidden>
+  <section class="winner-celebration-dialog" role="dialog" aria-modal="true" aria-labelledby="winner-celebration-title">
+    <p class="eyebrow">Quiz champion</p>
+    <div class="winner-medal-graphic" aria-hidden="true">🥇</div>
+    <h2 id="winner-celebration-title">You took first place!</h2>
+    <p class="winner-celebration-copy">A brilliant finish, <strong data-winner-celebration-name></strong>.</p>
+    <div class="winner-celebration-character" aria-label="Your victory character">
+      <canvas data-winner-celebration-canvas width="220" height="220"></canvas>
+      <img data-winner-celebration-avatar alt="" hidden />
+    </div>
+    <p class="winner-celebration-score"><span data-winner-celebration-score></span> points</p>
+    <button class="practice-button" type="button" data-winner-celebration-close>Continue</button>
+  </section>
+</div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
@@ -522,6 +536,71 @@
         return `<li class="final-results-row${index === 0 ? " final-results-winner" : ""}"><div class="final-results-avatar">${avatar}</div><span class="final-results-name">${index + 1}. ${escapeHtml(player.username)}</span><strong class="final-results-score">${player.score}</strong></li>`;
       }).join("");
     };
+    const winnerCelebrationModal = document.querySelector("[data-winner-celebration]");
+    const winnerCelebrationCanvas = winnerCelebrationModal?.querySelector("[data-winner-celebration-canvas]");
+    const winnerCelebrationAvatar = winnerCelebrationModal?.querySelector("[data-winner-celebration-avatar]");
+    const winnerCelebrationName = winnerCelebrationModal?.querySelector("[data-winner-celebration-name]");
+    const winnerCelebrationScore = winnerCelebrationModal?.querySelector("[data-winner-celebration-score]");
+    let winnerCelebrationShown = false;
+    let winnerAnimationToken = 0;
+    const closeWinnerCelebration = () => {
+      if (!winnerCelebrationModal) return;
+      winnerAnimationToken += 1;
+      winnerCelebrationModal.hidden = true;
+      document.body.classList.remove("winner-celebration-open");
+    };
+    winnerCelebrationModal?.querySelector("[data-winner-celebration-close]")?.addEventListener("click", closeWinnerCelebration);
+    const showWinnerCelebration = (players) => {
+      if (role !== "student" || winnerCelebrationShown || !winnerCelebrationModal) return;
+      const currentUsername = String(document.querySelector("[data-player-canvas]")?.dataset.playerUsername || "{{student.username}}");
+      const winner = (players || []).find((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
+      if (!winner || String(winner.username) !== currentUsername) return;
+      winnerCelebrationShown = true;
+      winnerCelebrationName.textContent = winner.username;
+      winnerCelebrationScore.textContent = winner.score;
+      winnerCelebrationModal.hidden = false;
+      document.body.classList.add("winner-celebration-open");
+      const source = winner.spritesheetUrl || winner.spritesheet || winner.avatarUrl || winner.avatar;
+      if (!source || !winnerCelebrationCanvas) return;
+      winnerAnimationToken += 1;
+      const animationToken = winnerAnimationToken;
+      const context = winnerCelebrationCanvas.getContext("2d");
+      const image = new Image();
+      winnerCelebrationAvatar.src = lobbyImageSrc(source);
+      winnerCelebrationAvatar.hidden = false;
+      image.onload = () => {
+        if (animationToken !== winnerAnimationToken) return;
+        const isSpriteSheet = image.naturalWidth >= 256 && image.naturalHeight >= 128;
+        winnerCelebrationAvatar.hidden = isSpriteSheet;
+        winnerCelebrationCanvas.hidden = !isSpriteSheet;
+        if (!isSpriteSheet) return;
+        const layout = getLobbyAnimationLayout(image, "cheer");
+        const drawVictoryFrame = (now) => {
+          if (animationToken !== winnerAnimationToken || winnerCelebrationModal.hidden) return;
+          const frame = Math.floor(now / 110) % layout.columns;
+          context.clearRect(0, 0, winnerCelebrationCanvas.width, winnerCelebrationCanvas.height);
+          context.imageSmoothingEnabled = false;
+          context.drawImage(
+            image,
+            frame * layout.frameWidth,
+            0,
+            layout.frameWidth,
+            layout.frameHeight,
+            20,
+            4,
+            180,
+            180,
+          );
+          window.requestAnimationFrame(drawVictoryFrame);
+        };
+        window.requestAnimationFrame(drawVictoryFrame);
+      };
+      image.onerror = () => {
+        winnerCelebrationCanvas.hidden = true;
+        winnerCelebrationAvatar.hidden = false;
+      };
+      image.src = lobbyImageSrc(source);
+    };
 
     const refresh = () => socketReady.then(() => fetch(`/api/lobby/state?roomId=${roomId}`)).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
@@ -725,7 +804,10 @@
         renderLeaderboardList(roundLeaderboardList, state.leaderboard);
         if (correctWordEl) correctWordEl.textContent = state.correctWord || "";
       }
-      if (gameFinished) renderFinalResults(state.leaderboard);
+      if (gameFinished) {
+        renderFinalResults(state.leaderboard);
+        showWinnerCelebration(state.leaderboard);
+      }
     });
 
     lobbySocket?.on("lobbyStateChanged", () => refresh());
