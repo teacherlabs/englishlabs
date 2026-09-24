@@ -4202,14 +4202,9 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
     room = room || null;
     questions = Array.isArray(questions) ? questions : [];
     participant = participant || null;
-    db.get(
-      "SELECT avatar, spritesheet, character_config, gold_medals FROM members WHERE username = ?",
-      [sessionName],
-      (memberError, member) => {
+    loadLobbyCharacter(sessionName)
+      .then((member) => {
         try {
-        if (memberError) {
-          return failLobby(memberError);
-        }
         let characterConfig = {
           skin: "#f6c89f",
           hair: "#2b1b16",
@@ -4296,8 +4291,8 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
         } catch (error) {
           return failLobby(error);
         }
-      },
-    );
+      })
+      .catch((error) => failLobby(error));
       } catch (error) {
         return failLobby(error);
       }
