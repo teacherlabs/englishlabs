@@ -4394,6 +4394,12 @@ app.post("/lobby/create", requireAdmin, (req, res) => {
 
 app.post("/lobby/quit", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
+  if (roomId) {
+    io.to(String(roomId)).emit("lobbyClosed", {
+      roomId,
+      message: "The teacher has closed the lobby.",
+    });
+  }
   db.run(
     "DELETE FROM lobby_participants WHERE room_id = ?",
     [roomId],
@@ -6782,6 +6788,15 @@ io.on("connection", (socket) => {
         acknowledge?.({ ok: true, teacherPresent: true });
       },
     );
+  });
+
+  socket.on("disconnecting", () => {
+    if (isAdmin && socket.data.roomId) {
+      io.to(String(socket.data.roomId)).emit("lobbyClosed", {
+        roomId: socket.data.roomId,
+        message: "The teacher has left the lobby.",
+      });
+    }
   });
 });
 

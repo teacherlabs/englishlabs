@@ -92,11 +92,11 @@
             <p class="question-timer"><span data-question-timer>30</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
             <p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>
             {{#if isQuicktype}}<button type="button" class="practice-button" data-next-word hidden>Next word</button>{{/if}}
-            {{#unless isQuicktype}}<div class="admin-live-answers">
-              <span><b>A</b><span data-answer-text="a">{{currentQuestion.answer_a}}</span></span>
-              <span><b>B</b><span data-answer-text="b">{{currentQuestion.answer_b}}</span></span>
-              <span><b>C</b><span data-answer-text="c">{{currentQuestion.answer_c}}</span></span>
-              <span><b>D</b><span data-answer-text="d">{{currentQuestion.answer_d}}</span></span>
+            {{#unless isQuicktype}}<div class="live-answer-grid admin-live-answers">
+              <button type="button"><b>A</b> <span data-answer-text="a">{{currentQuestion.answer_a}}</span></button>
+              <button type="button"><b>B</b> <span data-answer-text="b">{{currentQuestion.answer_b}}</span></button>
+              <button type="button"><b>C</b> <span data-answer-text="c">{{currentQuestion.answer_c}}</span></button>
+              <button type="button"><b>D</b> <span data-answer-text="d">{{currentQuestion.answer_d}}</span></button>
             </div>{{/unless}}
           </section>
           <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
@@ -179,6 +179,7 @@
   </section>
 </main>
 <div class="teacher-entrance-toast" data-teacher-entrance-toast role="status" aria-live="polite" hidden></div>
+<div class="teacher-entrance-toast" data-lobby-closed-notice role="status" aria-live="assertive" hidden></div>
 <audio data-teacher-entrance-audio preload="auto" src="/audio1/ElevenLabs_Evil_sinister_laugh_echoing_through_a_haunted_house_at_midnight.mp3"></audio>
 <div id="lobby-exit-modal" class="lobby-exit-modal" hidden>
   <div class="lobby-exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="lobby-exit-title">
@@ -333,6 +334,16 @@
           entranceButton.disabled = entering;
         }
       });
+      lobbySocket.on("lobbyClosed", ({ message } = {}) => {
+        if (role !== "student" || lobbyClosedRedirecting) return;
+        lobbyClosedRedirecting = true;
+        if (lobbyClosedNotice) {
+          lobbyClosedNotice.textContent = message || "The teacher has closed the lobby.";
+          lobbyClosedNotice.hidden = false;
+          lobbyClosedNotice.classList.remove("is-leaving");
+        }
+        window.setTimeout(() => window.location.assign("/"), 1200);
+      });
     }
     const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
     const phaseRunning = lobbyPhase.querySelector("[data-phase-running]");
@@ -353,7 +364,9 @@
     const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
+    const lobbyClosedNotice = document.querySelector("[data-lobby-closed-notice]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
+    let lobbyClosedRedirecting = false;
     if (teacherEntranceSound) {
       teacherEntranceSound.preload = "auto";
       teacherEntranceSound.load();
