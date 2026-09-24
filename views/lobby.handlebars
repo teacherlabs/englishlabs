@@ -89,7 +89,7 @@
           <section class="admin-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
             <p class="eyebrow">Live quiz</p>
             <h2>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2>
-            <p class="question-timer"><span data-question-timer>15</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
+            <p class="question-timer"><span data-question-timer>30</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
             <p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>
             {{#if isQuicktype}}<button type="button" class="practice-button" data-next-word hidden>Next word</button>{{/if}}
             {{#unless isQuicktype}}<div class="admin-live-answers">
@@ -113,6 +113,7 @@
           </section>
         </div>
         <footer class="teacher-control-footer">
+          {{#unless isQuicktype}}{{#if isWaiting}}{{#if questions}}<form class="lobby-inline-form start-game-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start Game</button></form>{{/if}}{{/if}}{{/unless}}
           {{#if isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{else}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{/if}}
         </footer>
         </aside>
@@ -145,7 +146,7 @@
           <section class="student-live-quiz" data-phase-running{{#unless isRunning}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h1>
-            <p class="question-timer"><span data-question-timer>15</span>s left</p>
+            <p class="question-timer"><span data-question-timer>30</span>s left</p>
             <div class="live-question">
               <h2 data-question-text>{{currentQuestion.question_text}}</h2>
               {{#if isQuicktype}}<form class="quicktype-answer-form" data-quicktype-form><input name="word" data-quicktype-input autocomplete="off" placeholder="Type the target word" required /><button class="practice-button" type="submit">Submit</button></form>{{else}}<div class="live-answer-grid">

@@ -4072,7 +4072,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
     });
 });
 
-const QUESTION_DURATION_MS = 20000;
+const QUESTION_DURATION_MS = 30000;
 const QUICKTYPE_COUNTDOWN_MS = 3000;
 const QUICKTYPE_DURATION_MS = 15000;
 
