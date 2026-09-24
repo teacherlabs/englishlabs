@@ -827,9 +827,6 @@ legend {
   display: block;
   margin: 0 0 12px;
 }
-.teacher-lobby-stage-wrap.is-intermission .intermission-next-form[hidden] {
-  display: block;
-}
 .teacher-control-sidebar {
   display: flex;
   flex-direction: column;
@@ -889,13 +886,16 @@ legend {
   gap: 18px;
   min-width: 0;
 }
-.quicktype-lobby .lobby-character-stage {
-  grid-column: 2;
-  grid-row: 1;
-}
-.quicktype-lobby .lobby-phase-stack {
+.lobby-student-main .lobby-character-stage {
   grid-column: 1;
   grid-row: 1;
+}
+.lobby-student-main .lobby-phase-stack {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  width: min(100%, 420px);
+  min-width: 0;
 }
 .admin-live-quiz,
 .student-live-quiz,
@@ -1131,10 +1131,20 @@ legend {
     width: auto;
     overflow-y: auto;
   }
-  .quicktype-lobby .lobby-character-stage,
+  .quicktype-lobby .lobby-character-stage {
+    grid-column: 1;
+    grid-row: auto;
+  }
   .quicktype-lobby .lobby-phase-stack {
     grid-column: 1;
     grid-row: auto;
+  }
+  .lobby-student-main .lobby-character-stage,
+  .lobby-student-main .lobby-phase-stack {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: stretch;
+    width: 100%;
   }
 }
 .lobby-character-stage canvas {
@@ -8754,6 +8764,24 @@ footer {
 .app-shell .lobby-answer-grid button {
   background: var(--color-primary) !important;
   color: var(--color-surface) !important;
+}
+
+.app-shell .teacher-lobby-stage-wrap .admin-live-answers button {
+  border: 2px solid #b98842 !important;
+  background: rgba(20, 33, 61, 0.88) !important;
+  color: #fffdf7 !important;
+}
+
+.app-shell .teacher-lobby-stage-wrap .admin-live-answers button span {
+  background: transparent !important;
+  color: #fffdf7 !important;
+}
+
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel li,
+.app-shell .teacher-lobby-stage-wrap .final-results-row {
+  border: 1px solid rgba(185, 136, 66, 0.7);
+  background: rgba(20, 33, 61, 0.78) !important;
+  color: #fffdf7 !important;
 }
 
 .app-shell .danger-button,

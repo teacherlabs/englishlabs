@@ -4102,7 +4102,12 @@ const finalizeRoundIfNeeded = (room, callback) => {
     room.mode === "quicktype" ? QUICKTYPE_DURATION_MS : QUESTION_DURATION_MS;
   const elapsed = Date.now() - (room.question_started_at || Date.now());
   db.get(
-    "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
+    `SELECT COUNT(*) AS total,
+            SUM(CASE WHEN lobby_participants.answer IS NOT NULL THEN 1 ELSE 0 END) AS answered
+     FROM lobby_participants
+     LEFT JOIN members ON members.username = lobby_participants.username
+     WHERE lobby_participants.room_id = ?
+       AND (members.role IS NULL OR members.role != 'admin')`,
     [room.id],
     (countError, counts) => {
       const total = countError ? 0 : counts.total || 0;
@@ -5088,7 +5093,12 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                   [updatedRoom.id, req.session.name],
                   (participantError, participant) => {
                     db.get(
-                      "SELECT COUNT(*) AS total, SUM(CASE WHEN answer IS NOT NULL THEN 1 ELSE 0 END) AS answered FROM lobby_participants WHERE room_id = ?",
+                      `SELECT COUNT(*) AS total,
+                              SUM(CASE WHEN lobby_participants.answer IS NOT NULL THEN 1 ELSE 0 END) AS answered
+                       FROM lobby_participants
+                       LEFT JOIN members ON members.username = lobby_participants.username
+                       WHERE lobby_participants.room_id = ?
+                         AND (members.role IS NULL OR members.role != 'admin')`,
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(

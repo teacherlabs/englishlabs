@@ -360,6 +360,7 @@
     const roundLeaderboardList = phaseLeaderboard.querySelector("[data-round-leaderboard]");
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
+    const nextQuestionForm = document.querySelector(".intermission-next-form");
     const playersGrid = document.querySelector("[data-lobby-players]");
     const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
@@ -555,6 +556,7 @@
       phaseRunning.hidden = state.room.status !== "running";
       if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
       phaseLeaderboard.hidden = state.room.status !== "leaderboard";
+      if (nextQuestionForm) nextQuestionForm.hidden = state.room.status !== "leaderboard";
       const gameFinished =
         state.room.status === "finished" &&
         Number(state.totalQuestions) > 0 &&
