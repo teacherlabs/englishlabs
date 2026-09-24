@@ -18,7 +18,6 @@
         {{#if room}}
           <h1>{{room.title}}</h1>
           <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
-          {{#unless isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit room</button></form>{{/unless}}
           {{#unless isQuicktype}}{{#if questions}}<h2>Questions</h2><ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{/each}}</ol>{{/if}}{{/unless}}
           {{#if isWaiting}}
             {{#if isQuicktype}}
@@ -33,7 +32,7 @@
                 <button class="practice-button" type="submit" data-create-game disabled>Create game</button>
               </form>
               {{/unless}}
-            {{else}}<div class="lobby-question-actions"><button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create New Quiz</button><span>or add a question manually</span></div><form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
+            {{else}}<div class="lobby-question-actions"><span>Add a question manually</span></div><form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
             {{#if questions}}{{#unless isQuicktype}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/unless}}{{/if}}
           {{else}}
             <p class="admin-live-note">The live game appears in the lobby below.</p>
@@ -73,10 +72,22 @@
           <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
+          <header class="teacher-control-header">
+            <p class="eyebrow">Teacher control</p>
+            <h2>{{room.title}}</h2>
+            <p class="teacher-room-status">{{#if isActiveSession}}Live game{{else}}Waiting for players{{/if}}</p>
+            <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
+          </header>
           <div class="lobby-teacher-actions">
+            <button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create Quiz</button>
             <button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>
-            <a class="notes-button" href="/character-generator">Customize character</a>
+            <a class="notes-button" href="/character-generator">Customize</a>
           </div>
+          <section class="teacher-participants" aria-labelledby="teacher-participants-title">
+            <p class="eyebrow">Present:</p>
+            <h2 id="teacher-participants-title">Students in the room</h2>
+            <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
+          </section>
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
          {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
           {{#if isQuicktype}}
@@ -115,11 +126,9 @@
             <form class="lobby-inline-form finished-end-game-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>
           </section>
         </div>
-        <div class="lobby-leaderboard">
-          <p class="eyebrow">Players</p>
-          <h2>Who's here</h2>
-          <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
-        </div>
+        <footer class="teacher-control-footer">
+          {{#if isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{else}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{/if}}
+        </footer>
         </aside>
       </div>
       {{/if}}

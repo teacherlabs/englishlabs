@@ -487,16 +487,85 @@ legend {
 }
 
 .lobby-teacher-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  padding: 0 22px 18px;
 }
 
 .lobby-teacher-actions .practice-button,
 .lobby-teacher-actions .notes-button {
   margin: 0;
+  width: 100%;
+  min-height: 44px;
+}
+
+.teacher-control-header {
+  padding: 24px 22px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.teacher-control-header h2 {
+  margin: 4px 0 3px;
+  color: #14213d;
+  font-size: 25px;
+}
+
+.teacher-room-status {
+  margin-bottom: 12px;
+  color: #68758a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.teacher-control-header .lobby-code {
+  margin: 0;
+}
+
+.teacher-participants {
+  margin: 0 22px 18px;
+  padding: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f7f9fc;
+}
+
+.teacher-participants h2 {
+  margin: 2px 0 14px;
+  color: #14213d;
+  font-size: 18px;
+}
+
+.teacher-participants .eyebrow {
+  margin-bottom: 0;
+}
+
+.teacher-participants .lobby-players-grid {
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 10px;
+}
+
+.teacher-control-footer {
+  margin-top: auto;
+  padding: 18px 22px 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.teacher-control-footer .lobby-quit-form {
+  display: block;
+  margin: 0;
+}
+
+.teacher-control-footer .danger-button {
+  width: 100%;
+  background: #eef2f7;
+  color: #526074;
+  border: 1px solid #cbd5e1;
+}
+
+.teacher-control-footer .danger-button:hover {
+  background: #e2e8f0;
+  color: #14213d;
 }
 
 .lobby-quit-form {
@@ -604,6 +673,8 @@ legend {
   grid-row: 1;
 }
 .teacher-control-sidebar {
+  display: flex;
+  flex-direction: column;
   grid-column: 2;
   grid-row: 1 / span 2;
   width: 420px;
