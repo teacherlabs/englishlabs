@@ -198,7 +198,8 @@ legend {
 }
 
 .lobby-join-page .lobby-quiz-panel {
-  margin: 0;
+  align-self: center;
+  margin: 0 auto;
 }
 
 .lobby-student-page.lobby-join-page .lobby-quiz-panel {
@@ -432,6 +433,10 @@ legend {
   gap: 8px;
   max-width: 680px;
   padding: 30px;
+}
+
+.lobby-admin-tools {
+  margin: 10px;
 }
 
 .lobby-form label {

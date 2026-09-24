@@ -1334,6 +1334,29 @@ if (postgresPool) {
         ON vocabulary_difficult_words (username, difficulty_level, word)
       `),
     )
+    .then(() =>
+      postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS lobby_saved_quizzes (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          created_by TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS lobby_saved_quiz_questions (
+          id SERIAL PRIMARY KEY,
+          quiz_id INTEGER NOT NULL REFERENCES lobby_saved_quizzes(id) ON DELETE CASCADE,
+          question_order INTEGER NOT NULL,
+          question_text TEXT NOT NULL,
+          answer_a TEXT NOT NULL,
+          answer_b TEXT NOT NULL,
+          answer_c TEXT NOT NULL,
+          answer_d TEXT NOT NULL,
+          correct_answer TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS lobby_saved_quiz_questions_quiz_id_idx
+        ON lobby_saved_quiz_questions (quiz_id, question_order)
+      `),
+    )
     .catch((error) => {
       console.error("PostgreSQL user database initialization failed:", error);
       throw error;
@@ -4476,6 +4499,34 @@ app.get("/api/lobby/quizzes", requireAdmin, (req, res) => {
      ORDER BY chapters.chapter_number, grammar_topics.title COLLATE NOCASE`,
     (error, grammarQuizzes) => {
       if (error) return res.status(500).json({ error: "Unable to load quiz library." });
+      if (postgresPool) {
+        return postgresReady
+          .then(() =>
+            postgresPool.query(
+              `SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
+                      lobby_saved_quizzes.title AS topic_title,
+                      'Teacher-created quiz' AS chapter_title,
+                      '' AS cefr_level,
+                      COUNT(lobby_saved_quiz_questions.id)::INTEGER AS question_count
+               FROM lobby_saved_quizzes
+               JOIN lobby_saved_quiz_questions ON lobby_saved_quiz_questions.quiz_id = lobby_saved_quizzes.id
+               GROUP BY lobby_saved_quizzes.id
+               ORDER BY lobby_saved_quizzes.created_at DESC`,
+            ),
+          )
+          .then(({ rows: savedQuizzes }) => {
+            res.json({
+              quizzes: [
+                ...grammarQuizzes.map((quiz) => ({ ...quiz, quiz_id: `grammar:${quiz.topic_id}` })),
+                ...savedQuizzes,
+              ],
+            });
+          })
+          .catch((savedError) => {
+            console.error("Unable to load saved quizzes from PostgreSQL:", savedError);
+            res.status(500).json({ error: "Unable to load saved quizzes." });
+          });
+      }
       db.all(
         `SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
                 lobby_saved_quizzes.title AS topic_title,
@@ -4513,6 +4564,39 @@ app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
   }));
   if (normalizedQuestions.some((question) => !question.text || question.answers.some((answer) => !answer) || !["a", "b", "c", "d"].includes(question.correct))) {
     return res.status(400).json({ error: "Every question needs four answers and a correct answer." });
+  }
+  if (postgresPool) {
+    return postgresReady
+      .then(async () => {
+        const client = await postgresPool.connect();
+        try {
+          await client.query("BEGIN");
+          const { rows } = await client.query(
+            "INSERT INTO lobby_saved_quizzes (title, created_by) VALUES ($1, $2) RETURNING id",
+            [title, req.session.name],
+          );
+          const quizId = rows[0].id;
+          for (const [index, question] of normalizedQuestions.entries()) {
+            await client.query(
+              `INSERT INTO lobby_saved_quiz_questions
+               (quiz_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+              [quizId, index + 1, question.text, ...question.answers, question.correct],
+            );
+          }
+          await client.query("COMMIT");
+          res.status(201).json({ id: quizId, title });
+        } catch (saveError) {
+          await client.query("ROLLBACK").catch(() => {});
+          throw saveError;
+        } finally {
+          client.release();
+        }
+      })
+      .catch((quizError) => {
+        console.error("Unable to save quiz to PostgreSQL:", quizError);
+        res.status(500).json({ error: "Unable to save quiz." });
+      });
   }
   db.run(
     "INSERT INTO lobby_saved_quizzes (title, created_by) VALUES (?, ?)",
@@ -4578,6 +4662,27 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
         });
       };
       if (savedQuizId) {
+        if (postgresPool) {
+          return postgresReady
+            .then(async () => {
+              const { rows: savedQuizRows } = await postgresPool.query(
+                "SELECT title FROM lobby_saved_quizzes WHERE id = $1",
+                [savedQuizId],
+              );
+              const { rows: questionRows } = await postgresPool.query(
+                `SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer
+                 FROM lobby_saved_quiz_questions
+                 WHERE quiz_id = $1
+                 ORDER BY question_order`,
+                [savedQuizId],
+              );
+              loadQuestions(savedQuizRows[0]?.title, questionRows);
+            })
+            .catch((savedError) => {
+              console.error("Unable to load saved quiz from PostgreSQL:", savedError);
+              res.status(500).json({ error: "Unable to load saved quiz." });
+            });
+        }
         return db.get("SELECT title FROM lobby_saved_quizzes WHERE id = ?", [savedQuizId], (titleError, savedQuiz) => {
           if (titleError) return res.status(500).json({ error: "Unable to load saved quiz." });
           db.all("SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer FROM lobby_saved_quiz_questions WHERE quiz_id = ? ORDER BY question_order", [savedQuizId], (questionsError, questions) => {
