@@ -18,8 +18,8 @@
             <input id="room-title" name="title" placeholder="Friday English quiz" required />
             <fieldset class="lobby-mode-picker">
               <legend>Game mode</legend>
-              <label><input type="radio" name="mode" value="lobby" checked /> <span>Question Game</span></label>
-              <label><input type="radio" name="mode" value="quicktype" /> <span>QuickType</span></label>
+              <label class="practice-button lobby-mode-option"><input type="radio" name="mode" value="lobby" checked /> <span>Question Game</span></label>
+              <label class="practice-button lobby-mode-option"><input type="radio" name="mode" value="quicktype" /> <span>QuickType</span></label>
             </fieldset>
             <button class="practice-button" type="submit">Launch Lobby</button>
           </form>
@@ -75,7 +75,7 @@
             <div class="lobby-players-grid" data-lobby-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
           </section>
        <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="admin" data-mode="{{room.mode}}">
-         {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>{{#unless isFinished}}<form class="lobby-inline-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>{{/unless}}</div>{{/if}}
+         {{#if isActiveSession}}<div class="active-room-controls"><p class="lobby-code">Student code: <strong>{{room.code}}</strong></p></div>{{/if}}
           {{#if isQuicktype}}
           <section class="admin-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">Teacher control</p>
@@ -109,7 +109,6 @@
             <p class="eyebrow">Quiz complete</p>
             <h2>Final results</h2>
             <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
-            <form class="lobby-inline-form finished-end-game-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">End game</button></form>
           </section>
         </div>
         <footer class="teacher-control-footer">
