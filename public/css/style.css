@@ -478,7 +478,7 @@ legend {
 
 .lobby-code strong {
   letter-spacing: 0.16em;
-  font-size: 25px;
+  font-size: 18px;
 }
 
 .lobby-inline-form {
@@ -490,14 +490,36 @@ legend {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  padding: 0 22px 18px;
+  padding: 10px 22px 18px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .lobby-teacher-actions .practice-button,
 .lobby-teacher-actions .notes-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
   width: 100%;
+  min-width: 0;
   min-height: 44px;
+  text-align: center;
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.teacher-control-sidebar .practice-button:hover:not(:disabled),
+.teacher-control-sidebar .notes-button:hover:not(:disabled),
+.teacher-control-sidebar .danger-button:hover:not(:disabled) {
+  filter: brightness(0.94);
+  box-shadow: 0 4px 10px rgba(38, 55, 82, 0.12);
+  transform: translateY(-2px);
 }
 
 .teacher-control-header {
@@ -557,10 +579,21 @@ legend {
 }
 
 .teacher-control-footer .danger-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   background: #eef2f7;
   color: #526074;
   border: 1px solid #cbd5e1;
+  text-align: center;
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .teacher-control-footer .danger-button:hover {
@@ -639,7 +672,8 @@ legend {
   grid-template-columns: minmax(0, 1fr) 420px;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .lobby-page:has(.teacher-lobby-stage-wrap) {
   display: grid;
@@ -647,6 +681,7 @@ legend {
   grid-template-rows: auto minmax(0, 1fr);
   column-gap: 18px;
   align-items: stretch;
+  overflow-x: hidden;
 }
 .lobby-page:has(.teacher-lobby-stage-wrap) .lobby-quiz-panel {
   grid-column: 2;
@@ -675,15 +710,28 @@ legend {
 .teacher-control-sidebar {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  justify-self: end;
   grid-column: 2;
   grid-row: 1 / span 2;
   width: 420px;
   min-width: 0;
-  height: 100%;
+  height: calc(100dvh - 60px);
+  max-height: calc(100dvh - 60px);
+  overflow-x: hidden;
   overflow-y: auto;
   border-left: 2px solid #e2e8f0;
-  background: #fff;
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
   z-index: 10;
+}
+.teacher-control-sidebar > * {
+  min-width: 0;
+  max-width: 100%;
 }
 .teacher-control-sidebar .lobby-phase-stack {
   width: 100%;
@@ -951,8 +999,11 @@ legend {
     grid-row: auto;
   }
   .teacher-control-sidebar {
+    position: static;
+    justify-self: stretch;
     width: 100%;
     height: auto;
+    max-height: none;
     border-left: 0;
   }
   .quicktype-lobby .lobby-character-stage,
@@ -5092,7 +5143,6 @@ nav ul li a:hover {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 30px;
 }
 
 .profile-layout .eyebrow,
@@ -8256,7 +8306,6 @@ header > nav,
 .lobby-code,
 .lobby-code strong {
   color: var(--color-primary);
-  padding-left: 30px;
 }
 
 .danger-button {
@@ -8268,7 +8317,6 @@ header > nav,
 }
 
 footer {
-  background: var(--color-dark);
   color: var(--color-surface);
 }
 

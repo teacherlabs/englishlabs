@@ -7,42 +7,19 @@
       <a class="lobby-settings-action lobby-settings-leave" href="/">Leave lobby</a>
     </div>
   </div>
-  <section class="lobby-quiz-panel">
-    {{#if isAdmin}}
-      <div class="lobby-admin-tools">
-        <p class="eyebrow">Teacher control</p>
-        {{#unless room}}
+  {{#if isAdmin}}
+    {{#unless room}}
+      <section class="lobby-quiz-panel">
+        <div class="lobby-admin-tools">
+          <p class="eyebrow">Teacher control</p>
           <h1>Create a {{#if isQuicktype}}QuickType{{else}}Question Game{{/if}} room</h1>
           <form class="lobby-form" action="/lobby/rooms" method="post" data-room-create data-room-mode="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><input type="hidden" name="mode" value="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}" /><button class="practice-button" type="submit">Create room</button></form>
-        {{/unless}}
-        {{#if room}}
-          <h1>{{room.title}}</h1>
-          <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
-          {{#unless isQuicktype}}{{#if questions}}<h2>Questions</h2><ol class="lobby-question-list">{{#each questions}}<li>{{question_text}}</li>{{/each}}</ol>{{/if}}{{/unless}}
-          {{#if isWaiting}}
-            {{#if isQuicktype}}
-              {{#unless questions}}
-              <form class="lobby-form quicktype-setup-form" action="/lobby/quicktype/create" method="post" data-quicktype-setup>
-                <input type="hidden" name="roomId" value="{{room.id}}" />
-                <label for="quicktype-word-search">Select words from the active vocabulary</label>
-                <input id="quicktype-word-search" type="search" placeholder="Filter words..." data-word-search />
-                <div class="quicktype-word-picker">{{#each vocabularyWords}}<button type="button" class="word-card" data-word-option data-word-id="{{id}}" aria-pressed="false"><span>{{english_word}}</span><small>{{swedish_translation}}</small></button>{{/each}}</div>
-                <p class="admin-live-note"><span data-selected-count>0</span> words selected. Drag selected words below to order them.</p>
-                <ol class="quicktype-order-list" data-word-order></ol>
-                <button class="practice-button" type="submit" data-create-game disabled>Create game</button>
-              </form>
-              {{/unless}}
-            {{else}}<div class="lobby-question-actions"><span>Add a question manually</span></div><form class="lobby-form" action="/lobby/questions" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><label for="question-text">Question</label><textarea id="question-text" name="questionText" rows="2" required></textarea><div class="lobby-answer-grid"><input name="answer_a" placeholder="Answer A" required /><input name="answer_b" placeholder="Answer B" required /><input name="answer_c" placeholder="Answer C" required /><input name="answer_d" placeholder="Answer D" required /></div><label for="correct-answer">Correct answer</label><select id="correct-answer" name="correctAnswer"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select><button class="notes-button" type="submit">Add question</button></form>{{/if}}
-            {{#if questions}}{{#unless isQuicktype}}<form class="lobby-inline-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start quiz</button></form>{{/unless}}{{/if}}
-          {{else}}
-            <p class="admin-live-note">The live game appears in the lobby below.</p>
-          {{/if}}
-        {{/if}}
-      </div>
-    {{else}}
-      {{#unless participant}}<h1>Join a quiz</h1><form class="lobby-form" action="/lobby/join" method="post"><label for="room-code">Enter the 4-digit code</label><input id="room-code" name="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" /><button class="practice-button" type="submit">Join room</button></form>{{/unless}}
-    {{/if}}
-  </section>
+        </div>
+      </section>
+    {{/unless}}
+  {{else}}
+    {{#unless participant}}<section class="lobby-quiz-panel"><h1>Join a quiz</h1><form class="lobby-form" action="/lobby/join" method="post"><label for="room-code">Enter the 4-digit code</label><input id="room-code" name="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" /><button class="practice-button" type="submit">Join room</button></form></section>{{/unless}}
+  {{/if}}
   {{#if isAdmin}}{{#if room}}{{#unless isQuicktype}}
   <div class="quiz-selector-modal" data-quiz-selector hidden>
     <section class="quiz-selector-dialog" role="dialog" aria-modal="true" aria-labelledby="quiz-selector-title">
