@@ -113,7 +113,7 @@
           </section>
         </div>
         <footer class="teacher-control-footer">
-          {{#unless isQuicktype}}<form class="lobby-inline-form intermission-next-form" action="/lobby/next" method="post" hidden><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Next Question</button></form>{{/unless}}
+          <div data-intermission-actions></div>
           {{#unless isQuicktype}}{{#if isWaiting}}{{#if questions}}<form class="lobby-inline-form start-game-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start Game</button></form>{{/if}}{{/if}}{{/unless}}
           {{#if isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{else}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{/if}}
         </footer>
@@ -309,9 +309,24 @@
     const socketUrl = "{{socketUrl}}" || window.location.origin;
     const lobbySocket = typeof io === "function" ? io(socketUrl, { withCredentials: true }) : null;
     window.lobbySocket = lobbySocket;
+    let socketReady = Promise.resolve();
     if (lobbySocket) {
-      lobbySocket.emit("joinRoom", { roomId }, (result) => {
-        if (!result?.ok) console.warn("Unable to join lobby socket:", result?.error);
+      socketReady = new Promise((resolve) => {
+        let settled = false;
+        const finish = (result) => {
+          if (settled) return;
+          settled = true;
+          resolve(result);
+        };
+        lobbySocket.once("connect_error", (error) => {
+          console.warn("Unable to connect to lobby socket:", error.message);
+          finish({ ok: false, error: error.message });
+        });
+        window.setTimeout(() => finish({ ok: false, error: "Socket handshake timed out." }), 1500);
+        lobbySocket.emit("joinRoom", { roomId }, (result) => {
+          if (!result?.ok) console.warn("Unable to join lobby socket:", result?.error);
+          finish(result);
+        });
       });
       lobbySocket.on("playerMoved", (movement) => {
         window.lobbyPlayers = (window.lobbyPlayers || []).map((player) =>
@@ -360,7 +375,7 @@
     const roundLeaderboardList = phaseLeaderboard.querySelector("[data-round-leaderboard]");
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
-    const nextQuestionForm = document.querySelector(".intermission-next-form");
+    const intermissionActions = document.querySelector("[data-intermission-actions]");
     const playersGrid = document.querySelector("[data-lobby-players]");
     const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
@@ -431,7 +446,7 @@
       }).join("");
     };
 
-    const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
+    const refresh = () => socketReady.then(() => fetch(`/api/lobby/state?roomId=${roomId}`)).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
       if (teacherStage && role === "admin") {
         teacherStage.classList.toggle("is-live-question", state.room.status === "running");
@@ -556,7 +571,26 @@
       phaseRunning.hidden = state.room.status !== "running";
       if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
       phaseLeaderboard.hidden = state.room.status !== "leaderboard";
-      if (nextQuestionForm) nextQuestionForm.hidden = state.room.status !== "leaderboard";
+      if (intermissionActions) {
+        if (state.room.status === "leaderboard" && !intermissionActions.firstElementChild && mode !== "quicktype") {
+          const form = document.createElement("form");
+          form.className = "lobby-inline-form intermission-next-form";
+          form.action = "/lobby/next";
+          form.method = "post";
+          const roomInput = document.createElement("input");
+          roomInput.type = "hidden";
+          roomInput.name = "roomId";
+          roomInput.value = roomId;
+          const button = document.createElement("button");
+          button.className = "practice-button";
+          button.type = "submit";
+          button.textContent = "Next Question";
+          form.append(roomInput, button);
+          intermissionActions.append(form);
+        } else if (state.room.status !== "leaderboard") {
+          intermissionActions.replaceChildren();
+        }
+      }
       const gameFinished =
         state.room.status === "finished" &&
         Number(state.totalQuestions) > 0 &&

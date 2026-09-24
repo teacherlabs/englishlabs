@@ -3500,11 +3500,10 @@ app.post("/login", (req, res) => {
         req.session.avatar = "";
         req.session.avatar_initial = username.charAt(0).toUpperCase();
         console.log("Session information: " + JSON.stringify(req.session));
-        res.redirect("/");
-        const model = {
-          error: "",
-          message: "You are the admin, Welcome home!",
-        };
+        return req.session.save((saveError) => {
+          if (saveError) return res.status(500).send("Unable to save session.");
+          res.redirect("/");
+        });
       } else {
         const model = {
           error: "Sorry, the password is not correct...",
@@ -3552,7 +3551,10 @@ app.post("/login", (req, res) => {
             req.session.avatar_initial = member.username
               .charAt(0)
               .toUpperCase();
-            res.redirect("/");
+            req.session.save((saveError) => {
+              if (saveError) return res.status(500).send("Unable to save session.");
+              res.redirect("/");
+            });
           },
         );
       })
@@ -4799,11 +4801,15 @@ app.post("/lobby/join", requireLogin, (req, res) => {
     [code],
     (error, room) => {
       if (error || !room) return res.status(400).redirect("/lobby?error=code");
-      insertLobbyParticipant(room.id, req.session.name, () =>
-        res.redirect(
-          `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
-        ),
-      );
+      insertLobbyParticipant(room.id, req.session.name, (participantError) => {
+        if (participantError) return res.status(500).send("Unable to join lobby.");
+        req.session.save((saveError) => {
+          if (saveError) return res.status(500).send("Unable to save session.");
+          res.redirect(
+            `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}&roomId=${room.id}`,
+          );
+        });
+      });
     },
   );
 });
