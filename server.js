@@ -4404,6 +4404,8 @@ app.post("/lobby/quit", requireAdmin, (req, res) => {
   if (roomId) {
     io.to(String(roomId)).emit("lobbyClosed", {
       roomId,
+      closed: true,
+      status: "closed",
       message: "The teacher has closed the lobby.",
     });
   }
@@ -6806,14 +6808,6 @@ io.on("connection", (socket) => {
     );
   });
 
-  socket.on("disconnecting", () => {
-    if (isAdmin && socket.data.roomId) {
-      io.to(String(socket.data.roomId)).emit("lobbyClosed", {
-        roomId: socket.data.roomId,
-        message: "The teacher has left the lobby.",
-      });
-    }
-  });
 });
 
 // The server.listen call should be outside the post route

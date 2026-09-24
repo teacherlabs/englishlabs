@@ -362,18 +362,19 @@
           entranceButton.disabled = entering;
         }
       });
-      lobbySocket.on("lobbyClosed", ({ message } = {}) => {
+      lobbySocket.on("lobbyClosed", ({ message, closed, status } = {}) => {
         if (role !== "student" || lobbyClosedRedirecting) return;
+        if (closed !== true && !["closed", "deleted"].includes(status)) return;
         const waitForInitialState = !initialLobbyStateReady ||
           Date.now() - lobbyJoinedAt < lobbyStartupGracePeriod;
         if (waitForInitialState) {
           window.setTimeout(() => {
             if (!initialLobbyStateReady) return;
-            handleLobbyClosed({ message });
+            handleLobbyClosed({ message, closed, status });
           }, Math.max(0, lobbyStartupGracePeriod - (Date.now() - lobbyJoinedAt)));
           return;
         }
-        handleLobbyClosed({ message });
+        handleLobbyClosed({ message, closed, status });
       });
     }
     const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
@@ -400,8 +401,9 @@
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
     let lobbyClosedRedirecting = false;
     let initialLobbyStateReady = role === "admin";
-    const handleLobbyClosed = ({ message } = {}) => {
+    const handleLobbyClosed = ({ message, closed, status } = {}) => {
       if (role !== "student" || lobbyClosedRedirecting || !initialLobbyStateReady) return;
+      if (closed !== true && !["closed", "deleted"].includes(status)) return;
       lobbyClosedRedirecting = true;
       if (lobbyClosedNotice) {
         lobbyClosedNotice.textContent = message || "The teacher has closed the lobby.";
