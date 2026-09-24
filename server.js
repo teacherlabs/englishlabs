@@ -1093,7 +1093,7 @@ const loadLobbyCharacter = (username) => {
     return postgresReady
       .then(() =>
         postgresPool.query(
-          "SELECT avatar, spritesheet, character_config FROM users WHERE username = $1",
+          "SELECT avatar, spritesheet, character_config, gold_medals FROM users WHERE username = $1",
           [username],
         ),
       )
@@ -1112,7 +1112,7 @@ const loadLobbyCharacter = (username) => {
 const loadLobbyCharacterFromSqlite = (username) =>
   new Promise((resolve, reject) => {
     db.get(
-      "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
+      "SELECT avatar, spritesheet, character_config, gold_medals FROM members WHERE username = ?",
       [username],
       (error, row) => {
         if (error) return reject(error);
@@ -1211,7 +1211,10 @@ if (postgresPool) {
           ADD COLUMN IF NOT EXISTS avatar TEXT NOT NULL DEFAULT '',
           ADD COLUMN IF NOT EXISTS spritesheet TEXT NOT NULL DEFAULT '',
           ADD COLUMN IF NOT EXISTS character_config TEXT NOT NULL DEFAULT '',
-          ADD COLUMN IF NOT EXISTS profile_background TEXT NOT NULL DEFAULT '#edf4ff'
+          ADD COLUMN IF NOT EXISTS profile_background TEXT NOT NULL DEFAULT '#edf4ff',
+          ADD COLUMN IF NOT EXISTS gold_medals INTEGER NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS silver_medals INTEGER NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS bronze_medals INTEGER NOT NULL DEFAULT 0
       `),
     )
     .then(() =>
@@ -1889,6 +1892,9 @@ db.serialize(() => {
     spritesheet TEXT NOT NULL DEFAULT '',
     character_config TEXT NOT NULL DEFAULT '',
     profile_background TEXT NOT NULL DEFAULT '#edf4ff',
+    gold_medals INTEGER NOT NULL DEFAULT 0,
+    silver_medals INTEGER NOT NULL DEFAULT 0,
+    bronze_medals INTEGER NOT NULL DEFAULT 0,
     joined_date TEXT,
     phone_number TEXT
   )`);
@@ -1914,6 +1920,25 @@ db.serialize(() => {
     "ALTER TABLE members ADD COLUMN character_config TEXT DEFAULT ''",
     () => {},
   );
+  db.run(
+    "ALTER TABLE members ADD COLUMN gold_medals INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE members ADD COLUMN silver_medals INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE members ADD COLUMN bronze_medals INTEGER NOT NULL DEFAULT 0",
+    () => {},
+  );
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_medal_awards (
+    room_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    rank INTEGER NOT NULL,
+    awarded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (room_id, username)
+  )`);
   db.run(
     "INSERT OR IGNORE INTO members (username, fname, lname, email, role, goal, avatar, spritesheet, character_config) VALUES (?, ?, ?, ?, 'admin', '', '', '', '')",
     [adminname, adminname, "", ""],
@@ -4178,7 +4203,7 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
     questions = Array.isArray(questions) ? questions : [];
     participant = participant || null;
     db.get(
-      "SELECT avatar, spritesheet, character_config FROM members WHERE username = ?",
+      "SELECT avatar, spritesheet, character_config, gold_medals FROM members WHERE username = ?",
       [sessionName],
       (memberError, member) => {
         try {
@@ -4216,6 +4241,8 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
               member?.spritesheet || member?.avatar,
             ),
             characterConfig,
+            goldMedals: Number(member?.gold_medals) || 0,
+            winnerAnimationsUnlocked: Number(member?.gold_medals) > 0,
           },
           isAdmin,
           socketUrl: process.env.VITE_SOCKET_URL || "",
@@ -5018,6 +5045,59 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
   );
 });
 
+const awardLobbyMedals = (roomId, callback) => {
+  db.all(
+    `SELECT lobby_participants.username, lobby_participants.score
+     FROM lobby_participants
+     LEFT JOIN members ON members.username = lobby_participants.username
+     WHERE lobby_participants.room_id = ?
+       AND (members.role IS NULL OR members.role != 'admin')
+     ORDER BY lobby_participants.score DESC, lobby_participants.username ASC
+     LIMIT 3`,
+    [roomId],
+    (error, winners) => {
+      if (error) return callback(error);
+      const medalColumns = ["gold_medals", "silver_medals", "bronze_medals"];
+      const awardNext = (index) => {
+        if (index >= winners.length) return callback();
+        const winner = winners[index];
+        const medalColumn = medalColumns[index];
+        db.run(
+          "INSERT OR IGNORE INTO lobby_medal_awards (room_id, username, rank) VALUES (?, ?, ?)",
+          [roomId, winner.username, index + 1],
+          function (awardError) {
+            if (awardError) return callback(awardError);
+            if (!this.changes) return awardNext(index + 1);
+            db.run(
+              `UPDATE members
+               SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1
+               WHERE username = ?`,
+              [winner.username],
+              (memberError) => {
+                if (memberError) return callback(memberError);
+                const postgresUpdate = postgresPool
+                  ? postgresReady.then(() =>
+                      postgresPool.query(
+                        `UPDATE users
+                         SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1
+                         WHERE username = $1`,
+                        [winner.username],
+                      ),
+                    )
+                  : Promise.resolve();
+                postgresUpdate
+                  .then(() => awardNext(index + 1))
+                  .catch(callback);
+              },
+            );
+          },
+        );
+      };
+      awardNext(0);
+    },
+  );
+};
+
 app.post("/lobby/next", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
   db.get(
@@ -5057,10 +5137,19 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
               db.run(
                 "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
                 [roomId],
-                () =>
-                  res.redirect(
-                    `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`,
-                  ),
+                () => {
+                  const redirect = () =>
+                    res.redirect(
+                      `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`,
+                    );
+                  if (next > count.total) {
+                    return awardLobbyMedals(roomId, (awardError) => {
+                      if (awardError) console.error("Unable to award lobby medals:", awardError);
+                      redirect();
+                    });
+                  }
+                  redirect();
+                },
               );
             },
           );
@@ -5588,7 +5677,7 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
   const category = categoryKey ? teacherCategories[categoryKey] : null;
   if (!postgresPool) {
     return db.all(
-      "SELECT username, fname, lname, goal FROM members WHERE role = ? ORDER BY username",
+      "SELECT username, fname, lname, goal, gold_medals, silver_medals, bronze_medals FROM members WHERE role = ? ORDER BY username",
       ["student"],
       (studentError, students) => {
         if (studentError) {
@@ -5662,7 +5751,7 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
   try {
     await postgresReady;
     const studentResult = await postgresPool.query(
-      "SELECT username, fname, lname, goal FROM users WHERE role = $1 ORDER BY username",
+      "SELECT username, fname, lname, goal, gold_medals, silver_medals, bronze_medals FROM users WHERE role = $1 ORDER BY username",
       ["student"],
     );
     const tableResult = await postgresPool.query(
@@ -6363,7 +6452,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     postgresReady
       .then(() =>
         postgresPool.query(
-          "SELECT username, fname, lname, goal, avatar, spritesheet, character_config FROM users WHERE username = $1 AND role = $2",
+          "SELECT username, fname, lname, goal, avatar, spritesheet, character_config, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1 AND role = $2",
           [req.params.username, "student"],
         ),
       )
@@ -6374,7 +6463,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
       });
   } else {
     db.get(
-      "SELECT username, fname, lname, goal, avatar, spritesheet, character_config FROM members WHERE username = ? AND role = 'student'",
+      "SELECT username, fname, lname, goal, avatar, spritesheet, character_config, gold_medals, silver_medals, bronze_medals FROM members WHERE username = ? AND role = 'student'",
       [req.params.username],
       loadStudentDetails,
     );
@@ -6720,6 +6809,8 @@ io.on("connection", (socket) => {
                   characterConfig: parseCharacterConfig(
                     character.character_config,
                   ),
+                  winnerAnimationsUnlocked:
+                    Number(character.gold_medals) > 0,
                 };
                 acknowledge?.({ ok: true });
               })
@@ -6772,6 +6863,12 @@ io.on("connection", (socket) => {
       !socket.data.roomId ||
       socket.data.roomId !== numericRoomId ||
       !allowedEmotes.has(emote)
+    ) {
+      return;
+    }
+    if (
+      ["dance", "cheer"].includes(emote) &&
+      !socket.data.character?.winnerAnimationsUnlocked
     ) {
       return;
     }

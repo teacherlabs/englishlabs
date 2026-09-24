@@ -4335,6 +4335,36 @@ div.profile-avatar-placeholder {
   font-weight: 700;
   line-height: 1.2;
 }
+.student-medal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.student-medal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid #d9e2ef;
+  border-radius: 999px;
+  background: #fffdf7;
+  color: #526074;
+  font-size: 13px;
+  line-height: 1;
+}
+.student-medal strong {
+  color: #14213d;
+}
+.student-medal-gold {
+  border-color: #d9b75f;
+}
+.student-medal-silver {
+  border-color: #b9c3d0;
+}
+.student-medal-bronze {
+  border-color: #c47a52;
+}
 
 .student-character-preview {
   width: 72px;
@@ -4360,6 +4390,12 @@ div.profile-avatar-placeholder {
   max-width: 1280px;
   width: min(100%, 1280px);
   padding: 24px;
+}
+.student-row-medals {
+  color: #526074;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .admin-student-profile-card,

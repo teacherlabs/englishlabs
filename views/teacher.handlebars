@@ -5,7 +5,7 @@
             ·
             {{categoryLabel}}{{/if}}</h1></div></div>
     <div class="student-table"><div class="student-table-head"><span
-      >Student</span><span>Activity</span><span>Actions</span></div>{{#each students}}<div
+      >Student</span><span>Activity</span><span>Medals</span><span>Actions</span></div>{{#each students}}<div
           class="student-row"
           data-student-row
           data-username="{{username}}"
@@ -22,7 +22,7 @@
             class="student-row-cell student-row-goal"
           ><span>{{#if goal}}{{goal}}{{else}}No goal set{{/if}}</span>{{#if
               pendingCount
-            }}<b class="teacher-pending-badge" aria-label="{{pendingCount}} pending items">{{pendingCount}}</b>{{/if}}</span></a><button
+            }}<b class="teacher-pending-badge" aria-label="{{pendingCount}} pending items">{{pendingCount}}</b>{{/if}}</span><span class="student-row-cell student-row-medals" aria-label="Quiz medals">🥇 {{gold_medals}} · 🥈 {{silver_medals}} · 🥉 {{bronze_medals}}</span></a><button
             class="danger-button student-delete-button"
             type="button"
             data-delete-student

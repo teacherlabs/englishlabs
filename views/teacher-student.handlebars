@@ -9,6 +9,11 @@
           <h1 class="student-profile-name">{{#if student.fname}}{{student.fname}} {{student.lname}}{{else}}{{student.username}}{{/if}}</h1>
           <p class="student-username">@{{student.username}}</p>
           <span class="learning-goal-badge">🎯 Goal: {{#if student.goal}}{{student.goal}}{{else}}No goal set{{/if}}</span>
+          <div class="student-medal-summary" aria-label="Quiz medals">
+            <span class="student-medal student-medal-gold" title="Gold medals">🥇 <strong>{{student.gold_medals}}</strong></span>
+            <span class="student-medal student-medal-silver" title="Silver medals">🥈 <strong>{{student.silver_medals}}</strong></span>
+            <span class="student-medal student-medal-bronze" title="Bronze medals">🥉 <strong>{{student.bronze_medals}}</strong></span>
+          </div>
         </div>
       </div>
     </div>
