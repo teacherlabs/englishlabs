@@ -459,10 +459,58 @@
     let lastEntranceEvent = null;
 
     const renderLeaderboardList = (target, players) => {
-      const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
-      target.innerHTML = students.length
-        ? students.map((player, index) => `<li><span>${index + 1}. ${escapeHtml(player.username)}</span><strong>${player.score}</strong></li>`).join("")
-        : "<li>No scores yet.</li>";
+      const students = (players || [])
+        .filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher")
+        .sort((first, second) => Number(second.score) - Number(first.score) || String(first.username).localeCompare(String(second.username)))
+        .slice(0, 5);
+      if (!students.length) {
+        target.innerHTML = "<li>No scores yet.</li>";
+        return;
+      }
+
+      const previousPositions = new Map(
+        [...target.querySelectorAll("li[data-player-key]")]
+          .map((row) => [row.dataset.playerKey, row.getBoundingClientRect()]),
+      );
+      const existingRows = new Map(
+        [...target.querySelectorAll("li[data-player-key]")]
+          .map((row) => [row.dataset.playerKey, row]),
+      );
+      const visibleKeys = new Set();
+
+      students.forEach((player, index) => {
+        const playerKey = String(player.username);
+        const avatar = (player.avatarUrl || player.avatar)
+          ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
+          : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
+        const row = existingRows.get(playerKey) || document.createElement("li");
+        row.dataset.playerKey = playerKey;
+        row.innerHTML = `<span class="round-leaderboard-rank">${index + 1}</span><span class="round-leaderboard-avatar">${avatar}</span><span class="round-leaderboard-name">${escapeHtml(player.username)}</span><strong>${player.score}</strong>`;
+        visibleKeys.add(playerKey);
+        target.append(row);
+      });
+
+      existingRows.forEach((row, playerKey) => {
+        if (!visibleKeys.has(playerKey)) row.remove();
+      });
+
+      requestAnimationFrame(() => {
+        students.forEach((player) => {
+          const row = target.querySelector(`[data-player-key="${CSS.escape(String(player.username))}"]`);
+          const previous = previousPositions.get(String(player.username));
+          if (!row || !previous) return;
+          const current = row.getBoundingClientRect();
+          const deltaX = previous.left - current.left;
+          const deltaY = previous.top - current.top;
+          if (!deltaX && !deltaY) return;
+          row.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+          row.style.transition = "none";
+          requestAnimationFrame(() => {
+            row.style.transition = "transform 380ms cubic-bezier(0.22, 1, 0.36, 1)";
+            row.style.transform = "";
+          });
+        });
+      });
     };
     const renderFinalResults = (players) => {
       const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
