@@ -791,8 +791,27 @@ legend {
 .teacher-lobby-stage-wrap .lobby-phase-stack > * {
   pointer-events: auto;
 }
-.lobby-active-session .teacher-lobby-stage-wrap .lobby-character-stage {
+.lobby-active-session .teacher-lobby-stage-wrap .lobby-character-stage,
+.teacher-lobby-stage-wrap.is-live-question .lobby-character-stage {
   visibility: hidden;
+}
+.teacher-lobby-stage-wrap.is-live-question {
+  grid-template-columns: minmax(0, 1fr);
+}
+.teacher-lobby-stage-wrap.is-live-question .teacher-control-sidebar {
+  grid-column: 1;
+  width: 0;
+  min-width: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.teacher-lobby-stage-wrap.is-live-question .teacher-control-sidebar > *:not(.lobby-phase-stack) {
+  display: none;
+}
+.teacher-lobby-stage-wrap.is-live-question .teacher-control-sidebar .lobby-phase-stack {
+  right: 18px;
 }
 .teacher-control-sidebar {
   display: flex;
@@ -1106,6 +1125,15 @@ legend {
     width: 100%;
     overflow: visible;
     pointer-events: auto;
+  }
+  .teacher-lobby-stage-wrap.is-live-question .teacher-control-sidebar .lobby-phase-stack {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
+    width: auto;
+    overflow-y: auto;
   }
   .quicktype-lobby .lobby-character-stage,
   .quicktype-lobby .lobby-phase-stack {

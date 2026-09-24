@@ -300,6 +300,7 @@
 
   const lobbyPhase = document.querySelector("[data-lobby-phase]");
   if (lobbyPhase) {
+    const teacherStage = document.querySelector(".teacher-lobby-stage-wrap");
     const roomId = lobbyPhase.dataset.roomId;
     const role = lobbyPhase.dataset.role;
     const mode = lobbyPhase.dataset.mode;
@@ -417,6 +418,9 @@
 
     const refresh = () => fetch(`/api/lobby/state?roomId=${roomId}`).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
+      if (teacherStage && role === "admin") {
+        teacherStage.classList.toggle("is-live-question", state.room.status === "running");
+      }
       const enteredRunningState =
         previousRoomStatus !== "running" && state.room.status === "running";
       previousRoomStatus = state.room.status;
