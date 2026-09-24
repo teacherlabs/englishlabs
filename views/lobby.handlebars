@@ -132,13 +132,13 @@
             <div class="lobby-waiting-room" data-lobby-waiting-room>
               <p class="lobby-waiting-room-title">Everyone in the room</p>
               <div class="lobby-waiting-players" data-lobby-waiting-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
-              <div class="lobby-emotes" aria-label="Lobby emotes">
+              {{#if student.winnerAnimationsUnlocked}}<div class="lobby-emotes" aria-label="Lobby emotes">
                 <span>React</span>
-                {{#if student.winnerAnimationsUnlocked}}<button type="button" data-lobby-emote="dance">Dance</button>
-                <button type="button" data-lobby-emote="cheer">Cheer</button>{{/if}}
+                <button type="button" data-lobby-emote="dance">Dance</button>
+                <button type="button" data-lobby-emote="cheer">Cheer</button>
                 <button type="button" data-lobby-emote="wave">Wave</button>
                 <button type="button" data-lobby-emote="think">Think</button>
-              </div>
+              </div>{{/if}}
             </div>
           </section>
           <section class="student-live-quiz" data-phase-countdown hidden>

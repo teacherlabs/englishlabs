@@ -1555,9 +1555,9 @@ legend {
   padding: 30px 32px 28px;
   border: 2px solid #d9b75f;
   border-radius: 22px;
-  background: linear-gradient(145deg, rgba(20, 33, 61, 0.98), rgba(49, 39, 30, 0.96));
-  box-shadow: 0 22px 0 rgba(185, 136, 66, 0.78), 0 30px 70px rgba(10, 16, 30, 0.42);
-  color: #fffdf7;
+  background: #ffffff;
+  box-shadow: 0 18px 0 rgba(185, 136, 66, 0.32), 0 24px 60px rgba(10, 16, 30, 0.38);
+  color: #14213d;
   text-align: center;
   animation: winner-celebration-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -1575,13 +1575,13 @@ legend {
   width: auto;
   margin: 0 0 8px;
   padding: 0;
-  color: #fffdf7;
+  color: #14213d;
   font-family: "Teachers", sans-serif;
   font-size: 32px;
 }
 .winner-celebration-copy {
   margin: 0;
-  color: #d9e2ef;
+  color: #526074;
   font-size: 15px;
 }
 .winner-celebration-character {
@@ -1593,7 +1593,7 @@ legend {
   overflow: hidden;
   border: 2px solid rgba(217, 183, 95, 0.8);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 183, 95, 0.28), rgba(20, 33, 61, 0.1) 68%);
+  background: radial-gradient(circle, rgba(217, 183, 95, 0.24), rgba(248, 250, 252, 0.9) 68%);
   box-shadow: 0 0 0 8px rgba(217, 183, 95, 0.08), inset 0 0 28px rgba(217, 183, 95, 0.18);
 }
 .winner-celebration-character canvas {
@@ -4469,6 +4469,58 @@ div.profile-avatar-placeholder {
 .student-medal-bronze {
   border-color: #c47a52;
 }
+.profile-medal-showcase {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--profile-card-text, #14213d) 14%, transparent);
+}
+.profile-medal-showcase-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.profile-medal-showcase-heading .eyebrow {
+  margin: 0;
+}
+.profile-medal-showcase-heading > span {
+  color: var(--profile-card-muted, #526074);
+  font-size: 12px;
+}
+.profile-medal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.profile-medal-card {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 12px 8px;
+  border: 1px solid #d9e2ef;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--profile-card-muted, #526074);
+  text-align: center;
+}
+.profile-medal-card strong {
+  color: var(--profile-card-text, #14213d);
+  font-size: 22px;
+}
+.profile-medal-card > span:last-child {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.profile-medal-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.profile-medal-card-gold { border-color: #d9b75f; }
+.profile-medal-card-silver { border-color: #b9c3d0; }
+.profile-medal-card-bronze { border-color: #c47a52; }
 
 .student-character-preview {
   width: 72px;

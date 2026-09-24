@@ -3919,7 +3919,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
   postgresReady
     .then(() =>
       postgresPool.query(
-        "SELECT username, email, goal, avatar, spritesheet, character_config FROM users WHERE username = $1",
+        "SELECT username, email, goal, avatar, spritesheet, character_config, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
         [req.session.name],
       ),
     )
@@ -6866,10 +6866,7 @@ io.on("connection", (socket) => {
     ) {
       return;
     }
-    if (
-      ["dance", "cheer"].includes(emote) &&
-      !socket.data.character?.winnerAnimationsUnlocked
-    ) {
+    if (!isAdmin && !socket.data.character?.winnerAnimationsUnlocked) {
       return;
     }
     io.to(String(numericRoomId)).emit("lobbyEmote", {

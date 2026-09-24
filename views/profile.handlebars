@@ -73,7 +73,18 @@
                 data-goal-edit
                 aria-label="Edit learning goal"
                 title="Edit learning goal"
-              >&#9998;</button></div></div>
+              >&#9998;</button></div>
+          <section class="profile-medal-showcase" aria-labelledby="profile-medals-title">
+            <div class="profile-medal-showcase-heading">
+              <p class="eyebrow" id="profile-medals-title">Quiz medals</p>
+              <span>Collected podium finishes</span>
+            </div>
+            <div class="profile-medal-grid">
+              <div class="profile-medal-card profile-medal-card-gold"><span class="profile-medal-icon" aria-hidden="true">🥇</span><strong>{{student.gold_medals}}</strong><span>Gold</span></div>
+              <div class="profile-medal-card profile-medal-card-silver"><span class="profile-medal-icon" aria-hidden="true">🥈</span><strong>{{student.silver_medals}}</strong><span>Silver</span></div>
+              <div class="profile-medal-card profile-medal-card-bronze"><span class="profile-medal-icon" aria-hidden="true">🥉</span><strong>{{student.bronze_medals}}</strong><span>Bronze</span></div>
+            </div>
+          </section></div>
         </div>
         <a class="practice-button" href="/logout">Log out</a>
       </div>
