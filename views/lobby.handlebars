@@ -53,7 +53,7 @@
   <section class="lobby-shell">
     {{#if isAdmin}}
       {{#if room}}
-      <div class="lobby-stage-wrap teacher-lobby-stage-wrap">
+      <div class="lobby-stage-wrap teacher-lobby-stage-wrap{{#if isLeaderboardPhase}} is-intermission{{/if}}">
         <div class="lobby-character-stage">
           <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
@@ -113,6 +113,7 @@
           </section>
         </div>
         <footer class="teacher-control-footer">
+          {{#unless isQuicktype}}<form class="lobby-inline-form intermission-next-form" action="/lobby/next" method="post" hidden><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit">Next Question</button></form>{{/unless}}
           {{#unless isQuicktype}}{{#if isWaiting}}{{#if questions}}<form class="lobby-inline-form start-game-form" action="/lobby/start" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><input type="hidden" name="mode" value="{{room.mode}}" /><button class="practice-button" type="submit">Start Game</button></form>{{/if}}{{/if}}{{/unless}}
           {{#if isActiveSession}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('End this game and disconnect students?');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{else}}<form class="lobby-inline-form lobby-quit-form" action="/lobby/quit" method="post" onsubmit="return confirm('Quit this room? Students will be disconnected.');"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="danger-button" type="submit">Quit lobby</button></form>{{/if}}
         </footer>
@@ -420,6 +421,7 @@
       if (!state.room || state.room.id !== Number(roomId)) return;
       if (teacherStage && role === "admin") {
         teacherStage.classList.toggle("is-live-question", state.room.status === "running");
+        teacherStage.classList.toggle("is-intermission", state.room.status === "leaderboard");
       }
       const enteredRunningState =
         previousRoomStatus !== "running" && state.room.status === "running";

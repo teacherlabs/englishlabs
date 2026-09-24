@@ -630,7 +630,8 @@ legend {
   margin: 0 0 12px;
 }
 
-.teacher-control-footer .start-game-form .practice-button {
+.teacher-control-footer .start-game-form .practice-button,
+.teacher-control-footer .intermission-next-form .practice-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -813,11 +814,25 @@ legend {
 .teacher-lobby-stage-wrap.is-live-question .teacher-control-sidebar .lobby-phase-stack {
   right: 18px;
 }
+.teacher-lobby-stage-wrap.is-intermission .teacher-control-header,
+.teacher-lobby-stage-wrap.is-intermission .lobby-teacher-actions,
+.teacher-lobby-stage-wrap.is-intermission .teacher-participants,
+.teacher-lobby-stage-wrap.is-intermission .start-game-form {
+  display: none;
+}
+.teacher-lobby-stage-wrap.is-intermission .teacher-control-sidebar .lobby-phase-stack {
+  display: none;
+}
+.teacher-lobby-stage-wrap.is-intermission .intermission-next-form {
+  display: block;
+  margin: 0 0 12px;
+}
+.teacher-lobby-stage-wrap.is-intermission .intermission-next-form[hidden] {
+  display: block;
+}
 .teacher-control-sidebar {
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 18px;
   align-self: start;
   justify-self: end;
   grid-column: 2;
