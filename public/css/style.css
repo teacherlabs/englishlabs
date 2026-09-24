@@ -1340,6 +1340,29 @@ legend {
   justify-content: center;
   gap: 18px;
   min-height: 104px;
+  max-height: 250px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+  scrollbar-color: #d9b75f rgba(20, 33, 61, 0.12);
+  scrollbar-width: thin;
+}
+.lobby-waiting-players::-webkit-scrollbar {
+  width: 8px;
+}
+.lobby-waiting-players::-webkit-scrollbar-track {
+  border-radius: 4px;
+  background: rgba(20, 33, 61, 0.12);
+}
+.lobby-waiting-players::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: #d9b75f;
+  background-clip: padding-box;
+}
+.lobby-waiting-players::-webkit-scrollbar-thumb:hover {
+  background: #b28b32;
+  background-clip: padding-box;
 }
 .lobby-waiting-player {
   position: relative;

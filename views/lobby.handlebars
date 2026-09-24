@@ -309,23 +309,36 @@
     const socketUrl = "{{socketUrl}}" || window.location.origin;
     const lobbySocket = typeof io === "function" ? io(socketUrl, { withCredentials: true }) : null;
     window.lobbySocket = lobbySocket;
+    const lobbyJoinedAt = Date.now();
+    const lobbyStartupGracePeriod = 3000;
     let socketReady = Promise.resolve();
     if (lobbySocket) {
       socketReady = new Promise((resolve) => {
         let settled = false;
+        let connected = lobbySocket.connected;
+        let joined = false;
         const finish = (result) => {
           if (settled) return;
           settled = true;
           resolve(result);
         };
+        const finishWhenReady = () => {
+          if (connected && joined) finish({ ok: true });
+        };
+        lobbySocket.once("connect", () => {
+          connected = true;
+          finishWhenReady();
+        });
         lobbySocket.once("connect_error", (error) => {
           console.warn("Unable to connect to lobby socket:", error.message);
           finish({ ok: false, error: error.message });
         });
-        window.setTimeout(() => finish({ ok: false, error: "Socket handshake timed out." }), 1500);
+        window.setTimeout(() => finish({ ok: false, error: "Socket handshake timed out." }), 3000);
         lobbySocket.emit("joinRoom", { roomId }, (result) => {
           if (!result?.ok) console.warn("Unable to join lobby socket:", result?.error);
-          finish(result);
+          joined = Boolean(result?.ok);
+          if (!joined) return finish(result);
+          finishWhenReady();
         });
       });
       lobbySocket.on("playerMoved", (movement) => {
@@ -351,13 +364,16 @@
       });
       lobbySocket.on("lobbyClosed", ({ message } = {}) => {
         if (role !== "student" || lobbyClosedRedirecting) return;
-        lobbyClosedRedirecting = true;
-        if (lobbyClosedNotice) {
-          lobbyClosedNotice.textContent = message || "The teacher has closed the lobby.";
-          lobbyClosedNotice.hidden = false;
-          lobbyClosedNotice.classList.remove("is-leaving");
+        const waitForInitialState = !initialLobbyStateReady ||
+          Date.now() - lobbyJoinedAt < lobbyStartupGracePeriod;
+        if (waitForInitialState) {
+          window.setTimeout(() => {
+            if (!initialLobbyStateReady) return;
+            handleLobbyClosed({ message });
+          }, Math.max(0, lobbyStartupGracePeriod - (Date.now() - lobbyJoinedAt)));
+          return;
         }
-        window.setTimeout(() => window.location.assign("/"), 1200);
+        handleLobbyClosed({ message });
       });
     }
     const phaseWaiting = lobbyPhase.querySelector("[data-phase-waiting]");
@@ -383,6 +399,17 @@
     const lobbyClosedNotice = document.querySelector("[data-lobby-closed-notice]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
     let lobbyClosedRedirecting = false;
+    let initialLobbyStateReady = role === "admin";
+    const handleLobbyClosed = ({ message } = {}) => {
+      if (role !== "student" || lobbyClosedRedirecting || !initialLobbyStateReady) return;
+      lobbyClosedRedirecting = true;
+      if (lobbyClosedNotice) {
+        lobbyClosedNotice.textContent = message || "The teacher has closed the lobby.";
+        lobbyClosedNotice.hidden = false;
+        lobbyClosedNotice.classList.remove("is-leaving");
+      }
+      window.setTimeout(() => window.location.assign("/"), 1200);
+    };
     if (teacherEntranceSound) {
       teacherEntranceSound.preload = "auto";
       teacherEntranceSound.load();
@@ -448,6 +475,7 @@
 
     const refresh = () => socketReady.then(() => fetch(`/api/lobby/state?roomId=${roomId}`)).then((response) => response.json()).then((state) => {
       if (!state.room || state.room.id !== Number(roomId)) return;
+      if (!initialLobbyStateReady) initialLobbyStateReady = true;
       if (teacherStage && role === "admin") {
         teacherStage.classList.toggle("is-live-question", state.room.status === "running");
         teacherStage.classList.toggle("is-intermission", state.room.status === "leaderboard");
