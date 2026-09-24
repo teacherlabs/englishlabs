@@ -1599,22 +1599,6 @@ app.use(function (req, res, next) {
     ...(req.session.isAdmin
       ? [
           {
-            href: "/quicktype",
-            label: "QuickType",
-            icon: "08",
-            active: isActivePath(["/quicktype"]),
-          },
-          {
-            href: "/question-game",
-            label: "Question game",
-            icon: "09",
-            active: isActivePath(["/question-game"]),
-          },
-        ]
-      : []),
-    ...(req.session.isAdmin
-      ? [
-          {
             href: "/teacher/dashboard",
             label: "Students",
             icon: "10",
@@ -4383,7 +4367,7 @@ app.get("/question-game", requireAuthenticated, (req, res) => {
   );
 });
 
-app.post("/lobby/rooms", requireAdmin, (req, res) => {
+app.post("/lobby/create", requireAdmin, (req, res) => {
   const title = String(req.body.title || "English Labs quiz")
     .trim()
     .slice(0, 100);
@@ -4485,70 +4469,29 @@ app.post("/lobby/questions", requireAdmin, (req, res) => {
 });
 
 app.get("/api/lobby/quizzes", requireAdmin, (req, res) => {
-  grammarDb.all(
-    `SELECT grammar_topics.id AS topic_id,
-            grammar_topics.title AS topic_title,
-            chapters.title AS chapter_title,
-            grammar_topics.cefr_level,
-            COUNT(quiz_questions.id) AS question_count
-     FROM grammar_topics
-     JOIN chapters ON grammar_topics.chapter_id = chapters.id
-     JOIN quiz_questions ON quiz_questions.topic_id = grammar_topics.id
-     GROUP BY grammar_topics.id
-     HAVING COUNT(quiz_questions.id) > 0
-     ORDER BY chapters.chapter_number, grammar_topics.title COLLATE NOCASE`,
-    (error, grammarQuizzes) => {
-      if (error) return res.status(500).json({ error: "Unable to load quiz library." });
-      if (postgresPool) {
-        return postgresReady
-          .then(() =>
-            postgresPool.query(
-              `SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
-                      lobby_saved_quizzes.title AS topic_title,
-                      'Teacher-created quiz' AS chapter_title,
-                      '' AS cefr_level,
-                      COUNT(lobby_saved_quiz_questions.id)::INTEGER AS question_count
-               FROM lobby_saved_quizzes
-               JOIN lobby_saved_quiz_questions ON lobby_saved_quiz_questions.quiz_id = lobby_saved_quizzes.id
-               GROUP BY lobby_saved_quizzes.id
-               ORDER BY lobby_saved_quizzes.created_at DESC`,
-            ),
-          )
-          .then(({ rows: savedQuizzes }) => {
-            res.json({
-              quizzes: [
-                ...grammarQuizzes.map((quiz) => ({ ...quiz, quiz_id: `grammar:${quiz.topic_id}` })),
-                ...savedQuizzes,
-              ],
-            });
-          })
-          .catch((savedError) => {
-            console.error("Unable to load saved quizzes from PostgreSQL:", savedError);
-            res.status(500).json({ error: "Unable to load saved quizzes." });
-          });
-      }
-      db.all(
-        `SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
-                lobby_saved_quizzes.title AS topic_title,
-                'Teacher-created quiz' AS chapter_title,
-                '' AS cefr_level,
-                COUNT(lobby_saved_quiz_questions.id) AS question_count
-         FROM lobby_saved_quizzes
-         JOIN lobby_saved_quiz_questions ON lobby_saved_quiz_questions.quiz_id = lobby_saved_quizzes.id
-         GROUP BY lobby_saved_quizzes.id
-         ORDER BY lobby_saved_quizzes.created_at DESC`,
-        (savedError, savedQuizzes) => {
-          if (savedError) return res.status(500).json({ error: "Unable to load saved quizzes." });
-          res.json({
-            quizzes: [
-              ...grammarQuizzes.map((quiz) => ({ ...quiz, quiz_id: `grammar:${quiz.topic_id}` })),
-              ...savedQuizzes,
-            ],
-          });
-        },
-      );
-    },
-  );
+  const savedQuizQuery = `
+    SELECT 'custom:' || lobby_saved_quizzes.id AS quiz_id,
+           lobby_saved_quizzes.title AS topic_title,
+           'Teacher-created quiz' AS chapter_title,
+           '' AS cefr_level,
+           COUNT(lobby_saved_quiz_questions.id)::INTEGER AS question_count
+    FROM lobby_saved_quizzes
+    JOIN lobby_saved_quiz_questions ON lobby_saved_quiz_questions.quiz_id = lobby_saved_quizzes.id
+    GROUP BY lobby_saved_quizzes.id
+    ORDER BY lobby_saved_quizzes.created_at DESC`;
+  if (postgresPool) {
+    return postgresReady
+      .then(() => postgresPool.query(savedQuizQuery))
+      .then(({ rows: savedQuizzes }) => res.json({ quizzes: savedQuizzes }))
+      .catch((savedError) => {
+        console.error("Unable to load saved quizzes from PostgreSQL:", savedError);
+        res.status(500).json({ error: "Unable to load saved quizzes." });
+      });
+  }
+  db.all(savedQuizQuery.replace("::INTEGER", ""), (savedError, savedQuizzes) => {
+    if (savedError) return res.status(500).json({ error: "Unable to load saved quizzes." });
+    res.json({ quizzes: savedQuizzes });
+  });
 });
 
 app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
@@ -4580,7 +4523,7 @@ app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
             await client.query(
               `INSERT INTO lobby_saved_quiz_questions
                (quiz_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
               [quizId, index + 1, question.text, ...question.answers, question.correct],
             );
           }

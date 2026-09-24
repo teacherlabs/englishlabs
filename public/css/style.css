@@ -439,6 +439,47 @@ legend {
   margin: 10px;
 }
 
+.lobby-create-form {
+  gap: 12px;
+}
+
+.lobby-mode-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0;
+  padding: 0;
+  border: 0;
+}
+
+.lobby-mode-picker legend {
+  grid-column: 1 / -1;
+  margin-bottom: 2px;
+  color: #14213d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lobby-mode-picker label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #14213d;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lobby-mode-picker input {
+  width: auto;
+  accent-color: #2d4b7b;
+}
+
 .lobby-form label {
   margin-top: 5px;
   color: #14213d;

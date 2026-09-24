@@ -12,8 +12,17 @@
       <section class="lobby-quiz-panel">
         <div class="lobby-admin-tools">
           <p class="eyebrow">Teacher control</p>
-          <h1>Create a {{#if isQuicktype}}QuickType{{else}}Question Game{{/if}} room</h1>
-          <form class="lobby-form" action="/lobby/rooms" method="post" data-room-create data-room-mode="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}"><label for="room-title">Room name</label><input id="room-title" name="title" placeholder="Friday English quiz" required /><input type="hidden" name="mode" value="{{#if isQuicktype}}quicktype{{else}}lobby{{/if}}" /><button class="practice-button" type="submit">Create room</button></form>
+          <h1>Launch a new lobby</h1>
+          <form class="lobby-form lobby-create-form" action="/lobby/create" method="post" data-room-create>
+            <label for="room-title">Room name / title</label>
+            <input id="room-title" name="title" placeholder="Friday English quiz" required />
+            <fieldset class="lobby-mode-picker">
+              <legend>Game mode</legend>
+              <label><input type="radio" name="mode" value="lobby" checked /> <span>Question Game</span></label>
+              <label><input type="radio" name="mode" value="quicktype" /> <span>QuickType</span></label>
+            </fieldset>
+            <button class="practice-button" type="submit">Launch Lobby</button>
+          </form>
         </div>
       </section>
     {{/unless}}
@@ -270,9 +279,7 @@
       event.preventDefault();
       const button = roomCreateForm.querySelector("button[type='submit']");
       if (button) button.disabled = true;
-      const roomMode = roomCreateForm.dataset.roomMode === "quicktype" ? "quicktype" : "lobby";
       const body = new URLSearchParams(new FormData(roomCreateForm));
-      body.set("mode", roomMode);
       fetch(roomCreateForm.action, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
