@@ -62,14 +62,14 @@ legend {
   height: calc(100dvh - 90px);
   overflow: hidden;
   padding: 12px 20px 20px;
-  background: #24150f;
+  background: #24150f url("/img/lobbyroombg.jpg") center / cover no-repeat;
 }
 
 .lobby-student-page {
   width: 100vw;
   height: 100vh;
   min-height: 100vh;
-  background: transparent;
+  background: #24150f url("/img/lobbyroombg.jpg") center / cover no-repeat;
 }
 
 .app-shell:has(.lobby-page) {
@@ -883,6 +883,9 @@ legend {
   overflow-wrap: anywhere;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel [data-correct-word] {
+  color: #fffdf7 !important;
+}
 .teacher-lobby-stage-wrap.is-intermission .intermission-next-form {
   display: block;
   margin: 0 0 12px;
@@ -1305,16 +1308,6 @@ legend {
   padding: 10px;
   border: 0;
   background: transparent;
-}
-
-.lobby-background-video {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
 }
 
 @media (max-width: 760px) {
@@ -9221,7 +9214,10 @@ footer {
   min-height: 100dvh;
   height: 100dvh;
   background-color: #24150f !important;
-  background-image: none !important;
+  background-image: url("/img/lobbyroombg.jpg") !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
 }
 
 .app-shell:has(.lobby-page) .lobby-quiz-panel,

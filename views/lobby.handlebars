@@ -1,7 +1,4 @@
 <main class="lobby-page{{#unless isAdmin}} lobby-student-page{{/unless}}{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
-  <video class="lobby-background-video" autoplay muted loop playsinline aria-hidden="true">
-    <source src="/backgrounds/mainpage.mp4" type="video/mp4" />
-  </video>
   <div class="lobby-settings" data-lobby-settings>
     <button class="lobby-settings-toggle" type="button" data-lobby-settings-toggle aria-expanded="false" aria-controls="lobby-settings-menu" aria-label="Open lobby settings" title="Lobby settings">&#9881;</button>
     <div class="lobby-settings-menu" id="lobby-settings-menu" data-lobby-settings-menu hidden>
