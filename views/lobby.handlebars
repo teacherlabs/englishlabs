@@ -1,4 +1,7 @@
 <main class="lobby-page{{#unless isAdmin}} lobby-student-page{{/unless}}{{#if isActiveSession}} lobby-active-session{{/if}}{{#unless participant}} lobby-join-page{{/unless}}" data-user-id="{{student.id}}">
+  <video class="lobby-background-video" autoplay muted loop playsinline aria-hidden="true">
+    <source src="/backgrounds/mainpage.mp4" type="video/mp4" />
+  </video>
   <div class="lobby-settings" data-lobby-settings>
     <button class="lobby-settings-toggle" type="button" data-lobby-settings-toggle aria-expanded="false" aria-controls="lobby-settings-menu" aria-label="Open lobby settings" title="Lobby settings">&#9881;</button>
     <div class="lobby-settings-menu" id="lobby-settings-menu" data-lobby-settings-menu hidden>
@@ -65,10 +68,29 @@
             <p class="lobby-code">Student code: <strong>{{room.code}}</strong></p>
           </header>
           <div class="lobby-teacher-actions">
-            <button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create Quiz</button>
+            {{#unless isQuicktype}}<button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create Quiz</button>{{/unless}}
             <button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>
             <a class="notes-button" href="/character-generator">Customize</a>
           </div>
+          {{#if isQuicktype}}{{#if isWaiting}}
+          <form class="quicktype-setup-form" action="/lobby/quicktype/create" method="post" data-quicktype-setup>
+            <input type="hidden" name="roomId" value="{{room.id}}" />
+            <h3>Choose QuickType words</h3>
+            <label for="quicktype-word-search">Search vocabulary</label>
+            <input id="quicktype-word-search" type="search" data-word-search placeholder="Search words" autocomplete="off" />
+            <div class="quicktype-word-picker" data-word-picker aria-live="polite"><p class="admin-live-note">Loading vocabulary...</p></div>
+            <label for="quicktype-custom-word">Add a custom word</label>
+            <div class="quicktype-custom-row">
+              <input id="quicktype-custom-word" type="text" data-custom-word placeholder="Type a word" maxlength="80" autocomplete="off" />
+              <button class="notes-button" type="button" data-add-custom-word>Add</button>
+            </div>
+            <p class="quicktype-selection-count"><span data-selected-count>0</span> selected</p>
+            <ol class="quicktype-order-list" data-word-order aria-label="Selected words"></ol>
+            <input type="hidden" name="customWords" data-custom-words value="[]" />
+            <p class="quicktype-picker-error" data-quicktype-picker-error role="status" hidden></p>
+            <button class="practice-button" type="submit" data-create-game disabled>Next</button>
+          </form>
+          {{/if}}{{/if}}
           <section class="teacher-participants" aria-labelledby="teacher-participants-title">
             <p class="eyebrow">Present:</p>
             <h2 id="teacher-participants-title">Students in the room</h2>
@@ -891,6 +913,14 @@
     const count = setupForm.querySelector("[data-selected-count]");
     const createButton = setupForm.querySelector("[data-create-game]");
     const search = setupForm.querySelector("[data-word-search]");
+    const customWordInput = setupForm.querySelector("[data-custom-word]");
+    const addCustomWordButton = setupForm.querySelector("[data-add-custom-word]");
+    const customWordsInput = setupForm.querySelector("[data-custom-words]");
+    const pickerError = setupForm.querySelector("[data-quicktype-picker-error]");
+    const selectedWords = new Map();
+    let customWordId = 0;
+    let searchTimer = null;
+    let searchRequest = 0;
     let savedUsedWordIds = [];
     try {
       savedUsedWordIds = JSON.parse(localStorage.getItem(quicktypeUsedWordIdsKey) || "[]");
@@ -898,57 +928,157 @@
       savedUsedWordIds = [];
     }
     const usedWordIds = new Set(Array.isArray(savedUsedWordIds) ? savedUsedWordIds.map(String) : []);
-    picker.querySelectorAll("[data-word-option]").forEach((card) => {
-      if (usedWordIds.has(card.dataset.wordId)) card.classList.add("previously-used");
-    });
+    const showPickerError = (message) => {
+      pickerError.textContent = message;
+      pickerError.hidden = !message;
+    };
     const renderOrder = () => {
-      const selected = [...setupForm.querySelectorAll(".word-card.selected")];
-      orderList.innerHTML = selected.map((checkbox) => {
-        return `<li draggable="true" data-order-id="${checkbox.dataset.wordId}">${escapeHtml(checkbox.querySelector("span").textContent)}</li>`;
-      }).join("");
-      count.textContent = selected.length;
-      createButton.disabled = selected.length === 0;
-      orderList.querySelectorAll("li").forEach((item) => item.addEventListener("dragstart", (event) => event.dataTransfer.setData("text/plain", item.dataset.orderId)));
+      orderList.replaceChildren();
+      selectedWords.forEach((item, key) => {
+        const row = document.createElement("li");
+        const label = document.createElement("span");
+        label.textContent = item.word;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "quicktype-remove-word";
+        remove.textContent = "Remove";
+        remove.setAttribute("aria-label", `Remove ${item.word}`);
+        remove.addEventListener("click", () => {
+          selectedWords.delete(key);
+          renderOrder();
+          renderVocabulary([...picker.querySelectorAll("[data-word-id]")].map((option) => ({
+            id: Number(option.dataset.wordId),
+            english_word: option.dataset.word,
+            part_of_speech: option.dataset.partOfSpeech,
+            cefr_level: option.dataset.cefrLevel,
+          })));
+        });
+        row.append(label, remove);
+        orderList.appendChild(row);
+      });
+      count.textContent = selectedWords.size;
+      createButton.disabled = selectedWords.size === 0;
+    };
+    const renderVocabulary = (words) => {
+      picker.replaceChildren();
+      if (!words.length) {
+        const empty = document.createElement("p");
+        empty.className = "admin-live-note";
+        empty.textContent = "No matching words.";
+        picker.appendChild(empty);
+        return;
+      }
+      words.forEach((word) => {
+        const key = `vocabulary:${word.id}`;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "word-card";
+        button.dataset.wordId = word.id;
+        button.dataset.word = word.english_word;
+        button.dataset.partOfSpeech = word.part_of_speech || "";
+        button.dataset.cefrLevel = word.cefr_level || "";
+        button.setAttribute("aria-pressed", selectedWords.has(key) ? "true" : "false");
+        if (selectedWords.has(key)) button.classList.add("selected");
+        if (usedWordIds.has(String(word.id))) button.classList.add("previously-used");
+        const label = document.createElement("span");
+        label.textContent = word.english_word;
+        button.appendChild(label);
+        if (word.cefr_level) {
+          const level = document.createElement("small");
+          level.textContent = word.cefr_level;
+          button.appendChild(level);
+        }
+        picker.appendChild(button);
+      });
+    };
+    const loadVocabulary = async () => {
+      const requestId = ++searchRequest;
+      picker.replaceChildren();
+      const loading = document.createElement("p");
+      loading.className = "admin-live-note";
+      loading.textContent = "Loading vocabulary...";
+      picker.appendChild(loading);
+      try {
+        const response = await fetch(`/api/lobby/quicktype/vocabulary?q=${encodeURIComponent(search.value.trim())}`, { credentials: "same-origin" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to load vocabulary.");
+        if (requestId === searchRequest) {
+          showPickerError("");
+          renderVocabulary(result.words || []);
+        }
+      } catch (error) {
+        if (requestId !== searchRequest) return;
+        showPickerError(error.message);
+        picker.replaceChildren();
+      }
     };
     picker.addEventListener("click", (event) => {
-      const card = event.target.closest("[data-word-option]");
-      if (!card) return;
-      card.classList.toggle("selected");
-      card.setAttribute("aria-pressed", card.classList.contains("selected"));
+      const option = event.target.closest("[data-word-id]");
+      if (!option) return;
+      const key = `vocabulary:${option.dataset.wordId}`;
+      if (selectedWords.has(key)) selectedWords.delete(key);
+      else selectedWords.set(key, { kind: "vocabulary", id: option.dataset.wordId, word: option.dataset.word });
       renderOrder();
+      loadVocabulary();
     });
-    orderList.addEventListener("dragover", (event) => event.preventDefault());
-    orderList.addEventListener("drop", (event) => {
-      event.preventDefault();
-      const dragged = orderList.querySelector(`[data-order-id="${event.dataTransfer.getData("text/plain")}"]`);
-      const target = event.target.closest("li");
-      if (dragged && target && dragged !== target) orderList.insertBefore(dragged, target);
+    const addCustomWord = () => {
+      const word = customWordInput.value.trim().slice(0, 80);
+      if (!word) return;
+      const duplicate = [...selectedWords.values()].some((item) => item.word.toLocaleLowerCase() === word.toLocaleLowerCase());
+      if (duplicate) {
+        showPickerError("That word is already selected.");
+        return;
+      }
+      selectedWords.set(`custom:${customWordId++}`, { kind: "custom", word });
+      customWordInput.value = "";
+      showPickerError("");
+      renderOrder();
+    };
+    addCustomWordButton.addEventListener("click", addCustomWord);
+    customWordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addCustomWord();
+      }
     });
     search.addEventListener("input", () => {
-      const term = search.value.toLocaleLowerCase();
-      picker.querySelectorAll("[data-word-option]").forEach((option) => { option.hidden = !option.textContent.toLocaleLowerCase().includes(term); });
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(loadVocabulary, 180);
     });
     setupForm.addEventListener("submit", (event) => {
-      event.preventDefault();
       setupForm.querySelectorAll("input[name='wordIds']").forEach((input) => input.remove());
-      orderList.querySelectorAll("[data-order-id]").forEach((item) => {
-        const input = document.createElement("input");
-        input.type = "hidden"; input.name = "wordIds"; input.value = item.dataset.orderId;
-        setupForm.appendChild(input);
-        usedWordIds.add(item.dataset.orderId);
+      const submittedWordIds = [];
+      const submittedCustomWords = [];
+      selectedWords.forEach((item) => {
+        if (item.kind === "vocabulary") {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "wordIds";
+          input.value = item.id;
+          setupForm.appendChild(input);
+          submittedWordIds.push(item.id);
+        } else {
+          submittedCustomWords.push(item.word);
+        }
       });
-      localStorage.setItem(quicktypeUsedWordIdsKey, JSON.stringify([...usedWordIds]));
-      setupForm.submit();
+      customWordsInput.value = JSON.stringify(submittedCustomWords);
+      localStorage.setItem(quicktypeUsedWordIdsKey, JSON.stringify([...usedWordIds, ...submittedWordIds]));
+      createButton.disabled = true;
     });
+    loadVocabulary();
   }
 
   const playerCanvas = document.querySelector("[data-player-canvas]");
   if (playerCanvas) {
+    const ARENA_WIDTH = 620;
+    const ARENA_HEIGHT = 420;
+    playerCanvas.width = ARENA_WIDTH;
+    playerCanvas.height = ARENA_HEIGHT;
     const playerContext = playerCanvas.getContext("2d");
     playerContext.imageSmoothingEnabled = false;
     const frameCanvas = document.createElement("canvas");
-    frameCanvas.width = playerCanvas.width;
-    frameCanvas.height = playerCanvas.height;
+    frameCanvas.width = ARENA_WIDTH;
+    frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_SIZE = 78;
     playerContext.imageSmoothingEnabled = false;
@@ -1053,23 +1183,6 @@
         frameContext.textBaseline = "bottom";
         frameContext.fillText("Teacher", x, y - 68);
       };
-      const resizeCanvas = () => {
-        const stage = playerCanvas.closest(".lobby-character-stage");
-        if (!stage) return;
-        const width = Math.max(310, Math.floor(playerCanvas.clientWidth || stage.clientWidth));
-        const height = Math.max(210, Math.floor(playerCanvas.clientHeight || stage.clientHeight));
-        if (playerCanvas.width === width && playerCanvas.height === height) return;
-        const previousWidth = playerCanvas.width;
-        playerCanvas.width = width;
-        playerCanvas.height = height;
-        frameCanvas.width = width;
-        frameCanvas.height = height;
-        if (previousWidth > 0 && previousWidth !== width) {
-          player.x = Math.max(RENDER_SIZE / 2, Math.min(width - RENDER_SIZE / 2, player.x * width / previousWidth));
-        }
-      };
-      resizeCanvas();
-      if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {
         const animatedPlayer = getEmoteSpriteState(

@@ -4702,6 +4702,25 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
   );
 });
 
+app.get("/api/lobby/quicktype/vocabulary", requireAdmin, (req, res) => {
+  const search = String(req.query.q || "").trim().slice(0, 80);
+  grammarReady
+    .then(() =>
+      new Promise((resolve, reject) => {
+        grammarDb.all(
+          "SELECT id, english_word, part_of_speech, cefr_level FROM vocabulary WHERE english_word LIKE ? COLLATE NOCASE ORDER BY english_word COLLATE NOCASE LIMIT 100",
+          [`%${search}%`],
+          (error, words) => (error ? reject(error) : resolve(words || [])),
+        );
+      }),
+    )
+    .then((words) => res.json({ words }))
+    .catch((error) => {
+      console.error("Unable to load QuickType vocabulary:", error);
+      res.status(500).json({ error: "Unable to load vocabulary." });
+    });
+});
+
 app.post("/lobby/quicktype/questions", requireAdmin, (req, res) => {
   const roomId = Number(req.body.roomId);
   const prompt = String(req.body.prompt || "").trim();
@@ -4747,7 +4766,29 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
       ? [req.body.wordIds]
       : [];
   const wordIds = [...new Set(rawWordIds.map(Number).filter(Number.isInteger))];
-  if (!roomId || !wordIds.length)
+  let rawCustomWords;
+  try {
+    rawCustomWords = JSON.parse(String(req.body.customWords || "[]"));
+  } catch (error) {
+    return res.status(400).redirect("/lobby?mode=quicktype");
+  }
+  if (!Array.isArray(rawCustomWords))
+    return res.status(400).redirect("/lobby?mode=quicktype");
+  const customWords = [];
+  const seenCustomWords = new Set();
+  rawCustomWords.forEach((value) => {
+    const word = String(value || "").trim().slice(0, 80);
+    const key = word.toLocaleLowerCase();
+    if (word && !seenCustomWords.has(key)) {
+      seenCustomWords.add(key);
+      customWords.push(word);
+    }
+  });
+  if (
+    !roomId ||
+    (!wordIds.length && !customWords.length) ||
+    wordIds.length + customWords.length > 50
+  )
     return res.status(400).redirect("/lobby?mode=quicktype");
   db.get(
     "SELECT mode, status FROM lobby_rooms WHERE id = ?",
@@ -4760,14 +4801,18 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
         room.status !== "waiting"
       )
         return res.status(400).redirect("/lobby?mode=quicktype");
-      const placeholders = wordIds.map(() => "?").join(",");
-      grammarDb.all(
-        `SELECT id, english_word FROM vocabulary WHERE id IN (${placeholders})`,
-        wordIds,
-        (vocabularyError, words) => {
-          if (vocabularyError || words.length !== wordIds.length)
-            return res.status(400).redirect("/lobby?mode=quicktype");
-          const byId = new Map(words.map((word) => [word.id, word]));
+      const createQuestions = (selectedWords) => {
+        const questionWords = [];
+        const seenWords = new Set();
+        [...selectedWords, ...customWords].forEach((word) => {
+          const key = word.toLocaleLowerCase();
+          if (!seenWords.has(key)) {
+            seenWords.add(key);
+            questionWords.push(word);
+          }
+        });
+        if (!questionWords.length || questionWords.length > 50)
+          return res.status(400).redirect("/lobby?mode=quicktype");
           db.serialize(() => {
             db.run(
               "DELETE FROM lobby_quicktype_submissions WHERE room_id = ?",
@@ -4779,13 +4824,12 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
             const insert = db.prepare(
               "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
             );
-            wordIds.forEach((wordId, index) => {
-              const word = byId.get(wordId);
+            questionWords.forEach((word, index) => {
               insert.run(
                 roomId,
                 index + 1,
                 "Type the word you hear.",
-                word.english_word,
+                word,
               );
             });
             insert.finalize((insertError) => {
@@ -4803,6 +4847,17 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
               );
             });
           });
+      };
+      if (!wordIds.length) return createQuestions([]);
+      const placeholders = wordIds.map(() => "?").join(",");
+      grammarDb.all(
+        `SELECT id, english_word FROM vocabulary WHERE id IN (${placeholders})`,
+        wordIds,
+        (vocabularyError, words) => {
+          if (vocabularyError || words.length !== wordIds.length)
+            return res.status(400).redirect("/lobby?mode=quicktype");
+          const byId = new Map(words.map((word) => [word.id, word.english_word]));
+          createQuestions(wordIds.map((wordId) => byId.get(wordId)));
         },
       );
     },
