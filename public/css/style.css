@@ -823,6 +823,66 @@ legend {
 .teacher-lobby-stage-wrap.is-intermission .teacher-control-sidebar .lobby-phase-stack {
   display: none;
 }
+.teacher-lobby-stage-wrap.is-quicktype-active .quicktype-setup-form,
+.teacher-lobby-stage-wrap.is-quicktype-active .lobby-teacher-actions,
+.teacher-lobby-stage-wrap.is-quicktype-active .teacher-participants {
+  display: none;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active .teacher-control-sidebar .lobby-phase-stack {
+  display: grid;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active.is-intermission .teacher-control-sidebar .lobby-phase-stack {
+  display: grid;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active.is-intermission .teacher-control-sidebar .lobby-phase-stack > :not([data-phase-leaderboard]) {
+  display: none;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active.is-intermission .intermission-next-form {
+  display: block;
+  margin: 12px 0 0;
+}
+.teacher-lobby-stage-wrap.is-live-question.is-quicktype-active {
+  grid-template-columns: minmax(0, 1fr) 420px;
+}
+.teacher-lobby-stage-wrap.is-live-question.is-quicktype-active .teacher-control-sidebar {
+  grid-column: 2;
+  width: 420px;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid #14213d;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #d4f0fc 0%, #eef4fc 70%);
+  box-shadow: 4px 4px 0 #14213d;
+}
+.teacher-lobby-stage-wrap.is-live-question.is-quicktype-active .teacher-control-sidebar .lobby-phase-stack {
+  position: static;
+  inset: auto;
+  width: 100%;
+  overflow: visible;
+  pointer-events: auto;
+}
+.teacher-lobby-stage-wrap.is-live-question.is-quicktype-active .teacher-control-sidebar > .teacher-control-footer {
+  display: block;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active .quicktype-live-next-form {
+  display: block;
+  margin: 12px 0 0;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active .quicktype-live-next-form .practice-button {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+}
+.teacher-lobby-stage-wrap.is-quicktype-active .admin-live-question strong {
+  display: inline-block;
+  margin-left: 6px;
+  color: #fffdf7 !important;
+  font-size: 24px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
 .teacher-lobby-stage-wrap.is-intermission .intermission-next-form {
   display: block;
   margin: 0 0 12px;

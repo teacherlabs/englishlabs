@@ -109,8 +109,8 @@
             <p class="eyebrow">Live quiz</p>
             <h2>Question <span data-question-number>{{room.current_question}}</span> of {{totalQuestions}}</h2>
             <p class="question-timer"><span data-question-timer>30</span>s left &middot; <span data-answered-count>0</span>/<span data-total-participants>0</span> answered</p>
-            <p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>
-            {{#if isQuicktype}}<button type="button" class="practice-button" data-next-word hidden>Next word</button>{{/if}}
+            {{#if isQuicktype}}<p class="admin-live-question">Say aloud: <strong data-target-word>{{currentQuestion.target_word}}</strong></p>{{else}}<p class="admin-live-question" data-question-text>{{currentQuestion.question_text}}</p>{{/if}}
+            {{#if isQuicktype}}<form class="lobby-inline-form quicktype-live-next-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button type="submit" class="practice-button" data-next-word>Next word</button></form>{{/if}}
             {{#unless isQuicktype}}<div class="live-answer-grid admin-live-answers">
               <button type="button"><b>A</b> <span data-answer-text="a">{{currentQuestion.answer_a}}</span></button>
               <button type="button"><b>B</b> <span data-answer-text="b">{{currentQuestion.answer_b}}</span></button>
@@ -650,6 +650,14 @@
       if (teacherStage && role === "admin") {
         teacherStage.classList.toggle("is-live-question", state.room.status === "running");
         teacherStage.classList.toggle("is-intermission", state.room.status === "leaderboard");
+        teacherStage.classList.toggle(
+          "is-quicktype-active",
+          mode === "quicktype" && (
+            state.room.status !== "waiting" ||
+            Number(state.room.current_question) > 1 ||
+            state.event === "NEXT_WORD_PREPARED"
+          ),
+        );
       }
       const enteredRunningState =
         previousRoomStatus !== "running" && state.room.status === "running";
