@@ -5387,7 +5387,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, COALESCE(members.gold_medals, 0) AS goldMedals, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
                           [
                             updatedRoom.id,
                             Number(updatedRoom.teacher_present) === 1 ? 1 : 0,
@@ -5406,7 +5406,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                                 const { rows: profiles } =
                                   await postgresReady.then(() =>
                                     postgresPool.query(
-                                      "SELECT username, avatar, spritesheet, character_config, role FROM users WHERE username = ANY($1::text[])",
+                                      "SELECT username, avatar, spritesheet, character_config, role, gold_medals FROM users WHERE username = ANY($1::text[])",
                                       [usernames],
                                     ),
                                   );
@@ -5428,6 +5428,8 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                                       spritesheet: profile.spritesheet,
                                       character_config:
                                         profile.character_config,
+                                      goldMedals:
+                                        Number(profile.gold_medals) || 0,
                                       isAdmin: profile.role === "admin" ? 1 : 0,
                                     };
                                   })

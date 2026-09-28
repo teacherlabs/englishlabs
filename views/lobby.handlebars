@@ -707,7 +707,19 @@
         if (feedback) feedback.textContent = "";
       }
       if (state.event !== "NEXT_WORD_PREPARED") lastEvent = state.event;
-      window.lobbyPlayers = state.leaderboard || [];
+      const leaderboardPlayers = state.leaderboard || [];
+      const finishedWinner = state.room.status === "finished"
+        ? [...leaderboardPlayers]
+            .filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher")
+            .sort((first, second) => Number(second.score) - Number(first.score) || String(first.username).localeCompare(String(second.username)))[0]
+        : null;
+      window.lobbyPlayers = leaderboardPlayers.map((player) => ({
+        ...player,
+        isWinner:
+          Boolean(player.isWinner) ||
+          Number(player.goldMedals ?? player.gold_medals) > 0 ||
+          String(player.username) === String(finishedWinner?.username || ""),
+      }));
       if (score) score.textContent = state.participant?.score || 0;
 
       if (playersGrid) {
@@ -1141,6 +1153,10 @@
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     const getEmoteSpriteState = (username, direction, frame, now) =>
       getLobbySpriteFrame(username, direction, frame, now);
+    const getPlayerSpriteState = (username, direction, frame, now, isWinner) =>
+      isWinner
+        ? { direction: 2, frame: Math.floor(now / 135) % 7, animation: "spell" }
+        : getEmoteSpriteState(username, direction, frame, now);
     const drawPlayer = () => {
       const now = timestampNow();
       const movement = {
@@ -1232,11 +1248,17 @@
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {
-        const animatedPlayer = getEmoteSpriteState(
+        const ownLeaderboardEntry = (window.lobbyPlayers || []).find(
+          (entry) => String(entry.username) === ownUsername,
+        );
+        const ownIsWinner = Boolean(ownLeaderboardEntry?.isWinner) ||
+          Number(ownLeaderboardEntry?.goldMedals ?? ownLeaderboardEntry?.gold_medals) > 0;
+        const animatedPlayer = getPlayerSpriteState(
           ownUsername,
           player.direction,
           player.frame,
           now,
+          ownIsWinner,
         );
         drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation);
       }
@@ -1272,11 +1294,14 @@
           remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
           remoteImages.set(remoteKey, { key: remoteSpritesheet, image: remoteImage });
         }
-        const animatedRemote = getEmoteSpriteState(
+        const isWinner = Boolean(remotePlayer.isWinner) ||
+          Number(remotePlayer.goldMedals ?? remotePlayer.gold_medals) > 0;
+        const animatedRemote = getPlayerSpriteState(
           remotePlayer.username,
           Number(remotePlayer.direction) || 2,
           Number(remotePlayer.frame) || 0,
           now,
+          isWinner,
         );
         drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation);
       });
