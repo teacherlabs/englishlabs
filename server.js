@@ -5477,15 +5477,34 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
   const characterConfig = JSON.stringify(config);
   const saveToPostgres = postgresPool
     ? postgresReady.then(() =>
-        postgresPool.query(
-          "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
-          [
-            avatarDataUrl,
-            spritesheetDataUrl,
-            characterConfig,
-            req.session.name,
-          ],
-        ),
+        req.session.isAdmin
+          ? postgresPool.query(
+              `INSERT INTO users
+                (username, fname, lname, email, password_hash, role, goal, avatar, spritesheet, character_config)
+               VALUES ($1, $1, '', $2, $3, 'admin', '', $4, $5, $6)
+               ON CONFLICT (username) DO UPDATE SET
+                 avatar = EXCLUDED.avatar,
+                 spritesheet = EXCLUDED.spritesheet,
+                 character_config = EXCLUDED.character_config
+               RETURNING username`,
+              [
+                req.session.name,
+                `${req.session.name}@admin.invalid`,
+                adminPassword,
+                avatarDataUrl,
+                spritesheetDataUrl,
+                characterConfig,
+              ],
+            )
+          : postgresPool.query(
+              "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
+              [
+                avatarDataUrl,
+                spritesheetDataUrl,
+                characterConfig,
+                req.session.name,
+              ],
+            ),
       )
     : Promise.resolve({ rowCount: 0 });
   saveToPostgres
@@ -5502,7 +5521,13 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
             characterConfig,
             req.session.name,
           ],
-          (error) => (error ? reject(error) : resolve()),
+          function (error) {
+            if (error) return reject(error);
+            if (this.changes !== 1) {
+              return reject(new Error(`No SQLite member found for ${req.session.name}.`));
+            }
+            resolve();
+          },
         );
       });
     })
@@ -5510,10 +5535,20 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       req.session.avatar = avatarDataUrl;
       req.session.avatarUrl = avatarDataUrl;
       req.session.spritesheet = spritesheetDataUrl;
-      res.json({
-        saved: true,
-        avatar: avatarDataUrl,
-        spritesheet: spritesheetDataUrl,
+      req.session.characterConfig = config;
+      req.session.character_config = characterConfig;
+      req.session.save((sessionError) => {
+        if (sessionError) {
+          console.error("Unable to persist character session:", sessionError);
+          return res.status(500).json({ error: "Unable to save character session." });
+        }
+        res.json({
+          saved: true,
+          username: req.session.name,
+          avatar: avatarDataUrl,
+          spritesheet: spritesheetDataUrl,
+          config,
+        });
       });
     })
     .catch((error) => {

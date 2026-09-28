@@ -109,6 +109,11 @@
           if (!result.saved || !result.avatar) {
             throw new Error("The character was not saved.");
           }
+          if (result.username) {
+            localStorage.setItem(`userProfilePic_${result.username}`, result.avatar);
+            localStorage.setItem(`userSpritesheet_${result.username}`, result.spritesheet);
+            localStorage.setItem(`userCharacterConfig_${result.username}`, JSON.stringify(result.config || {}));
+          }
           window.top.location.reload();
         } catch (error) {
           console.error("Unable to save character:", error);

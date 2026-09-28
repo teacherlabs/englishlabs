@@ -682,23 +682,34 @@
           : "<p class=\"lobby-players-empty\">Waiting for players to join...</p>";
       }
 
-      document.querySelector("[data-teacher-entrance]")?.addEventListener("click", (event) => {
-        const button = event.currentTarget;
-        button.disabled = true;
-        const entering = button.dataset.entering === "true";
-        const update = lobbySocket
-          ? new Promise((resolve, reject) => lobbySocket.emit("teacherEntrance", { roomId, entering }, (result) => result?.ok ? resolve(result) : reject(new Error(result?.error || "Unable to update lobby entrance."))))
-          : fetch("/api/lobby/teacher-entrance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, entering }) }).then((response) => response.json().then((result) => ({ ...result, ok: response.ok })));
-        update
-          .then((result) => {
-            if (result.ok === false) throw new Error(result.error || "Unable to update lobby entrance.");
-            window.lobbySetTeacherPresent?.(result.teacherPresent ?? entering);
-            button.textContent = "In Lobby";
-            button.disabled = true;
-          })
-          .catch((error) => console.error(error))
-          .finally(() => { button.disabled = false; });
-      });
+      if (entranceButton && !entranceButton.dataset.entranceBound) {
+        entranceButton.dataset.entranceBound = "true";
+        entranceButton.addEventListener("click", (event) => {
+          const button = event.currentTarget;
+          button.disabled = true;
+          const entering = button.dataset.entering === "true";
+          const update = lobbySocket
+            ? new Promise((resolve, reject) => lobbySocket.emit("teacherEntrance", { roomId, entering }, (result) => result?.ok ? resolve(result) : reject(new Error(result?.error || "Unable to update lobby entrance."))))
+            : fetch("/api/lobby/teacher-entrance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, entering }) }).then((response) => response.json().then((result) => ({ ...result, ok: response.ok })));
+          update
+            .then((result) => {
+              if (result.ok === false) throw new Error(result.error || "Unable to update lobby entrance.");
+              const teacherPresent = Boolean(result.teacherPresent ?? entering);
+              document.querySelectorAll("[data-player-canvas]").forEach((canvas) => {
+                canvas.dataset.teacherPresent = teacherPresent ? "1" : "0";
+              });
+              window.lobbySetTeacherPresent?.(teacherPresent);
+              window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
+              button.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
+              button.dataset.entering = teacherPresent ? "false" : "true";
+              button.disabled = teacherPresent;
+            })
+            .catch((error) => {
+              console.error(error);
+              button.disabled = false;
+            });
+        });
+      }
 
       document.querySelectorAll("[data-lobby-emote]").forEach((button) => {
         if (button.dataset.emoteBound) return;
