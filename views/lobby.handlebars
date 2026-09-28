@@ -121,7 +121,7 @@
           <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">Round results</p>
             {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
-            <ol class="round-leaderboard-list" data-round-leaderboard><li>Loading...</li></ol>
+            <ol class="round-leaderboard-list" data-round-leaderboard></ol>
             <form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit" data-next-word>{{#if isQuicktype}}Next word{{else}}Next question{{/if}}</button></form>
           </section>
           <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
@@ -180,8 +180,8 @@
           </section>
           <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">Round results</p>
-            <h2>Standings</h2>
-            <ol class="round-leaderboard-list" data-round-leaderboard><li>Loading...</li></ol>
+            {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
+            <ol class="round-leaderboard-list" data-round-leaderboard></ol>
             <p class="admin-live-note">Waiting for the teacher to continue...</p>
           </section>
           <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>

@@ -4206,6 +4206,13 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
     room = room || null;
     questions = Array.isArray(questions) ? questions : [];
     participant = participant || null;
+    if (
+      room?.mode === "quicktype" &&
+      questions.length > 0 &&
+      Number(room.current_question) < 1
+    ) {
+      room = { ...room, current_question: 1 };
+    }
     loadLobbyCharacter(sessionName)
       .then((member) => {
         try {
@@ -5231,6 +5238,18 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
           totalQuery,
           [updatedRoom.id],
           (totalQuestionsError, totalQuestionsRow) => {
+            if (
+              updatedRoom.mode === "quicktype" &&
+              !totalQuestionsError &&
+              Number(totalQuestionsRow?.total) > 0 &&
+              Number(updatedRoom.current_question) < 1
+            ) {
+              updatedRoom.current_question = 1;
+              db.run(
+                "UPDATE lobby_rooms SET current_question = 1 WHERE id = ? AND current_question < 1",
+                [updatedRoom.id],
+              );
+            }
             const questionQuery =
               updatedRoom.mode === "quicktype"
                 ? `SELECT id, question_order, prompt AS question_text${req.session.isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? AND question_order = ?`
