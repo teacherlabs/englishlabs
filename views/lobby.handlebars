@@ -1141,9 +1141,10 @@
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_SIZE = 50;
+    const PLAYER_SPEED = 1.8;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 310, y: 380, speed: 1.8, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: 310, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
@@ -1180,6 +1181,27 @@
       }
 
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+      const drawHoverName = (x, y, username) => {
+        if (!username || !pointerPosition ||
+          pointerPosition.x < x - RENDER_SIZE / 2 ||
+          pointerPosition.x > x + RENDER_SIZE / 2 ||
+          pointerPosition.y < y - RENDER_SIZE ||
+          pointerPosition.y > y) return;
+        frameContext.font = "700 8px Teachers, sans-serif";
+        frameContext.textAlign = "center";
+        frameContext.textBaseline = "bottom";
+        const label = String(username).slice(0, 18);
+        const labelX = Math.floor(x);
+        const labelY = Math.floor(y - RENDER_SIZE - 3);
+        const labelWidth = frameContext.measureText(label).width + 6;
+        frameContext.fillStyle = "rgba(41, 29, 24, 0.88)";
+        frameContext.fillRect(labelX - labelWidth / 2, labelY - 11, labelWidth, 13);
+        frameContext.fillStyle = "#ffffff";
+        frameContext.shadowColor = "rgba(0, 0, 0, 0.8)";
+        frameContext.shadowBlur = 2;
+        frameContext.fillText(label, labelX, labelY);
+        frameContext.shadowBlur = 0;
+      };
       const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk") => {
         if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
         const layout = getLobbyAnimationLayout(image, animation);
@@ -1213,23 +1235,7 @@
           frameContext.fillStyle = "#ffffff";
           frameContext.fillText(badge, Math.floor(x), badgeY - 2);
         }
-        const isHovered = pointerPosition && pointerPosition.x >= x - RENDER_SIZE / 2 && pointerPosition.x <= x + RENDER_SIZE / 2 && pointerPosition.y >= y - RENDER_SIZE && pointerPosition.y <= y;
-        if (username && isHovered) {
-          frameContext.font = "700 8px Teachers, sans-serif";
-          frameContext.textAlign = "center";
-          frameContext.textBaseline = "bottom";
-          const label = String(username).slice(0, 18);
-          const labelX = Math.floor(x);
-          const labelY = drawY - 3;
-          const labelWidth = frameContext.measureText(label).width + 6;
-          frameContext.fillStyle = "rgba(41, 29, 24, 0.88)";
-          frameContext.fillRect(labelX - labelWidth / 2, labelY - 11, labelWidth, 13);
-          frameContext.fillStyle = "#ffffff";
-          frameContext.shadowColor = "rgba(0, 0, 0, 0.8)";
-          frameContext.shadowBlur = 2;
-          frameContext.fillText(label, labelX, labelY);
-          frameContext.shadowBlur = 0;
-        }
+        drawHoverName(x, y, username);
       };
       const drawAdminPlaceholder = (x, y, username) => {
         const radius = RENDER_SIZE * 0.31;
@@ -1249,6 +1255,7 @@
         frameContext.font = `700 ${Math.max(7, Math.round(RENDER_SIZE * 0.12))}px sans-serif`;
         frameContext.textBaseline = "bottom";
         frameContext.fillText("Teacher", x, y - RENDER_SIZE * 0.88);
+        drawHoverName(x, y, username);
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {

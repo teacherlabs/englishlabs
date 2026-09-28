@@ -9362,7 +9362,7 @@ footer {
   background: transparent !important;
   box-shadow: none !important;
   object-fit: fill;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .app-shell:has(.lobby-student-page) .lobby-stage-wrap,
