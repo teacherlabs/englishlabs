@@ -1126,7 +1126,7 @@
     frameCanvas.width = ARENA_WIDTH;
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_SIZE = 78;
+    const RENDER_SIZE = 58;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const player = { x: 310, y: 380, speed: 2.5, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
@@ -1212,22 +1212,23 @@
         }
       };
       const drawAdminPlaceholder = (x, y, username) => {
-        const centerY = y - 39;
+        const radius = RENDER_SIZE * 0.31;
+        const centerY = y - RENDER_SIZE / 2;
         frameContext.beginPath();
-        frameContext.arc(x, centerY, 24, 0, Math.PI * 2);
+        frameContext.arc(x, centerY, radius, 0, Math.PI * 2);
         frameContext.fillStyle = "#2d4b7b";
         frameContext.fill();
-        frameContext.lineWidth = 3;
+        frameContext.lineWidth = RENDER_SIZE * 0.04;
         frameContext.strokeStyle = "#ffffff";
         frameContext.stroke();
         frameContext.fillStyle = "#ffffff";
-        frameContext.font = "700 22px sans-serif";
+        frameContext.font = `700 ${Math.round(RENDER_SIZE * 0.28)}px sans-serif`;
         frameContext.textAlign = "center";
         frameContext.textBaseline = "middle";
         frameContext.fillText(String(username || "T").charAt(0).toUpperCase(), x, centerY);
-        frameContext.font = "700 9px sans-serif";
+        frameContext.font = `700 ${Math.round(RENDER_SIZE * 0.12)}px sans-serif`;
         frameContext.textBaseline = "bottom";
-        frameContext.fillText("Teacher", x, y - 68);
+        frameContext.fillText("Teacher", x, y - RENDER_SIZE * 0.88);
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {
