@@ -7673,6 +7673,15 @@ body:has(.auth-landing) > header {
   animation: auth-content-enter 0.9s ease-out both;
 }
 
+.auth-landing-logo {
+  display: block;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 14px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+}
+
 .auth-landing-content .eyebrow {
   color: #fff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);

@@ -1168,19 +1168,27 @@
       const facing = Number.isFinite(safeDirection) ? safeDirection : 2;
       if (!isMoving) return { direction: facing, frame: 0, animation: "idle" };
       if (isWinner) {
-        return { direction: 2, frame: Math.floor(now / 135) % 7, animation: "spell" };
+        return { direction: facing, frame: Math.floor(now / 135) % 7, animation: "spell" };
       }
       return getEmoteSpriteState(username, facing, frame, now);
     };
+    const keyByCode = { KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d" };
+    const getMovementKey = (event) =>
+      event.key in keysDown ? event.key : keyByCode[event.code] || null;
+    const getMovementVector = () => ({
+      x: Number(keysDown.ArrowRight || keysDown.d) - Number(keysDown.ArrowLeft || keysDown.a),
+      y: Number(keysDown.ArrowDown || keysDown.s) - Number(keysDown.ArrowUp || keysDown.w),
+    });
+    const updateDirectionFromMovement = (movement) => {
+      const direction = directionFromMovement(movement.x, movement.y);
+      if (direction !== null) player.direction = direction;
+    };
     const drawPlayer = () => {
       const now = timestampNow();
-      const movement = {
-        x: Number(keysDown.ArrowRight || keysDown.d) - Number(keysDown.ArrowLeft || keysDown.a),
-        y: Number(keysDown.ArrowDown || keysDown.s) - Number(keysDown.ArrowUp || keysDown.w),
-      };
+      const movement = getMovementVector();
       player.isMoving = movement.x !== 0 || movement.y !== 0;
       if (player.isMoving) {
-        player.direction = directionFromMovement(movement.x, movement.y);
+        updateDirectionFromMovement(movement);
         player.frame = (player.frame + 0.2) % 8;
         const length = Math.hypot(movement.x, movement.y) || 1;
         player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
@@ -1374,12 +1382,15 @@
         clearKeysDown();
         return;
       }
-      if (!(event.key in directionByKey)) return;
+      const movementKey = getMovementKey(event);
+      if (!movementKey) return;
       event.preventDefault();
-      keysDown[event.key] = true;
+      keysDown[movementKey] = true;
+      updateDirectionFromMovement(getMovementVector());
     });
     window.addEventListener("keyup", (event) => {
-      if (event.key in keysDown) keysDown[event.key] = false;
+      const movementKey = getMovementKey(event);
+      if (movementKey) keysDown[movementKey] = false;
     });
     window.addEventListener("blur", clearKeysDown);
     playerCanvas.addEventListener("mousemove", (event) => {
