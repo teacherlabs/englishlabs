@@ -368,11 +368,18 @@
           startedAt: performance.now(),
         });
       });
-      lobbySocket.on("teacherEntered", ({ entering }) => {
+      lobbySocket.on("teacherEntered", ({ entering, roomId: enteredRoomId }) => {
+        if (String(enteredRoomId) !== String(roomId)) return;
+        const teacherPresent = Boolean(entering);
+        document.querySelectorAll("[data-player-canvas]").forEach((canvas) => {
+          canvas.dataset.teacherPresent = teacherPresent ? "1" : "0";
+        });
+        window.lobbySetTeacherPresent?.(teacherPresent);
+        window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
         if (entranceButton) {
-          entranceButton.textContent = entering ? "In Lobby" : "Enter Lobby";
-          entranceButton.dataset.entering = entering ? "false" : "true";
-          entranceButton.disabled = entering;
+          entranceButton.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
+          entranceButton.dataset.entering = teacherPresent ? "false" : "true";
+          entranceButton.disabled = teacherPresent;
         }
       });
       lobbySocket.on("lobbyClosed", ({ message, closed, status } = {}) => {
@@ -1106,7 +1113,10 @@
       updatedImage.src = `${source}${source.startsWith("data:") ? "" : `?t=${Date.now()}`}`;
     };
     window.lobbyLoadPlayerImage = loadPlayerImage;
-    window.lobbySetTeacherPresent = (present) => { player.isPresent = present; window.lobbyTeacherPresent = present ? 1 : 0; };
+    window.lobbySetTeacherPresent = (present) => {
+      player.isPresent = playerCanvas.dataset.playerAdmin !== "true" || Boolean(present);
+      window.lobbyTeacherPresent = present ? 1 : 0;
+    };
     const scopedSpritesheetKey = `userSpritesheet_${playerCanvas.dataset.playerUserId || playerCanvas.dataset.playerUsername}`;
     loadPlayerImage(localStorage.getItem(scopedSpritesheetKey) || playerCanvas.dataset.spritesheetImage);
     window.requestAnimationFrame(drawPlayer);
