@@ -917,8 +917,7 @@
     const RENDER_SIZE = 78;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 310, y: 380, speed: 4, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
-    const pressedKeys = new Set();
+    const player = { x: 310, y: 380, speed: 6, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
@@ -926,22 +925,21 @@
     let lastSyncAt = 0;
     let lastSyncedState = "";
     const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
+    const keysDown = Object.fromEntries(Object.keys(directionByKey).map((key) => [key, false]));
+    const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     const getEmoteSpriteState = (username, direction, frame, now) =>
       getLobbySpriteFrame(username, direction, frame, now);
     const drawPlayer = () => {
       const now = timestampNow();
-      player.isMoving = pressedKeys.size > 0;
+      const movement = {
+        x: Number(keysDown.ArrowRight || keysDown.d) - Number(keysDown.ArrowLeft || keysDown.a),
+        y: Number(keysDown.ArrowDown || keysDown.s) - Number(keysDown.ArrowUp || keysDown.w),
+      };
+      player.isMoving = movement.x !== 0 || movement.y !== 0;
       if (player.isMoving) {
-        const activeKey = [...pressedKeys][pressedKeys.size - 1];
-        player.direction = directionByKey[activeKey];
+        const activeKey = Object.keys(directionByKey).find((key) => keysDown[key]);
+        if (activeKey) player.direction = directionByKey[activeKey];
         player.frame = (player.frame + 0.2) % 8;
-        const movement = [...pressedKeys].reduce((result, key) => {
-          if (key === "ArrowUp" || key === "w") result.y -= 1;
-          if (key === "ArrowDown" || key === "s") result.y += 1;
-          if (key === "ArrowLeft" || key === "a") result.x -= 1;
-          if (key === "ArrowRight" || key === "d") result.x += 1;
-          return result;
-        }, { x: 0, y: 0 });
         const length = Math.hypot(movement.x, movement.y) || 1;
         player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
         player.y = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
@@ -1085,15 +1083,17 @@
         activeElement?.tagName === "TEXTAREA" ||
         activeElement?.isContentEditable
       ) {
-        pressedKeys.clear();
+        clearKeysDown();
         return;
       }
       if (!(event.key in directionByKey)) return;
       event.preventDefault();
-      pressedKeys.add(event.key);
+      keysDown[event.key] = true;
     });
-    window.addEventListener("keyup", (event) => pressedKeys.delete(event.key));
-    window.addEventListener("blur", () => pressedKeys.clear());
+    window.addEventListener("keyup", (event) => {
+      if (event.key in keysDown) keysDown[event.key] = false;
+    });
+    window.addEventListener("blur", clearKeysDown);
     playerCanvas.addEventListener("mousemove", (event) => {
       const bounds = playerCanvas.getBoundingClientRect();
       pointerPosition = {
