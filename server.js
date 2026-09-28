@@ -3737,9 +3737,13 @@ function requireProfileUser(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.session.isAdmin)
+  if (!hasAdminSession(req.session))
     return res.status(403).send("Teacher access required.");
   next();
+}
+
+function hasAdminSession(sessionData) {
+  return sessionData?.isAdmin === true || sessionData?.name === adminname;
 }
 
 const loadStudentGoal = (username, callback) => {
@@ -6802,7 +6806,7 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const username = socket.request.session.name;
-  const isAdmin = Boolean(socket.request.session.isAdmin);
+  const isAdmin = hasAdminSession(socket.request.session);
 
   socket.on("joinRoom", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
@@ -6910,7 +6914,7 @@ io.on("connection", (socket) => {
 
   socket.on("teacherEntrance", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
-    if (!isAdmin || socket.data.roomId !== numericRoomId) {
+    if (!hasAdminSession(socket.request.session) || socket.data.roomId !== numericRoomId) {
       return acknowledge?.({ ok: false, error: "Teacher access required." });
     }
     db.run(

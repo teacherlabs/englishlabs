@@ -688,9 +688,27 @@
           const button = event.currentTarget;
           button.disabled = true;
           const entering = button.dataset.entering === "true";
-          const update = lobbySocket
-            ? new Promise((resolve, reject) => lobbySocket.emit("teacherEntrance", { roomId, entering }, (result) => result?.ok ? resolve(result) : reject(new Error(result?.error || "Unable to update lobby entrance."))))
-            : fetch("/api/lobby/teacher-entrance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId, entering }) }).then((response) => response.json().then((result) => ({ ...result, ok: response.ok })));
+          const updateViaApi = () =>
+            fetch("/api/lobby/teacher-entrance", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ roomId, entering }),
+            }).then((response) =>
+              response.json().then((result) => ({ ...result, ok: response.ok })),
+            );
+          const update = lobbySocket?.connected
+            ? new Promise((resolve, reject) => {
+                lobbySocket.emit("teacherEntrance", { roomId, entering }, (result) =>
+                  result?.ok
+                    ? resolve(result)
+                    : reject(new Error(result?.error || "Unable to update lobby entrance.")),
+                );
+              }).catch((error) => {
+                console.warn("Socket teacher entry failed; retrying with the session-authenticated API.", error);
+                return updateViaApi();
+              })
+            : updateViaApi();
           update
             .then((result) => {
               if (result.ok === false) throw new Error(result.error || "Unable to update lobby entrance.");
