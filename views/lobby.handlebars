@@ -1126,7 +1126,7 @@
     frameCanvas.width = ARENA_WIDTH;
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_SIZE = 42;
+    const RENDER_SIZE = 50;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const player = { x: 310, y: 380, speed: 1.8, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
