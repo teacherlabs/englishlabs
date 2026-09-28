@@ -751,8 +751,8 @@ legend {
 }
 .lobby-page:has(.teacher-lobby-stage-wrap) {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 420px;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   column-gap: 18px;
   align-items: stretch;
   overflow-x: hidden;
@@ -766,8 +766,8 @@ legend {
   overflow-y: auto;
 }
 .lobby-page:has(.teacher-lobby-stage-wrap) .lobby-shell {
-  grid-column: 1;
-  grid-row: 1 / span 2;
+  grid-column: 1 / -1;
+  grid-row: 1;
   min-width: 0;
 }
 .lobby-active-session:has(.teacher-lobby-stage-wrap) .lobby-shell {
@@ -850,6 +850,45 @@ legend {
 .teacher-control-sidebar > * {
   min-width: 0;
   max-width: 100%;
+}
+.teacher-control-sidebar .quicktype-setup-form {
+  grid-template-columns: minmax(0, 1fr);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: calc(100% - 16px);
+  max-width: calc(100% - 16px);
+  margin: 0 auto 10px;
+  gap: 8px;
+  padding: 10px;
+  overflow: visible;
+}
+.quicktype-setup-form > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.quicktype-setup-form [data-open-word-library],
+.quicktype-setup-form [data-create-game] {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.quicktype-setup-form .quicktype-custom-row {
+  grid-template-columns: minmax(0, 1fr) minmax(56px, auto);
+  min-width: 0;
+}
+.quicktype-setup-form .quicktype-custom-row input,
+.quicktype-setup-form .quicktype-custom-row button {
+  min-width: 0;
+  max-width: 100%;
+}
+.quicktype-setup-form .quicktype-picker-error {
+  overflow-wrap: anywhere;
+}
+.quicktype-setup-form .quicktype-order-list {
+  margin: 0;
 }
 .teacher-control-sidebar .lobby-phase-stack {
   width: 100%;
@@ -1006,14 +1045,50 @@ legend {
 .quicktype-setup-form {
   display: grid;
   gap: 8px;
-  max-height: min(58vh, 520px);
   min-width: 0;
   margin: 0 12px 14px;
   padding: 12px;
-  overflow-y: auto;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.82);
+}
+.quicktype-library-modal .quiz-selector-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  max-height: min(82vh, 760px);
+}
+.quicktype-library-modal .quicktype-library-search-label {
+  margin: 12px 0 6px;
+  color: #14213d;
+  font-size: 13px;
+  font-weight: 700;
+}
+.quicktype-library-search {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #14213d;
+  font: inherit;
+}
+.quicktype-library-modal .quicktype-word-picker {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  flex: 1 1 auto;
+  max-height: min(52vh, 460px);
+  margin: 12px 0;
+}
+.quicktype-library-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #d8e0e8;
+  color: #526074;
+  font-size: 13px;
 }
 .quicktype-setup-form h3 {
   color: #14213d;

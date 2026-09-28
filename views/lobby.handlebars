@@ -75,10 +75,7 @@
           {{#if isQuicktype}}{{#if isWaiting}}
           <form class="quicktype-setup-form" action="/lobby/quicktype/create" method="post" data-quicktype-setup>
             <input type="hidden" name="roomId" value="{{room.id}}" />
-            <h3>Choose QuickType words</h3>
-            <label for="quicktype-word-search">Search vocabulary</label>
-            <input id="quicktype-word-search" type="search" data-word-search placeholder="Search words" autocomplete="off" />
-            <div class="quicktype-word-picker" data-word-picker aria-live="polite"><p class="admin-live-note">Loading vocabulary...</p></div>
+            <button class="practice-button" type="button" data-open-word-library>Browse vocabulary</button>
             <label for="quicktype-custom-word">Add a custom word</label>
             <div class="quicktype-custom-row">
               <input id="quicktype-custom-word" type="text" data-custom-word placeholder="Type a word" maxlength="80" autocomplete="off" />
@@ -198,6 +195,23 @@
       {{/if}}
     {{/if}}
   </section>
+  {{#if isAdmin}}{{#if room}}{{#if isQuicktype}}{{#if isWaiting}}
+  <div class="quiz-selector-modal quicktype-library-modal" data-word-library hidden>
+    <section class="quiz-selector-dialog" role="dialog" aria-modal="true" aria-labelledby="quicktype-library-title">
+      <div class="quiz-selector-heading">
+        <div><p class="eyebrow">QuickType</p><h2 id="quicktype-library-title">Vocabulary library</h2></div>
+        <button type="button" class="quiz-selector-close" data-close-word-library aria-label="Close vocabulary library">&times;</button>
+      </div>
+      <label class="quicktype-library-search-label" for="quicktype-word-search">Search vocabulary</label>
+      <input id="quicktype-word-search" class="quicktype-library-search" type="search" data-word-search placeholder="Search words" autocomplete="off" />
+      <div class="quicktype-word-picker" data-word-picker aria-live="polite"><p class="admin-live-note">Open the library to load vocabulary.</p></div>
+      <footer class="quicktype-library-footer">
+        <span><strong data-selected-count>0</strong> selected</span>
+        <button class="practice-button" type="button" data-done-word-library>Done</button>
+      </footer>
+    </section>
+  </div>
+  {{/if}}{{/if}}{{/if}}{{/if}}
 </main>
 <div class="teacher-entrance-toast" data-teacher-entrance-toast role="status" aria-live="polite" hidden></div>
 <div class="teacher-entrance-toast" data-lobby-closed-notice role="status" aria-live="assertive" hidden></div>
@@ -908,16 +922,21 @@
   if (setupForm) {
     const userId = document.querySelector(".lobby-page")?.dataset.userId || "anonymous";
     const quicktypeUsedWordIdsKey = `quicktypeUsedWordIds_${userId}`;
-    const picker = setupForm.querySelector(".quicktype-word-picker");
+    const pickerModal = document.querySelector("[data-word-library]");
+    const picker = pickerModal.querySelector("[data-word-picker]");
     const orderList = setupForm.querySelector("[data-word-order]");
-    const count = setupForm.querySelector("[data-selected-count]");
+    const countElements = document.querySelectorAll("[data-selected-count]");
     const createButton = setupForm.querySelector("[data-create-game]");
-    const search = setupForm.querySelector("[data-word-search]");
+    const search = pickerModal.querySelector("[data-word-search]");
+    const openLibraryButton = setupForm.querySelector("[data-open-word-library]");
+    const closeLibraryButton = pickerModal.querySelector("[data-close-word-library]");
+    const doneLibraryButton = pickerModal.querySelector("[data-done-word-library]");
     const customWordInput = setupForm.querySelector("[data-custom-word]");
     const addCustomWordButton = setupForm.querySelector("[data-add-custom-word]");
     const customWordsInput = setupForm.querySelector("[data-custom-words]");
     const pickerError = setupForm.querySelector("[data-quicktype-picker-error]");
     const selectedWords = new Map();
+    let vocabularyWords = [];
     let customWordId = 0;
     let searchTimer = null;
     let searchRequest = 0;
@@ -946,17 +965,12 @@
         remove.addEventListener("click", () => {
           selectedWords.delete(key);
           renderOrder();
-          renderVocabulary([...picker.querySelectorAll("[data-word-id]")].map((option) => ({
-            id: Number(option.dataset.wordId),
-            english_word: option.dataset.word,
-            part_of_speech: option.dataset.partOfSpeech,
-            cefr_level: option.dataset.cefrLevel,
-          })));
+          renderVocabulary(vocabularyWords);
         });
         row.append(label, remove);
         orderList.appendChild(row);
       });
-      count.textContent = selectedWords.size;
+      countElements.forEach((count) => { count.textContent = selectedWords.size; });
       createButton.disabled = selectedWords.size === 0;
     };
     const renderVocabulary = (words) => {
@@ -1000,11 +1014,14 @@
       picker.appendChild(loading);
       try {
         const response = await fetch(`/api/lobby/quicktype/vocabulary?q=${encodeURIComponent(search.value.trim())}`, { credentials: "same-origin" });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Unable to load vocabulary.");
+        const result = response.headers.get("content-type")?.includes("application/json")
+          ? await response.json()
+          : {};
+        if (!response.ok) throw new Error(result.error || `Vocabulary request failed (${response.status}).`);
         if (requestId === searchRequest) {
+          vocabularyWords = result.words || [];
           showPickerError("");
-          renderVocabulary(result.words || []);
+          renderVocabulary(vocabularyWords);
         }
       } catch (error) {
         if (requestId !== searchRequest) return;
@@ -1019,7 +1036,21 @@
       if (selectedWords.has(key)) selectedWords.delete(key);
       else selectedWords.set(key, { kind: "vocabulary", id: option.dataset.wordId, word: option.dataset.word });
       renderOrder();
+      renderVocabulary(vocabularyWords);
+    });
+    const closeLibrary = () => { pickerModal.hidden = true; };
+    openLibraryButton.addEventListener("click", () => {
+      pickerModal.hidden = false;
       loadVocabulary();
+      search.focus();
+    });
+    closeLibraryButton.addEventListener("click", closeLibrary);
+    doneLibraryButton.addEventListener("click", closeLibrary);
+    pickerModal.addEventListener("click", (event) => {
+      if (event.target === pickerModal) closeLibrary();
+    });
+    pickerModal.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeLibrary();
     });
     const addCustomWord = () => {
       const word = customWordInput.value.trim().slice(0, 80);
@@ -1065,7 +1096,6 @@
       localStorage.setItem(quicktypeUsedWordIdsKey, JSON.stringify([...usedWordIds, ...submittedWordIds]));
       createButton.disabled = true;
     });
-    loadVocabulary();
   }
 
   const playerCanvas = document.querySelector("[data-player-canvas]");
