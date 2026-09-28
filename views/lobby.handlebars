@@ -310,10 +310,12 @@
             animation: state.emote,
           };
         }
-        return { direction: Number(direction) || 2, frame: Number(frame) || 0, animation: "walk" };
+        const safeDirection = Number(direction);
+        return { direction: Number.isFinite(safeDirection) ? safeDirection : 2, frame: Number(frame) || 0, animation: "walk" };
       }
     }
-    return { direction: Number(direction) || 2, frame: Number(frame) || 0, animation: "walk" };
+    const safeDirection = Number(direction);
+    return { direction: Number.isFinite(safeDirection) ? safeDirection : 2, frame: Number(frame) || 0, animation: "walk" };
   };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
@@ -1165,8 +1167,10 @@
       };
       player.isMoving = movement.x !== 0 || movement.y !== 0;
       if (player.isMoving) {
-        const activeKey = Object.keys(directionByKey).find((key) => keysDown[key]);
-        if (activeKey) player.direction = directionByKey[activeKey];
+        if (movement.x < 0) player.direction = 1;
+        else if (movement.x > 0) player.direction = 3;
+        else if (movement.y < 0) player.direction = 0;
+        else if (movement.y > 0) player.direction = 2;
         player.frame = (player.frame + 0.2) % 8;
         const length = Math.hypot(movement.x, movement.y) || 1;
         player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
@@ -1298,7 +1302,7 @@
           Number(remotePlayer.goldMedals ?? remotePlayer.gold_medals) > 0;
         const animatedRemote = getPlayerSpriteState(
           remotePlayer.username,
-          Number(remotePlayer.direction) || 2,
+          remotePlayer.direction == null ? 2 : Number(remotePlayer.direction),
           Number(remotePlayer.frame) || 0,
           now,
           isWinner,
