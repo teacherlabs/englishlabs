@@ -1017,10 +1017,7 @@
       resizeCanvas();
       if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(playerCanvas.closest(".lobby-character-stage"));
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
-      const hasRemoteSelf = (window.lobbyPlayers || []).some(
-        (remotePlayer) => String(remotePlayer.username) === ownUsername,
-      );
-      if (player.isLoaded && player.isPresent && !hasRemoteSelf) {
+      if (player.isLoaded && player.isPresent) {
         const animatedPlayer = getEmoteSpriteState(
           ownUsername,
           player.direction,
@@ -1030,6 +1027,7 @@
         drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation);
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
+        if (String(remotePlayer.username) === ownUsername) return;
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
         if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
