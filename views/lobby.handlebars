@@ -917,7 +917,7 @@
     const RENDER_SIZE = 78;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 310, y: 380, speed: 6, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: 310, y: 380, speed: 2.5, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
