@@ -1006,6 +1006,24 @@
           frameContext.shadowBlur = 0;
         }
       };
+      const drawAdminPlaceholder = (x, y, username) => {
+        const centerY = y - 39;
+        frameContext.beginPath();
+        frameContext.arc(x, centerY, 24, 0, Math.PI * 2);
+        frameContext.fillStyle = "#2d4b7b";
+        frameContext.fill();
+        frameContext.lineWidth = 3;
+        frameContext.strokeStyle = "#ffffff";
+        frameContext.stroke();
+        frameContext.fillStyle = "#ffffff";
+        frameContext.font = "700 22px sans-serif";
+        frameContext.textAlign = "center";
+        frameContext.textBaseline = "middle";
+        frameContext.fillText(String(username || "T").charAt(0).toUpperCase(), x, centerY);
+        frameContext.font = "700 9px sans-serif";
+        frameContext.textBaseline = "bottom";
+        frameContext.fillText("Teacher", x, y - 68);
+      };
       const resizeCanvas = () => {
         const stage = playerCanvas.closest(".lobby-character-stage");
         if (!stage) return;
@@ -1037,7 +1055,8 @@
         if (String(remotePlayer.username) === ownUsername) return;
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
         const teacherPresent = playerCanvas.dataset.teacherPresent === "1" || window.lobbyTeacherPresent === 1;
-        if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && !teacherPresent)) return;
+        const isAdmin = Number(remotePlayer.isAdmin) === 1;
+        if ((isAdmin && !teacherPresent) || (!remoteSpritesheet && !isAdmin)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
         const targetX = Number(remotePlayer.x) || 310;
         const targetY = Number(remotePlayer.y) || 380;
@@ -1052,6 +1071,10 @@
           remotePosition.y = remotePosition.targetY;
         }
         remotePositions.set(remoteKey, remotePosition);
+        if (!remoteSpritesheet) {
+          drawAdminPlaceholder(remotePosition.x, remotePosition.y, remotePlayer.username);
+          return;
+        }
         const cachedRemote = remoteImages.get(remoteKey);
         let remoteImage = cachedRemote?.key === remoteSpritesheet ? cachedRemote.image : null;
         if (!remoteImage) {
@@ -1066,7 +1089,7 @@
           Number(remotePlayer.frame) || 0,
           now,
         );
-        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, Number(remotePlayer.isAdmin) === 1, animatedRemote.animation);
+        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
