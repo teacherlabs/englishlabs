@@ -5277,6 +5277,8 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                             const sendState = (correctWord = null) =>
                               res.json({
                                 room: updatedRoom,
+                                teacherPresent:
+                                  Number(updatedRoom.teacher_present) === 1,
                                 event: updatedRoom.last_event || null,
                                 totalQuestions: totalQuestionsError
                                   ? 0

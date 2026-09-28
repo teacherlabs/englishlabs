@@ -618,7 +618,7 @@
       const enteredRunningState =
         previousRoomStatus !== "running" && state.room.status === "running";
       previousRoomStatus = state.room.status;
-      const teacherPresent = Number(state.room.teacher_present) === 1;
+      const teacherPresent = Number(state.teacherPresent ?? state.room.teacher_present) === 1;
       document.querySelectorAll("[data-player-canvas]").forEach((canvas) => {
         canvas.dataset.teacherPresent = teacherPresent ? "1" : "0";
       });
@@ -1036,7 +1036,8 @@
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         if (String(remotePlayer.username) === ownUsername) return;
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
-        if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && Number(playerCanvas.dataset.teacherPresent) !== 1)) return;
+        const teacherPresent = playerCanvas.dataset.teacherPresent === "1" || window.lobbyTeacherPresent === 1;
+        if (!remoteSpritesheet || (Number(remotePlayer.isAdmin) === 1 && !teacherPresent)) return;
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
         const targetX = Number(remotePlayer.x) || 310;
         const targetY = Number(remotePlayer.y) || 380;
