@@ -917,7 +917,7 @@
     const RENDER_SIZE = 78;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const player = { x: 310, y: 380, speed: 4, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: 310, y: 380, targetX: 310, targetY: 380, speed: 4, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const pressedKeys = new Set();
     const remoteImages = new Map();
     const remotePositions = new Map();
@@ -943,10 +943,16 @@
           return result;
         }, { x: 0, y: 0 });
         const length = Math.hypot(movement.x, movement.y) || 1;
-        player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
-        player.y = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
+        player.targetX = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.targetX + movement.x / length * player.speed));
+        player.targetY = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.targetY + movement.y / length * player.speed));
       } else {
         player.frame = 0;
+      }
+      player.x += (player.targetX - player.x) * LERP_FACTOR;
+      player.y += (player.targetY - player.y) * LERP_FACTOR;
+      if (Math.hypot(player.targetX - player.x, player.targetY - player.y) < 0.5) {
+        player.x = player.targetX;
+        player.y = player.targetY;
       }
 
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
@@ -1014,6 +1020,7 @@
         frameCanvas.height = height;
         if (previousWidth > 0 && previousWidth !== width) {
           player.x = Math.max(RENDER_SIZE / 2, Math.min(width - RENDER_SIZE / 2, player.x * width / previousWidth));
+          player.targetX = Math.max(RENDER_SIZE / 2, Math.min(width - RENDER_SIZE / 2, player.targetX * width / previousWidth));
         }
       };
       resizeCanvas();
@@ -1067,7 +1074,8 @@
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
       const syncState = `${player.x},${player.y},${player.direction},${player.frame.toFixed(2)}`;
-      if (player.isMoving && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
+      const hasPendingPosition = Math.hypot(player.targetX - player.x, player.targetY - player.y) >= 0.5;
+      if ((player.isMoving || hasPendingPosition) && syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
         lastSyncAt = timestampNow();
         lastSyncedState = syncState;
         const movement = { roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame };
