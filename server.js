@@ -1939,6 +1939,35 @@ db.serialize(() => {
     awarded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (room_id, username)
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS lobby_player_mode_stats (
+    username TEXT NOT NULL,
+    mode TEXT NOT NULL CHECK (mode IN ('lobby', 'quicktype')),
+    best_score INTEGER NOT NULL DEFAULT 0,
+    gold_medals INTEGER NOT NULL DEFAULT 0,
+    silver_medals INTEGER NOT NULL DEFAULT 0,
+    bronze_medals INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (username, mode)
+  )`);
+  db.run(
+    `INSERT OR IGNORE INTO lobby_player_mode_stats
+       (username, mode, best_score, gold_medals, silver_medals, bronze_medals)
+     SELECT p.username, r.mode, MAX(p.score),
+            SUM(CASE WHEN a.rank = 1 THEN 1 ELSE 0 END),
+            SUM(CASE WHEN a.rank = 2 THEN 1 ELSE 0 END),
+            SUM(CASE WHEN a.rank = 3 THEN 1 ELSE 0 END)
+     FROM lobby_participants AS p
+     JOIN lobby_rooms AS r ON r.id = p.room_id
+     LEFT JOIN lobby_medal_awards AS a
+       ON a.room_id = p.room_id AND a.username = p.username
+     LEFT JOIN members AS m ON m.username = p.username
+     WHERE r.status = 'finished'
+       AND r.mode IN ('lobby', 'quicktype')
+       AND (m.role IS NULL OR m.role != 'admin')
+     GROUP BY p.username, r.mode`,
+    (error) => {
+      if (error) console.warn("Unable to backfill mode-specific lobby stats:", error);
+    },
+  );
   db.run(
     "INSERT OR IGNORE INTO members (username, fname, lname, email, role, goal, avatar, spritesheet, character_config) VALUES (?, ?, ?, ?, 'admin', '', '', '', '')",
     [adminname, adminname, "", ""],
@@ -3917,19 +3946,78 @@ const loadUsefulChunkSubmissions = (username, callback) => {
   );
 };
 
+const emptyLobbyModeStats = () => ({
+  questionGame: { bestScore: 0, goldMedals: 0, silverMedals: 0, bronzeMedals: 0 },
+  quicktype: { bestScore: 0, goldMedals: 0, silverMedals: 0, bronzeMedals: 0 },
+});
+
+const formatLobbyModeStats = (rows) => {
+  const stats = emptyLobbyModeStats();
+  (rows || []).forEach((row) => {
+    const key = row.mode === "quicktype" ? "quicktype" : "questionGame";
+    stats[key] = {
+      bestScore: Number(row.best_score) || 0,
+      goldMedals: Number(row.gold_medals) || 0,
+      silverMedals: Number(row.silver_medals) || 0,
+      bronzeMedals: Number(row.bronze_medals) || 0,
+    };
+  });
+  return stats;
+};
+
+const loadLobbyModeStats = (username, callback) => {
+  db.all(
+    "SELECT mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats WHERE username = ?",
+    [username],
+    (error, rows) => callback(error, formatLobbyModeStats(rows)),
+  );
+};
+
+const loadAllLobbyModeStats = (callback) => {
+  db.all(
+    "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats",
+    (error, rows) => {
+      if (error) return callback(error);
+      const statsByUsername = {};
+      (rows || []).forEach((row) => {
+        statsByUsername[row.username] ||= [];
+        statsByUsername[row.username].push(row);
+      });
+      callback(
+        null,
+        Object.fromEntries(
+          Object.entries(statsByUsername).map(([username, userRows]) => [
+            username,
+            formatLobbyModeStats(userRows),
+          ]),
+        ),
+      );
+    },
+  );
+};
+
 app.get("/profile", requireProfileUser, (req, res) => {
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
+  const modeStatsPromise = new Promise((resolve, reject) =>
+    loadLobbyModeStats(req.session.name, (error, stats) =>
+      error ? reject(error) : resolve(stats),
+    ),
+  );
   postgresReady
     .then(() =>
-      postgresPool.query(
+      Promise.all([
+        postgresPool.query(
         "SELECT username, email, goal, avatar, spritesheet, character_config, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
         [req.session.name],
-      ),
+        ),
+        modeStatsPromise,
+      ]),
     )
-    .then(({ rows }) => {
+    .then(([{ rows }, lobbyModeStats]) => {
       const student = rows[0];
       if (!student) return res.status(404).send("Profile not found.");
+      student.lobbyModeStats = lobbyModeStats;
       student.avatar = student.avatar || student.spritesheet || "";
       student.avatarUrl = profileImageUrl(student.avatar);
       student.avatar_initial = student.username.charAt(0).toUpperCase();
@@ -5107,54 +5195,81 @@ app.post("/lobby/answer", requireLogin, (req, res) => {
 });
 
 const awardLobbyMedals = (roomId, callback) => {
-  db.all(
+  db.get(
+    "SELECT mode FROM lobby_rooms WHERE id = ?",
+    [roomId],
+    (roomError, room) => {
+      if (roomError || !room || !["lobby", "quicktype"].includes(room.mode))
+        return callback(roomError || new Error("Lobby mode is unavailable."));
+      db.all(
     `SELECT lobby_participants.username, lobby_participants.score
      FROM lobby_participants
      LEFT JOIN members ON members.username = lobby_participants.username
      WHERE lobby_participants.room_id = ?
        AND (members.role IS NULL OR members.role != 'admin')
-     ORDER BY lobby_participants.score DESC, lobby_participants.username ASC
-     LIMIT 3`,
+     ORDER BY lobby_participants.score DESC, lobby_participants.username ASC`,
     [roomId],
-    (error, winners) => {
+    (error, participants) => {
       if (error) return callback(error);
       const medalColumns = ["gold_medals", "silver_medals", "bronze_medals"];
-      const awardNext = (index) => {
-        if (index >= winners.length) return callback();
-        const winner = winners[index];
-        const medalColumn = medalColumns[index];
+      const persistNext = (index) => {
+        if (index >= participants.length) return callback();
+        const participant = participants[index];
+        const rank = index < medalColumns.length ? index + 1 : 0;
+        const persistStats = (awardedRank) => {
+          const persistModeStats = () => {
+          const medals = [1, 2, 3].map((medalRank) =>
+            awardedRank === medalRank ? 1 : 0,
+          );
+          db.run(
+            `INSERT INTO lobby_player_mode_stats
+               (username, mode, best_score, gold_medals, silver_medals, bronze_medals)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON CONFLICT(username, mode) DO UPDATE SET
+               best_score = MAX(lobby_player_mode_stats.best_score, excluded.best_score),
+               gold_medals = lobby_player_mode_stats.gold_medals + excluded.gold_medals,
+               silver_medals = lobby_player_mode_stats.silver_medals + excluded.silver_medals,
+               bronze_medals = lobby_player_mode_stats.bronze_medals + excluded.bronze_medals`,
+            [participant.username, room.mode, participant.score, ...medals],
+            (statsError) => statsError
+              ? callback(statsError)
+              : persistNext(index + 1),
+          );
+          };
+          if (!awardedRank) return persistModeStats();
+          const medalColumn = medalColumns[awardedRank - 1];
+          db.run(
+            `UPDATE members SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1 WHERE username = ?`,
+            [participant.username],
+            (memberError) => {
+              if (memberError) return callback(memberError);
+              const updatePostgres = postgresPool
+                ? postgresReady.then(() =>
+                    postgresPool.query(
+                      `UPDATE users SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1 WHERE username = $1`,
+                      [participant.username],
+                    ),
+                  )
+                : Promise.resolve();
+              updatePostgres
+                .then(persistModeStats)
+                .catch(callback);
+            },
+          );
+        };
+        if (!rank) return persistStats(0);
         db.run(
           "INSERT OR IGNORE INTO lobby_medal_awards (room_id, username, rank) VALUES (?, ?, ?)",
-          [roomId, winner.username, index + 1],
+          [roomId, participant.username, rank],
           function (awardError) {
             if (awardError) return callback(awardError);
-            if (!this.changes) return awardNext(index + 1);
-            db.run(
-              `UPDATE members
-               SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1
-               WHERE username = ?`,
-              [winner.username],
-              (memberError) => {
-                if (memberError) return callback(memberError);
-                const postgresUpdate = postgresPool
-                  ? postgresReady.then(() =>
-                      postgresPool.query(
-                        `UPDATE users
-                         SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1
-                         WHERE username = $1`,
-                        [winner.username],
-                      ),
-                    )
-                  : Promise.resolve();
-                postgresUpdate
-                  .then(() => awardNext(index + 1))
-                  .catch(callback);
-              },
-            );
+            persistStats(this.changes ? rank : 0);
           },
         );
       };
-      awardNext(0);
+      persistNext(0);
+    },
+      );
     },
   );
 };
@@ -5794,6 +5909,11 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
           console.error("Unable to load SQLite teacher students:", studentError);
           return res.status(500).send(`Teacher dashboard database error: ${studentError.message}`);
         }
+        loadAllLobbyModeStats((modeStatsError, modeStatsByUsername) => {
+        if (modeStatsError) {
+          console.error("Unable to load SQLite lobby mode stats:", modeStatsError);
+          return res.status(500).send("Unable to load lobby scores.");
+        }
         db.all(
           "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
           (progressError, progressRows) => {
@@ -5838,6 +5958,7 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
                     ),
                     activities: filteredProgress.length,
                     pendingCount: pendingWritingByUsername[student.username] || 0,
+                    lobbyModeStats: modeStatsByUsername[student.username] || emptyLobbyModeStats(),
                   };
                 });
                 return res.render("teacher.handlebars", {
@@ -5854,6 +5975,7 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
             );
           },
         );
+        });
       },
     );
   }
@@ -5863,6 +5985,11 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
     const studentResult = await postgresPool.query(
       "SELECT username, fname, lname, goal, gold_medals, silver_medals, bronze_medals FROM users WHERE role = $1 ORDER BY username",
       ["student"],
+    );
+    const modeStatsByUsername = await new Promise((resolve, reject) =>
+      loadAllLobbyModeStats((error, stats) =>
+        error ? reject(error) : resolve(stats),
+      ),
     );
     const tableResult = await postgresPool.query(
       `SELECT to_regclass('public.progress') AS progress_table,
@@ -5920,6 +6047,7 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
         possible_points,
         activities: filteredProgress.length,
         pendingCount: pendingWritingByUsername[student.username] || 0,
+        lobbyModeStats: modeStatsByUsername[student.username] || emptyLobbyModeStats(),
       };
     });
 
@@ -5954,6 +6082,8 @@ const deleteStudent = (req, res) => {
     "progress",
     "password_resets",
     "lobby_participants",
+    "lobby_medal_awards",
+    "lobby_player_mode_stats",
     "lobby_quicktype_submissions",
     "vocabulary_difficult_words",
   ];
@@ -6178,6 +6308,10 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
     } else {
       student.characterConfig = {};
     }
+    loadLobbyModeStats(student.username, (modeStatsError, lobbyModeStats) => {
+      if (modeStatsError)
+        return res.status(500).send("Unable to load student lobby stats.");
+      student.lobbyModeStats = lobbyModeStats;
     db.all(
       "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
       [student.username],
@@ -6556,6 +6690,7 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
         );
       },
     );
+    });
   };
 
   if (postgresPool) {

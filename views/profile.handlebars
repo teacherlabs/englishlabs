@@ -76,13 +76,26 @@
               >&#9998;</button></div>
           <section class="profile-medal-showcase" aria-labelledby="profile-medals-title">
             <div class="profile-medal-showcase-heading">
-              <p class="eyebrow" id="profile-medals-title">Quiz medals</p>
-              <span>Collected podium finishes</span>
+              <p class="eyebrow" id="profile-medals-title">Lobby game records</p>
+              <span>Scores and podium finishes by mode</span>
             </div>
-            <div class="profile-medal-grid">
-              <div class="profile-medal-card profile-medal-card-gold"><span class="profile-medal-icon" aria-hidden="true">🥇</span><strong>{{student.gold_medals}}</strong><span>Gold</span></div>
-              <div class="profile-medal-card profile-medal-card-silver"><span class="profile-medal-icon" aria-hidden="true">🥈</span><strong>{{student.silver_medals}}</strong><span>Silver</span></div>
-              <div class="profile-medal-card profile-medal-card-bronze"><span class="profile-medal-icon" aria-hidden="true">🥉</span><strong>{{student.bronze_medals}}</strong><span>Bronze</span></div>
+            <div class="profile-mode-medal-groups">
+              <section class="profile-mode-medal-group" aria-label="Question Game record">
+                <h3>Question Game <span>Best {{student.lobbyModeStats.questionGame.bestScore}}</span></h3>
+                <div class="profile-medal-grid">
+                  <div class="profile-medal-card profile-medal-card-gold"><span class="profile-medal-icon" aria-hidden="true">🥇</span><strong>{{student.lobbyModeStats.questionGame.goldMedals}}</strong><span>Gold</span></div>
+                  <div class="profile-medal-card profile-medal-card-silver"><span class="profile-medal-icon" aria-hidden="true">🥈</span><strong>{{student.lobbyModeStats.questionGame.silverMedals}}</strong><span>Silver</span></div>
+                  <div class="profile-medal-card profile-medal-card-bronze"><span class="profile-medal-icon" aria-hidden="true">🥉</span><strong>{{student.lobbyModeStats.questionGame.bronzeMedals}}</strong><span>Bronze</span></div>
+                </div>
+              </section>
+              <section class="profile-mode-medal-group" aria-label="QuickType record">
+                <h3>QuickType <span>Best {{student.lobbyModeStats.quicktype.bestScore}}</span></h3>
+                <div class="profile-medal-grid">
+                  <div class="profile-medal-card profile-medal-card-gold"><span class="profile-medal-icon" aria-hidden="true">🥇</span><strong>{{student.lobbyModeStats.quicktype.goldMedals}}</strong><span>Gold</span></div>
+                  <div class="profile-medal-card profile-medal-card-silver"><span class="profile-medal-icon" aria-hidden="true">🥈</span><strong>{{student.lobbyModeStats.quicktype.silverMedals}}</strong><span>Silver</span></div>
+                  <div class="profile-medal-card profile-medal-card-bronze"><span class="profile-medal-icon" aria-hidden="true">🥉</span><strong>{{student.lobbyModeStats.quicktype.bronzeMedals}}</strong><span>Bronze</span></div>
+                </div>
+              </section>
             </div>
           </section></div>
         </div>

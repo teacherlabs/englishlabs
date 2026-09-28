@@ -116,14 +116,14 @@
             </div>{{/unless}}
           </section>
           <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
-            <p class="eyebrow">Round results</p>
+            <p class="eyebrow">{{#if isQuicktype}}QuickType round results{{else}}Question Game round results{{/if}}</p>
             {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
             <ol class="round-leaderboard-list" data-round-leaderboard></ol>
             <form class="lobby-inline-form" action="/lobby/next" method="post"><input type="hidden" name="roomId" value="{{room.id}}" /><button class="practice-button" type="submit" data-next-word>{{#if isQuicktype}}Next word{{else}}Next question{{/if}}</button></form>
           </section>
           <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
             <p class="eyebrow">Quiz complete</p>
-            <h2>Final results</h2>
+            <h2 data-final-results-title>Final results</h2>
             <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
           </section>
         </div>
@@ -224,15 +224,15 @@
 </div>
 <div class="winner-celebration-modal" data-winner-celebration hidden>
   <section class="winner-celebration-dialog" role="dialog" aria-modal="true" aria-labelledby="winner-celebration-title">
-    <p class="eyebrow">Quiz champion</p>
+    <p class="eyebrow" data-winner-game-mode>Question Game champion</p>
     <div class="winner-medal-graphic" aria-hidden="true">🥇</div>
-    <h2 id="winner-celebration-title">You took first place!</h2>
+    <h2 id="winner-celebration-title" data-winner-title>You took first place!</h2>
     <p class="winner-celebration-copy">A brilliant finish, <strong data-winner-celebration-name></strong>.</p>
     <div class="winner-celebration-character" aria-label="Your victory character">
       <canvas data-winner-celebration-canvas width="220" height="220"></canvas>
       <img data-winner-celebration-avatar alt="" hidden />
     </div>
-    <p class="winner-celebration-score"><span data-winner-celebration-score></span> points</p>
+    <p class="winner-celebration-score"><span data-winner-celebration-score></span> <span data-winner-score-label>Question Game points</span></p>
     <button class="practice-button" type="button" data-winner-celebration-close>Continue</button>
   </section>
 </div>
@@ -444,6 +444,7 @@
     const score = phaseRunning.querySelector("[data-live-score]");
     const roundLeaderboardList = phaseLeaderboard.querySelector("[data-round-leaderboard]");
     const finalResultsList = phaseFinished.querySelector("[data-final-results]");
+    const finalResultsTitle = phaseFinished.querySelector("[data-final-results-title]");
     const correctWordEl = phaseLeaderboard.querySelector("[data-correct-word]");
     const intermissionActions = document.querySelector("[data-intermission-actions]");
     const playersGrid = document.querySelector("[data-lobby-players]");
@@ -580,6 +581,9 @@
     const winnerCelebrationAvatar = winnerCelebrationModal?.querySelector("[data-winner-celebration-avatar]");
     const winnerCelebrationName = winnerCelebrationModal?.querySelector("[data-winner-celebration-name]");
     const winnerCelebrationScore = winnerCelebrationModal?.querySelector("[data-winner-celebration-score]");
+    const winnerCelebrationMode = winnerCelebrationModal?.querySelector("[data-winner-game-mode]");
+    const winnerCelebrationTitle = winnerCelebrationModal?.querySelector("[data-winner-title]");
+    const winnerCelebrationScoreLabel = winnerCelebrationModal?.querySelector("[data-winner-score-label]");
     let winnerCelebrationShown = false;
     let winnerAnimationToken = 0;
     const closeWinnerCelebration = () => {
@@ -597,6 +601,10 @@
       winnerCelebrationShown = true;
       winnerCelebrationName.textContent = winner.username;
       winnerCelebrationScore.textContent = winner.score;
+      const gameLabel = mode === "quicktype" ? "QuickType" : "Question Game";
+      if (winnerCelebrationMode) winnerCelebrationMode.textContent = `${gameLabel} champion`;
+      if (winnerCelebrationTitle) winnerCelebrationTitle.textContent = `You took first place in ${gameLabel}!`;
+      if (winnerCelebrationScoreLabel) winnerCelebrationScoreLabel.textContent = `${gameLabel} points`;
       winnerCelebrationModal.hidden = false;
       document.body.classList.add("winner-celebration-open");
       const source = winner.spritesheetUrl || winner.spritesheet || winner.avatarUrl || winner.avatar;
@@ -881,6 +889,9 @@
         if (correctWordEl) correctWordEl.textContent = state.correctWord || "";
       }
       if (gameFinished) {
+        if (finalResultsTitle) {
+          finalResultsTitle.textContent = `${mode === "quicktype" ? "QuickType" : "Question Game"} final results`;
+        }
         renderFinalResults(state.leaderboard);
         showWinnerCelebration(state.leaderboard);
       }

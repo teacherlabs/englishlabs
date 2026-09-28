@@ -4688,6 +4688,27 @@ div.profile-avatar-placeholder {
   gap: 8px;
   margin-top: 4px;
 }
+.student-mode-medal-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.student-mode-medal-summary > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #d9e2ef;
+  border-radius: 6px;
+  background: #f7f9fc;
+  color: #526074;
+  font-size: 12px;
+}
+.student-mode-medal-summary > div > strong:first-child {
+  flex: 1 0 100%;
+  color: #14213d;
+}
 .student-medal {
   display: inline-flex;
   align-items: center;
@@ -4731,6 +4752,34 @@ div.profile-avatar-placeholder {
 .profile-medal-showcase-heading > span {
   color: var(--profile-card-muted, #526074);
   font-size: 12px;
+}
+.profile-mode-medal-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: 12px;
+}
+.profile-mode-medal-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--profile-card-text, #14213d) 14%, transparent);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.28);
+}
+.profile-mode-medal-group h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  color: var(--profile-card-text, #14213d);
+  font-size: 14px;
+}
+.profile-mode-medal-group h3 span {
+  color: var(--profile-card-muted, #526074);
+  font-size: 12px;
+  font-weight: 600;
 }
 .profile-medal-grid {
   display: grid;
@@ -4791,10 +4840,20 @@ div.profile-avatar-placeholder {
   padding: 24px;
 }
 .student-row-medals {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
   color: #526074;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: normal;
+}
+.student-row-medals > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.student-row-medals strong {
+  color: #14213d;
 }
 
 .admin-student-profile-card,
