@@ -7103,7 +7103,7 @@ io.on("connection", (socket) => {
     const y = Math.max(52, Math.min(420, Number(data.y) || 52));
     const direction = [0, 1, 2, 3].includes(Number(data.direction))
       ? Number(data.direction)
-      : 2;
+      : 0;
     const frame = Math.max(0, Math.min(8.99, Number(data.frame) || 0));
     db.run(
       "UPDATE lobby_participants SET x = ?, y = ?, direction = ?, frame = ? WHERE room_id = ? AND username = ?",
@@ -7142,7 +7142,7 @@ io.on("connection", (socket) => {
       roomId: numericRoomId,
       username,
       emote,
-      direction: [0, 1, 2, 3].includes(Number(direction)) ? Number(direction) : 2,
+      direction: [0, 1, 2, 3].includes(Number(direction)) ? Number(direction) : 0,
     });
   });
 

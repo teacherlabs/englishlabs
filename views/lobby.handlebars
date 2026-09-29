@@ -304,7 +304,7 @@
           victory: {
             direction: [0, 1, 2, 3].includes(Number(state.direction))
               ? Number(state.direction)
-              : Number(direction) || 2,
+              : Number.isFinite(Number(direction)) ? Number(direction) : 0,
             start: 0,
             count: 7,
             animation: "spell",
@@ -323,11 +323,11 @@
           };
         }
         const safeDirection = Number(direction);
-        return { direction: Number.isFinite(safeDirection) ? safeDirection : 2, frame: Number(frame) || 0, animation: "walk" };
+        return { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
       }
     }
     const safeDirection = Number(direction);
-    return { direction: Number.isFinite(safeDirection) ? safeDirection : 2, frame: Number(frame) || 0, animation: "walk" };
+    return { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
   };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
@@ -1174,23 +1174,25 @@
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_WIDTH = 52;
-    const PLAYER_SPEED = 1.8;
+    const PLAYER_SPEED = 108;
+    const WALK_FRAME_DURATION = 110;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_WIDTH / 2 - 1;
-    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
     let pointerPosition = null;
     let lastSyncAt = 0;
     let lastSyncedState = "";
-    const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
+    let previousFrameAt = null;
+    const directionByKey = { ArrowUp: 1, w: 1, ArrowLeft: 2, a: 2, ArrowDown: 0, s: 0, ArrowRight: 3, d: 3 };
     const directionFromMovement = (x, y) => {
-      if (x < 0) return 1;
+      if (x < 0) return 2;
       if (x > 0) return 3;
-      if (y < 0) return 0;
-      if (y > 0) return 2;
+      if (y < 0) return 1;
+      if (y > 0) return 0;
       return null;
     };
     const keysDown = Object.fromEntries(Object.keys(directionByKey).map((key) => [key, false]));
@@ -1216,15 +1218,12 @@
     };
     const getEmoteSpriteState = (username, direction, frame, now) =>
       getLobbySpriteFrame(username, direction, frame, now);
-    const getPlayerSpriteState = (username, direction, frame, now, isWinner, isMoving) => {
+    const getPlayerSpriteState = (username, direction, frame, now, isMoving) => {
       const safeDirection = Number(direction);
-      const facing = Number.isFinite(safeDirection) ? safeDirection : 2;
+      const facing = Number.isFinite(safeDirection) ? safeDirection : 0;
       const emote = getEmoteSpriteState(username, facing, frame, now);
       if (emote.animation !== "walk") return emote;
       if (!isMoving) return { direction: facing, frame: 0, animation: "idle" };
-      if (isWinner) {
-        return { direction: facing, frame: Math.floor(now / 135) % 7, animation: "spell" };
-      }
       return getEmoteSpriteState(username, facing, frame, now);
     };
     const keyByCode = { KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d" };
@@ -1240,6 +1239,10 @@
     };
     const drawPlayer = () => {
       const now = timestampNow();
+      const deltaTime = previousFrameAt === null
+        ? 0
+        : Math.min(now - previousFrameAt, 50);
+      previousFrameAt = now;
       const movement = getMovementVector();
       let victoryPoseActive = player.currentAnimation === "spell";
       if (victoryPoseActive) {
@@ -1263,11 +1266,24 @@
       player.isMoving = !victoryPoseActive && (movement.x !== 0 || movement.y !== 0);
       if (player.isMoving) {
         updateDirectionFromMovement(movement);
-        player.frame = (player.frame + 0.2) % 8;
+        if (player.currentAnimation !== "walk") {
+          player.currentAnimation = "walk";
+          player.animationStartedAt = now;
+        }
+        const walkLayout = getLobbyAnimationLayout(player.image, "walk");
+        const walkAnimation = window.getCharacterAnimationLayout("walk", walkLayout);
+        player.currentFrame = Math.floor((now - player.animationStartedAt) / WALK_FRAME_DURATION) % walkAnimation.columns;
+        player.frame = player.currentFrame;
         const length = Math.hypot(movement.x, movement.y) || 1;
-        player.x = Math.max(RENDER_WIDTH / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * player.speed));
-        player.y = Math.max(RENDER_WIDTH, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
+        const distance = player.speed * deltaTime / 1000;
+        player.x = Math.max(RENDER_WIDTH / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * distance));
+        player.y = Math.max(RENDER_WIDTH, Math.min(playerCanvas.height, player.y + movement.y / length * distance));
       } else if (!victoryPoseActive) {
+        if (player.currentAnimation !== "idle") {
+          player.currentAnimation = "idle";
+          player.animationStartedAt = now;
+        }
+        player.currentFrame = 0;
         player.frame = 0;
       }
 
@@ -1303,6 +1319,14 @@
           direction,
           layout,
         );
+        if (
+          frameRect.sx < 0 ||
+          frameRect.sy < 0 ||
+          frameRect.sx + frameRect.frameWidth > image.naturalWidth ||
+          frameRect.sy + frameRect.frameHeight > image.naturalHeight ||
+          frameRect.frameWidth !== layout.frameWidth ||
+          frameRect.frameHeight !== layout.frameHeight
+        ) return;
         logLobbySpriteLayout(image, layout, frameRect.frame, frameRect.direction);
         const renderHeight = RENDER_WIDTH * layout.frameHeight / layout.frameWidth;
         const drawX = Math.floor(x - (RENDER_WIDTH / 2));
@@ -1354,11 +1378,6 @@
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {
-        const ownLeaderboardEntry = (window.lobbyPlayers || []).find(
-          (entry) => String(entry.username) === ownUsername,
-        );
-        const ownIsWinner = Boolean(ownLeaderboardEntry?.isWinner) ||
-          Number(ownLeaderboardEntry?.goldMedals ?? ownLeaderboardEntry?.gold_medals) > 0;
         const animatedPlayer = victoryPoseActive
           ? {
               direction: player.direction,
@@ -1370,7 +1389,6 @@
               player.direction,
               player.frame,
               now,
-              ownIsWinner,
               player.isMoving,
             );
         drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null);
@@ -1402,7 +1420,7 @@
         const remoteDirection = targetDirection ?? (
           Number.isInteger(reportedDirection) && reportedDirection >= 0 && reportedDirection <= 3
             ? reportedDirection
-            : previousPosition?.direction ?? 2
+            : previousPosition?.direction ?? 0
         );
         const remotePosition = previousPosition || { x: targetX, y: targetY };
         remotePosition.direction = remoteDirection;
@@ -1410,8 +1428,9 @@
         const previousY = remotePosition.y;
         remotePosition.targetX = targetX;
         remotePosition.targetY = targetY;
-        remotePosition.x += (remotePosition.targetX - remotePosition.x) * LERP_FACTOR;
-        remotePosition.y += (remotePosition.targetY - remotePosition.y) * LERP_FACTOR;
+        const interpolationFactor = 1 - Math.pow(1 - LERP_FACTOR, deltaTime / (1000 / 60));
+        remotePosition.x += (remotePosition.targetX - remotePosition.x) * interpolationFactor;
+        remotePosition.y += (remotePosition.targetY - remotePosition.y) * interpolationFactor;
         if (Math.hypot(remotePosition.targetX - remotePosition.x, remotePosition.targetY - remotePosition.y) < 0.5) {
           remotePosition.x = remotePosition.targetX;
           remotePosition.y = remotePosition.targetY;
@@ -1433,14 +1452,11 @@
           remoteImage.src = `${remoteSource}${remoteSource.startsWith("data:") ? "" : `?t=${encodeURIComponent(remoteSource)}`}`;
           remoteImages.set(remoteKey, { key: remoteSpritesheet, image: remoteImage });
         }
-        const isWinner = Boolean(remotePlayer.isWinner) ||
-          Number(remotePlayer.goldMedals ?? remotePlayer.gold_medals) > 0;
         const animatedRemote = getPlayerSpriteState(
           remotePlayer.username,
           remotePosition.direction,
           Number(remotePlayer.frame) || 0,
           now,
-          isWinner,
           remoteIsMoving,
         );
         drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation);
