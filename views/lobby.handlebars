@@ -1187,12 +1187,12 @@
     let lastSyncAt = 0;
     let lastSyncedState = "";
     let previousFrameAt = null;
-    const directionByKey = { ArrowUp: 1, w: 1, ArrowLeft: 2, a: 2, ArrowDown: 0, s: 0, ArrowRight: 3, d: 3 };
+    const directionByKey = { ArrowUp: 0, w: 0, ArrowLeft: 1, a: 1, ArrowDown: 2, s: 2, ArrowRight: 3, d: 3 };
     const directionFromMovement = (x, y) => {
-      if (x < 0) return 2;
+      if (x < 0) return 1;
       if (x > 0) return 3;
-      if (y < 0) return 1;
-      if (y > 0) return 0;
+      if (y < 0) return 0;
+      if (y > 0) return 2;
       return null;
     };
     const keysDown = Object.fromEntries(Object.keys(directionByKey).map((key) => [key, false]));
