@@ -7077,7 +7077,8 @@ io.on("connection", (socket) => {
   socket.on("playerMove", (data = {}) => {
     const roomId = Number(data.roomId);
     if (!socket.data.roomId || socket.data.roomId !== roomId) return;
-    const x = Math.max(0, Math.min(620, Number(data.x) || 0));
+    const maxPlayerX = 620 / 2 - 50 / 2 - 1;
+    const x = Math.max(25, Math.min(maxPlayerX, Number(data.x) || 0));
     const y = Math.max(60, Math.min(420, Number(data.y) || 60));
     const direction = [0, 1, 2, 3].includes(Number(data.direction))
       ? Number(data.direction)

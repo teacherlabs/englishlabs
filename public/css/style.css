@@ -1381,13 +1381,11 @@ legend {
   aspect-ratio: 620 / 420;
   object-fit: contain;
   outline: 0;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
 }
 
 .lobby-page canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
 }
 .lobby-character-stage canvas:focus {
   box-shadow: 0 0 0 3px #f0b44d;
@@ -1630,8 +1628,8 @@ legend {
 .lobby-student-main .student-live-quiz[data-phase-running] .quicktype-answer-form input {
   width: 100%;
   min-width: 0;
-  min-height: 72px;
-  padding: 20px 22px;
+  min-height: 88px;
+  padding: 24px;
   border-radius: 8px;
   font-size: 22px;
 }
@@ -1842,7 +1840,7 @@ legend {
 .winner-celebration-character canvas {
   width: 220px;
   height: 220px;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 .winner-celebration-character img {
   width: 180px;

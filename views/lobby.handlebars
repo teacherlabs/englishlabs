@@ -628,7 +628,8 @@
           if (animationToken !== winnerAnimationToken || winnerCelebrationModal.hidden) return;
           const frame = Math.floor(now / 110) % layout.columns;
           context.clearRect(0, 0, winnerCelebrationCanvas.width, winnerCelebrationCanvas.height);
-          context.imageSmoothingEnabled = false;
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
           context.drawImage(
             image,
             frame * layout.frameWidth,
@@ -1135,16 +1136,18 @@
     playerCanvas.width = ARENA_WIDTH;
     playerCanvas.height = ARENA_HEIGHT;
     const playerContext = playerCanvas.getContext("2d");
-    playerContext.imageSmoothingEnabled = false;
     const frameCanvas = document.createElement("canvas");
     frameCanvas.width = ARENA_WIDTH;
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_SIZE = 50;
     const PLAYER_SPEED = 1.8;
-    playerContext.imageSmoothingEnabled = false;
-    frameContext.imageSmoothingEnabled = false;
-    const player = { x: 310, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    playerContext.imageSmoothingEnabled = true;
+    playerContext.imageSmoothingQuality = "high";
+    frameContext.imageSmoothingEnabled = true;
+    frameContext.imageSmoothingQuality = "high";
+    const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_SIZE / 2 - 1;
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
@@ -1191,7 +1194,7 @@
         updateDirectionFromMovement(movement);
         player.frame = (player.frame + 0.2) % 8;
         const length = Math.hypot(movement.x, movement.y) || 1;
-        player.x = Math.max(RENDER_SIZE / 2, Math.min(playerCanvas.width - RENDER_SIZE / 2, player.x + movement.x / length * player.speed));
+        player.x = Math.max(RENDER_SIZE / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * player.speed));
         player.y = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
       } else {
         player.frame = 0;
@@ -1300,7 +1303,10 @@
         const remoteKey = String(remotePlayer.userId || remotePlayer.username);
         const remoteX = Number(remotePlayer.x);
         const remoteY = Number(remotePlayer.y);
-        const targetX = Number.isFinite(remoteX) ? remoteX : 310;
+        const targetX = Math.max(
+          RENDER_SIZE / 2,
+          Math.min(MAX_PLAYER_X, Number.isFinite(remoteX) ? remoteX : MAX_PLAYER_X / 2),
+        );
         const targetY = Number.isFinite(remoteY) ? remoteY : 380;
         const previousPosition = remotePositions.get(remoteKey);
         const reportedDirection = remotePlayer.direction == null
