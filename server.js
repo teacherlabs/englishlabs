@@ -7191,6 +7191,7 @@ io.on("connection", (socket) => {
                     character.character_config,
                   ),
                   ...parseAnimationsConfig(character.character_animations),
+                  goldMedals: Number(character.gold_medals) || 0,
                   winnerAnimationsUnlocked:
                     Number(character.gold_medals) > 0,
                 };
@@ -7248,15 +7249,27 @@ io.on("connection", (socket) => {
     ) {
       return;
     }
-    if (!isAdmin && !socket.data.character?.winnerAnimationsUnlocked) {
-      return;
-    }
-    io.to(String(numericRoomId)).emit("lobbyEmote", {
-      roomId: numericRoomId,
-      username,
-      emote,
-      direction: [0, 1, 2, 3].includes(Number(direction)) ? Number(direction) : 0,
-    });
+    loadLobbyCharacter(username)
+      .then((character) => {
+        const goldMedals = Number(character.gold_medals) || 0;
+        socket.data.character = {
+          ...socket.data.character,
+          goldMedals,
+          winnerAnimationsUnlocked: goldMedals > 0,
+        };
+        if (goldMedals <= 0 || socket.data.roomId !== numericRoomId) return;
+        io.to(String(numericRoomId)).emit("lobbyEmote", {
+          roomId: numericRoomId,
+          username,
+          emote,
+          direction: [0, 1, 2, 3].includes(Number(direction))
+            ? Number(direction)
+            : 0,
+        });
+      })
+      .catch((error) => {
+        console.error("Unable to verify lobby emote medal eligibility:", error);
+      });
   });
 
   socket.on("teacherEntrance", ({ roomId } = {}, acknowledge) => {

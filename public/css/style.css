@@ -1061,6 +1061,18 @@ legend {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 4px 4px 0 rgba(20, 33, 61, 0.18);
 }
+.round-leaderboard-panel {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 2s ease-in-out, transform 2s ease-in-out;
+}
+.round-leaderboard-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.round-leaderboard-panel[hidden] {
+  display: none !important;
+}
 .teacher-lobby-stage-wrap .admin-live-quiz,
 .teacher-lobby-stage-wrap .round-leaderboard-panel,
 .teacher-lobby-stage-wrap .final-results-panel {

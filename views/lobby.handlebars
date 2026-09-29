@@ -55,7 +55,7 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap{{#if isLeaderboardPhase}} is-intermission{{/if}}">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-gold-medals="{{student.goldMedals}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
           <header class="teacher-control-header">
@@ -115,7 +115,7 @@
               <button type="button"><b>D</b> <span data-answer-text="d">{{currentQuestion.answer_d}}</span></button>
             </div>{{/unless}}
           </section>
-          <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
+          <section class="round-leaderboard-panel{{#if isLeaderboardPhase}} is-visible{{/if}}" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">{{#if isQuicktype}}QuickType round results{{else}}Question Game round results{{/if}}</p>
             {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
             <ol class="round-leaderboard-list" data-round-leaderboard></ol>
@@ -139,7 +139,7 @@
       {{#if participant}}
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
-          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
+          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-gold-medals="{{student.goldMedals}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
@@ -173,7 +173,7 @@
             </div>
             <p>Your score: <strong data-live-score>{{participant.score}}</strong></p>
           </section>
-          <section class="round-leaderboard-panel" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
+          <section class="round-leaderboard-panel{{#if isLeaderboardPhase}} is-visible{{/if}}" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">Round results</p>
             {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
             <ol class="round-leaderboard-list" data-round-leaderboard></ol>
@@ -816,6 +816,7 @@
         if (button.dataset.victoryBound) return;
         button.dataset.victoryBound = "true";
         button.addEventListener("click", () => {
+          if (!(Number(playerCanvas?.dataset.goldMedals) > 0)) return;
           const direction = window.lobbyTriggerVictoryPose?.();
           if (!Number.isInteger(direction)) return;
           if (lobbySocket?.connected) {
@@ -832,7 +833,19 @@
       if (phaseWaiting) phaseWaiting.hidden = state.room.status !== "waiting";
       phaseRunning.hidden = state.room.status !== "running";
       if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
-      phaseLeaderboard.hidden = state.room.status !== "leaderboard";
+      const showLeaderboard = state.room.status === "leaderboard";
+      if (showLeaderboard && phaseLeaderboard.hidden) {
+        phaseLeaderboard.hidden = false;
+        phaseLeaderboard.classList.remove("is-visible");
+        window.requestAnimationFrame(() => {
+          if (!phaseLeaderboard.hidden) {
+            phaseLeaderboard.classList.add("is-visible");
+          }
+        });
+      } else if (!showLeaderboard) {
+        phaseLeaderboard.hidden = true;
+        phaseLeaderboard.classList.remove("is-visible");
+      }
       if (intermissionActions) {
         if (state.room.status === "leaderboard" && !intermissionActions.firstElementChild && mode !== "quicktype") {
           const form = document.createElement("form");
@@ -1261,7 +1274,9 @@
     const keysDown = Object.fromEntries(Object.keys(directionByKey).map((key) => [key, false]));
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     window.lobbyTriggerVictoryPose = () => {
-      if (!player.isLoaded || playerCanvas.dataset.playerAdmin === "true") return false;
+      if (!player.isLoaded || !(Number(playerCanvas.dataset.goldMedals) > 0)) {
+        return false;
+      }
       // Prefer a real dedicated celebration sheet when the character has one; otherwise fall
       // back to a synthetic "bounce" celebration (drawCelebrationBounce) instead of ever
       // reinterpreting the walk sheet's directional frames as a celebration - that just crops
