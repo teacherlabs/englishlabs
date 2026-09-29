@@ -5342,73 +5342,129 @@ const awardLobbyMedals = (roomId, callback) => {
       if (roomError || !room || !["lobby", "quicktype"].includes(room.mode))
         return callback(roomError || new Error("Lobby mode is unavailable."));
       db.all(
-    `SELECT lobby_participants.username, lobby_participants.score
-     FROM lobby_participants
-     LEFT JOIN members ON members.username = lobby_participants.username
-     WHERE lobby_participants.room_id = ?
-       AND (members.role IS NULL OR members.role != 'admin')
-     ORDER BY lobby_participants.score DESC, lobby_participants.username ASC`,
-    [roomId],
-    (error, participants) => {
-      if (error) return callback(error);
-      const medalColumns = ["gold_medals", "silver_medals", "bronze_medals"];
-      const persistNext = (index) => {
-        if (index >= participants.length) return callback();
-        const participant = participants[index];
-        const rank = index < medalColumns.length ? index + 1 : 0;
-        const persistStats = (awardedRank) => {
-          const persistModeStats = () => {
-          const medals = [1, 2, 3].map((medalRank) =>
-            awardedRank === medalRank ? 1 : 0,
-          );
-          db.run(
-            `INSERT INTO lobby_player_mode_stats
-               (username, mode, best_score, gold_medals, silver_medals, bronze_medals)
-             VALUES (?, ?, ?, ?, ?, ?)
-             ON CONFLICT(username, mode) DO UPDATE SET
-               best_score = MAX(lobby_player_mode_stats.best_score, excluded.best_score),
-               gold_medals = lobby_player_mode_stats.gold_medals + excluded.gold_medals,
-               silver_medals = lobby_player_mode_stats.silver_medals + excluded.silver_medals,
-               bronze_medals = lobby_player_mode_stats.bronze_medals + excluded.bronze_medals`,
-            [participant.username, room.mode, participant.score, ...medals],
-            (statsError) => statsError
-              ? callback(statsError)
-              : persistNext(index + 1),
-          );
+        `SELECT lobby_participants.username, lobby_participants.score
+         FROM lobby_participants
+         LEFT JOIN members ON members.username = lobby_participants.username
+         WHERE lobby_participants.room_id = ?
+           AND (members.role IS NULL OR members.role != 'admin')
+         ORDER BY lobby_participants.score DESC, lobby_participants.username ASC`,
+        [roomId],
+        (error, participants) => {
+          if (error) return callback(error);
+          const persistNext = (index) => {
+            if (index >= participants.length) return callback();
+            const participant = participants[index];
+            const rank = index < 3 ? index + 1 : 0;
+            const persistStats = () => {
+              db.get(
+                `SELECT
+                   COALESCE(SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END), 0) AS gold_medals,
+                   COALESCE(SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END), 0) AS silver_medals,
+                   COALESCE(SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END), 0) AS bronze_medals
+                 FROM lobby_medal_awards
+                 WHERE username = ?`,
+                [participant.username],
+                (totalError, totals) => {
+                  if (totalError) return callback(totalError);
+                  db.get(
+                    `SELECT
+                       COALESCE(SUM(CASE WHEN a.rank = 1 THEN 1 ELSE 0 END), 0) AS gold_medals,
+                       COALESCE(SUM(CASE WHEN a.rank = 2 THEN 1 ELSE 0 END), 0) AS silver_medals,
+                       COALESCE(SUM(CASE WHEN a.rank = 3 THEN 1 ELSE 0 END), 0) AS bronze_medals
+                     FROM lobby_medal_awards AS a
+                     JOIN lobby_rooms AS r ON r.id = a.room_id
+                     WHERE a.username = ? AND r.mode = ?`,
+                    [participant.username, room.mode],
+                    (modeError, modeTotals) => {
+                      if (modeError) return callback(modeError);
+                      db.run(
+                        `INSERT INTO lobby_player_mode_stats
+                           (username, mode, best_score, gold_medals, silver_medals, bronze_medals)
+                         VALUES (?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(username, mode) DO UPDATE SET
+                           best_score = MAX(lobby_player_mode_stats.best_score, excluded.best_score),
+                           gold_medals = excluded.gold_medals,
+                           silver_medals = excluded.silver_medals,
+                           bronze_medals = excluded.bronze_medals`,
+                        [
+                          participant.username,
+                          room.mode,
+                          participant.score,
+                          modeTotals.gold_medals,
+                          modeTotals.silver_medals,
+                          modeTotals.bronze_medals,
+                        ],
+                        (statsError) => {
+                          if (statsError) return callback(statsError);
+                          db.run(
+                            `UPDATE members
+                             SET gold_medals = ?, silver_medals = ?, bronze_medals = ?
+                             WHERE username = ?`,
+                            [
+                              totals.gold_medals,
+                              totals.silver_medals,
+                              totals.bronze_medals,
+                              participant.username,
+                            ],
+                            (memberError) => {
+                              if (memberError) return callback(memberError);
+                              if (!postgresPool) return persistNext(index + 1);
+                              postgresReady
+                                .then(() =>
+                                  postgresPool.query(
+                                    `UPDATE users
+                                     SET gold_medals = $2, silver_medals = $3, bronze_medals = $4
+                                     WHERE username = $1`,
+                                    [
+                                      participant.username,
+                                      totals.gold_medals,
+                                      totals.silver_medals,
+                                      totals.bronze_medals,
+                                    ],
+                                  ),
+                                )
+                                .then(({ rowCount }) => {
+                                  if (!rowCount) {
+                                    throw new Error(
+                                      `Unable to persist lobby medals for ${participant.username}: user not found.`,
+                                    );
+                                  }
+                                  persistNext(index + 1);
+                                })
+                                .catch(callback);
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            };
+            if (!rank) return persistStats();
+            db.run(
+              "INSERT OR IGNORE INTO lobby_medal_awards (room_id, username, rank) VALUES (?, ?, ?)",
+              [roomId, participant.username, rank],
+              (awardError) => {
+                if (awardError) return callback(awardError);
+                db.get(
+                  "SELECT rank FROM lobby_medal_awards WHERE room_id = ? AND username = ?",
+                  [roomId, participant.username],
+                  (storedRankError, award) => {
+                    if (storedRankError) return callback(storedRankError);
+                    if (!award) {
+                      return callback(
+                        new Error("Unable to record the lobby medal award."),
+                      );
+                    }
+                    persistStats();
+                  },
+                );
+              },
+            );
           };
-          if (!awardedRank) return persistModeStats();
-          const medalColumn = medalColumns[awardedRank - 1];
-          db.run(
-            `UPDATE members SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1 WHERE username = ?`,
-            [participant.username],
-            (memberError) => {
-              if (memberError) return callback(memberError);
-              const updatePostgres = postgresPool
-                ? postgresReady.then(() =>
-                    postgresPool.query(
-                      `UPDATE users SET ${medalColumn} = COALESCE(${medalColumn}, 0) + 1 WHERE username = $1`,
-                      [participant.username],
-                    ),
-                  )
-                : Promise.resolve();
-              updatePostgres
-                .then(persistModeStats)
-                .catch(callback);
-            },
-          );
-        };
-        if (!rank) return persistStats(0);
-        db.run(
-          "INSERT OR IGNORE INTO lobby_medal_awards (room_id, username, rank) VALUES (?, ?, ?)",
-          [roomId, participant.username, rank],
-          function (awardError) {
-            if (awardError) return callback(awardError);
-            persistStats(this.changes ? rank : 0);
+          persistNext(0);
           },
-        );
-      };
-      persistNext(0);
-    },
       );
     },
   );
@@ -5427,42 +5483,72 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
           : "SELECT COUNT(*) AS total FROM lobby_questions WHERE room_id = ?",
         [roomId],
         (countError, count) => {
+          if (countError || !count) {
+            console.error("Unable to count lobby questions:", countError);
+            return res.status(500).send("Unable to finish the lobby game.");
+          }
           const next = room.current_question + 1;
+          const redirect = () =>
+            res.redirect(
+              `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`,
+            );
+          const finishGame = () => {
+            awardLobbyMedals(roomId, (awardError) => {
+              if (awardError) {
+                console.error("Unable to award lobby medals:", awardError);
+                return res
+                  .status(500)
+                  .send("Unable to save game medals. Please retry to finish the game.");
+              }
+              db.run(
+                "UPDATE lobby_rooms SET current_question = ?, status = 'finished', question_started_at = NULL, last_event = NULL WHERE id = ?",
+                [next, roomId],
+                (finishError) => {
+                  if (finishError) {
+                    console.error("Unable to finish lobby game:", finishError);
+                    return res
+                      .status(500)
+                      .send("Unable to finish the lobby game.");
+                  }
+                  redirect();
+                },
+              );
+            });
+          };
+          if (next > count.total) {
+            return db.run(
+              "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
+              [roomId],
+              (clearError) => {
+                if (clearError) {
+                  console.error("Unable to clear lobby answers:", clearError);
+                  return res.status(500).send("Unable to finish the lobby game.");
+                }
+                finishGame();
+              },
+            );
+          }
           db.run(
             "UPDATE lobby_rooms SET current_question = ?, status = ?, question_started_at = ?, last_event = ? WHERE id = ?",
             [
               next,
-              next > count.total
-                ? "finished"
-                : room.mode === "quicktype"
-                  ? "waiting"
-                  : "running",
-              next > count.total
-                ? null
-                : room.mode === "quicktype"
-                  ? null
-                  : Date.now(),
-              next > count.total
-                ? null
-                : room.mode === "quicktype"
-                  ? "NEXT_WORD_PREPARED"
-                  : null,
+              room.mode === "quicktype" ? "waiting" : "running",
+              room.mode === "quicktype" ? null : Date.now(),
+              room.mode === "quicktype" ? "NEXT_WORD_PREPARED" : null,
               roomId,
             ],
-            () => {
+            (updateError) => {
+              if (updateError) {
+                console.error("Unable to advance lobby game:", updateError);
+                return res.status(500).send("Unable to advance the lobby game.");
+              }
               db.run(
                 "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
                 [roomId],
-                () => {
-                  const redirect = () =>
-                    res.redirect(
-                      `/lobby?mode=${room.mode === "quicktype" ? "quicktype" : "lobby"}`,
-                    );
-                  if (next > count.total) {
-                    return awardLobbyMedals(roomId, (awardError) => {
-                      if (awardError) console.error("Unable to award lobby medals:", awardError);
-                      redirect();
-                    });
+                (clearError) => {
+                  if (clearError) {
+                    console.error("Unable to clear lobby answers:", clearError);
+                    return res.status(500).send("Unable to advance the lobby game.");
                   }
                   redirect();
                 },

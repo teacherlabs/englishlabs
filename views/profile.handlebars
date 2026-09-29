@@ -73,11 +73,7 @@
                 aria-label="Edit learning goal"
                 title="Edit learning goal"
               >&#9998;</button></div>
-          <section class="profile-medal-showcase" aria-labelledby="profile-medals-title">
-            <div class="profile-medal-showcase-heading">
-              <p class="eyebrow" id="profile-medals-title">Lobby game records</p>
-              <span>Scores and podium finishes by mode</span>
-            </div>
+          <section class="profile-medal-showcase">
             <div class="profile-mode-medal-groups">
               <section class="profile-mode-medal-group" aria-label="Question Game record">
                 <h3>Question Game <span>Best {{student.lobbyModeStats.questionGame.bestScore}}</span></h3>
@@ -105,11 +101,8 @@
           <p class="upload-success" data-character-saved hidden>Character saved to your profile.</p>
           <p class="account-error" data-character-error hidden></p>
         </div>
-        <button class="character-settings-toggle" type="button" data-character-settings-toggle aria-expanded="false" aria-controls="characterSettingsContent">
-          <span id="character-heading">{{#if isAdmin}}Create your teacher character{{else}}Create your character{{/if}}</span>
-          <span class="character-settings-toggle-arrow" aria-hidden="true">›</span>
-        </button>
-        <div id="characterSettingsContent" class="character-settings-content" data-character-settings-content hidden>
+        <div class="character-settings-content">
+          <h2 id="character-heading">{{#if isAdmin}}Create your teacher character{{else}}Create your character{{/if}}</h2>
           <p class="eyebrow">{{#if isAdmin}}Your teacher lobby identity{{else}}Your lobby identity{{/if}}</p>
           <p class="character-description">Choose a character to represent you when you join a lobby.</p>
         </div>
@@ -171,19 +164,6 @@
   closeHistoryButton?.addEventListener("click", () => feedbackHistoryModal?.close());
   feedbackHistoryModal?.addEventListener("click", (event) => {
     if (event.target === feedbackHistoryModal) feedbackHistoryModal.close();
-  });
-
-  const characterSettingsToggle = document.querySelector("[data-character-settings-toggle]");
-  const characterSettingsContent = document.querySelector("[data-character-settings-content]");
-  const characterSettingsArrow = document.querySelector(".character-settings-toggle-arrow");
-
-  characterSettingsToggle?.addEventListener("click", () => {
-    const willOpen = characterSettingsContent.hidden;
-    characterSettingsContent.hidden = !willOpen;
-    characterSettingsToggle.setAttribute("aria-expanded", String(willOpen));
-    if (characterSettingsArrow) {
-      characterSettingsArrow.style.transform = willOpen ? "rotate(90deg)" : "rotate(0deg)";
-    }
   });
 
   const goalEditButton = document.querySelector("[data-goal-edit]");
