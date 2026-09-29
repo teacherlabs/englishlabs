@@ -980,6 +980,23 @@ legend {
 .lobby-phase-stack {
   display: grid;
 }
+.lobby-victory-pose-button {
+  justify-self: end;
+  padding: 9px 15px;
+  border: 1px solid #b98842;
+  border-radius: 999px;
+  background: #fff0bd;
+  color: #14213d;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lobby-victory-pose-button:hover,
+.lobby-victory-pose-button:focus-visible {
+  background: #f3d59a;
+  outline: 2px solid #b98842;
+  outline-offset: 2px;
+}
 .lobby-student-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2326,13 +2343,18 @@ legend {
 
 .app-character-link {
   display: flex;
+  width: 100%;
   justify-content: space-between;
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid rgba(20, 33, 61, 0.14);
+  background: transparent;
   color: var(--color-primary);
+  font: inherit;
   font-size: 12px;
   font-weight: 800;
+  text-align: left;
+  cursor: pointer;
 }
 
 .app-rail-link {
@@ -5898,6 +5920,21 @@ nav ul li a:hover {
   height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
+}
+
+.character-generator-error {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 2;
+  width: min(560px, calc(100% - 80px));
+  padding: 12px 16px;
+  border: 1px solid #8f3028;
+  border-radius: 8px;
+  background: #fff0ef;
+  color: #8f3028;
+  text-align: center;
+  transform: translateX(-50%);
 }
 
 @media (max-width: 600px) {

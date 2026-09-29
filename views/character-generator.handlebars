@@ -110,13 +110,33 @@
             throw new Error("The character was not saved.");
           }
           if (result.username) {
-            localStorage.setItem(`userProfilePic_${result.username}`, result.avatar);
-            localStorage.setItem(`userSpritesheet_${result.username}`, result.spritesheet);
-            localStorage.setItem(`userCharacterConfig_${result.username}`, JSON.stringify(result.config || {}));
+            try {
+              localStorage.setItem(`userProfilePic_${result.username}`, result.avatar);
+              localStorage.setItem(`userSpritesheet_${result.username}`, result.spritesheet);
+              localStorage.setItem(`userCharacterConfig_${result.username}`, JSON.stringify(result.config || {}));
+            } catch (storageError) {
+              console.warn("Unable to cache the saved character.", storageError);
+            }
           }
-          window.top.location.reload();
+          if (window.parent !== window) {
+            window.parent.postMessage(
+              { type: "TEACHER_CHARACTER_SAVED", payload: result },
+              window.location.origin,
+            );
+          } else {
+            window.location.reload();
+          }
         } catch (error) {
           console.error("Unable to save character:", error);
+          if (window.parent !== window) {
+            window.parent.postMessage(
+              {
+                type: "TEACHER_CHARACTER_SAVE_FAILED",
+                message: error.message || "Unable to save the character.",
+              },
+              window.location.origin,
+            );
+          }
         }
       });
     </script>

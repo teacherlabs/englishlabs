@@ -141,6 +141,7 @@
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
           <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
+          {{#unless isAdmin}}{{#if student.winnerAnimationsUnlocked}}<button class="lobby-victory-pose-button" type="button" data-victory-pose>Victory Pose</button>{{/if}}{{/unless}}
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Waiting for the teacher to start...</h1>
@@ -153,6 +154,7 @@
                 <button type="button" data-lobby-emote="cheer">Cheer</button>
                 <button type="button" data-lobby-emote="wave">Wave</button>
                 <button type="button" data-lobby-emote="think">Think</button>
+                <span class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></span>
               </div>{{/if}}
             </div>
           </section>
@@ -237,6 +239,7 @@
   </section>
 </div>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/js/character-spritesheet.js"></script>
 <script>
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   function lobbyImageSrc(value) {
@@ -292,11 +295,20 @@
     const state = states.get(String(username));
     if (state) {
       const elapsed = now - state.startedAt;
-      if (elapsed >= 2200) {
+      const duration = state.emote === "victory" ? 7 * 110 : 2200;
+      if (elapsed >= duration) {
         states.delete(String(username));
       } else {
         const step = elapsed / 110;
         const emoteFrames = {
+          victory: {
+            direction: [0, 1, 2, 3].includes(Number(state.direction))
+              ? Number(state.direction)
+              : Number(direction) || 2,
+            start: 0,
+            count: 7,
+            animation: "spell",
+          },
           cheer: { direction: 0, start: 0, count: 8 },
           wave: { direction: 1, start: 0, count: 6 },
           dance: { direction: 2, start: 0, count: 8 },
@@ -307,7 +319,7 @@
           return {
             direction: animation.direction,
             frame: animation.start + Math.floor(step) % animation.count,
-            animation: state.emote,
+            animation: animation.animation || state.emote,
           };
         }
         const safeDirection = Number(direction);
@@ -394,12 +406,21 @@
           player.username === movement.username ? { ...player, ...movement } : player,
         );
       });
+      lobbySocket.on("characterUpdated", (character) => {
+        window.lobbyPlayers = (window.lobbyPlayers || []).map((player) =>
+          player.username === character.username ? { ...player, ...character } : player,
+        );
+        if (String(character.username) === String(playerCanvas?.dataset.playerUsername)) {
+          window.lobbyLoadPlayerImage?.(character.spritesheetUrl);
+        }
+      });
       lobbySocket.on("lobbyEmote", (emote) => {
         if (String(emote.roomId) !== String(roomId)) return;
         console.log("Received emote event:", emote);
         window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
         window.lobbyEmoteStates.set(String(emote.username), {
           emote: emote.emote,
+          direction: emote.direction,
           startedAt: performance.now(),
         });
       });
@@ -452,6 +473,7 @@
     const playersGrid = document.querySelector("[data-lobby-players]");
     const waitingPlayers = document.querySelector("[data-lobby-waiting-players]");
     const entranceButton = document.querySelector("[data-teacher-entrance]");
+    const emoteStatus = document.querySelector("[data-lobby-emote-status]");
     const entranceToast = document.querySelector("[data-teacher-entrance-toast]");
     const lobbyClosedNotice = document.querySelector("[data-lobby-closed-notice]");
     const teacherEntranceSound = document.querySelector("[data-teacher-entrance-audio]");
@@ -807,10 +829,6 @@
             },
           );
           if (lobbySocket?.connected) {
-            console.log("Sending emote event:", {
-              roomId,
-              emote: emoteType,
-            });
             lobbySocket.emit("lobbyEmote", {
               roomId,
               emote: emoteType,
@@ -819,6 +837,22 @@
             console.warn("Unable to send emote: lobby socket is not connected.");
           }
           if (emoteStatus) emoteStatus.textContent = `You chose ${button.textContent}.`;
+        });
+      });
+      document.querySelectorAll("[data-victory-pose]").forEach((button) => {
+        if (button.dataset.victoryBound) return;
+        button.dataset.victoryBound = "true";
+        button.addEventListener("click", () => {
+          const direction = window.lobbyTriggerVictoryPose?.();
+          if (!Number.isInteger(direction)) return;
+          if (lobbySocket?.connected) {
+            lobbySocket.emit("lobbyEmote", {
+              roomId,
+              emote: "victory",
+              direction,
+            });
+          }
+          if (emoteStatus) emoteStatus.textContent = "You struck a victory pose!";
         });
       });
 
@@ -1144,7 +1178,7 @@
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_WIDTH / 2 - 1;
-    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
@@ -1161,11 +1195,32 @@
     };
     const keysDown = Object.fromEntries(Object.keys(directionByKey).map((key) => [key, false]));
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
+    window.lobbyTriggerVictoryPose = () => {
+      if (!player.isLoaded || playerCanvas.dataset.playerAdmin === "true") return false;
+      const sheetLayout = getLobbyAnimationLayout(player.image, "spell");
+      const layout = window.getCharacterAnimationLayout(
+        "spell",
+        sheetLayout,
+      );
+      player.currentFrameRect = window.getCharacterFrameRect(
+        "spell",
+        0,
+        player.direction,
+        layout,
+      );
+      clearKeysDown();
+      player.currentAnimation = "spell";
+      player.currentFrame = 0;
+      player.animationStartedAt = timestampNow();
+      return player.direction;
+    };
     const getEmoteSpriteState = (username, direction, frame, now) =>
       getLobbySpriteFrame(username, direction, frame, now);
     const getPlayerSpriteState = (username, direction, frame, now, isWinner, isMoving) => {
       const safeDirection = Number(direction);
       const facing = Number.isFinite(safeDirection) ? safeDirection : 2;
+      const emote = getEmoteSpriteState(username, facing, frame, now);
+      if (emote.animation !== "walk") return emote;
       if (!isMoving) return { direction: facing, frame: 0, animation: "idle" };
       if (isWinner) {
         return { direction: facing, frame: Math.floor(now / 135) % 7, animation: "spell" };
@@ -1186,14 +1241,33 @@
     const drawPlayer = () => {
       const now = timestampNow();
       const movement = getMovementVector();
-      player.isMoving = movement.x !== 0 || movement.y !== 0;
+      let victoryPoseActive = player.currentAnimation === "spell";
+      if (victoryPoseActive) {
+        const sheetLayout = getLobbyAnimationLayout(player.image, "spell");
+        const layout = window.getCharacterAnimationLayout("spell", sheetLayout);
+        player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
+        if (player.currentFrame >= layout.columns) {
+          player.currentAnimation = "idle";
+          player.currentFrame = 0;
+          player.currentFrameRect = null;
+          victoryPoseActive = false;
+        } else {
+          player.currentFrameRect = window.getCharacterFrameRect(
+            "spell",
+            player.currentFrame,
+            player.direction,
+            layout,
+          );
+        }
+      }
+      player.isMoving = !victoryPoseActive && (movement.x !== 0 || movement.y !== 0);
       if (player.isMoving) {
         updateDirectionFromMovement(movement);
         player.frame = (player.frame + 0.2) % 8;
         const length = Math.hypot(movement.x, movement.y) || 1;
         player.x = Math.max(RENDER_WIDTH / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * player.speed));
         player.y = Math.max(RENDER_WIDTH, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
-      } else {
+      } else if (!victoryPoseActive) {
         player.frame = 0;
       }
 
@@ -1219,21 +1293,24 @@
         frameContext.fillText(label, labelX, labelY);
         frameContext.shadowBlur = 0;
       };
-      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk") => {
+      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null) => {
         if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
-        const layout = getLobbyAnimationLayout(image, animation);
-        const safeDirection = Math.max(0, Math.min(layout.rows - 1, Math.floor(direction)));
-        const safeFrame = Math.max(0, Math.min(layout.columns - 1, Math.floor(frame)));
-        const sx = safeFrame * layout.frameWidth;
-        const sy = safeDirection * layout.frameHeight;
-        logLobbySpriteLayout(image, layout, safeFrame, safeDirection);
+        const sheetLayout = getLobbyAnimationLayout(image, animation);
+        const layout = window.getCharacterAnimationLayout(animation, sheetLayout);
+        const frameRect = frameRectOverride || window.getCharacterFrameRect(
+          animation,
+          frame,
+          direction,
+          layout,
+        );
+        logLobbySpriteLayout(image, layout, frameRect.frame, frameRect.direction);
         const renderHeight = RENDER_WIDTH * layout.frameHeight / layout.frameWidth;
         const drawX = Math.floor(x - (RENDER_WIDTH / 2));
         const drawY = Math.floor(y - renderHeight);
         frameContext.drawImage(
           image,
-          sx,
-          sy,
+          frameRect.sx,
+          frameRect.sy,
           layout.frameWidth,
           layout.frameHeight,
           drawX,
@@ -1282,15 +1359,21 @@
         );
         const ownIsWinner = Boolean(ownLeaderboardEntry?.isWinner) ||
           Number(ownLeaderboardEntry?.goldMedals ?? ownLeaderboardEntry?.gold_medals) > 0;
-        const animatedPlayer = getPlayerSpriteState(
-          ownUsername,
-          player.direction,
-          player.frame,
-          now,
-          ownIsWinner,
-          player.isMoving,
-        );
-        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation);
+        const animatedPlayer = victoryPoseActive
+          ? {
+              direction: player.direction,
+              frame: player.currentFrame,
+              animation: player.currentAnimation,
+            }
+          : getPlayerSpriteState(
+              ownUsername,
+              player.direction,
+              player.frame,
+              now,
+              ownIsWinner,
+              player.isMoving,
+            );
+        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null);
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         if (String(remotePlayer.username) === ownUsername) return;

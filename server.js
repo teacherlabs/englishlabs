@@ -5737,6 +5737,28 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
           console.error("Unable to persist character session:", sessionError);
           return res.status(500).json({ error: "Unable to save character session." });
         }
+        const updatedCharacter = {
+          username: req.session.name,
+          avatar: avatarDataUrl,
+          avatarUrl: avatarDataUrl,
+          spritesheet: spritesheetDataUrl,
+          spritesheetUrl: spritesheetDataUrl,
+          characterConfig: config,
+        };
+        const notifiedRooms = new Set();
+        io.sockets.sockets.forEach((connectedSocket) => {
+          if (connectedSocket.request.session?.name !== req.session.name) return;
+          connectedSocket.data.character = {
+            ...connectedSocket.data.character,
+            ...updatedCharacter,
+          };
+          if (connectedSocket.data.roomId) {
+            notifiedRooms.add(String(connectedSocket.data.roomId));
+          }
+        });
+        notifiedRooms.forEach((roomId) => {
+          io.to(roomId).emit("characterUpdated", updatedCharacter);
+        });
         res.json({
           saved: true,
           username: req.session.name,
@@ -7103,9 +7125,9 @@ io.on("connection", (socket) => {
     );
   });
 
-  socket.on("lobbyEmote", ({ roomId, emote } = {}) => {
+  socket.on("lobbyEmote", ({ roomId, emote, direction } = {}) => {
     const numericRoomId = Number(roomId);
-    const allowedEmotes = new Set(["dance", "cheer", "wave", "think"]);
+    const allowedEmotes = new Set(["dance", "cheer", "wave", "think", "victory"]);
     if (
       !socket.data.roomId ||
       socket.data.roomId !== numericRoomId ||
@@ -7120,6 +7142,7 @@ io.on("connection", (socket) => {
       roomId: numericRoomId,
       username,
       emote,
+      direction: [0, 1, 2, 3].includes(Number(direction)) ? Number(direction) : 2,
     });
   });
 

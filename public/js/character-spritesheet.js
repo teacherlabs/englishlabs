@@ -22,10 +22,21 @@
     };
   };
 
-  const getFrameRect = (animation, frameIndex, directionIndex, payload = {}) => {
+  const getFrameRect = (
+    animation,
+    frameIndex,
+    directionIndex,
+    payload = {},
+  ) => {
     const layout = getAnimationLayout(animation, payload);
-    const direction = Math.max(0, Math.min(layout.rows - 1, Number(directionIndex) || 0));
-    const frame = Math.max(0, Math.min(layout.columns - 1, Number(frameIndex) || 0));
+    const direction = Math.max(
+      0,
+      Math.min(layout.rows - 1, Number(directionIndex) || 0),
+    );
+    const frame = Math.max(
+      0,
+      Math.min(layout.columns - 1, Number(frameIndex) || 0),
+    );
     return {
       ...layout,
       frame,
@@ -45,13 +56,18 @@
     new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error("Unable to load a character layer."));
+      image.onerror = () =>
+        reject(new Error("Unable to load a character layer."));
       image.src = source;
     });
 
   const bakeCharacterSpriteSheet = async (payload) => {
-    const layers = payload?.layers || payload?.layerImages || payload?.spritesheetLayers;
-    if ((!Array.isArray(layers) || layers.length === 0) && (payload?.spritesheetImage || payload?.image)) {
+    const layers =
+      payload?.layers || payload?.layerImages || payload?.spritesheetLayers;
+    if (
+      (!Array.isArray(layers) || layers.length === 0) &&
+      (payload?.spritesheetImage || payload?.image)
+    ) {
       return payload.spritesheetImage || payload.image;
     }
     if (!Array.isArray(layers) || layers.length === 0) {
@@ -67,19 +83,27 @@
     canvas.width = Number(payload.width) || columns * frameWidth;
     canvas.height = Number(payload.height) || rows * frameHeight;
     const context = canvas.getContext("2d");
-    if (!context) throw new Error("Unable to create a character sprite canvas.");
+    if (!context)
+      throw new Error("Unable to create a character sprite canvas.");
     context.imageSmoothingEnabled = false;
 
     const orderedLayers = layers
       .map((layer, index) => ({ layer, index }))
       .sort((left, right) => {
-        const leftOrder = Number(left.layer?.zIndex ?? left.layer?.z ?? left.index);
-        const rightOrder = Number(right.layer?.zIndex ?? right.layer?.z ?? right.index);
+        const leftOrder = Number(
+          left.layer?.zIndex ?? left.layer?.z ?? left.index,
+        );
+        const rightOrder = Number(
+          right.layer?.zIndex ?? right.layer?.z ?? right.index,
+        );
         return leftOrder - rightOrder;
       });
-    const images = await Promise.all(orderedLayers.map(({ layer }) => getLayerSource(layer)).map(loadImage));
+    const images = await Promise.all(
+      orderedLayers.map(({ layer }) => getLayerSource(layer)).map(loadImage),
+    );
     console.debug("Character sprite bake:", {
-      selectedItem: payload.selectedItem || payload.item || "selected-character",
+      selectedItem:
+        payload.selectedItem || payload.item || "selected-character",
       animation: layout.animation,
       sheetDimensions: `${canvas.width}x${canvas.height}`,
       frameSize: `${frameWidth}x${frameHeight}`,
@@ -89,12 +113,22 @@
     });
     images.forEach((image, index) => {
       const sourceIndex = orderedLayers[index].index;
-      const sourceWidth = Number(payload.layerWidths?.[sourceIndex]) || image.naturalWidth;
-      const sourceHeight = Number(payload.layerHeights?.[sourceIndex]) || image.naturalHeight;
+      const sourceWidth =
+        Number(payload.layerWidths?.[sourceIndex]) || image.naturalWidth;
+      const sourceHeight =
+        Number(payload.layerHeights?.[sourceIndex]) || image.naturalHeight;
       const sourceColumns = Math.max(1, Math.floor(sourceWidth / frameWidth));
       const sourceRows = Math.max(1, Math.floor(sourceHeight / frameHeight));
-      for (let direction = 0; direction < Math.min(rows, sourceRows); direction += 1) {
-        for (let frame = 0; frame < Math.min(columns, sourceColumns); frame += 1) {
+      for (
+        let direction = 0;
+        direction < Math.min(rows, sourceRows);
+        direction += 1
+      ) {
+        for (
+          let frame = 0;
+          frame < Math.min(columns, sourceColumns);
+          frame += 1
+        ) {
           const sx = frame * frameWidth;
           const sy = direction * frameHeight;
           context.drawImage(
