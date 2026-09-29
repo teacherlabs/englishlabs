@@ -5721,17 +5721,10 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       sanitizedAnimations.walk?.image ||
       "",
   );
-  // The legacy `spritesheet` field powers old rendering paths that aren't aware of the
-  // multi-animation map, so it should still point at a real walk sheet when one is available,
-  // and otherwise fall back to the same preview image so it's never left stale/blank.
-  const spritesheetImage = String(
-    req.body.spritesheet ||
-      req.body.spritesheetImage ||
-      req.body.image ||
-      sanitizedAnimations.walk?.image ||
-      previewImage ||
-      "",
-  );
+  // The legacy `spritesheet` column powers old rendering paths that only understand a single
+  // image (no multi-animation map). Every view that shows either field should render the same,
+  // up-to-date character portrait, so it is always kept identical to `previewImage`.
+  const spritesheetImage = previewImage;
   // 3. Save the base item configuration (character_config) alongside the images/animations.
   const config =
     (req.body.config || req.body.characterConfig) &&
