@@ -664,36 +664,92 @@
       if (winnerCelebrationScoreLabel) winnerCelebrationScoreLabel.textContent = `${gameLabel} points`;
       winnerCelebrationModal.hidden = false;
       document.body.classList.add("winner-celebration-open");
-      const source = winner.spritesheetUrl || winner.spritesheet || winner.avatarUrl || winner.avatar;
+      const animationNames = ["spell", "cast", "celebrate", "victory", "action", "cheer"];
+      const animations = winner.animations || {};
+      const dedicatedAnimation = animationNames.find((name) => animations[name]?.image);
+      const walkAnimation = animations.walk?.image ? animations.walk : null;
+      const source =
+        (dedicatedAnimation && animations[dedicatedAnimation].image) ||
+        walkAnimation?.image ||
+        winner.spritesheetUrl ||
+        winner.spritesheet ||
+        winner.avatarUrl ||
+        winner.avatar;
       if (!source || !winnerCelebrationCanvas) return;
       winnerAnimationToken += 1;
       const animationToken = winnerAnimationToken;
       const context = winnerCelebrationCanvas.getContext("2d");
       const image = new Image();
       winnerCelebrationAvatar.src = lobbyImageSrc(source);
-      winnerCelebrationAvatar.hidden = false;
+      winnerCelebrationAvatar.hidden = true;
+      winnerCelebrationCanvas.hidden = false;
       image.onload = () => {
         if (animationToken !== winnerAnimationToken) return;
-        const isSpriteSheet = image.naturalWidth >= 256 && image.naturalHeight >= 128;
-        winnerCelebrationAvatar.hidden = isSpriteSheet;
-        winnerCelebrationCanvas.hidden = !isSpriteSheet;
-        if (!isSpriteSheet) return;
-        const layout = getLobbyAnimationLayout(image, "cheer");
+        const isDedicatedAnimation = Boolean(dedicatedAnimation);
+        const animationName = dedicatedAnimation || "walk";
+        const metadata = isDedicatedAnimation
+          ? animations[dedicatedAnimation]
+          : walkAnimation;
+        const fallbackLayout = getLobbyAnimationLayout(image, animationName);
+        const columns = Number(metadata?.columns) || fallbackLayout.columns;
+        const rows = Number(metadata?.rows) || fallbackLayout.rows;
+        const frameWidth =
+          Number(metadata?.frameWidth) || Math.floor(image.naturalWidth / columns);
+        const frameHeight =
+          Number(metadata?.frameHeight) || Math.floor(image.naturalHeight / rows);
+        const isValidSheet =
+          frameWidth > 0 &&
+          frameHeight > 0 &&
+          columns > 0 &&
+          rows > 0 &&
+          frameWidth * columns <= image.naturalWidth &&
+          frameHeight * rows <= image.naturalHeight;
+        const isLegacyWalkGrid =
+          !metadata &&
+          fallbackLayout.columns === 8 &&
+          fallbackLayout.rows === 4 &&
+          fallbackLayout.frameWidth * 8 === image.naturalWidth &&
+          fallbackLayout.frameHeight * 4 === image.naturalHeight;
+        const useSpriteSheet = isValidSheet && (metadata || isLegacyWalkGrid);
+        const layout = useSpriteSheet
+          ? { frameWidth, frameHeight, columns, rows }
+          : {
+              frameWidth: image.naturalWidth,
+              frameHeight: image.naturalHeight,
+              columns: 1,
+              rows: 1,
+            };
+        const startedAt = performance.now();
         const drawVictoryFrame = (now) => {
           if (animationToken !== winnerAnimationToken || winnerCelebrationModal.hidden) return;
-          const frame = Math.floor(now / 110) % layout.columns;
           context.clearRect(0, 0, winnerCelebrationCanvas.width, winnerCelebrationCanvas.height);
           context.imageSmoothingEnabled = false;
+          const frame = isDedicatedAnimation
+            ? Math.floor((now - startedAt) / 150) % layout.columns
+            : 0;
+          const bounceOffset = isDedicatedAnimation
+            ? 0
+            : Math.abs(Math.sin(((now - startedAt) / 850) * Math.PI * 2)) * 16;
+          const drawWidth = Math.min(
+            180,
+            (180 * layout.frameWidth) / layout.frameHeight,
+          );
+          const drawHeight = Math.min(
+            180,
+            (180 * layout.frameHeight) / layout.frameWidth,
+          );
+          const sourceX = frame * layout.frameWidth;
+          const sourceY = Math.min(2, layout.rows - 1) * layout.frameHeight;
           context.drawImage(
             image,
-            frame * layout.frameWidth,
-            0,
+            sourceX,
+            sourceY,
             layout.frameWidth,
             layout.frameHeight,
-            20,
-            4,
-            180,
-            180,
+            Math.floor((winnerCelebrationCanvas.width - drawWidth) / 2),
+            Math.floor(winnerCelebrationCanvas.height - drawHeight - bounceOffset),
+            drawWidth,
+            drawHeight,
           );
           window.requestAnimationFrame(drawVictoryFrame);
         };
@@ -868,19 +924,7 @@
       if (phaseWaiting) phaseWaiting.hidden = state.room.status !== "waiting";
       phaseRunning.hidden = state.room.status !== "running";
       if (phaseCountdown) phaseCountdown.hidden = state.room.status !== "countdown";
-      const showLeaderboard = state.room.status === "leaderboard";
-      if (showLeaderboard && phaseLeaderboard.hidden) {
-        phaseLeaderboard.hidden = false;
-        phaseLeaderboard.classList.remove("is-visible");
-        window.requestAnimationFrame(() => {
-          if (!phaseLeaderboard.hidden) {
-            phaseLeaderboard.classList.add("is-visible");
-          }
-        });
-      } else if (!showLeaderboard) {
-        phaseLeaderboard.hidden = true;
-        phaseLeaderboard.classList.remove("is-visible");
-      }
+      phaseLeaderboard.hidden = state.room.status !== "leaderboard";
       if (intermissionActions) {
         if (state.room.status === "leaderboard" && !intermissionActions.firstElementChild && mode !== "quicktype") {
           const form = document.createElement("form");

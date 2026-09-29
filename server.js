@@ -3269,6 +3269,10 @@ app.get("/practice/find-errors", requireAuthenticated, (req, res) => {
 });
 
 app.get("/practice/final-test", requireAuthenticated, (req, res) => {
+  const FINAL_TEST_QUESTION_COUNT = 30;
+  const GRAMMAR_QUESTION_TARGET = 20;
+  const VOCABULARY_QUESTION_TARGET =
+    FINAL_TEST_QUESTION_COUNT - GRAMMAR_QUESTION_TARGET;
   const shuffleQuestions = (items) => {
     const list = [...items];
     for (let index = list.length - 1; index > 0; index -= 1) {
@@ -3308,7 +3312,7 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
           if (error)
             return res.status(500).send("Unable to load the final test.");
           grammarDb.all(
-            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY id LIMIT 10",
+            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY RANDOM() LIMIT 30",
             (vocabularyError, words) => {
               if (vocabularyError)
                 return res
@@ -3333,12 +3337,46 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
                 };
               });
 
-              const finalQuestionPool = shuffleQuestions([
-                ...grammarQuestions,
-                ...vocabularyQuestions,
+              const grammarPool = shuffleQuestions(grammarQuestions);
+              const vocabularyPool = shuffleQuestions(vocabularyQuestions);
+              const selectedGrammar = grammarPool.slice(
+                0,
+                GRAMMAR_QUESTION_TARGET,
+              );
+              const selectedVocabulary = vocabularyPool.slice(
+                0,
+                VOCABULARY_QUESTION_TARGET,
+              );
+              const selectedIds = new Set(
+                [...selectedGrammar, ...selectedVocabulary].map((question) =>
+                  String(question.id),
+                ),
+              );
+              const remainingQuestions = shuffleQuestions([
+                ...grammarPool,
+                ...vocabularyPool,
+              ]).filter(
+                (question) => !selectedIds.has(String(question.id)),
+              );
+              const selectedQuestions = shuffleQuestions([
+                ...selectedGrammar,
+                ...selectedVocabulary,
+                ...remainingQuestions.slice(
+                  0,
+                  FINAL_TEST_QUESTION_COUNT -
+                    selectedGrammar.length -
+                    selectedVocabulary.length,
+                ),
               ]);
-              const questions = finalQuestionPool
-                .slice(0, 30)
+              if (selectedQuestions.length < FINAL_TEST_QUESTION_COUNT) {
+                return res
+                  .status(500)
+                  .send(
+                    `Unable to start the final test: it requires ${FINAL_TEST_QUESTION_COUNT} questions, but only ${selectedQuestions.length} are available.`,
+                  );
+              }
+              const questions = selectedQuestions
+                .slice(0, FINAL_TEST_QUESTION_COUNT)
                 .map((question, index) => ({
                   ...question,
                   question_number: index + 1,
