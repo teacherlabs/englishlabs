@@ -141,7 +141,6 @@
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
           <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
-          {{#unless isAdmin}}{{#if student.winnerAnimationsUnlocked}}<button class="lobby-victory-pose-button" type="button" data-victory-pose>Victory Pose</button>{{/if}}{{/unless}}
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
             <h1>Waiting for the teacher to start...</h1>
@@ -149,13 +148,10 @@
               <p class="lobby-waiting-room-title">Everyone in the room</p>
               <div class="lobby-waiting-players" data-lobby-waiting-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
               {{#if student.winnerAnimationsUnlocked}}<div class="lobby-emotes" aria-label="Lobby emotes">
-                <span>React</span>
-                <button type="button" data-lobby-emote="dance">Dance</button>
-                <button type="button" data-lobby-emote="cheer">Cheer</button>
-                <button type="button" data-lobby-emote="wave">Wave</button>
-                <button type="button" data-lobby-emote="think">Think</button>
-                <span class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></span>
-              </div>{{/if}}
+                    <span>React</span>
+                    <button class="lobby-victory-pose-button" type="button" data-victory-pose>Victory Pose</button>
+                    <span class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></span>
+                  </div>{{/if}}
             </div>
           </section>
           <section class="student-live-quiz" data-phase-countdown hidden>
@@ -300,26 +296,14 @@
         states.delete(String(username));
       } else {
         const step = elapsed / 110;
-        const emoteFrames = {
-          victory: {
-            direction: [0, 1, 2, 3].includes(Number(state.direction))
-              ? Number(state.direction)
-              : Number.isFinite(Number(direction)) ? Number(direction) : 0,
-            start: 0,
-            count: 7,
-            animation: "spell",
-          },
-          cheer: { direction: 0, start: 0, count: 8 },
-          wave: { direction: 1, start: 0, count: 6 },
-          dance: { direction: 2, start: 0, count: 8 },
-          think: { direction: 3, start: 0, count: 6 },
-        };
-        const animation = emoteFrames[state.emote];
-        if (animation) {
+        if (state.emote === "victory") {
+          const victoryDirection = [0, 1, 2, 3].includes(Number(state.direction))
+            ? Number(state.direction)
+            : Number.isFinite(Number(direction)) ? Number(direction) : 0;
           return {
-            direction: animation.direction,
-            frame: animation.start + Math.floor(step) % animation.count,
-            animation: animation.animation || state.emote,
+            direction: victoryDirection,
+            frame: Math.floor(step) % 7,
+            animation: "spell",
           };
         }
         const safeDirection = Number(direction);
@@ -814,31 +798,6 @@
         });
       }
 
-      document.querySelectorAll("[data-lobby-emote]").forEach((button) => {
-        if (button.dataset.emoteBound) return;
-        button.dataset.emoteBound = "true";
-        button.addEventListener("click", () => {
-          const emoteType = button.dataset.lobbyEmote;
-          console.log("Emote clicked:", emoteType);
-          window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
-          window.lobbyEmoteStates.set(
-            String(document.querySelector("[data-player-canvas]")?.dataset.playerUsername || "{{student.username}}"),
-            {
-              emote: button.dataset.lobbyEmote,
-              startedAt: performance.now(),
-            },
-          );
-          if (lobbySocket?.connected) {
-            lobbySocket.emit("lobbyEmote", {
-              roomId,
-              emote: emoteType,
-            });
-          } else {
-            console.warn("Unable to send emote: lobby socket is not connected.");
-          }
-          if (emoteStatus) emoteStatus.textContent = `You chose ${button.textContent}.`;
-        });
-      });
       document.querySelectorAll("[data-victory-pose]").forEach((button) => {
         if (button.dataset.victoryBound) return;
         button.dataset.victoryBound = "true";
