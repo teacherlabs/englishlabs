@@ -47,9 +47,9 @@
       const loadSavedCharacter = async () => {
         const response = await fetch(apiUrl, { credentials: "same-origin" });
         if (!response.ok) return;
-        const { config } = await response.json();
+        const { config, animations, initialAnimation } = await response.json();
         editor.contentWindow?.postMessage(
-          { type: "LOAD_LPC_CHARACTER", payload: { config } },
+          { type: "LOAD_LPC_CHARACTER", payload: { config, animations, initialAnimation } },
           editorOrigin,
         );
       };
@@ -69,17 +69,27 @@
           return;
         }
         const payload = event.data.payload || {};
+        const animations =
+          payload.animations && typeof payload.animations === "object"
+            ? payload.animations
+            : {};
+        const initialAnimation = String(
+          payload.initialAnimation || "walk",
+        ).toLowerCase();
         const avatar =
           payload.avatar ||
           payload.previewImage ||
           payload.preview ||
           payload.previewDataUrl ||
           payload.image ||
-          payload.spritesheetImage;
+          payload.spritesheetImage ||
+          animations[initialAnimation]?.image ||
+          animations.walk?.image;
         const spritesheet =
           payload.spritesheet ||
           payload.spritesheetImage ||
-          payload.image;
+          payload.image ||
+          animations.walk?.image;
         if (!avatar || !spritesheet) {
           console.error("The character studio did not provide both images.");
           return;
@@ -93,6 +103,8 @@
               config: payload.config || payload.characterConfig || {},
               avatar,
               spritesheet,
+              animations,
+              initialAnimation,
             }),
           });
           const result = await response.json();
@@ -114,6 +126,14 @@
               localStorage.setItem(`userProfilePic_${result.username}`, result.avatar);
               localStorage.setItem(`userSpritesheet_${result.username}`, result.spritesheet);
               localStorage.setItem(`userCharacterConfig_${result.username}`, JSON.stringify(result.config || {}));
+              localStorage.setItem(
+                `userAnimations_${result.username}`,
+                JSON.stringify(result.animations || {}),
+              );
+              localStorage.setItem(
+                `userInitialAnimation_${result.username}`,
+                result.initialAnimation || "walk",
+              );
             } catch (storageError) {
               console.warn("Unable to cache the saved character.", storageError);
             }

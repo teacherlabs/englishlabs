@@ -55,7 +55,7 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap{{#if isLeaderboardPhase}} is-intermission{{/if}}">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
           <header class="teacher-control-header">
@@ -139,7 +139,7 @@
       {{#if participant}}
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
-          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
+          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" data-initial-animation="{{student.initialAnimation}}" data-animations='{{{json student.animations}}}' width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           {{#unless isAdmin}}{{#if student.winnerAnimationsUnlocked}}<button class="lobby-victory-pose-button" type="button" data-victory-pose>Victory Pose</button>{{/if}}{{/unless}}
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
@@ -411,7 +411,7 @@
           player.username === character.username ? { ...player, ...character } : player,
         );
         if (String(character.username) === String(playerCanvas?.dataset.playerUsername)) {
-          window.lobbyLoadPlayerImage?.(character.spritesheetUrl);
+          window.lobbyLoadPlayerImage?.(character.spritesheetUrl, character.animations);
         }
       });
       lobbySocket.on("lobbyEmote", (emote) => {
@@ -1179,8 +1179,38 @@
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
     const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_WIDTH / 2 - 1;
-    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
+    const parseAnimationsDataset = (raw) => {
+      if (!raw) return {};
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    };
+    const ensureAnimationImageLoaded = (imageMap, name, url) => {
+      const cached = imageMap.get(name);
+      if (cached && cached.url === url) return cached.image;
+      const image = new Image();
+      image.src = url;
+      imageMap.set(name, { url, image });
+      return image;
+    };
+    const getAnimationSource = (animationsMeta, imageMap, animation) => {
+      const meta = animationsMeta?.[animation];
+      if (!meta || !meta.image) return null;
+      const image = ensureAnimationImageLoaded(imageMap, animation, meta.image);
+      if (!image.complete || image.naturalWidth < 8) return null;
+      const columns = Number(meta.columns) ||
+        Math.max(1, Math.floor(image.naturalWidth / (Number(meta.frameWidth) || image.naturalWidth)));
+      const rows = Number(meta.rows) || 4;
+      const frameWidth = Number(meta.frameWidth) || Math.floor(image.naturalWidth / columns);
+      const frameHeight = Number(meta.frameHeight) || Math.floor(image.naturalHeight / rows);
+      return { image, frameWidth, frameHeight, columns, rows, animation };
+    };
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map() };
     const remoteImages = new Map();
+    const remoteAnimationImages = new Map();
     const remotePositions = new Map();
     const LERP_FACTOR = 0.18;
     let pointerPosition = null;
@@ -1199,10 +1229,11 @@
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     window.lobbyTriggerVictoryPose = () => {
       if (!player.isLoaded || playerCanvas.dataset.playerAdmin === "true") return false;
-      const sheetLayout = getLobbyAnimationLayout(player.image, "spell");
+      const source = getAnimationSource(player.animations, player.animationImages, "spell") ||
+        { image: player.image, ...getLobbyAnimationLayout(player.image, "spell") };
       const layout = window.getCharacterAnimationLayout(
         "spell",
-        sheetLayout,
+        source,
       );
       player.currentFrameRect = window.getCharacterFrameRect(
         "spell",
@@ -1246,8 +1277,9 @@
       const movement = getMovementVector();
       let victoryPoseActive = player.currentAnimation === "spell";
       if (victoryPoseActive) {
-        const sheetLayout = getLobbyAnimationLayout(player.image, "spell");
-        const layout = window.getCharacterAnimationLayout("spell", sheetLayout);
+        const source = getAnimationSource(player.animations, player.animationImages, "spell") ||
+          { image: player.image, ...getLobbyAnimationLayout(player.image, "spell") };
+        const layout = window.getCharacterAnimationLayout("spell", source);
         player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
         if (player.currentFrame >= layout.columns) {
           player.currentAnimation = "idle";
@@ -1270,8 +1302,9 @@
           player.currentAnimation = "walk";
           player.animationStartedAt = now;
         }
-        const walkLayout = getLobbyAnimationLayout(player.image, "walk");
-        const walkAnimation = window.getCharacterAnimationLayout("walk", walkLayout);
+        const walkSource = getAnimationSource(player.animations, player.animationImages, "walk") ||
+          { image: player.image, ...getLobbyAnimationLayout(player.image, "walk") };
+        const walkAnimation = window.getCharacterAnimationLayout("walk", walkSource);
         player.currentFrame = Math.floor((now - player.animationStartedAt) / WALK_FRAME_DURATION) % walkAnimation.columns;
         player.frame = player.currentFrame;
         const length = Math.hypot(movement.x, movement.y) || 1;
@@ -1309,9 +1342,9 @@
         frameContext.fillText(label, labelX, labelY);
         frameContext.shadowBlur = 0;
       };
-      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null) => {
-        if (!image.complete || image.naturalWidth < 64 || image.naturalHeight < 64) return;
-        const sheetLayout = getLobbyAnimationLayout(image, animation);
+      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null, metadataOverride = null) => {
+        if (!image.complete || image.naturalWidth < 8 || image.naturalHeight < 8) return;
+        const sheetLayout = metadataOverride || getLobbyAnimationLayout(image, animation);
         const layout = window.getCharacterAnimationLayout(animation, sheetLayout);
         const frameRect = frameRectOverride || window.getCharacterFrameRect(
           animation,
@@ -1391,7 +1424,8 @@
               now,
               player.isMoving,
             );
-        drawSprite(player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null);
+        const localSource = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
+        drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         if (String(remotePlayer.username) === ownUsername) return;
@@ -1459,7 +1493,17 @@
           now,
           remoteIsMoving,
         );
-        drawSprite(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation);
+        let remoteAnimationMap = remoteAnimationImages.get(remoteKey);
+        if (!remoteAnimationMap) {
+          remoteAnimationMap = new Map();
+          remoteAnimationImages.set(remoteKey, remoteAnimationMap);
+        }
+        const remoteAnimatedSource = getAnimationSource(
+          remotePlayer.animations,
+          remoteAnimationMap,
+          animatedRemote.animation,
+        );
+        drawSprite(remoteAnimatedSource?.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation, null, remoteAnimatedSource);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
@@ -1504,10 +1548,14 @@
       };
     });
     playerCanvas.addEventListener("mouseleave", () => { pointerPosition = null; });
-    const loadPlayerImage = (source) => {
+    const loadPlayerImage = (source, animations = null) => {
       const updatedImage = new Image();
       updatedImage.onload = () => { player.image = updatedImage; player.isLoaded = true; };
       updatedImage.src = `${source}${source.startsWith("data:") ? "" : `?t=${Date.now()}`}`;
+      if (animations && typeof animations === "object") {
+        player.animations = animations;
+        player.animationImages = new Map();
+      }
     };
     window.lobbyLoadPlayerImage = loadPlayerImage;
     window.lobbySetTeacherPresent = (present) => {

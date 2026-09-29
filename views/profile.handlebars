@@ -217,8 +217,17 @@
     const savedConfig = localStorage.getItem(scopedCharacterKey("userCharacterConfig"));
     if (!savedConfig || !characterFrame.contentWindow) return;
     try {
+      const savedAnimations = localStorage.getItem(scopedCharacterKey("userAnimations"));
+      const savedInitialAnimation = localStorage.getItem(scopedCharacterKey("userInitialAnimation"));
       characterFrame.contentWindow.postMessage(
-        { type: "LOAD_LPC_CHARACTER", payload: JSON.parse(savedConfig) },
+        {
+          type: "LOAD_LPC_CHARACTER",
+          payload: {
+            ...JSON.parse(savedConfig),
+            animations: savedAnimations ? JSON.parse(savedAnimations) : undefined,
+            initialAnimation: savedInitialAnimation || undefined,
+          },
+        },
         window.location.origin,
       );
     } catch (error) {
@@ -234,32 +243,56 @@
     if (event.origin !== window.location.origin || event.source !== characterFrame?.contentWindow) return;
     if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
     const payload = event.data.payload || {};
+    const hasMultiAnimationPayload =
+      payload.animations && typeof payload.animations === "object" && Object.keys(payload.animations).length > 0;
+    const initialAnimation = String(payload.initialAnimation || "walk").toLowerCase();
     const previewImage =
       payload.previewImage ||
       payload.preview ||
       payload.previewDataUrl ||
       payload.image ||
-      payload.spritesheetImage;
+      payload.spritesheetImage ||
+      (hasMultiAnimationPayload && (payload.animations[initialAnimation]?.image || payload.animations.walk?.image));
     if (!previewImage) {
       if (characterError) { characterError.textContent = "The character generator did not send the character images."; characterError.hidden = false; }
       return;
     }
-    window.bakeCharacterSpriteSheet(payload)
-      .then((spritesheetImage) => {
-        if (!spritesheetImage) throw new Error("The character generator did not send a sprite sheet.");
-        const { layers, layerImages, spritesheetLayers, ...bakedPayload } = payload;
-        return fetch("/api/profile/character", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...bakedPayload, previewImage, spritesheetImage }),
-        }).then((response) =>
-          response.json().then((result) => ({
-            ok: response.ok,
-            result,
-            spritesheetImage,
-          })),
-        );
-      })
+    const saveCharacter = hasMultiAnimationPayload
+      ? Promise.resolve(payload.animations.walk?.image || previewImage).then((spritesheetImage) =>
+          fetch("/api/profile/character", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              config: payload.config || payload.characterConfig || {},
+              previewImage,
+              spritesheetImage,
+              animations: payload.animations,
+              initialAnimation,
+            }),
+          }).then((response) =>
+            response.json().then((result) => ({
+              ok: response.ok,
+              result,
+              spritesheetImage,
+            })),
+          ),
+        )
+      : window.bakeCharacterSpriteSheet(payload).then((spritesheetImage) => {
+          if (!spritesheetImage) throw new Error("The character generator did not send a sprite sheet.");
+          const { layers, layerImages, spritesheetLayers, ...bakedPayload } = payload;
+          return fetch("/api/profile/character", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...bakedPayload, previewImage, spritesheetImage }),
+          }).then((response) =>
+            response.json().then((result) => ({
+              ok: response.ok,
+              result,
+              spritesheetImage,
+            })),
+          );
+        });
+    saveCharacter
       .then(({ ok, result, spritesheetImage }) => {
         if (!ok) throw new Error(result.error || "Unable to save character.");
         if (!result.saved || !result.avatar) {
@@ -268,6 +301,8 @@
         localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
         localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
         localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
+        localStorage.setItem(scopedCharacterKey("userAnimations"), JSON.stringify(result.animations || {}));
+        localStorage.setItem(scopedCharacterKey("userInitialAnimation"), result.initialAnimation || "walk");
         const avatarUrl = result.avatar.startsWith("data:image/")
           ? result.avatar
           : `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;

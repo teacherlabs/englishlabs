@@ -1088,12 +1088,70 @@ const parseCharacterConfig = (value) => {
   }
 };
 
+const ANIMATION_METADATA_KEYS = ["frameWidth", "frameHeight", "columns", "rows"];
+const parseAnimationsConfig = (value) => {
+  const empty = { initialAnimation: "walk", animations: {} };
+  if (!value) return empty;
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      return empty;
+    }
+  }
+  if (!parsed || typeof parsed !== "object") return empty;
+  const rawAnimations =
+    parsed.animations && typeof parsed.animations === "object"
+      ? parsed.animations
+      : {};
+  const animations = {};
+  Object.entries(rawAnimations).forEach(([name, entry]) => {
+    const image = entry?.image || entry?.url || entry?.spritesheet || "";
+    if (!image) return;
+    animations[name] = {
+      image: profileImageUrl(image),
+      ...ANIMATION_METADATA_KEYS.reduce((accumulator, key) => {
+        if (Number.isFinite(Number(entry?.[key]))) {
+          accumulator[key] = Number(entry[key]);
+        }
+        return accumulator;
+      }, {}),
+    };
+  });
+  return {
+    initialAnimation: String(parsed.initialAnimation || "walk"),
+    animations,
+  };
+};
+
+const sanitizeAnimationsForStorage = (animations, dataUrlPattern) => {
+  const sanitized = {};
+  if (!animations || typeof animations !== "object") return sanitized;
+  Object.entries(animations).forEach(([name, entry]) => {
+    const image = String(entry?.image || entry?.url || entry?.dataUrl || "").trim();
+    const match = image.match(dataUrlPattern);
+    if (!match) return;
+    sanitized[name] = {
+      image,
+      ...ANIMATION_METADATA_KEYS.reduce((accumulator, key) => {
+        if (Number.isFinite(Number(entry?.[key]))) {
+          accumulator[key] = Number(entry[key]);
+        }
+        return accumulator;
+      }, {}),
+    };
+  });
+  return sanitized;
+};
+
+
 const loadLobbyCharacter = (username) => {
   if (postgresPool) {
     return postgresReady
       .then(() =>
         postgresPool.query(
-          "SELECT avatar, spritesheet, character_config, gold_medals FROM users WHERE username = $1",
+          "SELECT avatar, spritesheet, character_config, character_animations, gold_medals FROM users WHERE username = $1",
           [username],
         ),
       )
@@ -1112,7 +1170,7 @@ const loadLobbyCharacter = (username) => {
 const loadLobbyCharacterFromSqlite = (username) =>
   new Promise((resolve, reject) => {
     db.get(
-      "SELECT avatar, spritesheet, character_config, gold_medals FROM members WHERE username = ?",
+      "SELECT avatar, spritesheet, character_config, character_animations, gold_medals FROM members WHERE username = ?",
       [username],
       (error, row) => {
         if (error) return reject(error);
@@ -1211,7 +1269,8 @@ if (postgresPool) {
           ADD COLUMN IF NOT EXISTS avatar TEXT NOT NULL DEFAULT '',
           ADD COLUMN IF NOT EXISTS spritesheet TEXT NOT NULL DEFAULT '',
           ADD COLUMN IF NOT EXISTS character_config TEXT NOT NULL DEFAULT '',
-          ADD COLUMN IF NOT EXISTS profile_background TEXT NOT NULL DEFAULT '#edf4ff',
+            ADD COLUMN IF NOT EXISTS character_animations TEXT NOT NULL DEFAULT '',
+            ADD COLUMN IF NOT EXISTS profile_background TEXT NOT NULL DEFAULT '#edf4ff',
           ADD COLUMN IF NOT EXISTS gold_medals INTEGER NOT NULL DEFAULT 0,
           ADD COLUMN IF NOT EXISTS silver_medals INTEGER NOT NULL DEFAULT 0,
           ADD COLUMN IF NOT EXISTS bronze_medals INTEGER NOT NULL DEFAULT 0
@@ -1891,6 +1950,7 @@ db.serialize(() => {
     avatar TEXT NOT NULL DEFAULT '',
     spritesheet TEXT NOT NULL DEFAULT '',
     character_config TEXT NOT NULL DEFAULT '',
+    character_animations TEXT NOT NULL DEFAULT '',
     profile_background TEXT NOT NULL DEFAULT '#edf4ff',
     gold_medals INTEGER NOT NULL DEFAULT 0,
     silver_medals INTEGER NOT NULL DEFAULT 0,
@@ -1918,6 +1978,10 @@ db.serialize(() => {
   );
   db.run(
     "ALTER TABLE members ADD COLUMN character_config TEXT DEFAULT ''",
+    () => {},
+  );
+  db.run(
+    "ALTER TABLE members ADD COLUMN character_animations TEXT DEFAULT ''",
     () => {},
   );
   db.run(
@@ -2370,7 +2434,7 @@ app.get("/api/profile/character", requireLogin, (req, res) => {
   postgresReady
     .then(() =>
       postgresPool.query(
-        "SELECT character_config FROM users WHERE username = $1",
+        "SELECT character_config, character_animations FROM users WHERE username = $1",
         [req.session.name],
       ),
     )
@@ -2384,7 +2448,10 @@ app.get("/api/profile/character", requireLogin, (req, res) => {
           console.error("Unable to parse saved character:", parseError);
         }
       }
-      res.json({ config });
+      const { initialAnimation, animations } = parseAnimationsConfig(
+        rows[0]?.character_animations,
+      );
+      res.json({ config, animations, initialAnimation });
     })
     .catch((error) => {
       console.error("Unable to load character:", error);
@@ -4337,6 +4404,7 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
             characterConfig,
             goldMedals: Number(member?.gold_medals) || 0,
             winnerAnimationsUnlocked: Number(member?.gold_medals) > 0,
+            ...parseAnimationsConfig(member?.character_animations),
           },
           isAdmin,
           socketUrl: process.env.VITE_SOCKET_URL || "",
@@ -5387,7 +5455,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                       [updatedRoom.id],
                       (countError, counts) => {
                         db.all(
-                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, COALESCE(members.gold_medals, 0) AS goldMedals, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
+                          "SELECT lobby_participants.username AS userId, lobby_participants.username AS username, lobby_participants.score AS score, lobby_participants.x AS x, lobby_participants.y AS y, lobby_participants.direction AS direction, lobby_participants.frame AS frame, members.avatar AS avatar, members.spritesheet AS spritesheet, members.character_config AS character_config, members.character_animations AS character_animations, COALESCE(members.gold_medals, 0) AS goldMedals, CASE WHEN members.role = 'admin' THEN 1 ELSE 0 END AS isAdmin FROM lobby_participants LEFT JOIN members ON members.username = lobby_participants.username WHERE lobby_participants.room_id = ? AND (members.role IS NULL OR members.role != 'admin' OR ? = 1) ORDER BY lobby_participants.score DESC, lobby_participants.username ASC",
                           [
                             updatedRoom.id,
                             Number(updatedRoom.teacher_present) === 1 ? 1 : 0,
@@ -5406,7 +5474,7 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                                 const { rows: profiles } =
                                   await postgresReady.then(() =>
                                     postgresPool.query(
-                                      "SELECT username, avatar, spritesheet, character_config, role, gold_medals FROM users WHERE username = ANY($1::text[])",
+                                      "SELECT username, avatar, spritesheet, character_config, character_animations, role, gold_medals FROM users WHERE username = ANY($1::text[])",
                                       [usernames],
                                     ),
                                   );
@@ -5428,6 +5496,8 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                                       spritesheet: profile.spritesheet,
                                       character_config:
                                         profile.character_config,
+                                      character_animations:
+                                        profile.character_animations,
                                       goldMedals:
                                         Number(profile.gold_medals) || 0,
                                       isAdmin: profile.role === "admin" ? 1 : 0,
@@ -5457,6 +5527,9 @@ app.get("/api/lobby/state", requireAuthenticated, (req, res) => {
                               ),
                               characterConfig: parseCharacterConfig(
                                 entry.character_config,
+                              ),
+                              ...parseAnimationsConfig(
+                                entry.character_animations,
                               ),
                             }));
                             const elapsed =
@@ -5619,6 +5692,19 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
 });
 
 app.post("/api/profile/character", requireAuthenticated, (req, res) => {
+  const dataUrlPattern =
+    /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i;
+  const rawAnimations =
+    req.body.animations && typeof req.body.animations === "object"
+      ? req.body.animations
+      : {};
+  const sanitizedAnimations = sanitizeAnimationsForStorage(
+    rawAnimations,
+    dataUrlPattern,
+  );
+  const initialAnimation = String(
+    req.body.initialAnimation || "walk",
+  ).toLowerCase();
   const previewImage = String(
     req.body.avatar ||
       req.body.previewImage ||
@@ -5626,26 +5712,25 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       req.body.previewDataUrl ||
       req.body.image ||
       req.body.spritesheetImage ||
+      sanitizedAnimations[initialAnimation]?.image ||
+      sanitizedAnimations.walk?.image ||
       "",
   );
   const spritesheetImage = String(
-    req.body.spritesheet || req.body.spritesheetImage || req.body.image || "",
+    req.body.spritesheet ||
+      req.body.spritesheetImage ||
+      req.body.image ||
+      sanitizedAnimations.walk?.image ||
+      previewImage ||
+      "",
   );
   const config =
     (req.body.config || req.body.characterConfig) &&
     typeof (req.body.config || req.body.characterConfig) === "object"
       ? req.body.config || req.body.characterConfig
       : {};
-  const previewMatch = previewImage
-    .trim()
-    .match(
-      /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i,
-    );
-  const spritesheetMatch = spritesheetImage
-    .trim()
-    .match(
-      /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i,
-    );
+  const previewMatch = previewImage.trim().match(dataUrlPattern);
+  const spritesheetMatch = spritesheetImage.trim().match(dataUrlPattern);
   if (!previewMatch || !spritesheetMatch)
     return res.status(400).json({ error: "Invalid character data." });
 
@@ -5657,6 +5742,10 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
     spritesheetMatch[2].replace(/[\r\n\s]/g, ""),
     "base64",
   );
+  const animationsByteLength = Object.values(sanitizedAnimations).reduce(
+    (total, entry) => total + Buffer.byteLength(entry.image, "utf8"),
+    0,
+  );
   if (
     !previewBuffer.length ||
     !spritesheetBuffer.length ||
@@ -5667,20 +5756,30 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       .status(400)
       .json({ error: "Character image must be under 2 MB." });
   }
+  if (animationsByteLength > 32 * 1024 * 1024) {
+    return res
+      .status(400)
+      .json({ error: "Character animations are too large to save." });
+  }
   const avatarDataUrl = previewImage.trim();
   const spritesheetDataUrl = spritesheetImage.trim();
   const characterConfig = JSON.stringify(config);
+  const characterAnimations = JSON.stringify({
+    initialAnimation,
+    animations: sanitizedAnimations,
+  });
   const saveToPostgres = postgresPool
     ? postgresReady.then(() =>
         req.session.isAdmin
           ? postgresPool.query(
               `INSERT INTO users
-                (username, fname, lname, email, password_hash, role, goal, avatar, spritesheet, character_config)
-               VALUES ($1, $1, '', $2, $3, 'admin', '', $4, $5, $6)
+                (username, fname, lname, email, password_hash, role, goal, avatar, spritesheet, character_config, character_animations)
+               VALUES ($1, $1, '', $2, $3, 'admin', '', $4, $5, $6, $7)
                ON CONFLICT (username) DO UPDATE SET
                  avatar = EXCLUDED.avatar,
                  spritesheet = EXCLUDED.spritesheet,
-                 character_config = EXCLUDED.character_config
+                 character_config = EXCLUDED.character_config,
+                 character_animations = EXCLUDED.character_animations
                RETURNING username`,
               [
                 req.session.name,
@@ -5689,14 +5788,16 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
                 avatarDataUrl,
                 spritesheetDataUrl,
                 characterConfig,
+                characterAnimations,
               ],
             )
           : postgresPool.query(
-              "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3 WHERE username = $4 RETURNING username",
+              "UPDATE users SET avatar = $1, spritesheet = $2, character_config = $3, character_animations = $4 WHERE username = $5 RETURNING username",
               [
                 avatarDataUrl,
                 spritesheetDataUrl,
                 characterConfig,
+                characterAnimations,
                 req.session.name,
               ],
             ),
@@ -5709,11 +5810,12 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       }
       return new Promise((resolve, reject) => {
         db.run(
-          "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ? WHERE username = ?",
+          "UPDATE members SET avatar = ?, spritesheet = ?, character_config = ?, character_animations = ? WHERE username = ?",
           [
             avatarDataUrl,
             spritesheetDataUrl,
             characterConfig,
+            characterAnimations,
             req.session.name,
           ],
           function (error) {
@@ -5732,6 +5834,10 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       req.session.spritesheet = spritesheetDataUrl;
       req.session.characterConfig = config;
       req.session.character_config = characterConfig;
+      req.session.characterAnimations = {
+        initialAnimation,
+        animations: sanitizedAnimations,
+      };
       req.session.save((sessionError) => {
         if (sessionError) {
           console.error("Unable to persist character session:", sessionError);
@@ -5744,6 +5850,8 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
           spritesheet: spritesheetDataUrl,
           spritesheetUrl: spritesheetDataUrl,
           characterConfig: config,
+          initialAnimation,
+          animations: sanitizedAnimations,
         };
         const notifiedRooms = new Set();
         io.sockets.sockets.forEach((connectedSocket) => {
@@ -5765,6 +5873,8 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
           avatar: avatarDataUrl,
           spritesheet: spritesheetDataUrl,
           config,
+          initialAnimation,
+          animations: sanitizedAnimations,
         });
       });
     })
@@ -7078,6 +7188,7 @@ io.on("connection", (socket) => {
                   characterConfig: parseCharacterConfig(
                     character.character_config,
                   ),
+                  ...parseAnimationsConfig(character.character_animations),
                   winnerAnimationsUnlocked:
                     Number(character.gold_medals) > 0,
                 };
