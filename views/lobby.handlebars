@@ -247,10 +247,13 @@
   window.lobbyImageSrc = lobbyImageSrc;
   // The celebration button is conceptually "spell", but the character studio may label the
   // action sheet differently. Resolve against whichever of these keys actually has real
-  // animation data instead of ever faking it from the walk sheet.
+  // animation data. When no dedicated sheet exists for a character, the emote instead plays a
+  // synthetic "bounce" celebration (see CELEBRATION_BOUNCE_FRAME_COUNT/drawCelebrationBounce)
+  // rather than misusing the walk sheet's directional frames, which looked like walking in place.
   const CELEBRATION_ANIMATION_NAMES = ["spell", "cast", "celebrate", "victory", "action"];
   const resolveCelebrationAnimation = (animationsMeta) =>
     CELEBRATION_ANIMATION_NAMES.find((name) => animationsMeta?.[name]?.image) || null;
+  const CELEBRATION_BOUNCE_FRAME_COUNT = 12;
   const lobbyAnimationLayouts = {
     walk: { columns: 8, rows: 4 },
     slash: { columns: 6, rows: 4 },
@@ -297,27 +300,25 @@
     const state = states.get(String(username));
     const safeDirection = Number(direction);
     const fallback = { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
-    if (!state) return fallback;
+    if (!state || state.emote !== "victory") return fallback;
+    // A dedicated sheet plays 7 real celebration frames; without one we play a shorter
+    // synthetic bounce instead (never fake celebration frames from the walk sheet).
+    const frameCount = state.animation ? 7 : CELEBRATION_BOUNCE_FRAME_COUNT;
+    const duration = frameCount * 110;
     const elapsed = now - state.startedAt;
-    const duration = state.emote === "victory" ? 7 * 110 : 2200;
-    // If the emote's real celebration sheet was never resolved (no dedicated animation data
-    // for that player), don't fake it against the walk sheet - just stop the emote early.
-    if (elapsed >= duration || (state.emote === "victory" && !state.animation)) {
+    if (elapsed >= duration) {
       states.delete(String(username));
       return fallback;
     }
-    if (state.emote === "victory") {
-      const step = elapsed / 110;
-      const victoryDirection = [0, 1, 2, 3].includes(Number(state.direction))
-        ? Number(state.direction)
-        : Number.isFinite(Number(direction)) ? Number(direction) : 0;
-      return {
-        direction: victoryDirection,
-        frame: Math.floor(step) % 7,
-        animation: state.animation,
-      };
-    }
-    return fallback;
+    const step = elapsed / 110;
+    const victoryDirection = [0, 1, 2, 3].includes(Number(state.direction))
+      ? Number(state.direction)
+      : Number.isFinite(Number(direction)) ? Number(direction) : 0;
+    return {
+      direction: victoryDirection,
+      frame: Math.floor(step) % frameCount,
+      animation: state.animation || "celebrate-bounce",
+    };
   };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
@@ -1188,7 +1189,7 @@
       const frameHeight = Number(meta.frameHeight) || Math.floor(image.naturalHeight / rows);
       return { image, frameWidth, frameHeight, columns, rows, animation };
     };
-    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map(), celebrationAnimation: null };
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map(), celebrationAnimation: null, isCelebrating: false };
     preloadAnimationImages(player.animations, player.animationImages);
     const remoteImages = new Map();
     const remoteAnimationImages = new Map();
@@ -1210,14 +1211,15 @@
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     window.lobbyTriggerVictoryPose = () => {
       if (!player.isLoaded || playerCanvas.dataset.playerAdmin === "true") return false;
-      // Only trigger the pose against a real dedicated animation sheet. Never reinterpret the
-      // walk sheet as if it were the celebration sheet - that just crops walking frames and
-      // makes the character look like it is walking in place.
+      // Prefer a real dedicated celebration sheet when the character has one; otherwise fall
+      // back to a synthetic "bounce" celebration (drawCelebrationBounce) instead of ever
+      // reinterpreting the walk sheet's directional frames as a celebration - that just crops
+      // walking frames and makes the character look like it is walking in place.
       const celebrationAnimation = resolveCelebrationAnimation(player.animations);
-      if (!celebrationAnimation) return false;
       clearKeysDown();
       player.celebrationAnimation = celebrationAnimation;
-      player.currentAnimation = celebrationAnimation;
+      player.isCelebrating = true;
+      player.currentAnimation = celebrationAnimation || "idle";
       player.currentFrame = 0;
       player.currentFrameRect = null;
       player.animationStartedAt = timestampNow();
@@ -1251,36 +1253,44 @@
         : Math.min(now - previousFrameAt, 50);
       previousFrameAt = now;
       const movement = getMovementVector();
-      let victoryPoseActive = Boolean(player.celebrationAnimation) &&
-        player.currentAnimation === player.celebrationAnimation;
+      let victoryPoseActive = player.isCelebrating === true;
       if (victoryPoseActive) {
         const celebrationAnimation = player.celebrationAnimation;
-        const source = getAnimationSource(player.animations, player.animationImages, celebrationAnimation);
-        if (source) {
-          const layout = window.getCharacterAnimationLayout(celebrationAnimation, source);
-          player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
-          if (player.currentFrame >= layout.columns) {
-            player.currentAnimation = "idle";
+        if (celebrationAnimation) {
+          const source = getAnimationSource(player.animations, player.animationImages, celebrationAnimation);
+          if (source) {
+            const layout = window.getCharacterAnimationLayout(celebrationAnimation, source);
+            player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
+            if (player.currentFrame >= layout.columns) {
+              player.currentAnimation = "idle";
+              player.isCelebrating = false;
+              player.celebrationAnimation = null;
+              player.currentFrame = 0;
+              player.currentFrameRect = null;
+              victoryPoseActive = false;
+            } else {
+              player.currentFrameRect = window.getCharacterFrameRect(
+                celebrationAnimation,
+                player.currentFrame,
+                player.direction,
+                layout,
+              );
+            }
+          } else if (now - player.animationStartedAt > 1500) {
+            // The dedicated sheet never became available in time - drop to the synthetic
+            // bounce celebration instead of leaving the pose stuck or faking real frames.
             player.celebrationAnimation = null;
+            player.animationStartedAt = now;
+          }
+        } else {
+          player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
+          if (player.currentFrame >= CELEBRATION_BOUNCE_FRAME_COUNT) {
+            player.currentAnimation = "idle";
+            player.isCelebrating = false;
             player.currentFrame = 0;
             player.currentFrameRect = null;
             victoryPoseActive = false;
-          } else {
-            player.currentFrameRect = window.getCharacterFrameRect(
-              celebrationAnimation,
-              player.currentFrame,
-              player.direction,
-              layout,
-            );
           }
-        } else if (now - player.animationStartedAt > 1500) {
-          // The dedicated sheet never became available - bail out to idle instead of ever
-          // faking the celebration from a mismatched sheet.
-          player.currentAnimation = "idle";
-          player.celebrationAnimation = null;
-          player.currentFrame = 0;
-          player.currentFrameRect = null;
-          victoryPoseActive = false;
         }
       }
       player.isMoving = !victoryPoseActive && (movement.x !== 0 || movement.y !== 0);
@@ -1330,7 +1340,7 @@
         frameContext.fillText(label, labelX, labelY);
         frameContext.shadowBlur = 0;
       };
-      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null, metadataOverride = null) => {
+      const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null, metadataOverride = null, bounceOffsetY = 0, overlaySymbol = null) => {
         if (!image.complete || image.naturalWidth < 8 || image.naturalHeight < 8) return;
         const sheetLayout = metadataOverride || getLobbyAnimationLayout(image, animation);
         const layout = window.getCharacterAnimationLayout(animation, sheetLayout);
@@ -1351,7 +1361,7 @@
         logLobbySpriteLayout(image, layout, frameRect.frame, frameRect.direction);
         const renderHeight = RENDER_WIDTH * layout.frameHeight / layout.frameWidth;
         const drawX = Math.floor(x - (RENDER_WIDTH / 2));
-        const drawY = Math.floor(y - renderHeight);
+        const drawY = Math.floor(y - renderHeight + bounceOffsetY);
         frameContext.drawImage(
           image,
           frameRect.sx,
@@ -1363,6 +1373,14 @@
           RENDER_WIDTH,
           renderHeight,
         );
+        if (overlaySymbol) {
+          frameContext.save();
+          frameContext.font = "700 14px sans-serif";
+          frameContext.textAlign = "center";
+          frameContext.textBaseline = "bottom";
+          frameContext.fillText(overlaySymbol, Math.floor(x), drawY - 2);
+          frameContext.restore();
+        }
         if (isAdmin) {
           frameContext.font = "700 9px sans-serif";
           frameContext.textAlign = "center";
@@ -1376,6 +1394,17 @@
           frameContext.fillText(badge, Math.floor(x), badgeY - 2);
         }
         drawHoverName(x, y, username);
+      };
+      // Used when a player has no dedicated celebration sheet: bounces their existing standing
+      // frame (walk animation, frame 0) with a sparkle overlay so the celebration reads clearly
+      // as "celebrating" rather than reusing directional walk frames (which looked like walking
+      // in place).
+      const drawCelebrationBounce = (image, x, y, direction, frame, username, isAdmin) => {
+        if (!image.complete || image.naturalWidth < 8 || image.naturalHeight < 8) return;
+        const layout = window.getCharacterAnimationLayout("walk", getLobbyAnimationLayout(image, "walk"));
+        const frameRect = window.getCharacterFrameRect("walk", 0, direction, layout);
+        const bounceOffset = -Math.abs(Math.sin(((frame % 4) / 4) * Math.PI)) * 8;
+        drawSprite(image, x, y, direction, 0, username, isAdmin, "walk", frameRect, layout, bounceOffset, "✨");
       };
       const drawAdminPlaceholder = (x, y, username) => {
         const radius = RENDER_WIDTH * 0.31;
@@ -1399,22 +1428,34 @@
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
       if (player.isLoaded && player.isPresent) {
-        const animatedPlayer = victoryPoseActive
-          ? {
-              direction: player.direction,
-              frame: player.currentFrame,
-              animation: player.currentAnimation,
-            }
-          : getPlayerSpriteState(
-              ownUsername,
-              player.direction,
-              player.frame,
-              now,
-              player.isMoving,
-            );
-        const localSource = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
-        if (!victoryPoseActive || localSource) {
-          drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
+        if (victoryPoseActive && !player.celebrationAnimation) {
+          drawCelebrationBounce(
+            player.image,
+            player.x,
+            player.y,
+            player.direction,
+            player.currentFrame,
+            ownUsername,
+            playerCanvas.dataset.playerAdmin === "true",
+          );
+        } else {
+          const animatedPlayer = victoryPoseActive
+            ? {
+                direction: player.direction,
+                frame: player.currentFrame,
+                animation: player.currentAnimation,
+              }
+            : getPlayerSpriteState(
+                ownUsername,
+                player.direction,
+                player.frame,
+                now,
+                player.isMoving,
+              );
+          const localSource = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
+          if (!victoryPoseActive || localSource) {
+            drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
+          }
         }
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
@@ -1492,14 +1533,18 @@
           preloadAnimationImages(remotePlayer.animations, remoteAnimationMap);
           remotePosition.hasPreloadedAnimations = true;
         }
+        if (animatedRemote.animation === "celebrate-bounce") {
+          drawCelebrationBounce(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin);
+          return;
+        }
         const remoteAnimatedSource = getAnimationSource(
           remotePlayer.animations,
           remoteAnimationMap,
           animatedRemote.animation,
         );
-        // Never fall back to the plain walk sheet for a celebration animation - that just crops
-        // walking frames and looks like the character is walking in place. Skip drawing that
-        // frame instead until the real sheet is loaded (or the emote naturally expires).
+        // Never fall back to the plain walk sheet for a dedicated celebration animation - that
+        // just crops walking frames and looks like the character is walking in place. Skip
+        // drawing that frame instead until the real sheet is loaded (or the emote expires).
         const isCelebrating = animatedRemote.animation !== "walk" && animatedRemote.animation !== "idle";
         if (isCelebrating && !remoteAnimatedSource) return;
         drawSprite(remoteAnimatedSource?.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation, null, remoteAnimatedSource);
