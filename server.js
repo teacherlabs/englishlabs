@@ -3270,9 +3270,6 @@ app.get("/practice/find-errors", requireAuthenticated, (req, res) => {
 
 app.get("/practice/final-test", requireAuthenticated, (req, res) => {
   const FINAL_TEST_QUESTION_COUNT = 30;
-  const GRAMMAR_QUESTION_TARGET = 20;
-  const VOCABULARY_QUESTION_TARGET =
-    FINAL_TEST_QUESTION_COUNT - GRAMMAR_QUESTION_TARGET;
   const shuffleQuestions = (items) => {
     const list = [...items];
     for (let index = list.length - 1; index > 0; index -= 1) {
@@ -3311,87 +3308,99 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
         (error, grammarQuestions) => {
           if (error)
             return res.status(500).send("Unable to load the final test.");
-          grammarDb.all(
-            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY RANDOM() LIMIT 30",
-            (vocabularyError, words) => {
-              if (vocabularyError)
-                return res
-                  .status(500)
-                  .send("Unable to load vocabulary for the final test.");
-              const vocabularyQuestions = words.map((word, index) => {
-                const alternatives = words
-                  .filter((candidate) => candidate.id !== word.id)
-                  .slice(0, 3)
-                  .map((candidate) => candidate.swedish_translation);
-                const options = [word.swedish_translation, ...alternatives];
-                return {
-                  id: `vocabulary-${word.id}`,
-                  chapter_title: "Vocabulary",
-                  question_text: `What is the Swedish meaning of “${word.english_word}”?`,
-                  option_a: options[0],
-                  option_b: options[1],
-                  option_c: options[2],
-                  option_d: options[3],
-                  correct_option: "a",
-                  explanation: `The Swedish translation of “${word.english_word}” is “${word.swedish_translation}”.`,
-                };
-              });
-
-              const grammarPool = shuffleQuestions(grammarQuestions);
-              const vocabularyPool = shuffleQuestions(vocabularyQuestions);
-              const selectedGrammar = grammarPool.slice(
-                0,
-                GRAMMAR_QUESTION_TARGET,
-              );
-              const selectedVocabulary = vocabularyPool.slice(
-                0,
-                VOCABULARY_QUESTION_TARGET,
-              );
-              const selectedIds = new Set(
-                [...selectedGrammar, ...selectedVocabulary].map((question) =>
-                  String(question.id),
-                ),
-              );
-              const remainingQuestions = shuffleQuestions([
-                ...grammarPool,
-                ...vocabularyPool,
-              ]).filter(
-                (question) => !selectedIds.has(String(question.id)),
-              );
-              const selectedQuestions = shuffleQuestions([
-                ...selectedGrammar,
-                ...selectedVocabulary,
-                ...remainingQuestions.slice(
-                  0,
-                  FINAL_TEST_QUESTION_COUNT -
-                    selectedGrammar.length -
-                    selectedVocabulary.length,
-                ),
-              ]);
-              if (selectedQuestions.length < FINAL_TEST_QUESTION_COUNT) {
-                return res
-                  .status(500)
-                  .send(
-                    `Unable to start the final test: it requires ${FINAL_TEST_QUESTION_COUNT} questions, but only ${selectedQuestions.length} are available.`,
-                  );
+          const chapterQuestions = practiceQuestionChapters.flatMap((chapter) =>
+            chapter.exercises.flatMap((exercise, exerciseIndex) => {
+              if (
+                exercise.type !== "multiple-choice" ||
+                !Array.isArray(exercise.questions)
+              ) {
+                return [];
               }
-              const questions = selectedQuestions
-                .slice(0, FINAL_TEST_QUESTION_COUNT)
-                .map((question, index) => ({
-                  ...question,
-                  question_number: index + 1,
-                }));
-
-              res.render("practice.handlebars", {
-                mode: "final",
-                pageTitle: "Final Test",
-                pageIntro: "Good luck!",
-                questions,
-                recentResults,
-                showFinalTestIntro: true,
+              return exercise.questions.flatMap((question, questionIndex) => {
+                const sourceOptions = Array.isArray(question.options)
+                  ? question.options.map((option) => String(option).trim()).filter(Boolean)
+                  : [];
+                const answer = String(question.answer || "").trim();
+                const correctSourceIndex = sourceOptions.findIndex(
+                  (option) => option.toLocaleLowerCase() === answer.toLocaleLowerCase(),
+                );
+                const questionText = String(
+                  question.sentence || question.question || "",
+                ).trim();
+                if (!questionText || correctSourceIndex < 0 || sourceOptions.length < 2) {
+                  return [];
+                }
+                const choices =
+                  sourceOptions.length <= 4
+                    ? sourceOptions
+                    : [
+                        answer,
+                        ...sourceOptions.filter(
+                          (option) =>
+                            option.toLocaleLowerCase() !== answer.toLocaleLowerCase(),
+                        ),
+                      ].slice(0, 4);
+                const correctIndex =
+                  sourceOptions.length <= 4
+                    ? correctSourceIndex
+                    : 0;
+                return [
+                  {
+                    id: `chapter-${chapter.id}-${exercise.id || exerciseIndex + 1}-${question.id || questionIndex + 1}`,
+                    chapter_title: chapter.unit || "Grammar",
+                    question_text: questionText,
+                    option_a: choices[0],
+                    option_b: choices[1],
+                    option_c: choices[2] || null,
+                    option_d: choices[3] || null,
+                    correct_option: String.fromCharCode(97 + correctIndex),
+                    explanation:
+                      question.explanation || exercise.instructions || "",
+                  },
+                ];
               });
-            },
+            }),
           );
+          const grammarPool = shuffleQuestions([
+            ...grammarQuestions.map((question) => ({
+              ...question,
+              id: `database-${question.id}`,
+            })),
+            ...chapterQuestions,
+          ]);
+          const seenQuestions = new Set();
+          const uniqueGrammarQuestions = grammarPool.filter((question) => {
+            const normalizedQuestion = String(question.question_text || "")
+              .trim()
+              .toLocaleLowerCase();
+            if (!normalizedQuestion || seenQuestions.has(normalizedQuestion)) {
+              return false;
+            }
+            seenQuestions.add(normalizedQuestion);
+            return true;
+          });
+          if (uniqueGrammarQuestions.length < FINAL_TEST_QUESTION_COUNT) {
+            return res
+              .status(500)
+              .send(
+                `Unable to start the final test: it requires ${FINAL_TEST_QUESTION_COUNT} grammar questions, but only ${uniqueGrammarQuestions.length} are available.`,
+              );
+          }
+          const questions = uniqueGrammarQuestions
+            .slice(0, FINAL_TEST_QUESTION_COUNT)
+            .map((question, index) => ({
+              ...question,
+              question_number: index + 1,
+            }));
+
+          res.render("practice.handlebars", {
+            mode: "final",
+            pageTitle: "Final Test",
+            pageIntro: "Good luck!",
+            questions,
+            recentResults,
+            showFinalTestIntro: true,
+          });
         },
       );
     },
