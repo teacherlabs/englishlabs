@@ -2396,22 +2396,46 @@ app.get("/", (req, res) => {
               )
               .map((area) => [area.key, area.percentage]),
           );
-          res.render("dashboard.handlebars", {
-            dashboardStats: {
-              totalPoints,
-              completedActivities: progress.length,
-              averageScore,
-            },
-            dashboardProgress,
-            feedbackMessages: feedbackMessages.slice(0, 3),
-            dashboardGoal: res.locals.dashboardGoal,
-            studentReminders: res.locals.studentReminders || [],
-            unreadFeedbackCount: res.locals.unreadFeedbackCount || 0,
-            student: {
-              username: req.session.name,
-              avatarUrl: req.session.avatarUrl,
-              avatarInitial: req.session.avatar_initial,
-            },
+          loadLobbyCharacter(req.session.name)
+            .then((character) => {
+              const avatar = character.avatar || character.spritesheet || "";
+              req.session.avatar = avatar;
+              req.session.avatarUrl = profileImageUrl(avatar);
+              req.session.spritesheet =
+                character.spritesheet || character.avatar || "";
+              req.session.avatar_initial =
+                req.session.name.charAt(0).toUpperCase();
+              req.session.save((sessionError) => {
+                if (sessionError) {
+                  console.error(
+                    "Unable to refresh dashboard avatar session:",
+                    sessionError,
+                  );
+                  return res.status(500).send("Unable to load dashboard.");
+                }
+                res.locals.session = req.session;
+                res.render("dashboard.handlebars", {
+                  dashboardStats: {
+                    totalPoints,
+                    completedActivities: progress.length,
+                    averageScore,
+                  },
+                  dashboardProgress,
+                  feedbackMessages: feedbackMessages.slice(0, 3),
+                  dashboardGoal: res.locals.dashboardGoal,
+                  studentReminders: res.locals.studentReminders || [],
+                  unreadFeedbackCount: res.locals.unreadFeedbackCount || 0,
+                  student: {
+                    username: req.session.name,
+                    avatarUrl: req.session.avatarUrl,
+                    avatarInitial: req.session.avatar_initial,
+                  },
+                });
+              });
+            })
+            .catch((characterError) => {
+              console.error("Unable to load dashboard avatar:", characterError);
+              res.status(500).send("Unable to load dashboard.");
           });
         },
       );
