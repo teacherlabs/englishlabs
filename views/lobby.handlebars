@@ -1139,11 +1139,11 @@
     frameCanvas.width = ARENA_WIDTH;
     frameCanvas.height = ARENA_HEIGHT;
     const frameContext = frameCanvas.getContext("2d");
-    const RENDER_SIZE = 52;
+    const RENDER_WIDTH = 52;
     const PLAYER_SPEED = 1.8;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_SIZE / 2 - 1;
+    const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_WIDTH / 2 - 1;
     const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
@@ -1191,8 +1191,8 @@
         updateDirectionFromMovement(movement);
         player.frame = (player.frame + 0.2) % 8;
         const length = Math.hypot(movement.x, movement.y) || 1;
-        player.x = Math.max(RENDER_SIZE / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * player.speed));
-        player.y = Math.max(RENDER_SIZE, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
+        player.x = Math.max(RENDER_WIDTH / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * player.speed));
+        player.y = Math.max(RENDER_WIDTH, Math.min(playerCanvas.height, player.y + movement.y / length * player.speed));
       } else {
         player.frame = 0;
       }
@@ -1200,16 +1200,16 @@
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
       const drawHoverName = (x, y, username) => {
         if (!username || !pointerPosition ||
-          pointerPosition.x < x - RENDER_SIZE / 2 ||
-          pointerPosition.x > x + RENDER_SIZE / 2 ||
-          pointerPosition.y < y - RENDER_SIZE ||
+          pointerPosition.x < x - RENDER_WIDTH / 2 ||
+          pointerPosition.x > x + RENDER_WIDTH / 2 ||
+          pointerPosition.y < y - RENDER_WIDTH ||
           pointerPosition.y > y) return;
         frameContext.font = "700 8px Teachers, sans-serif";
         frameContext.textAlign = "center";
         frameContext.textBaseline = "bottom";
         const label = String(username).slice(0, 18);
         const labelX = Math.floor(x);
-        const labelY = Math.floor(y - RENDER_SIZE - 3);
+        const labelY = Math.floor(y - RENDER_WIDTH - 3);
         const labelWidth = frameContext.measureText(label).width + 6;
         frameContext.fillStyle = "rgba(41, 29, 24, 0.88)";
         frameContext.fillRect(labelX - labelWidth / 2, labelY - 11, labelWidth, 13);
@@ -1227,8 +1227,9 @@
         const sx = safeFrame * layout.frameWidth;
         const sy = safeDirection * layout.frameHeight;
         logLobbySpriteLayout(image, layout, safeFrame, safeDirection);
-        const drawX = Math.floor(x - (RENDER_SIZE / 2));
-        const drawY = Math.floor(y - RENDER_SIZE);
+        const renderHeight = RENDER_WIDTH * layout.frameHeight / layout.frameWidth;
+        const drawX = Math.floor(x - (RENDER_WIDTH / 2));
+        const drawY = Math.floor(y - renderHeight);
         frameContext.drawImage(
           image,
           sx,
@@ -1237,8 +1238,8 @@
           layout.frameHeight,
           drawX,
           drawY,
-          RENDER_SIZE,
-          RENDER_SIZE,
+          RENDER_WIDTH,
+          renderHeight,
         );
         if (isAdmin) {
           frameContext.font = "700 9px sans-serif";
@@ -1255,23 +1256,23 @@
         drawHoverName(x, y, username);
       };
       const drawAdminPlaceholder = (x, y, username) => {
-        const radius = RENDER_SIZE * 0.31;
-        const centerY = y - RENDER_SIZE / 2;
+        const radius = RENDER_WIDTH * 0.31;
+        const centerY = y - RENDER_WIDTH / 2;
         frameContext.beginPath();
         frameContext.arc(x, centerY, radius, 0, Math.PI * 2);
         frameContext.fillStyle = "#2d4b7b";
         frameContext.fill();
-        frameContext.lineWidth = RENDER_SIZE * 0.04;
+        frameContext.lineWidth = RENDER_WIDTH * 0.04;
         frameContext.strokeStyle = "#ffffff";
         frameContext.stroke();
         frameContext.fillStyle = "#ffffff";
-        frameContext.font = `700 ${Math.round(RENDER_SIZE * 0.28)}px sans-serif`;
+        frameContext.font = `700 ${Math.round(RENDER_WIDTH * 0.28)}px sans-serif`;
         frameContext.textAlign = "center";
         frameContext.textBaseline = "middle";
         frameContext.fillText(String(username || "T").charAt(0).toUpperCase(), x, centerY);
-        frameContext.font = `700 ${Math.max(7, Math.round(RENDER_SIZE * 0.12))}px sans-serif`;
+        frameContext.font = `700 ${Math.max(7, Math.round(RENDER_WIDTH * 0.12))}px sans-serif`;
         frameContext.textBaseline = "bottom";
-        frameContext.fillText("Teacher", x, y - RENDER_SIZE * 0.88);
+        frameContext.fillText("Teacher", x, y - RENDER_WIDTH * 0.88);
         drawHoverName(x, y, username);
       };
       const ownUsername = String(playerCanvas.dataset.playerUsername || "");
@@ -1301,7 +1302,7 @@
         const remoteX = Number(remotePlayer.x);
         const remoteY = Number(remotePlayer.y);
         const targetX = Math.max(
-          RENDER_SIZE / 2,
+          RENDER_WIDTH / 2,
           Math.min(MAX_PLAYER_X, Number.isFinite(remoteX) ? remoteX : MAX_PLAYER_X / 2),
         );
         const targetY = Number.isFinite(remoteY) ? remoteY : 380;

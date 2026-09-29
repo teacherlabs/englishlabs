@@ -9411,8 +9411,8 @@ footer {
 
 .app-shell:has(.lobby-page) .lobby-character-stage canvas {
   display: block;
-  width: min(100vw, 147.62vh);
-  height: min(100vh, 67.74vw);
+  width: min(100vw, 214.29vh);
+  height: min(100vh, 46.67vw);
   max-width: none;
   aspect-ratio: 900 / 420;
   border: none !important;
