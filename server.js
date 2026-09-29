@@ -4994,8 +4994,8 @@ app.post("/lobby/join", requireLogin, (req, res) => {
 
 app.post("/api/lobby/player-state", requireProfileUser, (req, res) => {
   const roomId = Number(req.body.roomId);
-  const x = Math.max(0, Math.min(310, Number(req.body.x) || 0));
-  const y = Math.max(60, Math.min(210, Number(req.body.y) || 60));
+  const x = Math.max(25, Math.min(875, Number(req.body.x) || 0));
+  const y = Math.max(60, Math.min(420, Number(req.body.y) || 60));
   const direction = [0, 1, 2, 3].includes(Number(req.body.direction))
     ? Number(req.body.direction)
     : 2;
@@ -7077,8 +7077,7 @@ io.on("connection", (socket) => {
   socket.on("playerMove", (data = {}) => {
     const roomId = Number(data.roomId);
     if (!socket.data.roomId || socket.data.roomId !== roomId) return;
-    const maxPlayerX = 620 / 2 - 50 / 2 - 1;
-    const x = Math.max(25, Math.min(maxPlayerX, Number(data.x) || 0));
+    const x = Math.max(25, Math.min(875, Number(data.x) || 0));
     const y = Math.max(60, Math.min(420, Number(data.y) || 60));
     const direction = [0, 1, 2, 3].includes(Number(data.direction))
       ? Number(data.direction)

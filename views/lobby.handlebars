@@ -55,7 +55,7 @@
       {{#if room}}
       <div class="lobby-stage-wrap teacher-lobby-stage-wrap{{#if isLeaderboardPhase}} is-intermission{{/if}}">
         <div class="lobby-character-stage">
-          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
+          <canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-user-id="{{student.id}}" data-player-username="{{student.username}}" data-player-admin="{{isAdmin}}" data-player-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas>
         </div>
       <aside class="teacher-control-sidebar">
           <header class="teacher-control-header">
@@ -139,7 +139,7 @@
       {{#if participant}}
       <div class="lobby-stage-wrap">
         <div class="lobby-student-main{{#if isQuicktype}} quicktype-lobby{{/if}}">
-          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="620" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
+          <div class="lobby-character-stage"><canvas data-player-canvas data-room-id="{{room.id}}" data-mode="{{room.mode}}" data-player-username="{{student.username}}" data-teacher-present="{{room.teacher_present}}" data-spritesheet-image="{{student.spritesheetUrl}}" width="900" height="420" tabindex="0" aria-label="Use arrow keys or WASD to move your character"></canvas></div>
           <div class="lobby-phase-stack" data-lobby-phase data-room-id="{{room.id}}" data-role="student" data-mode="{{room.mode}}">
           <section class="student-live-quiz" data-phase-waiting{{#unless isWaiting}} hidden{{/unless}}>
             <p class="eyebrow">{{room.title}}</p>
@@ -628,8 +628,7 @@
           if (animationToken !== winnerAnimationToken || winnerCelebrationModal.hidden) return;
           const frame = Math.floor(now / 110) % layout.columns;
           context.clearRect(0, 0, winnerCelebrationCanvas.width, winnerCelebrationCanvas.height);
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
+          context.imageSmoothingEnabled = false;
           context.drawImage(
             image,
             frame * layout.frameWidth,
@@ -1131,7 +1130,7 @@
 
   const playerCanvas = document.querySelector("[data-player-canvas]");
   if (playerCanvas) {
-    const ARENA_WIDTH = 620;
+    const ARENA_WIDTH = 900;
     const ARENA_HEIGHT = 420;
     playerCanvas.width = ARENA_WIDTH;
     playerCanvas.height = ARENA_HEIGHT;
@@ -1142,11 +1141,9 @@
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_SIZE = 50;
     const PLAYER_SPEED = 1.8;
-    playerContext.imageSmoothingEnabled = true;
-    playerContext.imageSmoothingQuality = "high";
-    frameContext.imageSmoothingEnabled = true;
-    frameContext.imageSmoothingQuality = "high";
-    const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_SIZE / 2 - 1;
+    playerContext.imageSmoothingEnabled = false;
+    frameContext.imageSmoothingEnabled = false;
+    const MAX_PLAYER_X = ARENA_WIDTH - RENDER_SIZE / 2;
     const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();

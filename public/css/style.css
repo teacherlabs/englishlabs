@@ -1378,14 +1378,16 @@ legend {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 620 / 420;
+  aspect-ratio: 900 / 420;
   object-fit: contain;
   outline: 0;
-  image-rendering: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .lobby-page canvas {
-  image-rendering: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 .lobby-character-stage canvas:focus {
   box-shadow: 0 0 0 3px #f0b44d;
@@ -1840,7 +1842,8 @@ legend {
 .winner-celebration-character canvas {
   width: 220px;
   height: 220px;
-  image-rendering: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 .winner-celebration-character img {
   width: 180px;
@@ -1976,11 +1979,11 @@ legend {
 .app-sidebar .app-brand-logo {
   display: block;
   grid-column: 1 / -1;
-  width: min(100%, 166px);
-  height: 96px;
-  margin: 0 auto 10px;
+  width: min(100%, 184px);
+  height: 112px;
+  margin: 0 auto;
   object-fit: contain;
-  background: #ffffff;
+  filter: drop-shadow(0 0 8px rgba(121, 201, 232, 0.45));
 }
 
 .app-sidebar .app-brand small,
@@ -9412,7 +9415,7 @@ footer {
   width: min(100vw, 147.62vh);
   height: min(100vh, 67.74vw);
   max-width: none;
-  aspect-ratio: 620 / 420;
+  aspect-ratio: 900 / 420;
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
