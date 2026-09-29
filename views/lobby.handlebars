@@ -245,6 +245,12 @@
     return `/uploads/profiles/${encodeURIComponent(source)}`;
   }
   window.lobbyImageSrc = lobbyImageSrc;
+  // The celebration button is conceptually "spell", but the character studio may label the
+  // action sheet differently. Resolve against whichever of these keys actually has real
+  // animation data instead of ever faking it from the walk sheet.
+  const CELEBRATION_ANIMATION_NAMES = ["spell", "cast", "celebrate", "victory", "action"];
+  const resolveCelebrationAnimation = (animationsMeta) =>
+    CELEBRATION_ANIMATION_NAMES.find((name) => animationsMeta?.[name]?.image) || null;
   const lobbyAnimationLayouts = {
     walk: { columns: 8, rows: 4 },
     slash: { columns: 6, rows: 4 },
@@ -289,29 +295,29 @@
   const getLobbySpriteFrame = (username, direction, frame, now) => {
     const states = window.lobbyEmoteStates || new Map();
     const state = states.get(String(username));
-    if (state) {
-      const elapsed = now - state.startedAt;
-      const duration = state.emote === "victory" ? 7 * 110 : 2200;
-      if (elapsed >= duration) {
-        states.delete(String(username));
-      } else {
-        const step = elapsed / 110;
-        if (state.emote === "victory") {
-          const victoryDirection = [0, 1, 2, 3].includes(Number(state.direction))
-            ? Number(state.direction)
-            : Number.isFinite(Number(direction)) ? Number(direction) : 0;
-          return {
-            direction: victoryDirection,
-            frame: Math.floor(step) % 7,
-            animation: "spell",
-          };
-        }
-        const safeDirection = Number(direction);
-        return { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
-      }
-    }
     const safeDirection = Number(direction);
-    return { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
+    const fallback = { direction: Number.isFinite(safeDirection) ? safeDirection : 0, frame: Number(frame) || 0, animation: "walk" };
+    if (!state) return fallback;
+    const elapsed = now - state.startedAt;
+    const duration = state.emote === "victory" ? 7 * 110 : 2200;
+    // If the emote's real celebration sheet was never resolved (no dedicated animation data
+    // for that player), don't fake it against the walk sheet - just stop the emote early.
+    if (elapsed >= duration || (state.emote === "victory" && !state.animation)) {
+      states.delete(String(username));
+      return fallback;
+    }
+    if (state.emote === "victory") {
+      const step = elapsed / 110;
+      const victoryDirection = [0, 1, 2, 3].includes(Number(state.direction))
+        ? Number(state.direction)
+        : Number.isFinite(Number(direction)) ? Number(direction) : 0;
+      return {
+        direction: victoryDirection,
+        frame: Math.floor(step) % 7,
+        animation: state.animation,
+      };
+    }
+    return fallback;
   };
   const enterSessionMode = () => {
     document.body.classList.add("in-session-mode");
@@ -402,9 +408,16 @@
         if (String(emote.roomId) !== String(roomId)) return;
         console.log("Received emote event:", emote);
         window.lobbyEmoteStates = window.lobbyEmoteStates || new Map();
+        const remotePlayer = (window.lobbyPlayers || []).find(
+          (player) => String(player.username) === String(emote.username),
+        );
+        const celebrationAnimation = emote.emote === "victory"
+          ? resolveCelebrationAnimation(remotePlayer?.animations)
+          : null;
         window.lobbyEmoteStates.set(String(emote.username), {
           emote: emote.emote,
           direction: emote.direction,
+          animation: celebrationAnimation,
           startedAt: performance.now(),
         });
       });
@@ -1155,6 +1168,14 @@
       imageMap.set(name, { url, image });
       return image;
     };
+    // Kick off loading for every per-animation sheet as soon as we know about it, instead of
+    // waiting for the first draw/trigger, so a dedicated sheet (e.g. "spell") is already decoded
+    // by the time an action like the Victory Pose needs it.
+    const preloadAnimationImages = (animationsMeta, imageMap) => {
+      Object.entries(animationsMeta || {}).forEach(([name, meta]) => {
+        if (meta?.image) ensureAnimationImageLoaded(imageMap, name, meta.image);
+      });
+    };
     const getAnimationSource = (animationsMeta, imageMap, animation) => {
       const meta = animationsMeta?.[animation];
       if (!meta || !meta.image) return null;
@@ -1167,7 +1188,8 @@
       const frameHeight = Number(meta.frameHeight) || Math.floor(image.naturalHeight / rows);
       return { image, frameWidth, frameHeight, columns, rows, animation };
     };
-    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map() };
+    const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map(), celebrationAnimation: null };
+    preloadAnimationImages(player.animations, player.animationImages);
     const remoteImages = new Map();
     const remoteAnimationImages = new Map();
     const remotePositions = new Map();
@@ -1188,21 +1210,16 @@
     const clearKeysDown = () => Object.keys(keysDown).forEach((key) => { keysDown[key] = false; });
     window.lobbyTriggerVictoryPose = () => {
       if (!player.isLoaded || playerCanvas.dataset.playerAdmin === "true") return false;
-      const source = getAnimationSource(player.animations, player.animationImages, "spell") ||
-        { image: player.image, ...getLobbyAnimationLayout(player.image, "spell") };
-      const layout = window.getCharacterAnimationLayout(
-        "spell",
-        source,
-      );
-      player.currentFrameRect = window.getCharacterFrameRect(
-        "spell",
-        0,
-        player.direction,
-        layout,
-      );
+      // Only trigger the pose against a real dedicated animation sheet. Never reinterpret the
+      // walk sheet as if it were the celebration sheet - that just crops walking frames and
+      // makes the character look like it is walking in place.
+      const celebrationAnimation = resolveCelebrationAnimation(player.animations);
+      if (!celebrationAnimation) return false;
       clearKeysDown();
-      player.currentAnimation = "spell";
+      player.celebrationAnimation = celebrationAnimation;
+      player.currentAnimation = celebrationAnimation;
       player.currentFrame = 0;
+      player.currentFrameRect = null;
       player.animationStartedAt = timestampNow();
       return player.direction;
     };
@@ -1234,24 +1251,36 @@
         : Math.min(now - previousFrameAt, 50);
       previousFrameAt = now;
       const movement = getMovementVector();
-      let victoryPoseActive = player.currentAnimation === "spell";
+      let victoryPoseActive = Boolean(player.celebrationAnimation) &&
+        player.currentAnimation === player.celebrationAnimation;
       if (victoryPoseActive) {
-        const source = getAnimationSource(player.animations, player.animationImages, "spell") ||
-          { image: player.image, ...getLobbyAnimationLayout(player.image, "spell") };
-        const layout = window.getCharacterAnimationLayout("spell", source);
-        player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
-        if (player.currentFrame >= layout.columns) {
+        const celebrationAnimation = player.celebrationAnimation;
+        const source = getAnimationSource(player.animations, player.animationImages, celebrationAnimation);
+        if (source) {
+          const layout = window.getCharacterAnimationLayout(celebrationAnimation, source);
+          player.currentFrame = Math.floor((now - player.animationStartedAt) / 110);
+          if (player.currentFrame >= layout.columns) {
+            player.currentAnimation = "idle";
+            player.celebrationAnimation = null;
+            player.currentFrame = 0;
+            player.currentFrameRect = null;
+            victoryPoseActive = false;
+          } else {
+            player.currentFrameRect = window.getCharacterFrameRect(
+              celebrationAnimation,
+              player.currentFrame,
+              player.direction,
+              layout,
+            );
+          }
+        } else if (now - player.animationStartedAt > 1500) {
+          // The dedicated sheet never became available - bail out to idle instead of ever
+          // faking the celebration from a mismatched sheet.
           player.currentAnimation = "idle";
+          player.celebrationAnimation = null;
           player.currentFrame = 0;
           player.currentFrameRect = null;
           victoryPoseActive = false;
-        } else {
-          player.currentFrameRect = window.getCharacterFrameRect(
-            "spell",
-            player.currentFrame,
-            player.direction,
-            layout,
-          );
         }
       }
       player.isMoving = !victoryPoseActive && (movement.x !== 0 || movement.y !== 0);
@@ -1384,7 +1413,9 @@
               player.isMoving,
             );
         const localSource = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
-        drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
+        if (!victoryPoseActive || localSource) {
+          drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
+        }
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
         if (String(remotePlayer.username) === ownUsername) return;
@@ -1457,11 +1488,20 @@
           remoteAnimationMap = new Map();
           remoteAnimationImages.set(remoteKey, remoteAnimationMap);
         }
+        if (!remotePosition.hasPreloadedAnimations && remotePlayer.animations) {
+          preloadAnimationImages(remotePlayer.animations, remoteAnimationMap);
+          remotePosition.hasPreloadedAnimations = true;
+        }
         const remoteAnimatedSource = getAnimationSource(
           remotePlayer.animations,
           remoteAnimationMap,
           animatedRemote.animation,
         );
+        // Never fall back to the plain walk sheet for a celebration animation - that just crops
+        // walking frames and looks like the character is walking in place. Skip drawing that
+        // frame instead until the real sheet is loaded (or the emote naturally expires).
+        const isCelebrating = animatedRemote.animation !== "walk" && animatedRemote.animation !== "idle";
+        if (isCelebrating && !remoteAnimatedSource) return;
         drawSprite(remoteAnimatedSource?.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation, null, remoteAnimatedSource);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
@@ -1514,6 +1554,7 @@
       if (animations && typeof animations === "object") {
         player.animations = animations;
         player.animationImages = new Map();
+        preloadAnimationImages(player.animations, player.animationImages);
       }
     };
     window.lobbyLoadPlayerImage = loadPlayerImage;
