@@ -533,12 +533,16 @@ legend {
 }
 
 .lobby-teacher-actions {
+  position: sticky;
+  top: 0;
+  z-index: 11;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  padding: 10px 22px 18px;
+  padding: 10px 22px 12px;
   min-width: 0;
-  overflow: hidden;
+  background: #eef4fc;
+  box-shadow: 0 5px 10px rgba(20, 33, 61, 0.12);
 }
 
 .lobby-teacher-actions .practice-button,
@@ -808,7 +812,7 @@ legend {
   background: transparent;
   box-shadow: none;
 }
-.teacher-lobby-stage-wrap.is-live-question
+.teacher-lobby-stage-wrap.is-live-question:not(.is-quicktype-active)
   .teacher-control-sidebar
   > *:not(.lobby-phase-stack) {
   display: none;
@@ -819,7 +823,6 @@ legend {
   right: 18px;
 }
 .teacher-lobby-stage-wrap.is-intermission .teacher-control-header,
-.teacher-lobby-stage-wrap.is-intermission .lobby-teacher-actions,
 .teacher-lobby-stage-wrap.is-intermission .teacher-participants,
 .teacher-lobby-stage-wrap.is-intermission .start-game-form {
   display: none;
@@ -830,7 +833,6 @@ legend {
   display: none;
 }
 .teacher-lobby-stage-wrap.is-quicktype-active .quicktype-setup-form,
-.teacher-lobby-stage-wrap.is-quicktype-active .lobby-teacher-actions,
 .teacher-lobby-stage-wrap.is-quicktype-active .teacher-participants {
   display: none;
 }
@@ -999,6 +1001,41 @@ legend {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+  }
+}
+
+@media (max-width: 760px), (max-height: 700px) {
+  .app-shell:has(.lobby-page) .lobby-page:has(.teacher-lobby-stage-wrap) {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .teacher-lobby-stage-wrap {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .teacher-control-sidebar {
+    max-height: min(700px, calc(100dvh - 24px));
+  }
+}
+
+@media (max-width: 760px) {
+  .teacher-lobby-stage-wrap.is-live-question.is-quicktype-active {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teacher-lobby-stage-wrap.is-live-question.is-quicktype-active
+    .teacher-control-sidebar {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .teacher-control-sidebar {
+    max-height: none;
   }
 }
 .lobby-phase-stack {
@@ -1389,6 +1426,7 @@ legend {
     width: 100%;
     height: auto;
     max-height: none;
+    overflow: visible;
     border-left: 0;
   }
   .teacher-lobby-stage-wrap .teacher-control-sidebar .lobby-phase-stack {
