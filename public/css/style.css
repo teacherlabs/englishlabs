@@ -9393,7 +9393,7 @@ footer {
   overflow-x: hidden;
 }
 
-.app-shell:has(.lobby-student-page) .lobby-character-stage {
+.app-shell:has(.lobby-page) .lobby-character-stage {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -9409,8 +9409,7 @@ footer {
   pointer-events: none;
 }
 
-.app-shell:has(.lobby-student-page) .lobby-character-stage canvas,
-.app-shell:has(.lobby-student-page) .lobby-page canvas {
+.app-shell:has(.lobby-page) .lobby-character-stage canvas {
   display: block;
   width: min(100vw, 147.62vh);
   height: min(100vh, 67.74vw);
@@ -9421,6 +9420,11 @@ footer {
   box-shadow: none !important;
   object-fit: fill;
   pointer-events: auto;
+}
+
+.app-shell:has(.lobby-page) .lobby-active-session .teacher-lobby-stage-wrap .lobby-character-stage,
+.app-shell:has(.lobby-page) .teacher-lobby-stage-wrap.is-live-question .lobby-character-stage {
+  visibility: visible;
 }
 
 .app-shell:has(.lobby-student-page) .lobby-stage-wrap,

@@ -1143,7 +1143,7 @@
     const PLAYER_SPEED = 1.8;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
-    const MAX_PLAYER_X = ARENA_WIDTH - RENDER_SIZE / 2;
+    const MAX_PLAYER_X = ARENA_WIDTH / 2 - RENDER_SIZE / 2 - 1;
     const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 2, frame: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1" };
     const remoteImages = new Map();
     const remotePositions = new Map();
