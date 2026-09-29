@@ -544,6 +544,7 @@
         return;
       }
 
+      target.querySelectorAll(":scope > li:not([data-player-key])").forEach((row) => row.remove());
       const previousPositions = new Map(
         [...target.querySelectorAll("li[data-player-key]")]
           .map((row) => [row.dataset.playerKey, row.getBoundingClientRect()]),
@@ -553,6 +554,7 @@
           .map((row) => [row.dataset.playerKey, row]),
       );
       const visibleKeys = new Set();
+      const addedRows = [];
 
       students.forEach((player, index) => {
         const playerKey = String(player.username);
@@ -560,6 +562,10 @@
           ? `<img src="${escapeHtml(lobbyImageSrc(player.avatarUrl || player.avatar))}" alt="" />`
           : `<span class="lobby-player-initial">${escapeHtml(player.username.charAt(0).toUpperCase())}</span>`;
         const row = existingRows.get(playerKey) || document.createElement("li");
+        if (!existingRows.has(playerKey)) {
+          row.classList.add("is-entering");
+          addedRows.push({ row, index });
+        }
         row.dataset.playerKey = playerKey;
         row.innerHTML = `<span class="round-leaderboard-rank">${index + 1}</span><span class="round-leaderboard-avatar">${avatar}</span><span class="round-leaderboard-name">${escapeHtml(player.username)}</span><strong>${player.score}</strong>`;
         visibleKeys.add(playerKey);
@@ -571,19 +577,48 @@
       });
 
       requestAnimationFrame(() => {
-        students.forEach((player) => {
-          const row = target.querySelector(`[data-player-key="${CSS.escape(String(player.username))}"]`);
-          const previous = previousPositions.get(String(player.username));
-          if (!row || !previous) return;
+        const movingRows = [];
+        students.forEach((player, index) => {
+          const playerKey = String(player.username);
+          const row = target.querySelector(`[data-player-key="${CSS.escape(playerKey)}"]`);
+          if (!row) return;
+          const previous = previousPositions.get(playerKey);
+          if (!previous) return;
           const current = row.getBoundingClientRect();
           const deltaX = previous.left - current.left;
           const deltaY = previous.top - current.top;
           if (!deltaX && !deltaY) return;
-          row.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
           row.style.transition = "none";
+          row.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+          movingRows.push({ row, index });
+        });
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const staggerDelay = reduceMotion ? 0 : 120;
+        const transformDuration = reduceMotion ? "1ms" : "1.7s";
+        const opacityDuration = reduceMotion ? "1ms" : "1.4s";
+        [...movingRows, ...addedRows].forEach(({ row, index }) => {
+          const animationId = String((Number(row.dataset.animationId) || 0) + 1);
+          row.dataset.animationId = animationId;
+          row.style.transition = "none";
+          row.style.transitionDelay = `${index * staggerDelay}ms`;
           requestAnimationFrame(() => {
-            row.style.transition = "transform 380ms cubic-bezier(0.22, 1, 0.36, 1)";
+            if (row.dataset.animationId !== animationId) return;
+            row.style.transition =
+              `transform ${transformDuration} cubic-bezier(0.22, 1, 0.36, 1), opacity ${opacityDuration} ease`;
+            row.style.opacity = "1";
             row.style.transform = "";
+            row.classList.remove("is-entering");
+            const cleanTransition = (event) => {
+              if (event.propertyName !== "transform") return;
+              row.removeEventListener("transitionend", cleanTransition);
+              row.removeEventListener("transitioncancel", cleanTransition);
+              if (row.dataset.animationId === animationId) {
+                row.style.transition = "";
+                row.style.transitionDelay = "";
+              }
+            };
+            row.addEventListener("transitionend", cleanTransition);
+            row.addEventListener("transitioncancel", cleanTransition);
           });
         });
       });

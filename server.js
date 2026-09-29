@@ -2428,17 +2428,18 @@ app.get("/character-generator", requireAuthenticated, (req, res) => {
   });
 });
 
-app.get("/api/profile/character", requireLogin, (req, res) => {
+app.get("/api/profile/character", requireAuthenticated, (req, res) => {
   if (!postgresPool)
     return res.status(500).json({ error: "User database is not configured." });
   postgresReady
     .then(() =>
       postgresPool.query(
-        "SELECT character_config, character_animations FROM users WHERE username = $1",
+        "SELECT avatar, spritesheet, character_config, character_animations FROM users WHERE username = $1",
         [req.session.name],
       ),
     )
     .then(({ rows }) => {
+      const savedCharacter = rows[0];
       const characterConfig = rows[0]?.character_config;
       let config = {};
       if (characterConfig) {
@@ -2451,7 +2452,15 @@ app.get("/api/profile/character", requireLogin, (req, res) => {
       const { initialAnimation, animations } = parseAnimationsConfig(
         rows[0]?.character_animations,
       );
-      res.json({ config, animations, initialAnimation });
+      res.json({
+        avatar: profileImageUrl(savedCharacter?.avatar || ""),
+        spritesheet: profileImageUrl(
+          savedCharacter?.spritesheet || savedCharacter?.avatar || "",
+        ),
+        config,
+        animations,
+        initialAnimation,
+      });
     })
     .catch((error) => {
       console.error("Unable to load character:", error);
@@ -3618,13 +3627,24 @@ app.post("/login", (req, res) => {
         req.session.isAdmin = true;
         req.session.isLoggedIn = true;
         req.session.name = username;
-        req.session.avatar = "";
-        req.session.avatar_initial = username.charAt(0).toUpperCase();
-        console.log("Session information: " + JSON.stringify(req.session));
-        return req.session.save((saveError) => {
-          if (saveError) return res.status(500).send("Unable to save session.");
-          res.redirect("/");
-        });
+        return loadLobbyCharacter(username)
+          .then((character) => {
+            req.session.avatar = character.avatar || character.spritesheet || "";
+            req.session.avatarUrl = profileImageUrl(req.session.avatar);
+            req.session.spritesheet =
+              character.spritesheet || character.avatar || "";
+            req.session.avatar_initial = username.charAt(0).toUpperCase();
+            return new Promise((resolve, reject) => {
+              req.session.save((saveError) =>
+                saveError ? reject(saveError) : resolve(),
+              );
+            });
+          })
+          .then(() => res.redirect("/"))
+          .catch((saveError) => {
+            console.error("Unable to load/save admin character session:", saveError);
+            return res.status(500).send("Unable to load admin profile.");
+          });
       } else {
         const model = {
           error: "Sorry, the password is not correct...",
@@ -4075,7 +4095,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
     .then(() =>
       Promise.all([
         postgresPool.query(
-        "SELECT username, email, goal, avatar, spritesheet, character_config, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
+        "SELECT username, email, goal, avatar, spritesheet, character_config, character_animations, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
         [req.session.name],
         ),
         modeStatsPromise,
@@ -4105,6 +4125,11 @@ app.get("/profile", requireProfileUser, (req, res) => {
       } else {
         student.characterConfig = {};
       }
+      const savedAnimations = parseAnimationsConfig(
+        student.character_animations,
+      );
+      student.initialAnimation = savedAnimations.initialAnimation;
+      student.animations = savedAnimations.animations;
       loadProgressForUser(
         "SELECT * FROM progress WHERE username = $1 ORDER BY completed_at DESC",
         "SELECT * FROM progress WHERE username = ? ORDER BY completed_at DESC",
@@ -5822,9 +5847,12 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
           ],
           function (error) {
             if (error) return reject(error);
-            if (this.changes !== 1) {
+            if (this.changes !== 1 && (!req.session.isAdmin || !postgresPool)) {
               return reject(new Error(`No SQLite member found for ${req.session.name}.`));
             }
+            // PostgreSQL is authoritative for the admin account. Some deployments do not
+            // mirror that account into SQLite, so a missing local admin row must not turn a
+            // successful PostgreSQL character save into a failed API response.
             resolve();
           },
         );

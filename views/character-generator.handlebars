@@ -46,10 +46,22 @@
 
       const loadSavedCharacter = async () => {
         const response = await fetch(apiUrl, { credentials: "same-origin" });
-        if (!response.ok) return;
-        const { config, animations, initialAnimation } = await response.json();
+        const savedCharacter = await response.json();
+        if (!response.ok) {
+          throw new Error(savedCharacter.error || "Unable to load saved character.");
+        }
         editor.contentWindow?.postMessage(
-          { type: "LOAD_LPC_CHARACTER", payload: { config, animations, initialAnimation } },
+          {
+            type: "LOAD_LPC_CHARACTER",
+            payload: {
+              config: savedCharacter.config || {},
+              avatar: savedCharacter.avatar,
+              previewImage: savedCharacter.avatar,
+              spritesheet: savedCharacter.spritesheet,
+              animations: savedCharacter.animations || {},
+              initialAnimation: savedCharacter.initialAnimation || "walk",
+            },
+          },
           editorOrigin,
         );
       };

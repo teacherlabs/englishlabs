@@ -1471,6 +1471,10 @@ legend {
   min-height: 52px;
   will-change: transform;
 }
+.round-leaderboard-list li[data-player-key].is-entering {
+  opacity: 0;
+  transform: translateY(18px);
+}
 .round-leaderboard-rank {
   color: #b98842;
   font-size: 18px;

@@ -213,27 +213,6 @@
       image.replaceWith(placeholder);
     });
   });
-  characterFrame?.addEventListener("load", () => {
-    const savedConfig = localStorage.getItem(scopedCharacterKey("userCharacterConfig"));
-    if (!savedConfig || !characterFrame.contentWindow) return;
-    try {
-      const savedAnimations = localStorage.getItem(scopedCharacterKey("userAnimations"));
-      const savedInitialAnimation = localStorage.getItem(scopedCharacterKey("userInitialAnimation"));
-      characterFrame.contentWindow.postMessage(
-        {
-          type: "LOAD_LPC_CHARACTER",
-          payload: {
-            ...JSON.parse(savedConfig),
-            animations: savedAnimations ? JSON.parse(savedAnimations) : undefined,
-            initialAnimation: savedInitialAnimation || undefined,
-          },
-        },
-        window.location.origin,
-      );
-    } catch (error) {
-      localStorage.removeItem(scopedCharacterKey("userCharacterConfig"));
-    }
-  });
   characterOpen?.addEventListener("click", () => characterDialog?.showModal());
   characterClose?.addEventListener("click", () => characterDialog?.close());
   characterDialog?.addEventListener("click", (event) => {
@@ -241,101 +220,58 @@
   });
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin || event.source !== characterFrame?.contentWindow) return;
-    if (event.data?.type !== "SAVE_LPC_CHARACTER") return;
-    const payload = event.data.payload || {};
-    const hasMultiAnimationPayload =
-      payload.animations && typeof payload.animations === "object" && Object.keys(payload.animations).length > 0;
-    const initialAnimation = String(payload.initialAnimation || "walk").toLowerCase();
-    const previewImage =
-      payload.previewImage ||
-      payload.preview ||
-      payload.previewDataUrl ||
-      payload.image ||
-      payload.spritesheetImage ||
-      (hasMultiAnimationPayload && (payload.animations[initialAnimation]?.image || payload.animations.walk?.image));
-    if (!previewImage) {
-      if (characterError) { characterError.textContent = "The character generator did not send the character images."; characterError.hidden = false; }
+    if (event.data?.type === "TEACHER_CHARACTER_SAVE_FAILED") {
+      if (characterError) {
+        characterError.textContent = event.data.message || "Unable to save character.";
+        characterError.hidden = false;
+      }
+      if (characterSaved) characterSaved.hidden = true;
       return;
     }
-    const saveCharacter = hasMultiAnimationPayload
-      ? Promise.resolve(payload.animations.walk?.image || previewImage).then((spritesheetImage) =>
-          fetch("/api/profile/character", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              config: payload.config || payload.characterConfig || {},
-              previewImage,
-              spritesheetImage,
-              animations: payload.animations,
-              initialAnimation,
-            }),
-          }).then((response) =>
-            response.json().then((result) => ({
-              ok: response.ok,
-              result,
-              spritesheetImage,
-            })),
-          ),
-        )
-      : window.bakeCharacterSpriteSheet(payload).then((spritesheetImage) => {
-          if (!spritesheetImage) throw new Error("The character generator did not send a sprite sheet.");
-          const { layers, layerImages, spritesheetLayers, ...bakedPayload } = payload;
-          return fetch("/api/profile/character", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...bakedPayload, previewImage, spritesheetImage }),
-          }).then((response) =>
-            response.json().then((result) => ({
-              ok: response.ok,
-              result,
-              spritesheetImage,
-            })),
-          );
-        });
-    saveCharacter
-      .then(({ ok, result, spritesheetImage }) => {
-        if (!ok) throw new Error(result.error || "Unable to save character.");
-        if (!result.saved || !result.avatar) {
-          throw new Error("The character was not saved.");
-        }
-        localStorage.setItem(scopedCharacterKey("userProfilePic"), previewImage);
-        localStorage.setItem(scopedCharacterKey("userSpritesheet"), spritesheetImage);
-        localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(payload.config || {}));
-        localStorage.setItem(scopedCharacterKey("userAnimations"), JSON.stringify(result.animations || {}));
-        localStorage.setItem(scopedCharacterKey("userInitialAnimation"), result.initialAnimation || "walk");
-        const avatarUrl = result.avatar.startsWith("data:image/")
-          ? result.avatar
-          : `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
-        document.querySelectorAll(
-          ".profile-avatar, .nav-avatar, .app-avatar, .app-profile-avatar, .dashboard-avatar",
-        ).forEach((profileAvatar) => {
-          if (profileAvatar.tagName === "IMG") {
-            profileAvatar.src = avatarUrl;
-            return;
-          }
-          if (!profileAvatar.classList.contains("app-avatar-placeholder")) return;
-          const image = document.createElement("img");
-          image.className = profileAvatar.className
-            .replace("app-avatar-placeholder", "")
-            .trim();
-          image.src = avatarUrl;
-          image.alt = "Profile picture";
-          profileAvatar.replaceWith(image);
-        });
-        document.querySelectorAll(".profile-avatar-placeholder").forEach((placeholder) => {
-          const image = document.createElement("img");
-          image.className = "profile-avatar profile-avatar-img";
-          image.src = avatarUrl;
-          image.alt = "Profile picture";
-          placeholder.replaceWith(image);
-        });
-        if (characterSaved) characterSaved.hidden = false;
-        if (characterError) characterError.hidden = true;
-        characterDialog?.close();
-      })
-      .catch((error) => {
-        if (characterError) { characterError.textContent = error.message; characterError.hidden = false; }
-        if (characterSaved) characterSaved.hidden = true;
-      });
+    if (event.data?.type !== "TEACHER_CHARACTER_SAVED") return;
+    const result = event.data.payload || {};
+    if (!result.saved || !result.avatar) {
+      if (characterError) {
+        characterError.textContent = "The character was not saved.";
+        characterError.hidden = false;
+      }
+      return;
+    }
+    try {
+      localStorage.setItem(scopedCharacterKey("userProfilePic"), result.avatar);
+      localStorage.setItem(scopedCharacterKey("userSpritesheet"), result.spritesheet || result.avatar);
+      localStorage.setItem(scopedCharacterKey("userCharacterConfig"), JSON.stringify(result.config || {}));
+      localStorage.setItem(scopedCharacterKey("userAnimations"), JSON.stringify(result.animations || {}));
+      localStorage.setItem(scopedCharacterKey("userInitialAnimation"), result.initialAnimation || "walk");
+    } catch (storageError) {
+      console.warn("Unable to cache the saved character.", storageError);
+    }
+    const avatarUrl = result.avatar.startsWith("data:image/")
+      ? result.avatar
+      : `/uploads/profiles/${encodeURIComponent(result.avatar)}?t=${Date.now()}`;
+    document.querySelectorAll(
+      ".profile-avatar, .nav-avatar, .app-avatar, .app-profile-avatar, .dashboard-avatar",
+    ).forEach((profileAvatar) => {
+      if (profileAvatar.tagName === "IMG") {
+        profileAvatar.src = avatarUrl;
+        return;
+      }
+      if (!profileAvatar.classList.contains("app-avatar-placeholder")) return;
+      const image = document.createElement("img");
+      image.className = profileAvatar.className.replace("app-avatar-placeholder", "").trim();
+      image.src = avatarUrl;
+      image.alt = "Profile picture";
+      profileAvatar.replaceWith(image);
+    });
+    document.querySelectorAll(".profile-avatar-placeholder").forEach((placeholder) => {
+      const image = document.createElement("img");
+      image.className = "profile-avatar profile-avatar-img";
+      image.src = avatarUrl;
+      image.alt = "Profile picture";
+      placeholder.replaceWith(image);
+    });
+    if (characterSaved) characterSaved.hidden = false;
+    if (characterError) characterError.hidden = true;
+    characterDialog?.close();
   });
 </script>
