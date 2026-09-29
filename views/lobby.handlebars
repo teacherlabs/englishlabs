@@ -1182,12 +1182,63 @@
       if (!meta || !meta.image) return null;
       const image = ensureAnimationImageLoaded(imageMap, animation, meta.image);
       if (!image.complete || image.naturalWidth < 8) return null;
-      const columns = Number(meta.columns) ||
-        Math.max(1, Math.floor(image.naturalWidth / (Number(meta.frameWidth) || image.naturalWidth)));
-      const rows = Number(meta.rows) || 4;
+      const configured = lobbyAnimationLayouts[animation] || lobbyAnimationLayouts.walk;
+      const columns = Number(meta.columns) || configured.columns;
+      const rows = Number(meta.rows) || configured.rows;
       const frameWidth = Number(meta.frameWidth) || Math.floor(image.naturalWidth / columns);
       const frameHeight = Number(meta.frameHeight) || Math.floor(image.naturalHeight / rows);
+      if (
+        !Number.isFinite(frameWidth) ||
+        !Number.isFinite(frameHeight) ||
+        frameWidth < 1 ||
+        frameHeight < 1 ||
+        columns < 1 ||
+        rows < 1 ||
+        frameWidth * columns > image.naturalWidth ||
+        frameHeight * rows > image.naturalHeight
+      ) return null;
       return { image, frameWidth, frameHeight, columns, rows, animation };
+    };
+    // Resolves the best available sheet + frame to draw for a requested animation (e.g. "idle"),
+    // without ever guessing a frame grid out of a plain single-frame image (the profile portrait
+    // saved to the legacy `spritesheet` field is NOT a walk-style grid and must never be sliced
+    // like one - doing so produced giant/cropped, distorted characters). Order of preference:
+    //   1. A dedicated sheet for the exact requested animation (fully correct metadata).
+    //   2. The character's real "walk" sheet, shown at its standing frame 0, for any animation
+    //      that has no dedicated sheet of its own (e.g. "idle") - renders immediately and
+    //      correctly-proportioned instead of staying invisible/distorted until movement.
+    //   3. A pre-multi-animation legacy account whose raw spritesheet image really is a walk
+    //      grid (only reached when there is no animations map at all).
+    const resolveAnimationSource = (animationsMeta, imageMap, animation, legacyImage) => {
+      const dedicated = getAnimationSource(animationsMeta, imageMap, animation);
+      if (dedicated) return { source: dedicated, frame: null };
+      if (animation !== "walk") {
+        const walk = getAnimationSource(animationsMeta, imageMap, "walk");
+        if (walk) return { source: walk, frame: 0 };
+      }
+      if (legacyImage?.complete && legacyImage.naturalWidth >= 8) {
+        const legacyLayout = getLobbyAnimationLayout(legacyImage, "walk");
+        const isWalkGrid =
+          legacyLayout.columns === 8 &&
+          legacyLayout.rows === 4 &&
+          legacyLayout.frameWidth === legacyLayout.frameHeight &&
+          legacyLayout.frameWidth * legacyLayout.columns === legacyImage.naturalWidth &&
+          legacyLayout.frameHeight * legacyLayout.rows === legacyImage.naturalHeight;
+        return {
+          source: isWalkGrid
+            ? { image: legacyImage, ...legacyLayout }
+            : {
+                image: legacyImage,
+                frameWidth: legacyImage.naturalWidth,
+                frameHeight: legacyImage.naturalHeight,
+                columns: 1,
+                rows: 1,
+                animation: "walk",
+              },
+          frame: isWalkGrid && animation === "walk" ? null : 0,
+        };
+      }
+      return null;
     };
     const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map(), celebrationAnimation: null, isCelebrating: false };
     preloadAnimationImages(player.animations, player.animationImages);
@@ -1359,8 +1410,13 @@
           frameRect.frameHeight !== layout.frameHeight
         ) return;
         logLobbySpriteLayout(image, layout, frameRect.frame, frameRect.direction);
-        const renderHeight = RENDER_WIDTH * layout.frameHeight / layout.frameWidth;
-        const drawX = Math.floor(x - (RENDER_WIDTH / 2));
+        const spriteScale = Math.min(
+          RENDER_WIDTH / layout.frameWidth,
+          RENDER_WIDTH / layout.frameHeight,
+        );
+        const renderWidth = layout.frameWidth * spriteScale;
+        const renderHeight = layout.frameHeight * spriteScale;
+        const drawX = Math.floor(x - (renderWidth / 2));
         const drawY = Math.floor(y - renderHeight + bounceOffsetY);
         frameContext.drawImage(
           image,
@@ -1370,7 +1426,7 @@
           layout.frameHeight,
           drawX,
           drawY,
-          RENDER_WIDTH,
+          renderWidth,
           renderHeight,
         );
         if (overlaySymbol) {
@@ -1399,12 +1455,14 @@
       // frame (walk animation, frame 0) with a sparkle overlay so the celebration reads clearly
       // as "celebrating" rather than reusing directional walk frames (which looked like walking
       // in place).
-      const drawCelebrationBounce = (image, x, y, direction, frame, username, isAdmin) => {
-        if (!image.complete || image.naturalWidth < 8 || image.naturalHeight < 8) return;
-        const layout = window.getCharacterAnimationLayout("walk", getLobbyAnimationLayout(image, "walk"));
+      const drawCelebrationBounce = (image, x, y, direction, frame, username, isAdmin, animationsMeta, imageMap) => {
+        const resolved = resolveAnimationSource(animationsMeta, imageMap, "walk", image);
+        if (!resolved) return;
+        const { source } = resolved;
+        const layout = window.getCharacterAnimationLayout("walk", source);
         const frameRect = window.getCharacterFrameRect("walk", 0, direction, layout);
         const bounceOffset = -Math.abs(Math.sin(((frame % 4) / 4) * Math.PI)) * 8;
-        drawSprite(image, x, y, direction, 0, username, isAdmin, "walk", frameRect, layout, bounceOffset, "✨");
+        drawSprite(source.image, x, y, direction, 0, username, isAdmin, "walk", frameRect, source, bounceOffset, "✨");
       };
       const drawAdminPlaceholder = (x, y, username) => {
         const radius = RENDER_WIDTH * 0.31;
@@ -1437,6 +1495,8 @@
             player.currentFrame,
             ownUsername,
             playerCanvas.dataset.playerAdmin === "true",
+            player.animations,
+            player.animationImages,
           );
         } else {
           const animatedPlayer = victoryPoseActive
@@ -1452,9 +1512,21 @@
                 now,
                 player.isMoving,
               );
-          const localSource = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
-          if (!victoryPoseActive || localSource) {
-            drawSprite(localSource?.image || player.image, player.x, player.y, animatedPlayer.direction, animatedPlayer.frame, ownUsername, playerCanvas.dataset.playerAdmin === "true", animatedPlayer.animation, victoryPoseActive ? player.currentFrameRect : null, localSource);
+          // During a real-sheet celebration, only ever draw the dedicated sheet (skip the frame
+          // instead of drawing anything until it loads) - never fall back to the walk sheet,
+          // which previously produced the "walking in place" bug. Otherwise (idle/walking),
+          // resolve the best real grid available so the character renders immediately and
+          // correctly-proportioned, without ever slicing a single-frame portrait like a grid.
+          const resolved = victoryPoseActive
+            ? (() => {
+                const dedicated = getAnimationSource(player.animations, player.animationImages, animatedPlayer.animation);
+                return dedicated ? { source: dedicated, frame: null } : null;
+              })()
+            : resolveAnimationSource(player.animations, player.animationImages, animatedPlayer.animation, player.image);
+          if (!victoryPoseActive || resolved) {
+            const drawFrame = resolved && resolved.frame !== null ? resolved.frame : animatedPlayer.frame;
+            const drawAnimation = resolved ? resolved.source.animation : animatedPlayer.animation;
+            drawSprite(resolved?.source.image || player.image, player.x, player.y, animatedPlayer.direction, drawFrame, ownUsername, playerCanvas.dataset.playerAdmin === "true", drawAnimation, victoryPoseActive ? player.currentFrameRect : null, resolved?.source || null);
           }
         }
       }
@@ -1534,20 +1606,26 @@
           remotePosition.hasPreloadedAnimations = true;
         }
         if (animatedRemote.animation === "celebrate-bounce") {
-          drawCelebrationBounce(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin);
+          drawCelebrationBounce(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, remotePlayer.animations, remoteAnimationMap);
           return;
         }
-        const remoteAnimatedSource = getAnimationSource(
-          remotePlayer.animations,
-          remoteAnimationMap,
-          animatedRemote.animation,
-        );
         // Never fall back to the plain walk sheet for a dedicated celebration animation - that
         // just crops walking frames and looks like the character is walking in place. Skip
-        // drawing that frame instead until the real sheet is loaded (or the emote expires).
+        // drawing that frame instead until the real sheet is loaded (or the emote expires). For
+        // idle/walking, resolve the best real grid (dedicated sheet, then the walk sheet at its
+        // standing frame, then a legacy raw grid) so the remote character renders immediately
+        // and correctly-proportioned instead of slicing a single-frame image like a grid.
         const isCelebrating = animatedRemote.animation !== "walk" && animatedRemote.animation !== "idle";
-        if (isCelebrating && !remoteAnimatedSource) return;
-        drawSprite(remoteAnimatedSource?.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, animatedRemote.animation, null, remoteAnimatedSource);
+        const remoteResolved = isCelebrating
+          ? (() => {
+              const dedicated = getAnimationSource(remotePlayer.animations, remoteAnimationMap, animatedRemote.animation);
+              return dedicated ? { source: dedicated, frame: null } : null;
+            })()
+          : resolveAnimationSource(remotePlayer.animations, remoteAnimationMap, animatedRemote.animation, remoteImage);
+        if (isCelebrating && !remoteResolved) return;
+        const remoteDrawFrame = remoteResolved && remoteResolved.frame !== null ? remoteResolved.frame : animatedRemote.frame;
+        const remoteDrawAnimation = remoteResolved ? remoteResolved.source.animation : animatedRemote.animation;
+        drawSprite(remoteResolved?.source.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, remoteDrawFrame, remotePlayer.username, isAdmin, remoteDrawAnimation, null, remoteResolved?.source || null);
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);

@@ -5721,9 +5721,9 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       sanitizedAnimations.walk?.image ||
       "",
   );
-  // The legacy `spritesheet` column powers old rendering paths that only understand a single
-  // image (no multi-animation map). Every view that shows either field should render the same,
-  // up-to-date character portrait, so it is always kept identical to `previewImage`.
+  // Keep the legacy avatar/spritesheet fields synchronized with the selected portrait. Lobby
+  // animation sheets live in `character_animations`; the canvas uses their metadata rather than
+  // trying to slice this single-frame portrait as a multi-frame grid.
   const spritesheetImage = previewImage;
   // 3. Save the base item configuration (character_config) alongside the images/animations.
   const config =
