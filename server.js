@@ -5694,6 +5694,8 @@ app.post("/profile/avatar", requireProfileUser, (req, res) => {
 app.post("/api/profile/character", requireAuthenticated, (req, res) => {
   const dataUrlPattern =
     /^data:image\/(png|jpeg|webp|gif)(?:;charset=[^;]+)?;base64,([A-Za-z0-9+/=\r\n]+)$/i;
+  // 2. Save the multi-animation payload: parse/validate the incoming `animations` map (walk,
+  // idle, spell, etc.) and remember which one is the default (`initialAnimation`).
   const rawAnimations =
     req.body.animations && typeof req.body.animations === "object"
       ? req.body.animations
@@ -5705,9 +5707,12 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
   const initialAnimation = String(
     req.body.initialAnimation || "walk",
   ).toLowerCase();
+  // 1. Update the profile picture/avatar: the studio sends the chosen preview frame as
+  // `previewImage` (or an `avatar` alias for older callers). Fall back to the initial/walk
+  // animation's own frame only if no explicit preview image was provided.
   const previewImage = String(
-    req.body.avatar ||
-      req.body.previewImage ||
+    req.body.previewImage ||
+      req.body.avatar ||
       req.body.preview ||
       req.body.previewDataUrl ||
       req.body.image ||
@@ -5716,6 +5721,9 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       sanitizedAnimations.walk?.image ||
       "",
   );
+  // The legacy `spritesheet` field powers old rendering paths that aren't aware of the
+  // multi-animation map, so it should still point at a real walk sheet when one is available,
+  // and otherwise fall back to the same preview image so it's never left stale/blank.
   const spritesheetImage = String(
     req.body.spritesheet ||
       req.body.spritesheetImage ||
@@ -5724,6 +5732,7 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       previewImage ||
       "",
   );
+  // 3. Save the base item configuration (character_config) alongside the images/animations.
   const config =
     (req.body.config || req.body.characterConfig) &&
     typeof (req.body.config || req.body.characterConfig) === "object"
