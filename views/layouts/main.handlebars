@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>English Labs</title>
-    <link rel="stylesheet" href="/css/style.css?v=20260929-responsive-lobby" />
+    <link rel="stylesheet" href="/css/style.css?v=20260930-profile-card-link" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -73,10 +73,12 @@
         <div class="app-main">{{{body}}}</div>
         <aside class="app-rightbar" aria-label="Profile and progress">
           <div class="app-profile-card">
-            <div class="app-profile-card-heading"><p class="app-rail-label">Your space</p><a href="/profile" aria-label="Open profile">↗</a></div>
-            {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar profile-avatar-img" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
-            <h2>{{session.name}}</h2>
-            {{#unless session.isAdmin}}<p>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}No learning goal set yet.{{/if}}</p>{{/unless}}
+            <a class="app-profile-card-link" href="/profile" aria-label="Open {{session.name}}'s profile">
+              <span class="app-profile-card-heading"><span class="app-rail-label">Your space</span><span class="app-profile-card-arrow" aria-hidden="true">↗</span></span>
+              {{#if session.avatar}}<img src="{{session.avatarUrl}}" alt="{{session.name}}'s character" class="app-profile-avatar profile-avatar-img" />{{else}}<span class="app-profile-avatar app-avatar-placeholder">{{session.avatar_initial}}</span>{{/if}}
+              <h2>{{session.name}}</h2>
+              {{#unless session.isAdmin}}<p>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}No learning goal set yet.{{/if}}</p>{{/unless}}
+            </a>
             {{#if session.isAdmin}}<button class="app-character-link" type="button" data-teacher-character-open>Customize character <span aria-hidden="true">→</span></button>{{/if}}
           </div>
           {{#if dashboardSchedule}}

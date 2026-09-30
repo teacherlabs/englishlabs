@@ -2411,8 +2411,35 @@ legend {
 }
 
 .app-profile-card {
+  position: relative;
   padding: 18px;
   background: var(--color-background-tint);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.app-profile-card:hover,
+.app-profile-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 16px rgba(20, 33, 61, 0.16);
+}
+
+.app-profile-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-profile-card-link::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.app-profile-card-link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 9px;
 }
 
 .app-profile-card-heading {
@@ -2421,7 +2448,7 @@ legend {
   justify-content: space-between;
 }
 
-.app-profile-card-heading a {
+.app-profile-card-arrow {
   color: var(--color-primary);
   font-size: 18px;
 }
@@ -2444,7 +2471,7 @@ legend {
   font-size: 20px;
 }
 
-.app-profile-card > p:last-child {
+.app-profile-card-link > p:last-child {
   width: auto;
   padding: 0;
   margin-top: 5px;
@@ -2454,6 +2481,8 @@ legend {
 }
 
 .app-character-link {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 100%;
   justify-content: space-between;
