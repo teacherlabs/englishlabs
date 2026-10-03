@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>English Labs</title>
-    <link rel="stylesheet" href="/css/style.css?v=20260930-profile-card-link" />
+    <link rel="stylesheet" href="/css/style.css?v=20261003-rightbar-dock" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -38,7 +38,24 @@
   <body>
     {{#if session.isLoggedIn}}
       <div class="app-shell">
-        <aside class="app-sidebar">
+        <button
+          class="app-menu-toggle"
+          type="button"
+          data-app-menu-toggle
+          aria-label="Open main navigation"
+          aria-controls="app-sidebar"
+          aria-expanded="false"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <button
+          class="app-nav-backdrop"
+          type="button"
+          data-app-nav-backdrop
+          aria-label="Close main navigation"
+          hidden
+        ></button>
+        <aside class="app-sidebar" id="app-sidebar" aria-label="Main navigation">
           <a class="app-brand" href="/">
             <img class="app-brand-logo" src="/logo.png" alt="English Labs logo" />
           </a>
@@ -79,7 +96,7 @@
               <h2>{{session.name}}</h2>
               {{#unless session.isAdmin}}<p>{{#if dashboardGoal}}{{dashboardGoal}}{{else}}No learning goal set yet.{{/if}}</p>{{/unless}}
             </a>
-            {{#if session.isAdmin}}<button class="app-character-link" type="button" data-teacher-character-open>Customize character <span aria-hidden="true">→</span></button>{{/if}}
+            {{#if session.isAdmin}}<button class="app-character-link practice-button" type="button" data-teacher-character-open>Customize character <span aria-hidden="true">→</span></button>{{/if}}
           </div>
           {{#if dashboardSchedule}}
             <section class="app-calendar-card" aria-labelledby="calendar-heading">
@@ -134,6 +151,44 @@
       </div>
       <script>
         document.addEventListener("DOMContentLoaded", () => {
+          const menuToggle = document.querySelector("[data-app-menu-toggle]");
+          const sidebar = document.querySelector("#app-sidebar");
+          const menuBackdrop = document.querySelector("[data-app-nav-backdrop]");
+          const mobileNavigation = window.matchMedia("(max-width: 768px)");
+          const setMenuOpen = (isOpen, returnFocus = false) => {
+            if (!menuToggle || !sidebar || !menuBackdrop) return;
+            const shouldOpen = isOpen && mobileNavigation.matches;
+            document.querySelector(".app-shell")?.classList.toggle("is-nav-open", shouldOpen);
+            menuToggle.setAttribute("aria-expanded", String(shouldOpen));
+            menuToggle.setAttribute(
+              "aria-label",
+              shouldOpen ? "Close main navigation" : "Open main navigation",
+            );
+            menuBackdrop.hidden = !shouldOpen;
+            document.body.classList.toggle("app-nav-open", shouldOpen);
+            if (shouldOpen) {
+              sidebar.querySelector(".app-nav-link")?.focus();
+            } else if (returnFocus) {
+              menuToggle.focus();
+            }
+          };
+
+          menuToggle?.addEventListener("click", () => {
+            setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true");
+          });
+          menuBackdrop?.addEventListener("click", () => setMenuOpen(false));
+          sidebar?.addEventListener("click", (event) => {
+            if (event.target.closest("a")) setMenuOpen(false);
+          });
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && menuToggle?.getAttribute("aria-expanded") === "true") {
+              setMenuOpen(false, true);
+            }
+          });
+          mobileNavigation.addEventListener("change", (event) => {
+            if (!event.matches) setMenuOpen(false);
+          });
+
           const candle = document.getElementById("rpgCandle");
           if (candle) {
             const candleStorageKey = "rpgCandleLit";

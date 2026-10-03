@@ -172,17 +172,20 @@
               <p data-answer-feedback></p>
             </div>
             <p>Your score: <strong data-live-score>{{participant.score}}</strong></p>
+            <p class="lobby-your-rank" data-your-rank hidden></p>
           </section>
           <section class="round-leaderboard-panel{{#if isLeaderboardPhase}} is-visible{{/if}}" data-phase-leaderboard{{#unless isLeaderboardPhase}} hidden{{/unless}}>
             <p class="eyebrow">Round results</p>
             {{#if isQuicktype}}<h2>Correct spelling: <span data-correct-word></span></h2>{{else}}<h2>Standings</h2>{{/if}}
             <ol class="round-leaderboard-list" data-round-leaderboard></ol>
+            <p class="lobby-your-rank" data-your-rank hidden></p>
             <p class="admin-live-note">Waiting for the teacher to continue...</p>
           </section>
           <section class="final-results-panel" data-phase-finished{{#unless isFinished}} hidden{{/unless}}>
             <p class="eyebrow">Quiz complete</p>
             <h2>Final results</h2>
             <ol class="final-results-list" data-final-results><li>Loading...</li></ol>
+            <p class="lobby-your-rank" data-your-rank hidden></p>
           </section>
           </div>
         </div>
@@ -534,11 +537,12 @@
     let lastEvent = null;
     let lastEntranceEvent = null;
 
+    const isAdminView = lobbyPhase.dataset.role === "admin";
     const renderLeaderboardList = (target, players) => {
       const students = (players || [])
         .filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher")
         .sort((first, second) => Number(second.score) - Number(first.score) || String(first.username).localeCompare(String(second.username)))
-        .slice(0, 5);
+        .slice(0, isAdminView ? undefined : 5);
       if (!students.length) {
         target.innerHTML = "<li>No scores yet.</li>";
         return;
@@ -623,8 +627,21 @@
         });
       });
     };
+    const rankedStudents = (players) => (players || [])
+      .filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher")
+      .sort((first, second) => Number(second.score) - Number(first.score) || String(first.username).localeCompare(String(second.username)));
+    const updateYourRank = (players) => {
+      const ownName = String(document.querySelector("[data-player-canvas]")?.dataset.playerUsername || "");
+      const ranked = rankedStudents(players);
+      const position = ranked.findIndex((player) => String(player.username) === ownName);
+      document.querySelectorAll("[data-your-rank]").forEach((el) => {
+        if (!ownName || position < 0) { el.hidden = true; return; }
+        el.hidden = false;
+        el.textContent = `Your rank: ${position + 1}/${ranked.length} · ${ranked[position].score} pts`;
+      });
+    };
     const renderFinalResults = (players) => {
-      const students = (players || []).filter((player) => Number(player.isAdmin) !== 1 && player.role !== "teacher");
+      const students = rankedStudents(players).slice(0, isAdminView ? undefined : 5);
       if (!students.length) { finalResultsList.innerHTML = "<li>No scores yet.</li>"; return; }
       finalResultsList.innerHTML = students.map((player, index) => {
         const avatar = (player.avatarUrl || player.avatar)
@@ -997,6 +1014,7 @@
         const submit = lobbyPhase.querySelector("[data-quicktype-form] button");
         if (submit) submit.disabled = true;
       }
+      updateYourRank(state.leaderboard);
       if (state.room.status === "leaderboard") {
         renderLeaderboardList(roundLeaderboardList, state.leaderboard);
         if (correctWordEl) correctWordEl.textContent = state.correctWord || "";
@@ -1240,6 +1258,7 @@
     const frameContext = frameCanvas.getContext("2d");
     const RENDER_WIDTH = 52;
     const PLAYER_SPEED = 108;
+    const PLAYER_SYNC_INTERVAL = 125;
     const WALK_FRAME_DURATION = 110;
     playerContext.imageSmoothingEnabled = false;
     frameContext.imageSmoothingEnabled = false;
@@ -1723,8 +1742,8 @@
       });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
-      const syncState = `${player.x},${player.y},${player.direction},${player.frame.toFixed(2)}`;
-      if (syncState !== lastSyncedState && timestampNow() - lastSyncAt > 50) {
+      const syncState = `${player.x},${player.y},${player.direction}`;
+      if (syncState !== lastSyncedState && timestampNow() - lastSyncAt >= PLAYER_SYNC_INTERVAL) {
         lastSyncAt = timestampNow();
         lastSyncedState = syncState;
         const movement = { roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame };

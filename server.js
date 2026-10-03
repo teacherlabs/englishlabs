@@ -1088,7 +1088,12 @@ const parseCharacterConfig = (value) => {
   }
 };
 
-const ANIMATION_METADATA_KEYS = ["frameWidth", "frameHeight", "columns", "rows"];
+const ANIMATION_METADATA_KEYS = [
+  "frameWidth",
+  "frameHeight",
+  "columns",
+  "rows",
+];
 const parseAnimationsConfig = (value) => {
   const empty = { initialAnimation: "walk", animations: {} };
   if (!value) return empty;
@@ -1129,7 +1134,9 @@ const sanitizeAnimationsForStorage = (animations, dataUrlPattern) => {
   const sanitized = {};
   if (!animations || typeof animations !== "object") return sanitized;
   Object.entries(animations).forEach(([name, entry]) => {
-    const image = String(entry?.image || entry?.url || entry?.dataUrl || "").trim();
+    const image = String(
+      entry?.image || entry?.url || entry?.dataUrl || "",
+    ).trim();
     const match = image.match(dataUrlPattern);
     if (!match) return;
     sanitized[name] = {
@@ -1144,7 +1151,6 @@ const sanitizeAnimationsForStorage = (animations, dataUrlPattern) => {
   });
   return sanitized;
 };
-
 
 const loadLobbyCharacter = (username) => {
   if (postgresPool) {
@@ -2029,7 +2035,8 @@ db.serialize(() => {
        AND (m.role IS NULL OR m.role != 'admin')
      GROUP BY p.username, r.mode`,
     (error) => {
-      if (error) console.warn("Unable to backfill mode-specific lobby stats:", error);
+      if (error)
+        console.warn("Unable to backfill mode-specific lobby stats:", error);
     },
   );
   db.run(
@@ -2259,7 +2266,8 @@ db.serialize(() => {
 // The lobby can be the first authenticated request after a cold deploy.
 // Keep its schema initialization explicit and awaitable before serving it.
 const lobbyTablesReady = new Promise((resolve, reject) => {
-  db.exec(`
+  db.exec(
+    `
     CREATE TABLE IF NOT EXISTS lobby_rooms (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT NOT NULL UNIQUE,
@@ -2330,13 +2338,15 @@ const lobbyTablesReady = new Promise((resolve, reject) => {
       submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (room_id, question_order, username)
     );
-  `, (error) => {
-    if (error) {
-      console.error("Lobby schema initialization error:", error);
-      return reject(error);
-    }
-    resolve();
-  });
+  `,
+    (error) => {
+      if (error) {
+        console.error("Lobby schema initialization error:", error);
+        return reject(error);
+      }
+      resolve();
+    },
+  );
 });
 
 //------------
@@ -2390,9 +2400,13 @@ app.get("/", (req, res) => {
           const dashboardProgress = Object.fromEntries(
             dashboardAreaProgress
               .filter((area) =>
-                ["reading", "grammar", "vocabulary", "writing", "listening"].includes(
-                  area.key,
-                ),
+                [
+                  "reading",
+                  "grammar",
+                  "vocabulary",
+                  "writing",
+                  "listening",
+                ].includes(area.key),
               )
               .map((area) => [area.key, area.percentage]),
           );
@@ -2403,8 +2417,9 @@ app.get("/", (req, res) => {
               req.session.avatarUrl = profileImageUrl(avatar);
               req.session.spritesheet =
                 character.spritesheet || character.avatar || "";
-              req.session.avatar_initial =
-                req.session.name.charAt(0).toUpperCase();
+              req.session.avatar_initial = req.session.name
+                .charAt(0)
+                .toUpperCase();
               req.session.save((sessionError) => {
                 if (sessionError) {
                   console.error(
@@ -2436,7 +2451,7 @@ app.get("/", (req, res) => {
             .catch((characterError) => {
               console.error("Unable to load dashboard avatar:", characterError);
               res.status(500).send("Unable to load dashboard.");
-          });
+            });
         },
       );
     },
@@ -3342,16 +3357,23 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
               }
               return exercise.questions.flatMap((question, questionIndex) => {
                 const sourceOptions = Array.isArray(question.options)
-                  ? question.options.map((option) => String(option).trim()).filter(Boolean)
+                  ? question.options
+                      .map((option) => String(option).trim())
+                      .filter(Boolean)
                   : [];
                 const answer = String(question.answer || "").trim();
                 const correctSourceIndex = sourceOptions.findIndex(
-                  (option) => option.toLocaleLowerCase() === answer.toLocaleLowerCase(),
+                  (option) =>
+                    option.toLocaleLowerCase() === answer.toLocaleLowerCase(),
                 );
                 const questionText = String(
                   question.sentence || question.question || "",
                 ).trim();
-                if (!questionText || correctSourceIndex < 0 || sourceOptions.length < 2) {
+                if (
+                  !questionText ||
+                  correctSourceIndex < 0 ||
+                  sourceOptions.length < 2
+                ) {
                   return [];
                 }
                 const choices =
@@ -3361,13 +3383,12 @@ app.get("/practice/final-test", requireAuthenticated, (req, res) => {
                         answer,
                         ...sourceOptions.filter(
                           (option) =>
-                            option.toLocaleLowerCase() !== answer.toLocaleLowerCase(),
+                            option.toLocaleLowerCase() !==
+                            answer.toLocaleLowerCase(),
                         ),
                       ].slice(0, 4);
                 const correctIndex =
-                  sourceOptions.length <= 4
-                    ? correctSourceIndex
-                    : 0;
+                  sourceOptions.length <= 4 ? correctSourceIndex : 0;
                 return [
                   {
                     id: `chapter-${chapter.id}-${exercise.id || exerciseIndex + 1}-${question.id || questionIndex + 1}`,
@@ -3700,7 +3721,8 @@ app.post("/login", (req, res) => {
         req.session.name = username;
         return loadLobbyCharacter(username)
           .then((character) => {
-            req.session.avatar = character.avatar || character.spritesheet || "";
+            req.session.avatar =
+              character.avatar || character.spritesheet || "";
             req.session.avatarUrl = profileImageUrl(req.session.avatar);
             req.session.spritesheet =
               character.spritesheet || character.avatar || "";
@@ -3713,7 +3735,10 @@ app.post("/login", (req, res) => {
           })
           .then(() => res.redirect("/"))
           .catch((saveError) => {
-            console.error("Unable to load/save admin character session:", saveError);
+            console.error(
+              "Unable to load/save admin character session:",
+              saveError,
+            );
             return res.status(500).send("Unable to load admin profile.");
           });
       } else {
@@ -3764,7 +3789,8 @@ app.post("/login", (req, res) => {
               .charAt(0)
               .toUpperCase();
             req.session.save((saveError) => {
-              if (saveError) return res.status(500).send("Unable to save session.");
+              if (saveError)
+                return res.status(500).send("Unable to save session.");
               res.redirect("/");
             });
           },
@@ -4105,7 +4131,12 @@ const loadUsefulChunkSubmissions = (username, callback) => {
 };
 
 const emptyLobbyModeStats = () => ({
-  questionGame: { bestScore: 0, goldMedals: 0, silverMedals: 0, bronzeMedals: 0 },
+  questionGame: {
+    bestScore: 0,
+    goldMedals: 0,
+    silverMedals: 0,
+    bronzeMedals: 0,
+  },
   quicktype: { bestScore: 0, goldMedals: 0, silverMedals: 0, bronzeMedals: 0 },
 });
 
@@ -4166,8 +4197,8 @@ app.get("/profile", requireProfileUser, (req, res) => {
     .then(() =>
       Promise.all([
         postgresPool.query(
-        "SELECT username, email, goal, avatar, spritesheet, character_config, character_animations, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
-        [req.session.name],
+          "SELECT username, email, goal, avatar, spritesheet, character_config, character_animations, gold_medals, silver_medals, bronze_medals FROM users WHERE username = $1",
+          [req.session.name],
         ),
         modeStatsPromise,
       ]),
@@ -4436,12 +4467,11 @@ const insertLobbyParticipant = (roomId, username, callback) => {
 
 app.get("/lobby", requireAuthenticated, async (req, res) => {
   const failLobby = (error) => {
-    const lobbyError = error instanceof Error ? error : new Error(String(error));
+    const lobbyError =
+      error instanceof Error ? error : new Error(String(error));
     console.error("LOBBY CRASH ERROR:", lobbyError);
     if (!res.headersSent) {
-      return res
-        .status(500)
-        .send(`Lobby Server Error: ${lobbyError.message}`);
+      return res.status(500).send(`Lobby Server Error: ${lobbyError.message}`);
     }
     return undefined;
   };
@@ -4454,162 +4484,167 @@ app.get("/lobby", requireAuthenticated, async (req, res) => {
     const requestedMode = query.mode === "quicktype" ? "quicktype" : "lobby";
     const renderLobby = (room, questions = [], participant = null) => {
       try {
-    room = room || null;
-    questions = Array.isArray(questions) ? questions : [];
-    participant = participant || null;
-    if (
-      room?.mode === "quicktype" &&
-      questions.length > 0 &&
-      Number(room.current_question) < 1
-    ) {
-      room = { ...room, current_question: 1 };
-    }
-    loadLobbyCharacter(sessionName)
-      .then((member) => {
-        try {
-        let characterConfig = {
-          skin: "#f6c89f",
-          hair: "#2b1b16",
-          shirt: "#e85d4a",
-          accessory: "none",
-        };
-        try {
-          characterConfig = member?.character_config
-            ? JSON.parse(member.character_config)
-            : {};
-        } catch (parseError) {
-          characterConfig = {};
-        }
-        characterConfig = {
-          skin: "#f6c89f",
-          hair: "#2b1b16",
-          shirt: "#e85d4a",
-          accessory: "none",
-          ...characterConfig,
-        };
-        const renderData = {
-          student: {
-            username: sessionName,
-            id: sessionName,
-            avatar: member?.avatar || "",
-            spritesheet: member?.spritesheet || member?.avatar || "",
-            avatarUrl: profileImageUrl(member?.avatar),
-            spritesheetUrl: profileImageUrl(
-              member?.spritesheet || member?.avatar,
-            ),
-            characterConfig,
-            goldMedals: Number(member?.gold_medals) || 0,
-            winnerAnimationsUnlocked: Number(member?.gold_medals) > 0,
-            ...parseAnimationsConfig(member?.character_animations),
-          },
-          isAdmin,
-          socketUrl: process.env.VITE_SOCKET_URL || "",
-          room,
-          questions,
-          participant,
-          isQuicktype:
-            room?.mode === "quicktype" || requestedMode === "quicktype",
-          leaderboard: [],
-          totalQuestions: questions.length,
-          currentQuestion: room
-            ? questions.find(
-                (question) => question.question_order === room.current_question,
-              )
-            : null,
-          isWaiting: room?.status === "waiting",
-          isRunning: room?.status === "running",
-          isLeaderboardPhase: room?.status === "leaderboard",
-          isFinished:
-            room?.status === "finished" &&
-            questions.length > 0 &&
-            room.current_question > questions.length,
-          isActiveSession:
-            questions.length > 0 &&
-            ["countdown", "running", "leaderboard", "finished"].includes(
-              room?.status,
-            ),
-        };
+        room = room || null;
+        questions = Array.isArray(questions) ? questions : [];
+        participant = participant || null;
         if (
-          renderData.isAdmin &&
-          renderData.isQuicktype &&
-          renderData.isWaiting
+          room?.mode === "quicktype" &&
+          questions.length > 0 &&
+          Number(room.current_question) < 1
         ) {
-          grammarDb.all(
-            "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
-            (vocabularyError, vocabularyWords) => {
+          room = { ...room, current_question: 1 };
+        }
+        loadLobbyCharacter(sessionName)
+          .then((member) => {
+            try {
+              let characterConfig = {
+                skin: "#f6c89f",
+                hair: "#2b1b16",
+                shirt: "#e85d4a",
+                accessory: "none",
+              };
               try {
-                if (vocabularyError) return failLobby(vocabularyError);
-                return res.render("lobby.handlebars", {
-                  ...renderData,
-                  vocabularyWords: vocabularyWords || [],
-                });
-              } catch (error) {
-                return failLobby(error);
+                characterConfig = member?.character_config
+                  ? JSON.parse(member.character_config)
+                  : {};
+              } catch (parseError) {
+                characterConfig = {};
               }
-            },
-          );
-        } else {
-          return res.render("lobby.handlebars", renderData);
-        }
-        } catch (error) {
-          return failLobby(error);
-        }
-      })
-      .catch((error) => failLobby(error));
+              characterConfig = {
+                skin: "#f6c89f",
+                hair: "#2b1b16",
+                shirt: "#e85d4a",
+                accessory: "none",
+                ...characterConfig,
+              };
+              const renderData = {
+                student: {
+                  username: sessionName,
+                  id: sessionName,
+                  avatar: member?.avatar || "",
+                  spritesheet: member?.spritesheet || member?.avatar || "",
+                  avatarUrl: profileImageUrl(member?.avatar),
+                  spritesheetUrl: profileImageUrl(
+                    member?.spritesheet || member?.avatar,
+                  ),
+                  characterConfig,
+                  goldMedals: Number(member?.gold_medals) || 0,
+                  winnerAnimationsUnlocked: Number(member?.gold_medals) > 0,
+                  ...parseAnimationsConfig(member?.character_animations),
+                },
+                isAdmin,
+                socketUrl: process.env.VITE_SOCKET_URL || "",
+                room,
+                questions,
+                participant,
+                isQuicktype:
+                  room?.mode === "quicktype" || requestedMode === "quicktype",
+                leaderboard: [],
+                totalQuestions: questions.length,
+                currentQuestion: room
+                  ? questions.find(
+                      (question) =>
+                        question.question_order === room.current_question,
+                    )
+                  : null,
+                isWaiting: room?.status === "waiting",
+                isRunning: room?.status === "running",
+                isLeaderboardPhase: room?.status === "leaderboard",
+                isFinished:
+                  room?.status === "finished" &&
+                  questions.length > 0 &&
+                  room.current_question > questions.length,
+                isActiveSession:
+                  questions.length > 0 &&
+                  ["countdown", "running", "leaderboard", "finished"].includes(
+                    room?.status,
+                  ),
+              };
+              if (
+                renderData.isAdmin &&
+                renderData.isQuicktype &&
+                renderData.isWaiting
+              ) {
+                grammarDb.all(
+                  "SELECT id, english_word, swedish_translation, cefr_level FROM vocabulary ORDER BY english_word COLLATE NOCASE",
+                  (vocabularyError, vocabularyWords) => {
+                    try {
+                      if (vocabularyError) return failLobby(vocabularyError);
+                      return res.render("lobby.handlebars", {
+                        ...renderData,
+                        vocabularyWords: vocabularyWords || [],
+                      });
+                    } catch (error) {
+                      return failLobby(error);
+                    }
+                  },
+                );
+              } else {
+                return res.render("lobby.handlebars", renderData);
+              }
+            } catch (error) {
+              return failLobby(error);
+            }
+          })
+          .catch((error) => failLobby(error));
       } catch (error) {
         return failLobby(error);
       }
     };
-  if (!isAdmin && !query.roomId) return renderLobby(null);
-  const roomQuery = isAdmin
-    ? "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1"
-    : "SELECT * FROM lobby_rooms WHERE id = ? AND mode = ?";
-  const roomParams = isAdmin
-    ? [requestedMode]
-    : [Number(query.roomId), requestedMode];
-  db.get(roomQuery, roomParams, (roomError, room) => {
-    try {
-    if (roomError) {
-      return failLobby(roomError);
-    }
-    if (!room) return renderLobby(null);
-    finalizeRoundIfNeeded(room, (updatedRoom) => {
+    if (!isAdmin && !query.roomId) return renderLobby(null);
+    const roomQuery = isAdmin
+      ? "SELECT * FROM lobby_rooms WHERE mode = ? ORDER BY id DESC LIMIT 1"
+      : "SELECT * FROM lobby_rooms WHERE id = ? AND mode = ?";
+    const roomParams = isAdmin
+      ? [requestedMode]
+      : [Number(query.roomId), requestedMode];
+    db.get(roomQuery, roomParams, (roomError, room) => {
       try {
-      const questionQuery =
-        updatedRoom.mode === "quicktype"
-          ? `SELECT id, question_order, prompt AS question_text${isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
-          : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
-      db.all(questionQuery, [updatedRoom.id], (questionError, questions) => {
-        try {
-        if (questionError) {
-          return failLobby(questionError);
+        if (roomError) {
+          return failLobby(roomError);
         }
-        db.get(
-          "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
-          [updatedRoom.id, sessionName],
-          (participantError, participant) => {
-            try {
-            if (participantError) {
-              return failLobby(participantError);
-            }
-            return renderLobby(updatedRoom, questions, participant);
-            } catch (error) {
-              return failLobby(error);
-            }
-          },
-        );
-        } catch (error) {
-          return failLobby(error);
-        }
-      });
+        if (!room) return renderLobby(null);
+        finalizeRoundIfNeeded(room, (updatedRoom) => {
+          try {
+            const questionQuery =
+              updatedRoom.mode === "quicktype"
+                ? `SELECT id, question_order, prompt AS question_text${isAdmin ? ", target_word" : ""} FROM lobby_quicktype_questions WHERE room_id = ? ORDER BY question_order`
+                : "SELECT id, question_order, question_text, answer_a, answer_b, answer_c, answer_d FROM lobby_questions WHERE room_id = ? ORDER BY question_order";
+            db.all(
+              questionQuery,
+              [updatedRoom.id],
+              (questionError, questions) => {
+                try {
+                  if (questionError) {
+                    return failLobby(questionError);
+                  }
+                  db.get(
+                    "SELECT * FROM lobby_participants WHERE room_id = ? AND username = ?",
+                    [updatedRoom.id, sessionName],
+                    (participantError, participant) => {
+                      try {
+                        if (participantError) {
+                          return failLobby(participantError);
+                        }
+                        return renderLobby(updatedRoom, questions, participant);
+                      } catch (error) {
+                        return failLobby(error);
+                      }
+                    },
+                  );
+                } catch (error) {
+                  return failLobby(error);
+                }
+              },
+            );
+          } catch (error) {
+            return failLobby(error);
+          }
+        });
       } catch (error) {
         return failLobby(error);
       }
     });
-    } catch (error) {
-      return failLobby(error);
-    }
-  });
   } catch (error) {
     return failLobby(error);
   }
@@ -4784,29 +4819,53 @@ app.get("/api/lobby/quizzes", requireAdmin, (req, res) => {
       .then(() => postgresPool.query(savedQuizQuery))
       .then(({ rows: savedQuizzes }) => res.json({ quizzes: savedQuizzes }))
       .catch((savedError) => {
-        console.error("Unable to load saved quizzes from PostgreSQL:", savedError);
+        console.error(
+          "Unable to load saved quizzes from PostgreSQL:",
+          savedError,
+        );
         res.status(500).json({ error: "Unable to load saved quizzes." });
       });
   }
-  db.all(savedQuizQuery.replace("::INTEGER", ""), (savedError, savedQuizzes) => {
-    if (savedError) return res.status(500).json({ error: "Unable to load saved quizzes." });
-    res.json({ quizzes: savedQuizzes });
-  });
+  db.all(
+    savedQuizQuery.replace("::INTEGER", ""),
+    (savedError, savedQuizzes) => {
+      if (savedError)
+        return res.status(500).json({ error: "Unable to load saved quizzes." });
+      res.json({ quizzes: savedQuizzes });
+    },
+  );
 });
 
 app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
-  const title = String(req.body.title || "").trim().slice(0, 100);
+  const title = String(req.body.title || "")
+    .trim()
+    .slice(0, 100);
   const questions = Array.isArray(req.body.questions) ? req.body.questions : [];
   if (!title || !questions.length || questions.length > 50) {
-    return res.status(400).json({ error: "Add a title and between 1 and 50 questions." });
+    return res
+      .status(400)
+      .json({ error: "Add a title and between 1 and 50 questions." });
   }
   const normalizedQuestions = questions.map((question) => ({
     text: String(question.text || "").trim(),
-    answers: ["a", "b", "c", "d"].map((key) => String(question[`answer_${key}`] || "").trim()),
+    answers: ["a", "b", "c", "d"].map((key) =>
+      String(question[`answer_${key}`] || "").trim(),
+    ),
     correct: String(question.correct || "").toLowerCase(),
   }));
-  if (normalizedQuestions.some((question) => !question.text || question.answers.some((answer) => !answer) || !["a", "b", "c", "d"].includes(question.correct))) {
-    return res.status(400).json({ error: "Every question needs four answers and a correct answer." });
+  if (
+    normalizedQuestions.some(
+      (question) =>
+        !question.text ||
+        question.answers.some((answer) => !answer) ||
+        !["a", "b", "c", "d"].includes(question.correct),
+    )
+  ) {
+    return res
+      .status(400)
+      .json({
+        error: "Every question needs four answers and a correct answer.",
+      });
   }
   if (postgresPool) {
     return postgresReady
@@ -4824,7 +4883,13 @@ app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
               `INSERT INTO lobby_saved_quiz_questions
                (quiz_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-              [quizId, index + 1, question.text, ...question.answers, question.correct],
+              [
+                quizId,
+                index + 1,
+                question.text,
+                ...question.answers,
+                question.correct,
+              ],
             );
           }
           await client.query("COMMIT");
@@ -4845,19 +4910,30 @@ app.post("/api/lobby/quizzes", requireAdmin, (req, res) => {
     "INSERT INTO lobby_saved_quizzes (title, created_by) VALUES (?, ?)",
     [title, req.session.name],
     function (quizError) {
-      if (quizError) return res.status(500).json({ error: "Unable to save quiz." });
+      if (quizError)
+        return res.status(500).json({ error: "Unable to save quiz." });
       const quizId = this.lastID;
       const saveQuestion = (index) => {
-        if (index >= normalizedQuestions.length) return res.status(201).json({ id: quizId, title });
+        if (index >= normalizedQuestions.length)
+          return res.status(201).json({ id: quizId, title });
         const question = normalizedQuestions[index];
         db.run(
           `INSERT INTO lobby_saved_quiz_questions
            (quiz_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [quizId, index + 1, question.text, ...question.answers, question.correct],
-          (questionError) => questionError
-            ? res.status(500).json({ error: "Unable to save quiz questions." })
-            : saveQuestion(index + 1),
+          [
+            quizId,
+            index + 1,
+            question.text,
+            ...question.answers,
+            question.correct,
+          ],
+          (questionError) =>
+            questionError
+              ? res
+                  .status(500)
+                  .json({ error: "Unable to save quiz questions." })
+              : saveQuestion(index + 1),
         );
       };
       saveQuestion(0);
@@ -4871,7 +4947,8 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
   const [quizSource, quizValue] = quizId.split(":");
   const topicId = quizSource === "grammar" ? Number(quizValue) : 0;
   const savedQuizId = quizSource === "custom" ? Number(quizValue) : 0;
-  if (!roomId || (!topicId && !savedQuizId)) return res.status(400).json({ error: "Invalid quiz selection." });
+  if (!roomId || (!topicId && !savedQuizId))
+    return res.status(400).json({ error: "Invalid quiz selection." });
 
   db.get(
     `SELECT lobby_rooms.id, lobby_rooms.mode, lobby_rooms.status
@@ -4880,29 +4957,69 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
      WHERE lobby_rooms.id = ? AND lobby_participants.username = ?`,
     [roomId, req.session.name],
     (roomError, room) => {
-      if (roomError) return res.status(500).json({ error: "Unable to load room." });
+      if (roomError)
+        return res.status(500).json({ error: "Unable to load room." });
       if (!room || room.mode !== "lobby" || room.status !== "waiting") {
-        return res.status(400).json({ error: "Quiz selection is only available before the game starts." });
+        return res
+          .status(400)
+          .json({
+            error: "Quiz selection is only available before the game starts.",
+          });
       }
       const loadQuestions = (title, questions) => {
-        if (!title || !questions?.length) return res.status(404).json({ error: "Quiz not found or has no questions." });
-        db.run("DELETE FROM lobby_questions WHERE room_id = ?", [roomId], (deleteError) => {
-          if (deleteError) return res.status(500).json({ error: "Unable to replace room questions." });
-          const insertQuestion = (index) => {
-            if (index >= questions.length) {
-              return db.run("UPDATE lobby_rooms SET title = ?, current_question = 0 WHERE id = ?", [title.slice(0, 100), roomId], (updateError) => updateError ? res.status(500).json({ error: "Unable to update room title." }) : res.json({ title, questionCount: questions.length }));
-            }
-            const question = questions[index];
-            db.run(
-              `INSERT INTO lobby_questions
+        if (!title || !questions?.length)
+          return res
+            .status(404)
+            .json({ error: "Quiz not found or has no questions." });
+        db.run(
+          "DELETE FROM lobby_questions WHERE room_id = ?",
+          [roomId],
+          (deleteError) => {
+            if (deleteError)
+              return res
+                .status(500)
+                .json({ error: "Unable to replace room questions." });
+            const insertQuestion = (index) => {
+              if (index >= questions.length) {
+                return db.run(
+                  "UPDATE lobby_rooms SET title = ?, current_question = 0 WHERE id = ?",
+                  [title.slice(0, 100), roomId],
+                  (updateError) =>
+                    updateError
+                      ? res
+                          .status(500)
+                          .json({ error: "Unable to update room title." })
+                      : res.json({ title, questionCount: questions.length }),
+                );
+              }
+              const question = questions[index];
+              db.run(
+                `INSERT INTO lobby_questions
                (room_id, question_order, question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-              [roomId, index + 1, question.question_text, question.option_a || question.answer_a, question.option_b || question.answer_b, question.option_c || question.answer_c || "-", question.option_d || question.answer_d || "-", String(question.correct_option || question.correct_answer).toLowerCase()],
-              (insertError) => insertError ? res.status(500).json({ error: "Unable to save quiz questions." }) : insertQuestion(index + 1),
-            );
-          };
-          insertQuestion(0);
-        });
+                [
+                  roomId,
+                  index + 1,
+                  question.question_text,
+                  question.option_a || question.answer_a,
+                  question.option_b || question.answer_b,
+                  question.option_c || question.answer_c || "-",
+                  question.option_d || question.answer_d || "-",
+                  String(
+                    question.correct_option || question.correct_answer,
+                  ).toLowerCase(),
+                ],
+                (insertError) =>
+                  insertError
+                    ? res
+                        .status(500)
+                        .json({ error: "Unable to save quiz questions." })
+                    : insertQuestion(index + 1),
+              );
+            };
+            insertQuestion(0);
+          },
+        );
       };
       if (savedQuizId) {
         if (postgresPool) {
@@ -4922,17 +5039,34 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
               loadQuestions(savedQuizRows[0]?.title, questionRows);
             })
             .catch((savedError) => {
-              console.error("Unable to load saved quiz from PostgreSQL:", savedError);
+              console.error(
+                "Unable to load saved quiz from PostgreSQL:",
+                savedError,
+              );
               res.status(500).json({ error: "Unable to load saved quiz." });
             });
         }
-        return db.get("SELECT title FROM lobby_saved_quizzes WHERE id = ?", [savedQuizId], (titleError, savedQuiz) => {
-          if (titleError) return res.status(500).json({ error: "Unable to load saved quiz." });
-          db.all("SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer FROM lobby_saved_quiz_questions WHERE quiz_id = ? ORDER BY question_order", [savedQuizId], (questionsError, questions) => {
-            if (questionsError) return res.status(500).json({ error: "Unable to load saved quiz questions." });
-            loadQuestions(savedQuiz?.title, questions);
-          });
-        });
+        return db.get(
+          "SELECT title FROM lobby_saved_quizzes WHERE id = ?",
+          [savedQuizId],
+          (titleError, savedQuiz) => {
+            if (titleError)
+              return res
+                .status(500)
+                .json({ error: "Unable to load saved quiz." });
+            db.all(
+              "SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer FROM lobby_saved_quiz_questions WHERE quiz_id = ? ORDER BY question_order",
+              [savedQuizId],
+              (questionsError, questions) => {
+                if (questionsError)
+                  return res
+                    .status(500)
+                    .json({ error: "Unable to load saved quiz questions." });
+                loadQuestions(savedQuiz?.title, questions);
+              },
+            );
+          },
+        );
       }
       grammarDb.get(
         `SELECT grammar_topics.title AS topic_title,
@@ -4942,7 +5076,10 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
          WHERE grammar_topics.id = ?`,
         [topicId],
         (topicError, topic) => {
-          if (topicError) return res.status(500).json({ error: "Unable to load quiz topic." });
+          if (topicError)
+            return res
+              .status(500)
+              .json({ error: "Unable to load quiz topic." });
           if (!topic) return res.status(404).json({ error: "Quiz not found." });
           grammarDb.all(
             `SELECT question_text, option_a, option_b, option_c, option_d, correct_option
@@ -4951,8 +5088,14 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
              ORDER BY id`,
             [topicId],
             (questionsError, questions) => {
-              if (questionsError || !questions.length) return res.status(404).json({ error: "Quiz has no questions." });
-              loadQuestions(`${topic.chapter_title}: ${topic.topic_title}`, questions);
+              if (questionsError || !questions.length)
+                return res
+                  .status(404)
+                  .json({ error: "Quiz has no questions." });
+              loadQuestions(
+                `${topic.chapter_title}: ${topic.topic_title}`,
+                questions,
+              );
             },
           );
         },
@@ -4962,16 +5105,19 @@ app.post("/api/lobby/select-quiz", requireAdmin, (req, res) => {
 });
 
 app.get("/api/lobby/quicktype/vocabulary", requireAdmin, (req, res) => {
-  const search = String(req.query.q || "").trim().slice(0, 80);
+  const search = String(req.query.q || "")
+    .trim()
+    .slice(0, 80);
   grammarReady
-    .then(() =>
-      new Promise((resolve, reject) => {
-        grammarDb.all(
-          "SELECT id, english_word, part_of_speech, cefr_level FROM vocabulary WHERE english_word LIKE ? COLLATE NOCASE ORDER BY english_word COLLATE NOCASE LIMIT 100",
-          [`%${search}%`],
-          (error, words) => (error ? reject(error) : resolve(words || [])),
-        );
-      }),
+    .then(
+      () =>
+        new Promise((resolve, reject) => {
+          grammarDb.all(
+            "SELECT id, english_word, part_of_speech, cefr_level FROM vocabulary WHERE english_word LIKE ? COLLATE NOCASE ORDER BY english_word COLLATE NOCASE LIMIT 100",
+            [`%${search}%`],
+            (error, words) => (error ? reject(error) : resolve(words || [])),
+          );
+        }),
     )
     .then((words) => res.json({ words }))
     .catch((error) => {
@@ -5036,7 +5182,9 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
   const customWords = [];
   const seenCustomWords = new Set();
   rawCustomWords.forEach((value) => {
-    const word = String(value || "").trim().slice(0, 80);
+    const word = String(value || "")
+      .trim()
+      .slice(0, 80);
     const key = word.toLocaleLowerCase();
     if (word && !seenCustomWords.has(key)) {
       seenCustomWords.add(key);
@@ -5072,40 +5220,32 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
         });
         if (!questionWords.length || questionWords.length > 50)
           return res.status(400).redirect("/lobby?mode=quicktype");
-          db.serialize(() => {
-            db.run(
-              "DELETE FROM lobby_quicktype_submissions WHERE room_id = ?",
-              [roomId],
-            );
-            db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [
-              roomId,
-            ]);
-            const insert = db.prepare(
-              "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
-            );
-            questionWords.forEach((word, index) => {
-              insert.run(
-                roomId,
-                index + 1,
-                "Type the word you hear.",
-                word,
-              );
-            });
-            insert.finalize((insertError) => {
-              if (insertError)
-                return res.status(500).send("Unable to create Quicktype game.");
-              db.run(
-                "UPDATE lobby_rooms SET current_question = 1, status = 'waiting', question_started_at = NULL WHERE id = ?",
-                [roomId],
-                (updateError) =>
-                  updateError
-                    ? res
-                        .status(500)
-                        .send("Unable to initialize Quicktype game.")
-                    : res.redirect("/lobby?mode=quicktype"),
-              );
-            });
+        db.serialize(() => {
+          db.run("DELETE FROM lobby_quicktype_submissions WHERE room_id = ?", [
+            roomId,
+          ]);
+          db.run("DELETE FROM lobby_quicktype_questions WHERE room_id = ?", [
+            roomId,
+          ]);
+          const insert = db.prepare(
+            "INSERT INTO lobby_quicktype_questions (room_id, question_order, prompt, target_word) VALUES (?, ?, ?, ?)",
+          );
+          questionWords.forEach((word, index) => {
+            insert.run(roomId, index + 1, "Type the word you hear.", word);
           });
+          insert.finalize((insertError) => {
+            if (insertError)
+              return res.status(500).send("Unable to create Quicktype game.");
+            db.run(
+              "UPDATE lobby_rooms SET current_question = 1, status = 'waiting', question_started_at = NULL WHERE id = ?",
+              [roomId],
+              (updateError) =>
+                updateError
+                  ? res.status(500).send("Unable to initialize Quicktype game.")
+                  : res.redirect("/lobby?mode=quicktype"),
+            );
+          });
+        });
       };
       if (!wordIds.length) return createQuestions([]);
       const placeholders = wordIds.map(() => "?").join(",");
@@ -5115,7 +5255,9 @@ app.post("/lobby/quicktype/create", requireAdmin, (req, res) => {
         (vocabularyError, words) => {
           if (vocabularyError || words.length !== wordIds.length)
             return res.status(400).redirect("/lobby?mode=quicktype");
-          const byId = new Map(words.map((word) => [word.id, word.english_word]));
+          const byId = new Map(
+            words.map((word) => [word.id, word.english_word]),
+          );
           createQuestions(wordIds.map((wordId) => byId.get(wordId)));
         },
       );
@@ -5144,7 +5286,8 @@ app.post("/lobby/join", requireLogin, (req, res) => {
     (error, room) => {
       if (error || !room) return res.status(400).redirect("/lobby?error=code");
       insertLobbyParticipant(room.id, req.session.name, (participantError) => {
-        if (participantError) return res.status(500).send("Unable to join lobby.");
+        if (participantError)
+          return res.status(500).send("Unable to join lobby.");
         req.session.save((saveError) => {
           if (saveError) return res.status(500).send("Unable to save session.");
           res.redirect(
@@ -5305,58 +5448,62 @@ app.post("/lobby/quicktype/submit", requireLogin, (req, res) => {
   );
 });
 
-app.post("/lobby/answer", requireLogin, (req, res) => {
-  const roomId = Number(req.body.roomId);
-  const answer = String(req.body.answer || "").toLowerCase();
-  db.get(
-    "SELECT * FROM lobby_rooms WHERE id = ? AND status = 'running'",
-    [roomId],
-    (roomError, room) => {
-      if (roomError || !room)
-        return res.status(400).json({ error: "Room is not running." });
-      db.get(
-        "SELECT correct_answer FROM lobby_questions WHERE room_id = ? AND question_order = ?",
-        [roomId, room.current_question],
-        (questionError, question) => {
-          if (
-            questionError ||
-            !question ||
-            !["a", "b", "c", "d"].includes(answer)
-          )
-            return res.status(400).json({ error: "Invalid answer." });
-          const isCorrect = answer === question.correct_answer;
-          const speedBonus = isCorrect
-            ? Math.max(
-                0,
-                50 -
-                  Math.floor(
-                    (Date.now() - (room.question_started_at || Date.now())) /
-                      1000,
-                  ) *
-                    5,
-              )
-            : 0;
-          const points = isCorrect ? 100 + speedBonus : 0;
-          db.run(
-            "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
-            [answer, points, roomId, req.session.name],
-            function (updateError) {
-              if (updateError)
-                return res
-                  .status(500)
-                  .json({ error: "Unable to save answer." });
-              finalizeRoundIfNeeded(room, () => {});
-              res.json({
-                correct: this.changes === 1 && isCorrect,
-                answered: this.changes === 1,
-              });
-            },
-          );
-        },
-      );
-    },
-  );
-});
+app.post(
+  "/lobby/answer",
+  requireLogin,
+  (req, res) => {
+    const roomId = Number(req.body.roomId);
+    const answer = String(req.body.answer || "").toLowerCase();
+    db.get(
+      "SELECT * FROM lobby_rooms WHERE id = ? AND status = 'running'",
+      [roomId],
+      (roomError, room) => {
+        if (roomError || !room)
+          return res.status(400).json({ error: "Room is not running." });
+        db.get(
+          "SELECT correct_answer FROM lobby_questions WHERE room_id = ? AND question_order = ?",
+          [roomId, room.current_question],
+          (questionError, question) => {
+            if (
+              questionError ||
+              !question ||
+              !["a", "b", "c", "d"].includes(answer)
+            )
+              return res.status(400).json({ error: "Invalid answer." });
+            const isCorrect = answer === question.correct_answer;
+            const speedBonus = isCorrect
+              ? Math.max(
+                  0,
+                  50 -
+                    Math.floor(
+                      (Date.now() - (room.question_started_at || Date.now())) /
+                        1000,
+                    ) *
+                      5,
+                )
+              : 0;
+            const points = isCorrect ? 100 + speedBonus : 0;
+            db.run(
+              "UPDATE lobby_participants SET answer = ?, score = score + ? WHERE room_id = ? AND username = ? AND answer IS NULL",
+              [answer, points, roomId, req.session.name],
+              function (updateError) {
+                if (updateError)
+                  return res
+                    .status(500)
+                    .json({ error: "Unable to save answer." });
+                finalizeRoundIfNeeded(room, () => {});
+                res.json({
+                  correct: this.changes === 1 && isCorrect,
+                  answered: this.changes === 1,
+                });
+              },
+            );
+          },
+        );
+      },
+    );
+  },
+);
 
 const awardLobbyMedals = (roomId, callback) => {
   db.get(
@@ -5488,7 +5635,7 @@ const awardLobbyMedals = (roomId, callback) => {
             );
           };
           persistNext(0);
-          },
+        },
       );
     },
   );
@@ -5522,7 +5669,9 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
                 console.error("Unable to award lobby medals:", awardError);
                 return res
                   .status(500)
-                  .send("Unable to save game medals. Please retry to finish the game.");
+                  .send(
+                    "Unable to save game medals. Please retry to finish the game.",
+                  );
               }
               db.run(
                 "UPDATE lobby_rooms SET current_question = ?, status = 'finished', question_started_at = NULL, last_event = NULL WHERE id = ?",
@@ -5546,7 +5695,9 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
               (clearError) => {
                 if (clearError) {
                   console.error("Unable to clear lobby answers:", clearError);
-                  return res.status(500).send("Unable to finish the lobby game.");
+                  return res
+                    .status(500)
+                    .send("Unable to finish the lobby game.");
                 }
                 finishGame();
               },
@@ -5564,7 +5715,9 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
             (updateError) => {
               if (updateError) {
                 console.error("Unable to advance lobby game:", updateError);
-                return res.status(500).send("Unable to advance the lobby game.");
+                return res
+                  .status(500)
+                  .send("Unable to advance the lobby game.");
               }
               db.run(
                 "UPDATE lobby_participants SET answer = NULL WHERE room_id = ?",
@@ -5572,7 +5725,9 @@ app.post("/lobby/next", requireAdmin, (req, res) => {
                 (clearError) => {
                   if (clearError) {
                     console.error("Unable to clear lobby answers:", clearError);
-                    return res.status(500).send("Unable to advance the lobby game.");
+                    return res
+                      .status(500)
+                      .send("Unable to advance the lobby game.");
                   }
                   redirect();
                 },
@@ -6005,7 +6160,9 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
           function (error) {
             if (error) return reject(error);
             if (this.changes !== 1 && (!req.session.isAdmin || !postgresPool)) {
-              return reject(new Error(`No SQLite member found for ${req.session.name}.`));
+              return reject(
+                new Error(`No SQLite member found for ${req.session.name}.`),
+              );
             }
             // PostgreSQL is authoritative for the admin account. Some deployments do not
             // mirror that account into SQLite, so a missing local admin row must not turn a
@@ -6028,7 +6185,9 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
       req.session.save((sessionError) => {
         if (sessionError) {
           console.error("Unable to persist character session:", sessionError);
-          return res.status(500).json({ error: "Unable to save character session." });
+          return res
+            .status(500)
+            .json({ error: "Unable to save character session." });
         }
         const updatedCharacter = {
           username: req.session.name,
@@ -6042,7 +6201,8 @@ app.post("/api/profile/character", requireAuthenticated, (req, res) => {
         };
         const notifiedRooms = new Set();
         io.sockets.sockets.forEach((connectedSocket) => {
-          if (connectedSocket.request.session?.name !== req.session.name) return;
+          if (connectedSocket.request.session?.name !== req.session.name)
+            return;
           connectedSocket.data.character = {
             ...connectedSocket.data.character,
             ...updatedCharacter,
@@ -6227,75 +6387,107 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
       ["student"],
       (studentError, students) => {
         if (studentError) {
-          console.error("Unable to load SQLite teacher students:", studentError);
-          return res.status(500).send(`Teacher dashboard database error: ${studentError.message}`);
+          console.error(
+            "Unable to load SQLite teacher students:",
+            studentError,
+          );
+          return res
+            .status(500)
+            .send(`Teacher dashboard database error: ${studentError.message}`);
         }
         loadAllLobbyModeStats((modeStatsError, modeStatsByUsername) => {
-        if (modeStatsError) {
-          console.error("Unable to load SQLite lobby mode stats:", modeStatsError);
-          return res.status(500).send("Unable to load lobby scores.");
-        }
-        db.all(
-          "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
-          (progressError, progressRows) => {
-            if (progressError) {
-              console.error("Unable to load SQLite teacher progress:", progressError);
-              return res.status(500).send(`Teacher dashboard database error: ${progressError.message}`);
-            }
-            db.all(
-              `SELECT username FROM writing_submissions WHERE feedback IS NULL
+          if (modeStatsError) {
+            console.error(
+              "Unable to load SQLite lobby mode stats:",
+              modeStatsError,
+            );
+            return res.status(500).send("Unable to load lobby scores.");
+          }
+          db.all(
+            "SELECT username, activity_type, difficulty_level, points, total_points, percentage FROM progress",
+            (progressError, progressRows) => {
+              if (progressError) {
+                console.error(
+                  "Unable to load SQLite teacher progress:",
+                  progressError,
+                );
+                return res
+                  .status(500)
+                  .send(
+                    `Teacher dashboard database error: ${progressError.message}`,
+                  );
+              }
+              db.all(
+                `SELECT username FROM writing_submissions WHERE feedback IS NULL
                UNION ALL SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL
                UNION ALL SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL`,
-              (pendingError, pendingRows) => {
-                if (pendingError) {
-                  console.error("Unable to load SQLite pending feedback:", pendingError);
-                  return res.status(500).send(`Teacher dashboard database error: ${pendingError.message}`);
-                }
-                const pendingWritingByUsername = pendingRows.reduce(
-                  (counts, row) => ({
-                    ...counts,
-                    [row.username]: (counts[row.username] || 0) + 1,
-                  }),
-                  {},
-                );
-                const enrichedStudents = students.map((student) => {
-                  const studentProgress = progressRows.filter(
-                    (progressRow) => progressRow.username === student.username,
+                (pendingError, pendingRows) => {
+                  if (pendingError) {
+                    console.error(
+                      "Unable to load SQLite pending feedback:",
+                      pendingError,
+                    );
+                    return res
+                      .status(500)
+                      .send(
+                        `Teacher dashboard database error: ${pendingError.message}`,
+                      );
+                  }
+                  const pendingWritingByUsername = pendingRows.reduce(
+                    (counts, row) => ({
+                      ...counts,
+                      [row.username]: (counts[row.username] || 0) + 1,
+                    }),
+                    {},
                   );
-                  const filteredProgress = category
-                    ? studentProgress.filter((progressRow) =>
-                        category.activityTypes.includes(progressRow.activity_type),
-                      )
-                    : studentProgress;
-                  return {
-                    ...student,
-                    points: filteredProgress.reduce(
-                      (sum, progressRow) => sum + (Number(progressRow.points) || 0),
-                      0,
+                  const enrichedStudents = students.map((student) => {
+                    const studentProgress = progressRows.filter(
+                      (progressRow) =>
+                        progressRow.username === student.username,
+                    );
+                    const filteredProgress = category
+                      ? studentProgress.filter((progressRow) =>
+                          category.activityTypes.includes(
+                            progressRow.activity_type,
+                          ),
+                        )
+                      : studentProgress;
+                    return {
+                      ...student,
+                      points: filteredProgress.reduce(
+                        (sum, progressRow) =>
+                          sum + (Number(progressRow.points) || 0),
+                        0,
+                      ),
+                      possible_points: filteredProgress.reduce(
+                        (sum, progressRow) =>
+                          sum + (Number(progressRow.total_points) || 0),
+                        0,
+                      ),
+                      activities: filteredProgress.length,
+                      pendingCount:
+                        pendingWritingByUsername[student.username] || 0,
+                      lobbyModeStats:
+                        modeStatsByUsername[student.username] ||
+                        emptyLobbyModeStats(),
+                    };
+                  });
+                  return res.render("teacher.handlebars", {
+                    categoryKey,
+                    categoryLabel: category?.label,
+                    categories: Object.entries(teacherCategories).map(
+                      ([key, value]) => ({
+                        key,
+                        label: value.label,
+                        selected: key === categoryKey,
+                      }),
                     ),
-                    possible_points: filteredProgress.reduce(
-                      (sum, progressRow) => sum + (Number(progressRow.total_points) || 0),
-                      0,
-                    ),
-                    activities: filteredProgress.length,
-                    pendingCount: pendingWritingByUsername[student.username] || 0,
-                    lobbyModeStats: modeStatsByUsername[student.username] || emptyLobbyModeStats(),
-                  };
-                });
-                return res.render("teacher.handlebars", {
-                  categoryKey,
-                  categoryLabel: category?.label,
-                  categories: Object.entries(teacherCategories).map(([key, value]) => ({
-                    key,
-                    label: value.label,
-                    selected: key === categoryKey,
-                  })),
-                  students: enrichedStudents,
-                });
-              },
-            );
-          },
-        );
+                    students: enrichedStudents,
+                  });
+                },
+              );
+            },
+          );
         });
       },
     );
@@ -6327,9 +6519,12 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
         ).rows
       : [];
     const pendingSources = [
-      availableTables.writing_table && "SELECT username FROM writing_submissions WHERE feedback IS NULL",
-      availableTables.writing_discussion_table && "SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL",
-      availableTables.listening_discussion_table && "SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL",
+      availableTables.writing_table &&
+        "SELECT username FROM writing_submissions WHERE feedback IS NULL",
+      availableTables.writing_discussion_table &&
+        "SELECT username FROM writing_discussion_submissions WHERE feedback IS NULL",
+      availableTables.listening_discussion_table &&
+        "SELECT username FROM listening_discussion_submissions WHERE feedback IS NULL",
     ].filter(Boolean);
     const pendingRows = pendingSources.length
       ? (
@@ -6368,7 +6563,8 @@ app.get("/teacher/dashboard", requireAdmin, async (req, res) => {
         possible_points,
         activities: filteredProgress.length,
         pendingCount: pendingWritingByUsername[student.username] || 0,
-        lobbyModeStats: modeStatsByUsername[student.username] || emptyLobbyModeStats(),
+        lobbyModeStats:
+          modeStatsByUsername[student.username] || emptyLobbyModeStats(),
       };
     });
 
@@ -6633,384 +6829,392 @@ app.get("/teacher/student/:username", requireAdmin, (req, res) => {
       if (modeStatsError)
         return res.status(500).send("Unable to load student lobby stats.");
       student.lobbyModeStats = lobbyModeStats;
-    db.all(
-      "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
-      [student.username],
-      (progressError, progress) => {
-        if (progressError)
-          return res.status(500).send("Unable to load student details.");
-        db.all(
-          "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
-          [student.username],
-          (statsError, activityStats) => {
-            if (statsError)
-              return res.status(500).send("Unable to load student statistics.");
-            const preparedStats = activityStats.map((stat) => ({
-              ...stat,
-              average_score: Math.round(stat.average_score || 0),
-            }));
-            const rankedStats = [...preparedStats].sort(
-              (a, b) => b.average_score - a.average_score,
-            );
-            db.all(
-              "SELECT list_number, chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? ORDER BY submitted_at DESC",
-              [student.username],
-              (submissionsError, usefulChunkSubmissions) => {
-                if (submissionsError)
-                  return res
-                    .status(500)
-                    .send("Unable to load useful chunk submissions.");
-                db.all(
-                  "SELECT DISTINCT difficulty_level FROM progress WHERE username = ? AND activity_type = 'flip-cards' AND difficulty_level IN ('easy', 'medium') ORDER BY difficulty_level",
-                  [student.username],
-                  (levelsError, flipCompletions) => {
-                    if (levelsError)
-                      return res
-                        .status(500)
-                        .send("Unable to load flip-card completions.");
-                    loadDifficultWords(
-                      student.username,
-                      (wordsError, hardestWords) => {
-                        if (wordsError)
-                          return res
-                            .status(500)
-                            .send("Unable to load difficult words.");
-                        const difficultWordsEasy = hardestWords.filter(
-                          (word) => word.difficulty_level === "easy",
-                        );
-                        const difficultWordsMedium = hardestWords.filter(
-                          (word) => word.difficulty_level === "medium",
-                        );
-                        const latestSubmissionByChunk = new Map();
-                        usefulChunkSubmissions.forEach((submission) => {
-                          const key = `${submission.list_number}:${submission.chunk}`;
-                          if (!latestSubmissionByChunk.has(key))
-                            latestSubmissionByChunk.set(key, submission);
-                        });
-                        const usefulChunkListsForAdmin = usefulChunkLists.map(
-                          (list) => {
-                            const chunks = list.chunks.map((chunk) => {
-                              const submission = latestSubmissionByChunk.get(
-                                `${list.number}:${chunk}`,
-                              );
-                              return {
-                                chunk,
-                                submitted: Boolean(submission),
-                                sentence: submission?.sentence,
-                                submitted_at: submission?.submitted_at,
-                              };
-                            });
-                            return {
-                              number: list.number,
-                              chunks,
-                              submittedCount: chunks.filter(
-                                (chunk) => chunk.submitted,
-                              ).length,
-                              totalCount: chunks.length,
-                            };
-                          },
-                        );
-                        const listeningCompletions = progress
-                          .filter(
-                            (item) =>
-                              item.activity_type === "listening" &&
-                              item.difficulty_level.startsWith("listening:"),
-                          )
-                          .map((item) => {
-                            const [, topicId, exerciseNumber] =
-                              item.difficulty_level.split(":");
-                            const topic = listeningTopics.find(
-                              (entry) => entry.topic.id === topicId,
-                            );
-                            return {
-                              ...item,
-                              title: topic?.topic.title || "Listening topic",
-                              level: topic?.listeningLevel || "1",
-                              exerciseNumber,
-                            };
+      db.all(
+        "SELECT activity_type, difficulty_level, points, total_points, percentage, completed_at FROM progress WHERE username = ? ORDER BY completed_at DESC",
+        [student.username],
+        (progressError, progress) => {
+          if (progressError)
+            return res.status(500).send("Unable to load student details.");
+          db.all(
+            "SELECT activity_type, SUM(points) AS points, SUM(total_points) AS possible_points, AVG(percentage) AS average_score, GROUP_CONCAT(difficulty_level) AS levels FROM progress WHERE username = ? GROUP BY activity_type",
+            [student.username],
+            (statsError, activityStats) => {
+              if (statsError)
+                return res
+                  .status(500)
+                  .send("Unable to load student statistics.");
+              const preparedStats = activityStats.map((stat) => ({
+                ...stat,
+                average_score: Math.round(stat.average_score || 0),
+              }));
+              const rankedStats = [...preparedStats].sort(
+                (a, b) => b.average_score - a.average_score,
+              );
+              db.all(
+                "SELECT list_number, chunk, sentence, submitted_at FROM useful_chunk_submissions WHERE username = ? ORDER BY submitted_at DESC",
+                [student.username],
+                (submissionsError, usefulChunkSubmissions) => {
+                  if (submissionsError)
+                    return res
+                      .status(500)
+                      .send("Unable to load useful chunk submissions.");
+                  db.all(
+                    "SELECT DISTINCT difficulty_level FROM progress WHERE username = ? AND activity_type = 'flip-cards' AND difficulty_level IN ('easy', 'medium') ORDER BY difficulty_level",
+                    [student.username],
+                    (levelsError, flipCompletions) => {
+                      if (levelsError)
+                        return res
+                          .status(500)
+                          .send("Unable to load flip-card completions.");
+                      loadDifficultWords(
+                        student.username,
+                        (wordsError, hardestWords) => {
+                          if (wordsError)
+                            return res
+                              .status(500)
+                              .send("Unable to load difficult words.");
+                          const difficultWordsEasy = hardestWords.filter(
+                            (word) => word.difficulty_level === "easy",
+                          );
+                          const difficultWordsMedium = hardestWords.filter(
+                            (word) => word.difficulty_level === "medium",
+                          );
+                          const latestSubmissionByChunk = new Map();
+                          usefulChunkSubmissions.forEach((submission) => {
+                            const key = `${submission.list_number}:${submission.chunk}`;
+                            if (!latestSubmissionByChunk.has(key))
+                              latestSubmissionByChunk.set(key, submission);
                           });
-                        const readingCompletions = progress
-                          .filter(
-                            (item) =>
-                              item.activity_type === "reading" &&
-                              item.difficulty_level.startsWith("reading:"),
-                          )
-                          .map((item) => {
-                            const [, topicId, exerciseNumber] =
-                              item.difficulty_level.split(":");
-                            const topic = readingTopics.find(
-                              (entry) => entry.topic.id === topicId,
-                            );
-                            return {
-                              ...item,
-                              title: topic?.topic.title || "Reading topic",
-                              level: topic?.readingLevel || "1",
-                              exerciseNumber,
-                            };
-                          });
-                        loadTeacherSubmissionDetails(
-                          student.username,
-                          (
-                            discussionError,
-                            listeningDiscussionSubmissions,
-                            writingDiscussionError,
-                            writingDiscussionSubmissions,
-                            writingError,
-                            writingSubmissions,
-                          ) => {
-                            if (writingError)
-                              return res
-                                .status(500)
-                                .send("Unable to load writing submissions.");
-                            const groupTopicsByLevel = (topics, levelKey) => {
-                              const levels = new Map();
-                              topics.forEach((topic) => {
-                                const level = String(topic[levelKey] || "1");
-                                if (!levels.has(level)) {
-                                  levels.set(level, {
-                                    level,
-                                    topics: [],
-                                    completed: 0,
-                                    total: 0,
-                                  });
-                                }
-                                const levelData = levels.get(level);
-                                const completedExercises =
-                                  topic.exercises.filter(
-                                    (exercise) => exercise.completed,
-                                  ).length;
-                                levelData.topics.push({
-                                  title: topic.topic.title,
-                                  status: topic.completed
-                                    ? "Completed"
-                                    : completedExercises
-                                      ? "In Progress"
-                                      : "Not Started",
-                                  statusClass: topic.completed
-                                    ? "completed"
-                                    : completedExercises
-                                      ? "in-progress"
-                                      : "not-started",
-                                  completedExercises,
-                                  totalExercises: topic.exercises.length,
-                                });
-                                levelData.completed += completedExercises;
-                                levelData.total += topic.exercises.length;
-                              });
-                              return [...levels.values()].sort(
-                                (first, second) =>
-                                  Number(first.level) - Number(second.level),
-                              );
-                            };
-                            const decoratedReadingTopics = decorateTopics(
-                              readingTopics,
-                              progress,
-                              "reading",
-                              "readingLevel",
-                            );
-                            const decoratedWritingTopics = decorateTopics(
-                              writingTopics,
-                              progress,
-                              "writing",
-                              "writingLevel",
-                            );
-                            const decoratedListeningTopics = decorateTopics(
-                              listeningTopics,
-                              progress,
-                              "listening",
-                              "listeningLevel",
-                            );
-                            const grammarProgress = progress.filter((item) =>
-                              ["questions", "final"].includes(
-                                item.activity_type,
-                              ),
-                            );
-                            const grammarChapters =
-                              practiceQuestionChapters.map((chapter) => {
-                                const exercises = chapter.exercises.map(
-                                  (exercise, index) => {
-                                    const completion = grammarProgress.find(
-                                      (item) =>
-                                        item.activity_type === "questions" &&
-                                        item.difficulty_level ===
-                                          `questions:${chapter.id}:${index + 1}`,
-                                    );
-                                    return {
-                                      title: exercise.title,
-                                      completed: Boolean(completion),
-                                      score: completion?.percentage,
-                                    };
-                                  },
+                          const usefulChunkListsForAdmin = usefulChunkLists.map(
+                            (list) => {
+                              const chunks = list.chunks.map((chunk) => {
+                                const submission = latestSubmissionByChunk.get(
+                                  `${list.number}:${chunk}`,
                                 );
                                 return {
-                                  title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
-                                  completedExercises: exercises.filter(
-                                    (exercise) => exercise.completed,
-                                  ).length,
-                                  totalExercises: exercises.length,
-                                  percentage: exercises.length
-                                    ? Math.round(
-                                        (exercises.filter(
-                                          (exercise) => exercise.completed,
-                                        ).length /
-                                          exercises.length) *
-                                          100,
-                                      )
-                                    : 0,
-                                  status: exercises.every(
-                                    (exercise) => exercise.completed,
-                                  )
-                                    ? "Completed"
-                                    : exercises.some(
-                                          (exercise) => exercise.completed,
-                                        )
-                                      ? "In Progress"
-                                      : "Not Started",
-                                  statusClass: exercises.every(
-                                    (exercise) => exercise.completed,
-                                  )
-                                    ? "completed"
-                                    : exercises.some(
-                                          (exercise) => exercise.completed,
-                                        )
-                                      ? "in-progress"
-                                      : "not-started",
-                                  showStatus: exercises.some(
-                                    (exercise) => exercise.completed,
-                                  ),
-                                  exercises,
+                                  chunk,
+                                  submitted: Boolean(submission),
+                                  sentence: submission?.sentence,
+                                  submitted_at: submission?.submitted_at,
                                 };
                               });
-                            const finalTestRows = grammarProgress.filter(
-                              (item) => item.activity_type === "final",
-                            );
-                            loadStudentReminders(
-                              student.username,
-                              (remindersError, studentReminders) => {
-                                if (remindersError)
-                                  return res
-                                    .status(500)
-                                    .send("Unable to load student reminders.");
-                                res.render("teacher-student.handlebars", {
-                                  student: {
-                                    ...student,
-                                    avatarUrl: student.avatarUrl,
-                                    spritesheetUrl: student.spritesheetUrl,
-                                    characterConfig: student.characterConfig,
-                                  },
-                                  profileCategory,
-                                  profileIsGrammar:
-                                    profileCategory === "grammar",
-                                  profileIsReading:
-                                    profileCategory === "reading",
-                                  profileIsActivity:
-                                    profileCategory === "grammar",
-                                  profileIsVocabulary:
-                                    profileCategory === "vocabulary",
-                                  profileIsWriting:
-                                    profileCategory === "writing",
-                                  profileIsListening:
-                                    profileCategory === "listening",
-                                  progress,
-                                  grammarStats: preparedStats.filter((stat) =>
-                                    ["questions", "final"].includes(
-                                      stat.activity_type,
-                                    ),
-                                  ),
-                                  activityStats: preparedStats,
-                                  bestActivity: rankedStats[0],
-                                  needsFocus:
-                                    rankedStats[rankedStats.length - 1],
-                                  usefulChunkSubmissions,
-                                  usefulChunkSubmissionCount:
-                                    usefulChunkSubmissions.length,
-                                  usefulChunkListsForAdmin,
-                                  flipCompletions,
-                                  hardestWords,
-                                  listeningCompletions,
-                                  readingCompletions,
-                                  listeningDiscussionSubmissions:
-                                    discussionError
-                                      ? []
-                                      : listeningDiscussionSubmissions.map(
-                                          (submission) => ({
-                                            ...submission,
-                                            needsFeedback: !submission.feedback,
-                                          }),
-                                        ),
-                                  writingDiscussionSubmissions:
-                                    writingDiscussionError
-                                      ? []
-                                      : writingDiscussionSubmissions.map(
-                                          (submission) => ({
-                                            ...submission,
-                                            needsFeedback: !submission.feedback,
-                                          }),
-                                        ),
-                                  readingProgressLevels: groupTopicsByLevel(
-                                    decoratedReadingTopics,
-                                    "readingLevel",
-                                  ),
-                                  writingProgressLevels: groupTopicsByLevel(
-                                    decoratedWritingTopics,
-                                    "writingLevel",
-                                  ),
-                                  listeningProgressLevels: groupTopicsByLevel(
-                                    decoratedListeningTopics,
-                                    "listeningLevel",
-                                  ),
-                                  grammarChapters,
-                                  finalTestRows,
-                                  writingSubmissions: writingSubmissions.map(
-                                    (submission) => {
-                                      const topic = writingTopics.find(
-                                        (entry) =>
-                                          entry.topic.id ===
-                                          submission.topic_id,
+                              return {
+                                number: list.number,
+                                chunks,
+                                submittedCount: chunks.filter(
+                                  (chunk) => chunk.submitted,
+                                ).length,
+                                totalCount: chunks.length,
+                              };
+                            },
+                          );
+                          const listeningCompletions = progress
+                            .filter(
+                              (item) =>
+                                item.activity_type === "listening" &&
+                                item.difficulty_level.startsWith("listening:"),
+                            )
+                            .map((item) => {
+                              const [, topicId, exerciseNumber] =
+                                item.difficulty_level.split(":");
+                              const topic = listeningTopics.find(
+                                (entry) => entry.topic.id === topicId,
+                              );
+                              return {
+                                ...item,
+                                title: topic?.topic.title || "Listening topic",
+                                level: topic?.listeningLevel || "1",
+                                exerciseNumber,
+                              };
+                            });
+                          const readingCompletions = progress
+                            .filter(
+                              (item) =>
+                                item.activity_type === "reading" &&
+                                item.difficulty_level.startsWith("reading:"),
+                            )
+                            .map((item) => {
+                              const [, topicId, exerciseNumber] =
+                                item.difficulty_level.split(":");
+                              const topic = readingTopics.find(
+                                (entry) => entry.topic.id === topicId,
+                              );
+                              return {
+                                ...item,
+                                title: topic?.topic.title || "Reading topic",
+                                level: topic?.readingLevel || "1",
+                                exerciseNumber,
+                              };
+                            });
+                          loadTeacherSubmissionDetails(
+                            student.username,
+                            (
+                              discussionError,
+                              listeningDiscussionSubmissions,
+                              writingDiscussionError,
+                              writingDiscussionSubmissions,
+                              writingError,
+                              writingSubmissions,
+                            ) => {
+                              if (writingError)
+                                return res
+                                  .status(500)
+                                  .send("Unable to load writing submissions.");
+                              const groupTopicsByLevel = (topics, levelKey) => {
+                                const levels = new Map();
+                                topics.forEach((topic) => {
+                                  const level = String(topic[levelKey] || "1");
+                                  if (!levels.has(level)) {
+                                    levels.set(level, {
+                                      level,
+                                      topics: [],
+                                      completed: 0,
+                                      total: 0,
+                                    });
+                                  }
+                                  const levelData = levels.get(level);
+                                  const completedExercises =
+                                    topic.exercises.filter(
+                                      (exercise) => exercise.completed,
+                                    ).length;
+                                  levelData.topics.push({
+                                    title: topic.topic.title,
+                                    status: topic.completed
+                                      ? "Completed"
+                                      : completedExercises
+                                        ? "In Progress"
+                                        : "Not Started",
+                                    statusClass: topic.completed
+                                      ? "completed"
+                                      : completedExercises
+                                        ? "in-progress"
+                                        : "not-started",
+                                    completedExercises,
+                                    totalExercises: topic.exercises.length,
+                                  });
+                                  levelData.completed += completedExercises;
+                                  levelData.total += topic.exercises.length;
+                                });
+                                return [...levels.values()].sort(
+                                  (first, second) =>
+                                    Number(first.level) - Number(second.level),
+                                );
+                              };
+                              const decoratedReadingTopics = decorateTopics(
+                                readingTopics,
+                                progress,
+                                "reading",
+                                "readingLevel",
+                              );
+                              const decoratedWritingTopics = decorateTopics(
+                                writingTopics,
+                                progress,
+                                "writing",
+                                "writingLevel",
+                              );
+                              const decoratedListeningTopics = decorateTopics(
+                                listeningTopics,
+                                progress,
+                                "listening",
+                                "listeningLevel",
+                              );
+                              const grammarProgress = progress.filter((item) =>
+                                ["questions", "final"].includes(
+                                  item.activity_type,
+                                ),
+                              );
+                              const grammarChapters =
+                                practiceQuestionChapters.map((chapter) => {
+                                  const exercises = chapter.exercises.map(
+                                    (exercise, index) => {
+                                      const completion = grammarProgress.find(
+                                        (item) =>
+                                          item.activity_type === "questions" &&
+                                          item.difficulty_level ===
+                                            `questions:${chapter.id}:${index + 1}`,
                                       );
                                       return {
-                                        ...submission,
-                                        level: topic?.writingLevel || "2",
-                                        needsFeedback: !submission.feedback,
+                                        title: exercise.title,
+                                        completed: Boolean(completion),
+                                        score: completion?.percentage,
                                       };
                                     },
-                                  ),
-                                  writingSubmissionCount:
-                                    writingSubmissions.filter(
-                                      (submission) => !submission.feedback,
+                                  );
+                                  return {
+                                    title: `Chapter ${chapter.chapterNumber}: ${chapter.unit}`,
+                                    completedExercises: exercises.filter(
+                                      (exercise) => exercise.completed,
                                     ).length,
-                                  writingDiscussionCount: writingDiscussionError
-                                    ? 0
-                                    : writingDiscussionSubmissions.filter(
-                                        (submission) => !submission.feedback,
-                                      ).length,
-                                  listeningDiscussionCount: discussionError
-                                    ? 0
-                                    : listeningDiscussionSubmissions.filter(
-                                        (submission) => !submission.feedback,
-                                      ).length,
-                                  studentReminders,
-                                  studentReminderPreview:
-                                    studentReminders.slice(0, 3),
-                                  hasMoreStudentReminders:
-                                    studentReminders.length > 3,
-                                  difficultWordsEasy,
-                                  difficultWordsMedium,
+                                    totalExercises: exercises.length,
+                                    percentage: exercises.length
+                                      ? Math.round(
+                                          (exercises.filter(
+                                            (exercise) => exercise.completed,
+                                          ).length /
+                                            exercises.length) *
+                                            100,
+                                        )
+                                      : 0,
+                                    status: exercises.every(
+                                      (exercise) => exercise.completed,
+                                    )
+                                      ? "Completed"
+                                      : exercises.some(
+                                            (exercise) => exercise.completed,
+                                          )
+                                        ? "In Progress"
+                                        : "Not Started",
+                                    statusClass: exercises.every(
+                                      (exercise) => exercise.completed,
+                                    )
+                                      ? "completed"
+                                      : exercises.some(
+                                            (exercise) => exercise.completed,
+                                          )
+                                        ? "in-progress"
+                                        : "not-started",
+                                    showStatus: exercises.some(
+                                      (exercise) => exercise.completed,
+                                    ),
+                                    exercises,
+                                  };
                                 });
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
-    );
+                              const finalTestRows = grammarProgress.filter(
+                                (item) => item.activity_type === "final",
+                              );
+                              loadStudentReminders(
+                                student.username,
+                                (remindersError, studentReminders) => {
+                                  if (remindersError)
+                                    return res
+                                      .status(500)
+                                      .send(
+                                        "Unable to load student reminders.",
+                                      );
+                                  res.render("teacher-student.handlebars", {
+                                    student: {
+                                      ...student,
+                                      avatarUrl: student.avatarUrl,
+                                      spritesheetUrl: student.spritesheetUrl,
+                                      characterConfig: student.characterConfig,
+                                    },
+                                    profileCategory,
+                                    profileIsGrammar:
+                                      profileCategory === "grammar",
+                                    profileIsReading:
+                                      profileCategory === "reading",
+                                    profileIsActivity:
+                                      profileCategory === "grammar",
+                                    profileIsVocabulary:
+                                      profileCategory === "vocabulary",
+                                    profileIsWriting:
+                                      profileCategory === "writing",
+                                    profileIsListening:
+                                      profileCategory === "listening",
+                                    progress,
+                                    grammarStats: preparedStats.filter((stat) =>
+                                      ["questions", "final"].includes(
+                                        stat.activity_type,
+                                      ),
+                                    ),
+                                    activityStats: preparedStats,
+                                    bestActivity: rankedStats[0],
+                                    needsFocus:
+                                      rankedStats[rankedStats.length - 1],
+                                    usefulChunkSubmissions,
+                                    usefulChunkSubmissionCount:
+                                      usefulChunkSubmissions.length,
+                                    usefulChunkListsForAdmin,
+                                    flipCompletions,
+                                    hardestWords,
+                                    listeningCompletions,
+                                    readingCompletions,
+                                    listeningDiscussionSubmissions:
+                                      discussionError
+                                        ? []
+                                        : listeningDiscussionSubmissions.map(
+                                            (submission) => ({
+                                              ...submission,
+                                              needsFeedback:
+                                                !submission.feedback,
+                                            }),
+                                          ),
+                                    writingDiscussionSubmissions:
+                                      writingDiscussionError
+                                        ? []
+                                        : writingDiscussionSubmissions.map(
+                                            (submission) => ({
+                                              ...submission,
+                                              needsFeedback:
+                                                !submission.feedback,
+                                            }),
+                                          ),
+                                    readingProgressLevels: groupTopicsByLevel(
+                                      decoratedReadingTopics,
+                                      "readingLevel",
+                                    ),
+                                    writingProgressLevels: groupTopicsByLevel(
+                                      decoratedWritingTopics,
+                                      "writingLevel",
+                                    ),
+                                    listeningProgressLevels: groupTopicsByLevel(
+                                      decoratedListeningTopics,
+                                      "listeningLevel",
+                                    ),
+                                    grammarChapters,
+                                    finalTestRows,
+                                    writingSubmissions: writingSubmissions.map(
+                                      (submission) => {
+                                        const topic = writingTopics.find(
+                                          (entry) =>
+                                            entry.topic.id ===
+                                            submission.topic_id,
+                                        );
+                                        return {
+                                          ...submission,
+                                          level: topic?.writingLevel || "2",
+                                          needsFeedback: !submission.feedback,
+                                        };
+                                      },
+                                    ),
+                                    writingSubmissionCount:
+                                      writingSubmissions.filter(
+                                        (submission) => !submission.feedback,
+                                      ).length,
+                                    writingDiscussionCount:
+                                      writingDiscussionError
+                                        ? 0
+                                        : writingDiscussionSubmissions.filter(
+                                            (submission) =>
+                                              !submission.feedback,
+                                          ).length,
+                                    listeningDiscussionCount: discussionError
+                                      ? 0
+                                      : listeningDiscussionSubmissions.filter(
+                                          (submission) => !submission.feedback,
+                                        ).length,
+                                    studentReminders,
+                                    studentReminderPreview:
+                                      studentReminders.slice(0, 3),
+                                    hasMoreStudentReminders:
+                                      studentReminders.length > 3,
+                                    difficultWordsEasy,
+                                    difficultWordsMedium,
+                                  });
+                                },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
     });
   };
 
@@ -7331,11 +7535,12 @@ io.use((socket, next) => {
   if (!request.session?.isLoggedIn || !request.session.name) {
     return next(new Error("Authentication required."));
   }
+  socket.data.username = request.session.name;
   next();
 });
 
 io.on("connection", (socket) => {
-  const username = socket.request.session.name;
+  const username = socket.data.username;
   const isAdmin = hasAdminSession(socket.request.session);
 
   socket.on("joinRoom", ({ roomId } = {}, acknowledge) => {
@@ -7343,53 +7548,83 @@ io.on("connection", (socket) => {
     if (!numericRoomId)
       return acknowledge?.({ ok: false, error: "Room is required." });
     db.get(
-      "SELECT id, mode FROM lobby_rooms WHERE id = ?",
+      "SELECT id, mode, status FROM lobby_rooms WHERE id = ?",
       [numericRoomId],
       (roomError, room) => {
         if (roomError || !room)
           return acknowledge?.({ ok: false, error: "Room not found." });
+        const loadCharacterAndJoin = (characterPromise) => {
+          characterPromise
+            .then((character) => {
+              socket.join(String(numericRoomId));
+              socket.data.roomId = numericRoomId;
+              socket.data.mode = room.mode;
+              socket.data.character = {
+                avatar: profileImageUrl(character.avatar),
+                spritesheet: profileImageUrl(
+                  character.spritesheet || character.avatar,
+                ),
+                avatarUrl: profileImageUrl(character.avatar),
+                spritesheetUrl: profileImageUrl(
+                  character.spritesheet || character.avatar,
+                ),
+                characterConfig: parseCharacterConfig(
+                  character.character_config,
+                ),
+                ...parseAnimationsConfig(character.character_animations),
+                goldMedals: Number(character.gold_medals) || 0,
+                winnerAnimationsUnlocked: Number(character.gold_medals) > 0,
+              };
+              acknowledge?.({ ok: true });
+            })
+            .catch((error) => {
+              console.error("Unable to load socket lobby character:", error);
+              acknowledge?.({
+                ok: false,
+                error: "Unable to load your character.",
+              });
+            });
+        };
+        const joinRoomWithCharacter = (participantError, participant) => {
+          if (participantError) {
+            return acknowledge?.({
+              ok: false,
+              error: "Unable to verify room membership.",
+            });
+          }
+          if (participant || isAdmin) {
+            loadCharacterAndJoin(loadLobbyCharacter(username));
+            return;
+          }
+          if (["countdown", "running", "leaderboard"].includes(room.status)) {
+            insertLobbyParticipant(
+              numericRoomId,
+              username,
+              (insertError) => {
+                if (insertError) {
+                  console.error(
+                    "Unable to add a late lobby participant:",
+                    insertError,
+                  );
+                  return acknowledge?.({
+                    ok: false,
+                    error: "Unable to join the active room.",
+                  });
+                }
+                loadCharacterAndJoin(loadLobbyCharacter(username));
+              },
+            );
+            return;
+          }
+          acknowledge?.({
+            ok: false,
+            error: "You are not in this room.",
+          });
+        };
         db.get(
           "SELECT 1 AS participant FROM lobby_participants WHERE room_id = ? AND username = ?",
           [numericRoomId, username],
-          (participantError, participant) => {
-            if (participantError || (!participant && !isAdmin)) {
-              return acknowledge?.({
-                ok: false,
-                error: "You are not in this room.",
-              });
-            }
-            loadLobbyCharacter(username)
-              .then((character) => {
-                socket.join(String(numericRoomId));
-                socket.data.roomId = numericRoomId;
-                socket.data.mode = room.mode;
-                socket.data.character = {
-                  avatar: profileImageUrl(character.avatar),
-                  spritesheet: profileImageUrl(
-                    character.spritesheet || character.avatar,
-                  ),
-                  avatarUrl: profileImageUrl(character.avatar),
-                  spritesheetUrl: profileImageUrl(
-                    character.spritesheet || character.avatar,
-                  ),
-                  characterConfig: parseCharacterConfig(
-                    character.character_config,
-                  ),
-                  ...parseAnimationsConfig(character.character_animations),
-                  goldMedals: Number(character.gold_medals) || 0,
-                  winnerAnimationsUnlocked:
-                    Number(character.gold_medals) > 0,
-                };
-                acknowledge?.({ ok: true });
-              })
-              .catch((error) => {
-                console.error("Unable to load socket lobby character:", error);
-                acknowledge?.({
-                  ok: false,
-                  error: "Unable to load your character.",
-                });
-              });
-          },
+          joinRoomWithCharacter,
         );
       },
     );
@@ -7404,22 +7639,25 @@ io.on("connection", (socket) => {
       ? Number(data.direction)
       : 0;
     const frame = Math.max(0, Math.min(8.99, Number(data.frame) || 0));
+    const broadcastMovement = () => {
+      socket.to(String(roomId)).emit("playerMoved", {
+        roomId,
+        userId: username,
+        username,
+        x,
+        y,
+        direction,
+        frame,
+        isAdmin,
+        ...socket.data.character,
+      });
+    };
     db.run(
       "UPDATE lobby_participants SET x = ?, y = ?, direction = ?, frame = ? WHERE room_id = ? AND username = ?",
       [x, y, direction, frame, roomId, username],
       (error) => {
         if (error) return;
-        socket.to(String(roomId)).emit("playerMoved", {
-          roomId,
-          userId: username,
-          username,
-          x,
-          y,
-          direction,
-          frame,
-          isAdmin,
-          ...socket.data.character,
-        });
+        broadcastMovement();
       },
     );
   });
@@ -7459,7 +7697,10 @@ io.on("connection", (socket) => {
 
   socket.on("teacherEntrance", ({ roomId } = {}, acknowledge) => {
     const numericRoomId = Number(roomId);
-    if (!hasAdminSession(socket.request.session) || socket.data.roomId !== numericRoomId) {
+    if (
+      !hasAdminSession(socket.request.session) ||
+      socket.data.roomId !== numericRoomId
+    ) {
       return acknowledge?.({ ok: false, error: "Teacher access required." });
     }
     db.run(
@@ -7482,7 +7723,6 @@ io.on("connection", (socket) => {
       },
     );
   });
-
 });
 
 // The server.listen call should be outside the post route
