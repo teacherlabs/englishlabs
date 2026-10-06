@@ -67,6 +67,7 @@
           <div class="lobby-teacher-actions">
             {{#unless isQuicktype}}<button class="practice-button" type="button" data-choose-quiz>Choose Quiz</button><button class="notes-button" type="button" data-create-quiz>Create Quiz</button>{{/unless}}
             <button class="practice-button" type="button" data-teacher-entrance data-entering="false">Enter Lobby</button>
+            <button class="notes-button" type="button" data-lobby-music-toggle aria-pressed="false">Mute music</button>
             <a class="notes-button" href="/character-generator">Customize</a>
           </div>
           {{#if isQuicktype}}{{#if isWaiting}}
@@ -147,7 +148,7 @@
             <div class="lobby-waiting-room" data-lobby-waiting-room>
               <p class="lobby-waiting-room-title">Everyone in the room</p>
               <div class="lobby-waiting-players" data-lobby-waiting-players><p class="lobby-players-empty">Waiting for players to join...</p></div>
-              {{#if student.winnerAnimationsUnlocked}}<div class="lobby-emotes" aria-label="Lobby emotes">
+              {{#if student.goldMedals}}<div class="lobby-emotes" aria-label="Lobby emotes">
                     <span>React</span>
                     <button class="lobby-victory-pose-button" type="button" data-victory-pose>Victory Pose</button>
                     <span class="lobby-emote-status" data-lobby-emote-status role="status" aria-live="polite"></span>
@@ -214,6 +215,7 @@
 <div class="teacher-entrance-toast" data-teacher-entrance-toast role="status" aria-live="polite" hidden></div>
 <div class="teacher-entrance-toast" data-lobby-closed-notice role="status" aria-live="assertive" hidden></div>
 <audio data-teacher-entrance-audio preload="auto" src="/audio1/ElevenLabs_Evil_sinister_laugh_echoing_through_a_haunted_house_at_midnight.mp3"></audio>
+{{#if isAdmin}}<audio data-lobby-music src="/lobbymusic.mp3" preload="auto"></audio>{{/if}}
 <div id="lobby-exit-modal" class="lobby-exit-modal" hidden>
   <div class="lobby-exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="lobby-exit-title">
     <h2 id="lobby-exit-title">Are you sure you want to exit lobby?</h2>
@@ -433,6 +435,7 @@
         });
         window.lobbySetTeacherPresent?.(teacherPresent);
         window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
+        window.lobbyMusicSetPresent?.(teacherPresent);
         if (entranceButton) {
           entranceButton.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
           entranceButton.dataset.entering = teacherPresent ? "false" : "true";
@@ -803,6 +806,7 @@
       });
       window.lobbySetTeacherPresent?.(teacherPresent);
       window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
+      window.lobbyMusicSetPresent?.(teacherPresent);
       if (entranceButton) {
         entranceButton.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
         entranceButton.dataset.entering = teacherPresent ? "false" : "true";
@@ -909,6 +913,7 @@
               });
               window.lobbySetTeacherPresent?.(teacherPresent);
               window.lobbyTeacherPresent = teacherPresent ? 1 : 0;
+              window.lobbyMusicSetPresent?.(teacherPresent);
               button.textContent = teacherPresent ? "In Lobby" : "Enter Lobby";
               button.dataset.entering = teacherPresent ? "false" : "true";
               button.disabled = teacherPresent;
@@ -1838,6 +1843,42 @@
         updateJoinSoundControl();
       });
     }
+  }
+
+  const lobbyMusic = document.querySelector("[data-lobby-music]");
+  const lobbyMusicToggle = document.querySelector("[data-lobby-music-toggle]");
+  if (lobbyMusic && lobbyMusicToggle) {
+    lobbyMusic.loop = true;
+    let musicMuted = localStorage.getItem("english-labs-lobby-music") === "off";
+    let teacherInLobby = document.querySelector("[data-player-canvas]")?.dataset.playerPresent === "1";
+    const updateMusicToggle = () => {
+      lobbyMusic.muted = musicMuted;
+      lobbyMusicToggle.textContent = musicMuted ? "Unmute music" : "Mute music";
+      lobbyMusicToggle.setAttribute("aria-pressed", String(musicMuted));
+    };
+    const syncMusic = () => {
+      if (!teacherInLobby) {
+        lobbyMusic.pause();
+        lobbyMusic.currentTime = 0;
+        return;
+      }
+      if (lobbyMusic.paused) lobbyMusic.play().catch(() => {});
+    };
+    window.lobbyMusicSetPresent = (present) => {
+      teacherInLobby = Boolean(present);
+      syncMusic();
+    };
+    lobbyMusicToggle.addEventListener("click", () => {
+      musicMuted = !musicMuted;
+      localStorage.setItem("english-labs-lobby-music", musicMuted ? "off" : "on");
+      updateMusicToggle();
+      syncMusic();
+    });
+    // Autoplay is blocked until the page has a user gesture, so retry on the first one.
+    window.addEventListener("pointerdown", syncMusic, { once: true });
+    window.addEventListener("keydown", syncMusic, { once: true });
+    updateMusicToggle();
+    syncMusic();
   }
 
   const chooseQuizButton = document.querySelector("[data-choose-quiz]");

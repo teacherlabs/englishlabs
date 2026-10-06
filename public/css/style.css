@@ -702,6 +702,10 @@ legend {
   margin: 18px 0;
 }
 
+.quicktype-answer-form input {
+  padding: 28px;
+}
+
 .live-question h2 {
   margin-bottom: 14px;
 }
@@ -1732,7 +1736,6 @@ legend {
     width: 100%;
     min-width: 0;
     min-height: 88px;
-    padding: 24px;
     border-radius: 8px;
     font-size: 22px;
   }
