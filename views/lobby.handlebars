@@ -1416,6 +1416,8 @@
       if (direction !== null) player.direction = direction;
     };
     const drawPlayer = () => {
+      // Schedule first so an error while drawing one character can't stop every animation.
+      window.requestAnimationFrame(drawPlayer);
       const now = timestampNow();
       const deltaTime = previousFrameAt === null
         ? 0
@@ -1649,6 +1651,7 @@
         }
       }
       (window.lobbyPlayers || []).forEach((remotePlayer) => {
+        try {
         if (String(remotePlayer.username) === ownUsername) return;
         const remoteSpritesheet = remotePlayer.spritesheetUrl || remotePlayer.spritesheet;
         const teacherPresent = playerCanvas.dataset.teacherPresent === "1" || window.lobbyTeacherPresent === 1;
@@ -1761,7 +1764,10 @@
         const remoteDrawFrame = remoteResolved && remoteResolved.frame !== null ? remoteResolved.frame : animatedRemote.frame;
         const remoteDrawAnimation = remoteResolved ? remoteResolved.source.animation : animatedRemote.animation;
         drawSprite(remoteResolved?.source.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, remoteDrawFrame, remotePlayer.username, isAdmin, remoteDrawAnimation, null, remoteResolved?.source || null);
-      });
+                } catch (error) {
+                  console.error("Unable to draw lobby player:", remotePlayer?.username, error);
+                }
+              });
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
       playerContext.drawImage(frameCanvas, 0, 0);
       const syncState = `${player.x},${player.y},${player.direction}`;
@@ -1771,7 +1777,6 @@
         const movement = { roomId: playerCanvas.dataset.roomId, x: player.x, y: player.y, direction: player.direction, frame: player.frame };
         if (window.lobbySocket?.connected) window.lobbySocket.emit("playerMove", movement);
       }
-      window.requestAnimationFrame(drawPlayer);
     };
 
     const timestampNow = () => performance.now();
