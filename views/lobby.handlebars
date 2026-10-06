@@ -1723,6 +1723,23 @@
           preloadAnimationImages(remotePlayer.animations, remoteAnimationMap);
           remotePosition.hasPreloadedAnimations = true;
         }
+        // Same time-based walk cycle as the local player instead of the stale network frame.
+        if (remoteIsMoving) remotePosition.lastMovedAt = now;
+        const remoteWalking = now - (remotePosition.lastMovedAt ?? -Infinity) < 150;
+        if (animatedRemote.animation === "idle" && remoteWalking) {
+          animatedRemote.animation = "walk";
+        }
+        if (animatedRemote.animation === "walk") {
+          if (!remotePosition.walkStartedAt) remotePosition.walkStartedAt = now;
+          const walkSource = getAnimationSource(remotePlayer.animations, remoteAnimationMap, "walk") ||
+            (remoteImage.complete && remoteImage.naturalWidth >= 8
+              ? { image: remoteImage, ...getLobbyAnimationLayout(remoteImage, "walk") }
+              : null);
+          const walkColumns = walkSource ? window.getCharacterAnimationLayout("walk", walkSource).columns : 1;
+          animatedRemote.frame = Math.floor((now - remotePosition.walkStartedAt) / WALK_FRAME_DURATION) % walkColumns;
+        } else {
+          remotePosition.walkStartedAt = 0;
+        }
         if (animatedRemote.animation === "celebrate-bounce") {
           drawCelebrationBounce(remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, animatedRemote.frame, remotePlayer.username, isAdmin, remotePlayer.animations, remoteAnimationMap);
           return;
