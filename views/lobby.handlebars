@@ -1883,6 +1883,19 @@
   const lobbyMusicToggle = document.querySelector("[data-lobby-music-toggle]");
   if (lobbyMusic && lobbyMusicToggle) {
     lobbyMusic.loop = true;
+    // Rounds start via full page loads, so keep the playback position across them instead of restarting.
+    const MUSIC_POSITION_KEY = "english-labs-lobby-music-position";
+    const restoreMusicPosition = () => {
+      const saved = Number(sessionStorage.getItem(MUSIC_POSITION_KEY));
+      if (Number.isFinite(saved) && saved > 0 && saved < (lobbyMusic.duration || Infinity)) lobbyMusic.currentTime = saved;
+    };
+    if (lobbyMusic.readyState >= 1) restoreMusicPosition();
+    else lobbyMusic.addEventListener("loadedmetadata", restoreMusicPosition, { once: true });
+    const saveMusicPosition = () => {
+      if (lobbyMusic.currentTime > 0) sessionStorage.setItem(MUSIC_POSITION_KEY, String(lobbyMusic.currentTime));
+    };
+    lobbyMusic.addEventListener("timeupdate", saveMusicPosition);
+    window.addEventListener("pagehide", saveMusicPosition);
     let musicMuted = localStorage.getItem("english-labs-lobby-music") === "off";
     let teacherInLobby = document.querySelector("[data-player-canvas]")?.dataset.playerPresent === "1";
     const updateMusicToggle = () => {
@@ -1893,7 +1906,6 @@
     const syncMusic = () => {
       if (!teacherInLobby) {
         lobbyMusic.pause();
-        lobbyMusic.currentTime = 0;
         return;
       }
       if (lobbyMusic.paused) lobbyMusic.play().catch(() => {});
