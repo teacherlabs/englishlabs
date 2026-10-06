@@ -170,6 +170,13 @@
       const correct = value.trim().toLowerCase() === question.dataset.answer.toLowerCase();
       question.dataset.answered = "true";
       if (correct) points += 1;
+      const correctValue = question.dataset.answer.trim().toLowerCase();
+      question.querySelectorAll(".answer-options button").forEach((option) => {
+        const isRight = option.value.trim().toLowerCase() === correctValue;
+        const wasPicked = option.dataset.picked === "true";
+        if (isRight) option.classList.add(wasPicked ? "multi-correct" : "multi-missed");
+        else if (wasPicked) option.classList.add("multi-incorrect");
+      });
       question.querySelectorAll("button, input").forEach((element) => element.disabled = true);
       const feedback = question.querySelector(".answer-feedback");
       feedback.hidden = false;
@@ -179,7 +186,7 @@
       next.disabled = false;
       next.textContent = current === questions.length - 1 ? "Finish exercise" : "Next question";
     };
-    exercise.querySelectorAll(".answer-options button").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.value)));
+    exercise.querySelectorAll(".answer-options button").forEach((button) => button.addEventListener("click", () => { button.dataset.picked = "true"; answer(button.closest(".reading-question"), button.value); }));
     exercise.querySelectorAll("[data-reading-check]").forEach((button) => button.addEventListener("click", () => answer(button.closest(".reading-question"), button.previousElementSibling.value)));
     next.addEventListener("click", () => {
       questions[current].hidden = true;

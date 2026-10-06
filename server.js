@@ -4387,7 +4387,7 @@ app.get("/profile", requireProfileUser, (req, res) => {
 
 const QUESTION_DURATION_MS = 30000;
 const QUICKTYPE_COUNTDOWN_MS = 3000;
-const QUICKTYPE_DURATION_MS = 15000;
+const QUICKTYPE_DURATION_MS = 30000;
 
 // Lazily flips a running round to "leaderboard" once the timer expires or everyone has answered.
 const finalizeRoundIfNeeded = (room, callback) => {

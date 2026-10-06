@@ -280,7 +280,13 @@
             question.classList.add("incorrect-answer");
             setTimeout(() => question.classList.remove("incorrect-answer"), 900);
           }
-          question.querySelectorAll("input[type=radio]").forEach((input) => input.disabled = true);
+          const correctOption = question.querySelector("[data-answer]").value;
+          question.querySelectorAll("input[type=radio]").forEach((input) => {
+            input.disabled = true;
+            const label = input.closest("label");
+            if (input.value === correctOption) label.classList.add(input === selected ? "multi-correct" : "multi-missed");
+            else if (input === selected) label.classList.add("multi-incorrect");
+          });
           feedback.hidden = false;
           if (isCorrect) question.classList.add("celebrate-correct");
           feedback.className = `answer-feedback ${isCorrect ? "correct" : "incorrect"}`;
@@ -439,6 +445,8 @@
       }));
       question.querySelectorAll("[data-correction]").forEach((button) => button.addEventListener("click", () => {
         const isCorrect = button.dataset.correction === question.dataset.correctWord;
+        button.classList.remove("multi-correct", "multi-incorrect");
+        button.classList.add(isCorrect ? "multi-correct" : "multi-incorrect");
         if (isCorrect) {
           if (!question.dataset.completed) points += 1;
           question.dataset.completed = "true";

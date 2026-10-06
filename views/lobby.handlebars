@@ -215,7 +215,7 @@
 <div class="teacher-entrance-toast" data-teacher-entrance-toast role="status" aria-live="polite" hidden></div>
 <div class="teacher-entrance-toast" data-lobby-closed-notice role="status" aria-live="assertive" hidden></div>
 <audio data-teacher-entrance-audio preload="auto" src="/audio1/ElevenLabs_Evil_sinister_laugh_echoing_through_a_haunted_house_at_midnight.mp3"></audio>
-{{#if isAdmin}}<audio data-lobby-music src="/lobbymusic.mp3" preload="auto"></audio>{{/if}}
+{{#if isAdmin}}<audio data-lobby-music src="{{#if isQuicktype}}/quicktypelobbymusic.mp3{{else}}/questiongame.mp3{{/if}}" preload="auto"></audio>{{/if}}
 <div id="lobby-exit-modal" class="lobby-exit-modal" hidden>
   <div class="lobby-exit-dialog" role="alertdialog" aria-modal="true" aria-labelledby="lobby-exit-title">
     <h2 id="lobby-exit-title">Are you sure you want to exit lobby?</h2>
@@ -1884,7 +1884,7 @@
   if (lobbyMusic && lobbyMusicToggle) {
     lobbyMusic.loop = true;
     // Rounds start via full page loads, so keep the playback position across them instead of restarting.
-    const MUSIC_POSITION_KEY = "english-labs-lobby-music-position";
+    const MUSIC_POSITION_KEY = `english-labs-lobby-music-position:${new URL(lobbyMusic.src).pathname}`;
     const restoreMusicPosition = () => {
       const saved = Number(sessionStorage.getItem(MUSIC_POSITION_KEY));
       if (Number.isFinite(saved) && saved > 0 && saved < (lobbyMusic.duration || Infinity)) lobbyMusic.currentTime = saved;

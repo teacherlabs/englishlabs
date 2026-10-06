@@ -136,6 +136,10 @@
         question.dataset.answered = "true";
         question.dataset.correct = correct;
         if (correct) points += 1;
+        question.querySelectorAll(".answer-options button").forEach((choice) => {
+          if (choice.value === question.dataset.answer) choice.classList.add(choice === button ? "multi-correct" : "multi-missed");
+          else if (choice === button) choice.classList.add("multi-incorrect");
+        });
         question.querySelectorAll("button").forEach((choice) => choice.disabled = true);
         const feedback = question.querySelector(".answer-feedback");
         feedback.hidden = false;
