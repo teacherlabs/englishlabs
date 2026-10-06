@@ -1312,7 +1312,14 @@
         rows < 1 ||
         frameWidth * columns > image.naturalWidth ||
         frameHeight * rows > image.naturalHeight
-      ) return null;
+      ) {
+        // Saved metadata that doesn't fit the image: re-derive the grid from the image size
+        // instead of dropping the sheet (which left the character on a single static frame).
+        const derivedWidth = Math.floor(image.naturalWidth / configured.columns);
+        const derivedHeight = Math.floor(image.naturalHeight / configured.rows);
+        if (derivedWidth < 1 || derivedHeight < 1) return null;
+        return { image, frameWidth: derivedWidth, frameHeight: derivedHeight, columns: configured.columns, rows: configured.rows, animation };
+      }
       return { image, frameWidth, frameHeight, columns, rows, animation };
     };
     // Resolves the best available sheet + frame to draw for a requested animation (e.g. "idle"),
@@ -1356,6 +1363,11 @@
       }
       return null;
     };
+    // A character with no real walk grid (single-frame image) would otherwise glide; hop instead.
+    const getWalkBob = (now, resolved, isWalking) =>
+      isWalking && resolved && resolved.source.columns === 1 && resolved.source.rows === 1
+        ? -Math.abs(Math.sin(now / 90)) * 4
+        : 0;
     const player = { x: MAX_PLAYER_X / 2, y: 380, speed: PLAYER_SPEED, direction: 0, frame: 0, currentAnimation: "idle", currentFrame: 0, animationStartedAt: 0, isMoving: false, image: new Image(), isLoaded: false, isPresent: playerCanvas.dataset.playerAdmin !== "true" || playerCanvas.dataset.playerPresent === "1", animations: parseAnimationsDataset(playerCanvas.dataset.animations), animationImages: new Map(), celebrationAnimation: null, isCelebrating: false };
     preloadAnimationImages(player.animations, player.animationImages);
     const remoteImages = new Map();
@@ -1646,7 +1658,7 @@
           if (!victoryPoseActive || resolved) {
             const drawFrame = resolved && resolved.frame !== null ? resolved.frame : animatedPlayer.frame;
             const drawAnimation = resolved ? resolved.source.animation : animatedPlayer.animation;
-            drawSprite(resolved?.source.image || player.image, player.x, player.y, animatedPlayer.direction, drawFrame, ownUsername, playerCanvas.dataset.playerAdmin === "true", drawAnimation, victoryPoseActive ? player.currentFrameRect : null, resolved?.source || null);
+            drawSprite(resolved?.source.image || player.image, player.x, player.y, animatedPlayer.direction, drawFrame, ownUsername, playerCanvas.dataset.playerAdmin === "true", drawAnimation, victoryPoseActive ? player.currentFrameRect : null, resolved?.source || null, getWalkBob(now, resolved, player.isMoving && !victoryPoseActive));
           }
         }
       }
@@ -1763,7 +1775,7 @@
         if (isCelebrating && !remoteResolved) return;
         const remoteDrawFrame = remoteResolved && remoteResolved.frame !== null ? remoteResolved.frame : animatedRemote.frame;
         const remoteDrawAnimation = remoteResolved ? remoteResolved.source.animation : animatedRemote.animation;
-        drawSprite(remoteResolved?.source.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, remoteDrawFrame, remotePlayer.username, isAdmin, remoteDrawAnimation, null, remoteResolved?.source || null);
+        drawSprite(remoteResolved?.source.image || remoteImage, remotePosition.x, remotePosition.y, animatedRemote.direction, remoteDrawFrame, remotePlayer.username, isAdmin, remoteDrawAnimation, null, remoteResolved?.source || null, getWalkBob(now, remoteResolved, remoteWalking));
                 } catch (error) {
                   console.error("Unable to draw lobby player:", remotePlayer?.username, error);
                 }
