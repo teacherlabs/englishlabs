@@ -1001,6 +1001,7 @@
           const targetWordEl = phaseRunning.querySelector("[data-target-word]");
           if (targetWordEl && state.question.target_word) targetWordEl.textContent = state.question.target_word;
           if (quicktypeInput) { quicktypeInput.value = ""; quicktypeInput.disabled = false; }
+          if (quicktypeInput && role === "student") setTimeout(() => quicktypeInput.focus(), 0);
           if (quicktypeSubmit) quicktypeSubmit.disabled = false;
           [["a", "answer_a"], ["b", "answer_b"], ["c", "answer_c"], ["d", "answer_d"]].forEach(([key, field]) => {
             const answerEl = phaseRunning.querySelector(`[data-answer="${key}"], [data-answer-text="${key}"]`);
@@ -1066,6 +1067,23 @@
           .then((result) => { if (feedback) feedback.textContent = result.correct ? "Correct!" : "Not quite."; refresh(); });
       }));
     }
+
+    // Advance rounds with fetch instead of a full page navigation so the page (and the music) never reloads.
+    if (role === "admin") document.addEventListener("submit", (event) => {
+      const form = event.target.closest?.('form[action="/lobby/next"]');
+      if (!form) return;
+      event.preventDefault();
+      const button = form.querySelector("button[type='submit']");
+      if (button) button.disabled = true;
+      fetch(form.action, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(form)),
+        redirect: "manual",
+      })
+        .catch((error) => console.error("Unable to advance the lobby game:", error))
+        .finally(() => { if (button) button.disabled = false; refresh(); });
+    });
 
     refresh();
   }
@@ -1491,7 +1509,7 @@
         const length = Math.hypot(movement.x, movement.y) || 1;
         const distance = player.speed * deltaTime / 1000;
         player.x = Math.max(RENDER_WIDTH / 2, Math.min(MAX_PLAYER_X, player.x + movement.x / length * distance));
-        player.y = Math.max(RENDER_WIDTH, Math.min(playerCanvas.height, player.y + movement.y / length * distance));
+        player.y = Math.max(RENDER_WIDTH, Math.min(ARENA_HEIGHT, player.y + movement.y / length * distance));
       } else if (!victoryPoseActive) {
         if (player.currentAnimation !== "idle") {
           player.currentAnimation = "idle";
@@ -1502,26 +1520,14 @@
       }
 
       frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+      let hoverLabel = null;
       const drawHoverName = (x, y, username) => {
         if (!username || !pointerPosition ||
           pointerPosition.x < x - RENDER_WIDTH / 2 ||
           pointerPosition.x > x + RENDER_WIDTH / 2 ||
           pointerPosition.y < y - RENDER_WIDTH ||
           pointerPosition.y > y) return;
-        frameContext.font = "700 8px Teachers, sans-serif";
-        frameContext.textAlign = "center";
-        frameContext.textBaseline = "bottom";
-        const label = String(username).slice(0, 18);
-        const labelX = Math.floor(x);
-        const labelY = Math.floor(y - RENDER_WIDTH - 3);
-        const labelWidth = frameContext.measureText(label).width + 6;
-        frameContext.fillStyle = "rgba(41, 29, 24, 0.88)";
-        frameContext.fillRect(labelX - labelWidth / 2, labelY - 11, labelWidth, 13);
-        frameContext.fillStyle = "#ffffff";
-        frameContext.shadowColor = "rgba(0, 0, 0, 0.8)";
-        frameContext.shadowBlur = 2;
-        frameContext.fillText(label, labelX, labelY);
-        frameContext.shadowBlur = 0;
+        hoverLabel = { x, y, username };
       };
       const drawSprite = (image, x, y, direction, frame, username, isAdmin, animation = "walk", frameRectOverride = null, metadataOverride = null, bounceOffsetY = 0, overlaySymbol = null) => {
         if (!image.complete || image.naturalWidth < 8 || image.naturalHeight < 8) return;
@@ -1780,8 +1786,29 @@
                   console.error("Unable to draw lobby player:", remotePlayer?.username, error);
                 }
               });
+      // Render at the displayed resolution so the hover name stays crisp; sprites stay pixel-sharp.
+      const bounds = playerCanvas.getBoundingClientRect();
+      const scale = Math.min(4, Math.max(1, Math.ceil(bounds.width * (window.devicePixelRatio || 1) / ARENA_WIDTH)));
+      if (playerCanvas.width !== ARENA_WIDTH * scale) {
+        playerCanvas.width = ARENA_WIDTH * scale;
+        playerCanvas.height = ARENA_HEIGHT * scale;
+      }
+      playerContext.imageSmoothingEnabled = false;
       playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
-      playerContext.drawImage(frameCanvas, 0, 0);
+      playerContext.drawImage(frameCanvas, 0, 0, playerCanvas.width, playerCanvas.height);
+      if (hoverLabel) {
+        const label = String(hoverLabel.username).slice(0, 18);
+        const labelX = Math.floor(hoverLabel.x) * scale;
+        const labelY = Math.floor(hoverLabel.y - RENDER_WIDTH - 3) * scale;
+        playerContext.font = `700 ${9 * scale}px Teachers, sans-serif`;
+        playerContext.textAlign = "center";
+        playerContext.textBaseline = "bottom";
+        const labelWidth = playerContext.measureText(label).width + 8 * scale;
+        playerContext.fillStyle = "rgba(41, 29, 24, 0.88)";
+        playerContext.fillRect(labelX - labelWidth / 2, labelY - 12 * scale, labelWidth, 15 * scale);
+        playerContext.fillStyle = "#ffffff";
+        playerContext.fillText(label, labelX, labelY);
+      }
       const syncState = `${player.x},${player.y},${player.direction}`;
       if (syncState !== lastSyncedState && timestampNow() - lastSyncAt >= PLAYER_SYNC_INTERVAL) {
         lastSyncAt = timestampNow();
@@ -1817,8 +1844,8 @@
     playerCanvas.addEventListener("mousemove", (event) => {
       const bounds = playerCanvas.getBoundingClientRect();
       pointerPosition = {
-        x: (event.clientX - bounds.left) * playerCanvas.width / bounds.width,
-        y: (event.clientY - bounds.top) * playerCanvas.height / bounds.height,
+        x: (event.clientX - bounds.left) * ARENA_WIDTH / bounds.width,
+        y: (event.clientY - bounds.top) * ARENA_HEIGHT / bounds.height,
       };
     });
     playerCanvas.addEventListener("mouseleave", () => { pointerPosition = null; });
@@ -1894,7 +1921,13 @@
     const saveMusicPosition = () => {
       if (lobbyMusic.currentTime > 0) sessionStorage.setItem(MUSIC_POSITION_KEY, String(lobbyMusic.currentTime));
     };
-    lobbyMusic.addEventListener("timeupdate", saveMusicPosition);
+    let lastMusicSave = 0;
+    lobbyMusic.addEventListener("timeupdate", () => {
+      const now = Date.now();
+      if (now - lastMusicSave < 2000) return;
+      lastMusicSave = now;
+      saveMusicPosition();
+    });
     window.addEventListener("pagehide", saveMusicPosition);
     let musicMuted = localStorage.getItem("english-labs-lobby-music") === "off";
     let teacherInLobby = document.querySelector("[data-player-canvas]")?.dataset.playerPresent === "1";

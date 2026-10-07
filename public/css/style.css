@@ -10825,3 +10825,10 @@ p {
   color: #b71c1c !important;
   font-weight: 700;
 }
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel li,
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel li strong,
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel li span,
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel .round-leaderboard-rank,
+.app-shell .teacher-lobby-stage-wrap .round-leaderboard-panel .round-leaderboard-name {
+  color: #fff !important;
+}
