@@ -1290,6 +1290,19 @@ if (postgresPool) {
     )
     .then(() =>
       postgresPool.query(`
+        CREATE TABLE IF NOT EXISTS lobby_player_mode_stats (
+          username TEXT NOT NULL,
+          mode TEXT NOT NULL,
+          best_score INTEGER NOT NULL DEFAULT 0,
+          gold_medals INTEGER NOT NULL DEFAULT 0,
+          silver_medals INTEGER NOT NULL DEFAULT 0,
+          bronze_medals INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (username, mode)
+        )
+      `),
+    )
+    .then(() =>
+      postgresPool.query(`
         CREATE TABLE IF NOT EXISTS password_resets (
           id SERIAL PRIMARY KEY,
           username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,
@@ -4161,37 +4174,80 @@ const formatLobbyModeStats = (rows) => {
   return stats;
 };
 
-const loadLobbyModeStats = (username, callback) => {
-  db.all(
-    "SELECT mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats WHERE username = ?",
-    [username],
-    (error, rows) => callback(error, formatLobbyModeStats(rows)),
-  );
+const loadPostgresModeStatsRows = async (username) => {
+  if (!postgresPool) return [];
+  try {
+    await postgresReady;
+    const { rows } = username
+      ? await postgresPool.query(
+          "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats WHERE username = $1",
+          [username],
+        )
+      : await postgresPool.query(
+          "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats",
+        );
+    return rows;
+  } catch (error) {
+    console.error("Unable to load lobby mode stats from PostgreSQL:", error);
+    return [];
+  }
 };
 
-const loadAllLobbyModeStats = (callback) => {
+// Prefer durable Postgres rows; fall back to local SQLite per user/mode.
+const mergeModeStatsRows = (pgRows, sqliteRows) => {
+  const merged = new Map();
+  (sqliteRows || []).forEach((row) =>
+    merged.set(`${row.username}|${row.mode}`, row),
+  );
+  (pgRows || []).forEach((row) =>
+    merged.set(`${row.username}|${row.mode}`, row),
+  );
+  return [...merged.values()];
+};
+
+const loadLobbyModeStats = (username, callback) => {
   db.all(
-    "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats",
+    "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats WHERE username = ?",
+    [username],
     (error, rows) => {
-      if (error) return callback(error);
-      const statsByUsername = {};
-      (rows || []).forEach((row) => {
-        statsByUsername[row.username] ||= [];
-        statsByUsername[row.username].push(row);
-      });
-      callback(
-        null,
-        Object.fromEntries(
-          Object.entries(statsByUsername).map(([username, userRows]) => [
-            username,
-            formatLobbyModeStats(userRows),
-          ]),
+      if (error && !postgresPool)
+        return callback(error, formatLobbyModeStats([]));
+      loadPostgresModeStatsRows(username).then((pgRows) =>
+        callback(
+          null,
+          formatLobbyModeStats(
+            mergeModeStatsRows(pgRows, error ? [] : rows),
+          ),
         ),
       );
     },
   );
 };
 
+const loadAllLobbyModeStats = (callback) => {
+  db.all(
+    "SELECT username, mode, best_score, gold_medals, silver_medals, bronze_medals FROM lobby_player_mode_stats",
+    (error, sqliteRows) => {
+      if (error && !postgresPool) return callback(error);
+      loadPostgresModeStatsRows().then((pgRows) => {
+        const statsByUsername = {};
+        mergeModeStatsRows(pgRows, error ? [] : sqliteRows).forEach((row) => {
+          statsByUsername[row.username] ||= [];
+          statsByUsername[row.username].push(row);
+        });
+        callback(
+          null,
+          Object.fromEntries(
+            Object.entries(statsByUsername).map(([username, userRows]) => [
+              username,
+              formatLobbyModeStats(userRows),
+            ]),
+          ),
+        );
+      });
+    },
+  );
+};
 app.get("/profile", requireProfileUser, (req, res) => {
   if (!postgresPool)
     return res.status(500).send("User database is not configured.");
@@ -5512,6 +5568,54 @@ app.post(
   },
 );
 
+const persistMedalsToPostgres = async (
+  participant,
+  mode,
+  rank,
+  isNewAward,
+  seedTotals,
+) => {
+  const inc = (n) => (isNewAward && rank === n ? 1 : 0);
+  const [gold, silver, bronze] = [inc(1), inc(2), inc(3)];
+  // Postgres is the durable source of truth, so medals are incremented
+  // rather than recomputed from the (ephemeral) local SQLite awards.
+  const userResult = await postgresPool.query(
+    `UPDATE users
+     SET gold_medals = gold_medals + $2,
+         silver_medals = silver_medals + $3,
+         bronze_medals = bronze_medals + $4
+     WHERE username = $1`,
+    [participant.username, gold, silver, bronze],
+  );
+  if (!userResult.rowCount) {
+    throw new Error(
+      `Unable to persist lobby medals for ${participant.username}: user not found.`,
+    );
+  }
+  // The first row for a user/mode is seeded from local totals (legacy data).
+  await postgresPool.query(
+    `INSERT INTO lobby_player_mode_stats
+       (username, mode, best_score, gold_medals, silver_medals, bronze_medals)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (username, mode) DO UPDATE SET
+       best_score = GREATEST(lobby_player_mode_stats.best_score, EXCLUDED.best_score),
+       gold_medals = lobby_player_mode_stats.gold_medals + $7,
+       silver_medals = lobby_player_mode_stats.silver_medals + $8,
+       bronze_medals = lobby_player_mode_stats.bronze_medals + $9`,
+    [
+      participant.username,
+      mode,
+      participant.score,
+      Number(seedTotals.gold_medals) || 0,
+      Number(seedTotals.silver_medals) || 0,
+      Number(seedTotals.bronze_medals) || 0,
+      gold,
+      silver,
+      bronze,
+    ],
+  );
+};
+
 const awardLobbyMedals = (roomId, callback) => {
   db.get(
     "SELECT mode FROM lobby_rooms WHERE id = ?",
@@ -5533,7 +5637,7 @@ const awardLobbyMedals = (roomId, callback) => {
             if (index >= participants.length) return callback();
             const participant = participants[index];
             const rank = index < 3 ? index + 1 : 0;
-            const persistStats = () => {
+            const persistStats = (isNewAward = false) => {
               db.get(
                 `SELECT
                    COALESCE(SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END), 0) AS gold_medals,
@@ -5589,26 +5693,15 @@ const awardLobbyMedals = (roomId, callback) => {
                               if (!postgresPool) return persistNext(index + 1);
                               postgresReady
                                 .then(() =>
-                                  postgresPool.query(
-                                    `UPDATE users
-                                     SET gold_medals = $2, silver_medals = $3, bronze_medals = $4
-                                     WHERE username = $1`,
-                                    [
-                                      participant.username,
-                                      totals.gold_medals,
-                                      totals.silver_medals,
-                                      totals.bronze_medals,
-                                    ],
+                                  persistMedalsToPostgres(
+                                    participant,
+                                    room.mode,
+                                    rank,
+                                    isNewAward,
+                                    modeTotals,
                                   ),
                                 )
-                                .then(({ rowCount }) => {
-                                  if (!rowCount) {
-                                    throw new Error(
-                                      `Unable to persist lobby medals for ${participant.username}: user not found.`,
-                                    );
-                                  }
-                                  persistNext(index + 1);
-                                })
+                                .then(() => persistNext(index + 1))
                                 .catch(callback);
                             },
                           );
@@ -5619,11 +5712,12 @@ const awardLobbyMedals = (roomId, callback) => {
                 },
               );
             };
-            if (!rank) return persistStats();
+            if (!rank) return persistStats(false);
             db.run(
               "INSERT OR IGNORE INTO lobby_medal_awards (room_id, username, rank) VALUES (?, ?, ?)",
               [roomId, participant.username, rank],
-              (awardError) => {
+              function (awardError) {
+                const isNewAward = this.changes > 0;
                 if (awardError) return callback(awardError);
                 db.get(
                   "SELECT rank FROM lobby_medal_awards WHERE room_id = ? AND username = ?",
@@ -5635,7 +5729,7 @@ const awardLobbyMedals = (roomId, callback) => {
                         new Error("Unable to record the lobby medal award."),
                       );
                     }
-                    persistStats();
+                    persistStats(isNewAward);
                   },
                 );
               },
