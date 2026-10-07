@@ -102,17 +102,29 @@
         {{/if}}
         <section class="reading-exercises"><div class="reading-section-heading"><p class="eyebrow">Practise</p><h2>Check your understanding</h2></div>
           {{#each exercises}}
-            <article class="reading-exercise{{#if isGapFill}} gap-fill-exercise{{/if}}{{#if isOrdering}} ordering-exercise{{/if}}"{{#unless isGapFill}}{{#unless isOrdering}} data-reading-exercise{{/unless}}{{/unless}} data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-order-answer='{{#if isOrdering}}{{{json orderingAnswer}}}{{/if}}' data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
+            <article class="reading-exercise{{#if isGapFill}} gap-fill-exercise{{/if}}{{#if isOrdering}} ordering-exercise{{/if}}{{#if isCategoryDrag}} category-drag-exercise{{/if}}"{{#unless isGapFill}}{{#unless isOrdering}}{{#unless isCategoryDrag}} data-reading-exercise{{/unless}}{{/unless}}{{/unless}} data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-order-answer='{{#if isOrdering}}{{{json orderingAnswer}}}{{/if}}' data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}">
               <h3>{{title}}</h3><p>{{instruction}}</p>
               {{#if isOrdering}}
                 <p class="ordering-hint">Step 1 is the first event. Drag the earliest event to the top and the latest event to the bottom.</p>
                 <ol class="reading-order-list" data-order-list>
-                  {{#each orderingItems}}<li draggable="true" data-order-item="{{this}}"><span class="order-number">{{@index}}</span><span>{{this}}</span></li>{{/each}}
+                  {{#each orderingItems}}<li draggable="true" data-order-item="{{this}}"><span class="order-number">{{inc @index}}</span><span>{{this}}</span></li>{{/each}}
                 </ol>
                 <strong class="score-result" data-order-score>Points: 0 / {{orderingAnswer.length}}</strong>
                 <button class="practice-button" type="button" data-order-check>Check answers</button>
                 <button class="practice-button" type="button" data-order-retry hidden>Try again</button>
                 <p class="answer-feedback" data-order-feedback hidden></p>
+              {{else if isCategoryDrag}}
+                <div class="category-drag-items" data-category-bank>
+                  {{#each dragItems}}<button type="button" class="category-drag-item" draggable="true" data-item="{{this}}">{{this}}</button>{{/each}}
+                </div>
+                <div class="category-drag-grid">
+                  {{#each categories}}<section class="category-drag-zone" data-category="{{this}}"><h4>{{this}}</h4><div class="category-drag-dropped" data-category-dropped></div></section>{{/each}}
+                </div>
+                <strong class="score-result" data-category-score>Points: 0 / {{dragItems.length}}</strong>
+                <button class="practice-button" type="button" data-category-check disabled>Check answers</button>
+                <button class="practice-button" type="button" data-category-retry hidden>Try again</button>
+                <p class="answer-feedback" data-category-feedback hidden></p>
+                <script type="application/json" data-category-answers>{{{json dragAnswers}}}</script>
               {{else if isGapFill}}
                 <form class="gap-fill-box" data-gap-fill-exercise data-topic-id="{{@root.topic.id}}" data-exercise-number="{{number}}" data-completed="{{completed}}" data-saved-points="{{savedPoints}}" data-saved-total="{{savedTotal}}" data-answers='{{{json answers}}}'>
                   {{#if wordBox}}<div class="drag-drop-word-bank">{{#each wordBox}}<span class="drag-drop-chip">{{this}}</span>{{/each}}</div>{{/if}}
@@ -475,6 +487,78 @@
     retry.addEventListener("click", () => { list.classList.remove("correct", "incorrect"); list.querySelectorAll("[data-order-item]").forEach((item) => item.classList.remove("correct-order", "incorrect-order")); feedback.hidden = true; check.hidden = false; retry.hidden = true; if (score) score.textContent = `Points: 0 / ${answer.length}`; updateNumbers(); });
   });
 
+  document.querySelectorAll(".category-drag-exercise").forEach((exercise) => {
+    const bank = exercise.querySelector("[data-category-bank]");
+    const zones = [...exercise.querySelectorAll(".category-drag-zone")];
+    const check = exercise.querySelector("[data-category-check]");
+    const retry = exercise.querySelector("[data-category-retry]");
+    const feedback = exercise.querySelector("[data-category-feedback]");
+    const score = exercise.querySelector("[data-category-score]");
+    const answers = JSON.parse(exercise.querySelector("[data-category-answers]").textContent || "{}");
+    const items = [...exercise.querySelectorAll(".category-drag-item")];
+    let dragged = null;
+    let locked = false;
+    const updateState = () => { check.disabled = locked || bank.querySelector(".category-drag-item") !== null; };
+    const moveTo = (item, target) => { if (!locked && item) { target.appendChild(item); updateState(); } };
+    items.forEach((item) => {
+      item.addEventListener("dragstart", (event) => { if (locked) return event.preventDefault(); dragged = item; item.classList.add("dragging"); event.dataTransfer.setData("text/plain", item.dataset.item); });
+      item.addEventListener("dragend", () => { dragged = null; item.classList.remove("dragging"); });
+      item.addEventListener("click", () => {
+        if (locked) return;
+        const selected = exercise.querySelector(".category-drag-item.selected");
+        if (selected && selected !== item) selected.classList.remove("selected");
+        item.classList.toggle("selected");
+      });
+    });
+    [[bank, bank], ...zones.map((zone) => [zone, zone.querySelector("[data-category-dropped]")])].forEach(([area, target]) => {
+      area.addEventListener("dragover", (event) => { if (!locked) { event.preventDefault(); area.classList.add("drag-over"); } });
+      area.addEventListener("dragleave", () => area.classList.remove("drag-over"));
+      area.addEventListener("drop", (event) => { event.preventDefault(); area.classList.remove("drag-over"); moveTo(dragged, target); });
+      area.addEventListener("click", (event) => {
+        if (event.target.closest(".category-drag-item")) return;
+        const selected = exercise.querySelector(".category-drag-item.selected");
+        if (selected) { selected.classList.remove("selected"); moveTo(selected, target); }
+      });
+    });
+    check.addEventListener("click", () => {
+      locked = true;
+      let correctCount = 0;
+      items.forEach((item) => {
+        const placedIn = item.closest(".category-drag-zone").dataset.category;
+        const correct = placedIn === answers[item.dataset.item];
+        item.draggable = false;
+        item.classList.remove("selected");
+        item.classList.toggle("correct-order", correct);
+        item.classList.toggle("incorrect-order", !correct);
+        if (correct) correctCount += 1;
+      });
+      score.textContent = `Points: ${correctCount} / ${items.length}`;
+      feedback.hidden = false;
+      feedback.className = `answer-feedback ${correctCount === items.length ? "correct" : "incorrect"}`;
+      feedback.textContent = correctCount === items.length ? "Correct! All statements are in the right box." : `${correctCount} of ${items.length} statements are in the correct box.`;
+      check.hidden = true;
+      retry.hidden = false;
+      fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityType: "reading",
+          difficultyLevel: `reading:${exercise.dataset.topicId}:${exercise.dataset.exerciseNumber}`,
+          points: correctCount,
+          totalPoints: items.length,
+        }),
+      });
+    });
+    retry.addEventListener("click", () => {
+      locked = false;
+      items.forEach((item) => { item.draggable = true; item.classList.remove("correct-order", "incorrect-order"); bank.appendChild(item); });
+      score.textContent = `Points: 0 / ${items.length}`;
+      feedback.hidden = true;
+      check.hidden = false;
+      retry.hidden = true;
+      updateState();
+    });
+  });
   document.querySelectorAll("[data-gap-fill-box]").forEach((form) => {
     const checkButton = form.querySelector("[data-gap-fill-check]");
     const feedback = form.querySelector("[data-gap-fill-feedback]");
@@ -482,7 +566,12 @@
     try { answers = JSON.parse(form.dataset.answers || "{}"); } catch (error) { answers = {}; }
     checkButton.addEventListener("click", () => {
       const selects = [...form.querySelectorAll("select[data-gap-blank]")];
-      const correctCount = selects.filter((select) => select.value.trim().toLowerCase() === String(answers[select.dataset.gapBlank] || "").trim().toLowerCase()).length;
+      const correctCount = selects.filter((select) => {
+        const correct = select.value.trim().toLowerCase() === String(answers[select.dataset.gapBlank] || "").trim().toLowerCase();
+        select.classList.toggle("correct-blank", correct);
+        select.classList.toggle("incorrect-blank", !correct);
+        return correct;
+      }).length;
       feedback.hidden = false;
       feedback.className = `drag-drop-feedback ${correctCount === selects.length ? "correct" : "incorrect"}`;
       feedback.textContent = `You got ${correctCount} / ${selects.length} correct.`;

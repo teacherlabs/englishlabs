@@ -662,6 +662,12 @@ const buildReadingV2Exercise = (exercise, index) => {
   if (exercise.type === "category_matching") {
     return {
       ...base,
+      isCategoryDrag: true,
+      categories: exercise.categories,
+      dragItems: shuffleArray(exercise.items.map((entry) => entry.item)),
+      dragAnswers: Object.fromEntries(
+        exercise.items.map((entry) => [entry.item, entry.correct_category]),
+      ),
       isMultipleChoice: true,
       questions: exercise.items.map((entry, itemIndex) => ({
         number: itemIndex + 1,
@@ -2357,6 +2363,7 @@ app.engine(
   engine({
     helpers: {
       json: (context) => JSON.stringify(context).replace(/'/g, "&#39;"),
+      inc: (value) => Number(value) + 1,
     },
   }),
 );
